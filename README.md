@@ -42,13 +42,13 @@ Canonical implementation of Layer 3 derived quantities: ε[e], τ[v],
 Φ[v], 𝟙[e], J[v], N[v], and photon edge functions. These are the
 quantities the operators produce; their forms are invariant across
 all declared regions. Every function has a declared observable source
-and support classification. V3.
+and support classification. V4.
 
 **`validation_record.md`**
 Observational grounding for every confirmed quantity in
 `derived_invariants.rs`. States what was observed, from which source,
 through which measurement mapping M, and with what support classification.
-V4.
+V5.
 
 **`observable_variable_sets.md`**
 Declares the primitive variable set at each region (Primary through
@@ -59,7 +59,7 @@ empirical findings established from the observable record. V7.
 Derives E[v] = ι[v] · κ[region] from the isolated-locus limit of the
 unified τ expression. Distinguishes Φ_stability from Φ_relational.
 Confirms κ[Primary] = c² = 8.988×10¹⁶ J/kg as internal consistency
-within M. States open conditions OC-E-1 through OC-E-5. V3.
+within M. States open conditions OC-E-1 through OC-E-5. V4.
 
 ---
 
@@ -118,14 +118,32 @@ declared source.
 
 V7. Updates from V4:
 
+- derived_invariants.rs updated V3 → V4: four new invariants added —
+  I-T (Tunneling), I-S (Superposition), I-E (Entanglement), I-RE
+  (Relational Evolution); joint necessity preamble; 9 new open conditions
+- validation_record.md updated V4 → V5: VR-T-01, VR-S-01, VR-E-01,
+  VR-RE-01 added; 12 new open conditions; companion file reference updated
+- operators_notation_and_constraint.md: Primary Region
+  invariants section extended with I-T, I-S, I-E, I-RE cross-references;
+  joint necessity observation stated
+- abr_operators_plain.md: new plain language section on
+  Primary Region phenomena — tunneling, superposition, entanglement,
+  relational evolution; epistemic status explicit throughout
+- cross_region_energy_expression.md updated V3 → V4: I-RE cross-reference
+  added; κ[region] monotonic decrease stated; confirmation language
+  discipline applied — four categories: observed measurement confirmed,
+  internal consistency confirmed, derived identity confirmed, framework
+  consequence pending derivation
+
+**V7 changes (carried forward):**
 - Sequential observation requirement added (operators_notation_and_constraint.md)
 - Relational evolution direction as distinct named constraint added
 - Primary kernel E_primary = Σ(Δ(x)) declared alongside ABR kernel
 - ι[v] replaces m[v] throughout — rest mass declared inadmissible (SF-PR-16)
-- derived_invariants.rs added (V3) — photon edge functions, N[v], five new tests
-- validation_record.md added (V4) — VR-γ-01, VR-γ-τ-01, VR-γ-N-01
-- observable_variable_sets.md added (V7) — EF-14 through EF-17
-- cross_region_energy_expression.md added (V3) — κ[Primary] = c² stated
+- derived_invariants.rs V3 — photon edge functions, N[v], five new tests
+- validation_record.md V4 — VR-γ-01, VR-γ-τ-01, VR-γ-N-01
+- observable_variable_sets.md V7 — EF-14 through EF-17
+- cross_region_energy_expression.md V3 — κ[Primary] = c² stated
   explicitly; photon edge section; OC-E-5 elevated
 - Verifier language discipline: "relational field cycles" inadmissible;
   replaced with "declared relational intervals over the measured

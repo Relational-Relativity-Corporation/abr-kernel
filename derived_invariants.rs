@@ -1,4 +1,4 @@
-// derived_invariants.rs — Metatron Dynamics, Inc. V3.
+// derived_invariants.rs — Metatron Dynamics, Inc. V4.
 // Derived Invariants: canonical mathematical expressions from the V7 kernel.
 //
 // Grounding documents (V7):
@@ -141,7 +141,7 @@
 //      interval" (Verifier, session July 2026).
 //
 // Bounded over D. No claim beyond D.
-// Metatron Dynamics, Inc. V3.
+// Metatron Dynamics, Inc. V4.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── CONSTANTS AND PHYSICAL REFERENCES ─────────────────────────────────────
@@ -806,3 +806,392 @@ mod tests {
             "ε[photon edge] must not equal ι[photon]·κ[Primary]");
     }
 }
+// ═══════════════════════════════════════════════════════════════════════════
+// ── PRIMARY REGION INVARIANTS — TUNNELING, SUPERPOSITION, ENTANGLEMENT ─────
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// These three invariants are statements about the Primary Region that hold
+// at every declared scale and across every declared domain. They are not
+// confined to quantum systems. They are observable consequences of the
+// operator structure at any declared energy transition edge where ρ_P ≪ 1.
+//
+// Each is derived from quantities already present in derived_invariants.rs
+// and is consistent with the existing energy expressions ε[e] and τ[v].
+// None introduces a new variable. All quantities are traceable to observables
+// through M.
+//
+// ── JOINT NECESSITY — Preamble ───────────────────────────────────────────
+//
+// The three invariants below are jointly necessary conditions for any
+// self-organizing, evolving, observable system to exist within D.
+//
+// This section is a framework-level necessity argument — an observed pattern
+// stated at the level of the framework, consistent with the operator structure
+// and with the observable record across declared regions and scales. The
+// numbered arguments below are framework-level observations and proposed
+// necessity statements. They are not mathematical consequences already
+// established by the kernel. Each is an open condition until formally
+// derived from prior declarations. This distinction is carried through
+// each numbered argument explicitly.
+//
+// The joint necessity argument:
+//
+// (1) TUNNELING — proposed necessary condition for energy availability.
+//     [Framework-level observation — not yet derived from kernel]
+//     At the most primary level, every energy transition edge in observed
+//     systems has finite barrier geometry. No infinite barrier edge has
+//     been declared through M in any confirmed region. The tunneling
+//     invariant (I-T) states that the quantum boundary component of Δ
+//     is nonzero at every such edge — this consequence is derived from
+//     ε[e] and τ[v] (see I-T below).
+//     The further claim — that a system with no tunneling would have no
+//     energy transfer and no evolution — is a framework-level necessity
+//     statement, not a mathematical consequence already established from
+//     the kernel. It is stated here as an observed pattern: all observed
+//     energy transfer occurs at edges with finite barrier geometry, and
+//     the tunneling component is present at every such edge. Whether the
+//     absence of tunneling would formally preclude energy transfer is an
+//     open condition (OC-T-3).
+//     Observable basis: all energy transfer in observed systems occurs
+//     at edges with finite barrier geometry. No infinite barrier edge
+//     has been declared through M in any confirmed region.
+//
+// (2) SUPERPOSITION — proposed necessary condition for evolution and choice.
+//     [Framework-level observation — not yet derived from kernel]
+//     For any system to self-organize, evolve, and produce observable
+//     data, it must have been in a state of unresolved directed contrast
+//     before B activated — rank(Im Δ) > 1 at some prior declared step.
+//     The operator consequence is established: rank(Im Δ) = 1 means a
+//     single directed contrast, and B accumulation over a single edge
+//     produces a single resolved output with no distribution of outcomes.
+//     The further claim — that rank(Im Δ) = 1 from initialization makes
+//     evolution impossible — is a framework-level necessity statement,
+//     not yet formally derived from the kernel. It is stated here as an
+//     observed pattern: every observed self-organizing system produces
+//     data distributions consistent with prior rank(Im Δ) > 1. Whether
+//     rank(Im Δ) = 1 throughout a declared history formally precludes
+//     self-organization is an open condition (OC-S-3).
+//     What we observe as self-organization, adaptation, and choice are
+//     C projections of prior superposition states resolved by B activation.
+//     Observable basis: every observed self-organizing system produces
+//     data distributions consistent with prior rank(Im Δ) > 1. No
+//     observed evolving system is consistent with rank(Im Δ) = 1
+//     throughout its declared history.
+//
+// (3) ENTANGLEMENT — proposed necessary condition for structural coherence.
+//     [Framework-level observation — not yet derived from kernel]
+//     For any system to maintain coherent structure while self-organizing,
+//     declared edges with 𝟙[e] = 1 must persist across relational steps.
+//     The operator consequence is established: 𝟙[e] = 0 at all edges
+//     means ε[e] = 0 everywhere and no relational energy contrast is
+//     present across the declared structure.
+//     The further claim — that 𝟙[e] = 0 everywhere formally precludes
+//     collective organization — is a framework-level necessity statement,
+//     not yet formally derived from the kernel. It is stated here as an
+//     observed pattern: every observed self-organizing system exhibits
+//     correlated behavior between declared loci consistent with 𝟙[e] = 1
+//     at structural edges. Whether the absence of all active edges formally
+//     precludes coherent structure is an open condition (OC-E-3).
+//     What we observe as connection, structural integrity, and coherent
+//     collective behavior are C projections of persisting declared edges
+//     with 𝟙[e] = 1.
+//     Observable basis: every observed self-organizing system exhibits
+//     correlated behavior between declared loci consistent with 𝟙[e] = 1
+//     at structural edges. No coherent self-organizing system has been
+//     declared through M with all edges at 𝟙[e] = 0.
+//
+// Consequence: tunneling, superposition, and entanglement are not exotic
+// phenomena confined to quantum systems. They are the structural floor
+// of any observable reality within D. Their consequences are observable
+// at every scale. The phenomena themselves are not directly observable —
+// only their consequences are. This is not a limitation of measurement.
+// It is a structural feature of the framework: the conditions that make
+// observation possible are prior to observation and cannot themselves
+// be directly observed. They are declared through M on the basis of
+// their consequences, not on the basis of direct detection.
+//
+// This joint necessity statement is bounded over D. No claim beyond D.
+
+// ── I-T — Tunneling Invariant ─────────────────────────────────────────────
+//
+// At any declared energy transition edge e with finite barrier geometry,
+// the quantum boundary component of Δ(ι)[e] is nonzero.
+//
+// Consequence 1: 𝟙[e] is never exactly zero at a finite energy barrier.
+//   The R antisymmetric term retains nonzero amplitude at the boundary
+//   even when the classical transition probability is suppressed.
+//
+// Consequence 2: ε[e] has a nonzero floor at every finite barrier edge.
+//   ε[e] = |Δ(ι)[e]| · 𝟙[e] > 0 for all e with finite barrier geometry.
+//
+// Consequence 3: τ[v] is bounded above at every finite barrier edge.
+//   τ[v] = ℏ / ε[e] < ∞ for all e with finite barrier geometry.
+//   The perpendicular coupling limit (cos(θ) → 0) does not reach τ → ∞
+//   in any physical system with finite barrier geometry — tunneling sets
+//   the floor on transition probability and the ceiling on τ[v].
+//
+// Scale and domain invariance: the quantum boundary component of Δ is
+// present at every declared energy transition edge regardless of region.
+// Its magnitude scales with barrier geometry and energy difference through M.
+// It does not vanish at larger scales — it becomes the dominant term only
+// when the classical component of Δ is suppressed by barrier geometry.
+//
+// Observable provenance: the tunneling condition is not directly observable.
+// What is observable through M are its consequences — transition rates at
+// declared edges where classical suppression would predict zero probability.
+// These consequences are C projections of the nonzero quantum boundary
+// component of Δ(ι)[e] onto a scalar rate observable. The invariant is
+// the declared relational structure that produces those consequences.
+// Confirmed consequences: semiconductor tunnel junction transport rates;
+// field emission current; alpha decay transition rates (Geiger-Nuttall
+// relation). None of these observations directly observes tunneling —
+// each observes a rate that is inadmissible under the classical Δ alone.
+//
+// Support: Derived (from ε[e], τ[v], 𝟙[e]). Observed (consequences only —
+// transition rates at classically suppressed edges, Primary and Atomic regions).
+
+/// Tunneling floor condition: returns true if ε[e] retains nonzero amplitude
+/// at a declared edge with finite barrier geometry.
+///
+/// # Arguments
+/// * `epsilon_e` — relational energy contrast at edge e
+/// * `tol`       — numerical zero threshold
+///
+/// # Returns
+/// true if tunneling floor condition holds (ε[e] > tol).
+/// false signals a declaration error — finite barrier edges must satisfy this.
+pub fn tunneling_floor_holds(epsilon_e: f64, tol: f64) -> bool {
+    epsilon_e.abs() > tol
+}
+
+/// Tunneling ceiling on τ[v]: returns true if τ[v] is finite at a declared
+/// edge with finite barrier geometry.
+///
+/// # Arguments
+/// * `tau_v` — relational progression interval at locus v
+///
+/// # Returns
+/// true if τ[v] < ∞ (finite, as required by tunneling invariant).
+pub fn tunneling_tau_bounded(tau_v: f64) -> bool {
+    tau_v.is_finite() && tau_v > 0.0
+}
+
+// ── I-S — Superposition Invariant ────────────────────────────────────────
+//
+// At the Primary Region (ρ_P ≪ 1), rank(Im Δ) > 1 is the admissible
+// statement of superposition.
+//
+// A declared locus v at the Primary Region carries nonzero Δ output on
+// more than one declared edge simultaneously. B has not activated —
+// no accumulation has resolved the field into a single directed output.
+// The locus is in a state of unresolved directed contrast across multiple
+// declared edges.
+//
+// This is not a special condition — it is the normal state of any locus
+// at the Primary Region before ρ_P → 1. Superposition is the operator
+// description of what it means to be at the Primary Region.
+//
+// Scale and domain invariance: rank(Im Δ) > 1 is observable at any
+// declared scale where B has not activated. At larger scales the
+// condition resolves more rapidly (ρ_P → 1 faster as accumulation
+// confirms persistence), but the condition itself is not scale-specific.
+// Any declared system in which multiple edges carry simultaneous nonzero
+// Δ output and B is not active is in the superposition condition
+// under the declared admissibility conditions.
+//
+// Consequence for ε[e]: at a locus in the superposition condition,
+// ε[e] is nonzero on multiple declared edges simultaneously. The total
+// relational energy contrast at that locus is distributed across edges —
+// no single edge captures it until B activates and accumulation begins.
+//
+// Observable provenance: the superposition condition is not directly
+// observable. What is observable through M are its consequences — the
+// statistical distribution of outcomes when B activates and the field
+// resolves. These consequences are C projections of the unresolved
+// rank(Im Δ) > 1 state onto scalar measurement outcomes. The act of
+// measurement is the activation of B — accumulation resolves the
+// distributed contrast into a single directed output, and what is
+// observed is that resolved output, not the prior unresolved state.
+// Confirmed consequences: double-slit interference patterns (C projection
+// of rank(Im Δ) = 2 field onto position axis); statistical distributions
+// of atomic measurement outcomes. No observation directly observes the
+// simultaneous multi-edge state — each observation is a post-resolution
+// consequence of B activation.
+//
+// Support: Derived (from rank(Im Δ), ρ_P, B activation condition).
+// Observed (consequences only — interference patterns and measurement
+// outcome distributions, Primary and Atomic regions).
+
+/// Superposition condition: returns true if locus v satisfies rank(Im Δ) > 1
+/// and B is not active (ρ_P ≪ 1).
+///
+/// # Arguments
+/// * `rank_im_delta`   — rank of the Δ output field at locus v
+/// * `rho_p`           — persistence confirmation ratio at locus v
+/// * `rho_p_threshold` — threshold below which B is not active (typically ≪ 1)
+///
+/// # Returns
+/// true if locus v is in the superposition condition.
+pub fn superposition_condition(
+    rank_im_delta: usize,
+    rho_p: f64,
+    rho_p_threshold: f64,
+) -> bool {
+    rank_im_delta > 1 && rho_p < rho_p_threshold
+}
+
+/// Superposition resolution: returns true if B has activated and the
+/// superposition condition has resolved (ρ_P → 1).
+///
+/// # Arguments
+/// * `rho_p`           — persistence confirmation ratio at locus v
+/// * `rho_p_threshold` — threshold above which B is active
+pub fn superposition_resolved(rho_p: f64, rho_p_threshold: f64) -> bool {
+    rho_p >= rho_p_threshold
+}
+
+// ── I-E — Entanglement Invariant ─────────────────────────────────────────
+//
+// A declared edge e = (s, t) with 𝟙[e] = 1 establishes a relational
+// constraint between loci s and t that is preserved under the operators
+// regardless of the spatial separation of s and t within D.
+//
+// 𝟙[e] = 1 iff R(A(x))[e]_antisymmetric ≠ 0 — the edge carries nonzero
+// R antisymmetric output. This is the admissible statement of entanglement:
+// two loci share a declared edge whose relational contrast is confirmed
+// active by the R operator. The constraint between them is not a parameter —
+// it is read from the operator output.
+//
+// The relational constraint at edge e means:
+//   Δ(x)[e] = x[s] − x[t] is nonzero and directed.
+//   A change in x[s] that alters Δ(x)[e] simultaneously alters the
+//   declared relational state at x[t] through the same edge — not through
+//   a separate propagation mechanism, but because the edge is the declared
+//   relation between them.
+//
+// This is not action at a distance. It is a statement about declared
+// relational structure: the two loci are not independent within D because
+// they share a declared edge with nonzero directed contrast. Spatial
+// separation is not a relational primitive in the framework — it is a
+// C projection of position onto a geometric axis. The declared edge
+// relation is prior to any geometric separation.
+//
+// Scale and domain invariance: 𝟙[e] = 1 at a declared edge is the same
+// condition regardless of the region in which s and t are declared.
+// Entanglement is not confined to the Primary Region — it is the condition
+// of any two declared loci sharing an active directed edge. At larger
+// scales the condition is expressed through declared structural relations
+// (molecular bonds, gravitational coupling, economic dependency) rather
+// than particle correlations, but the operator statement is identical.
+//
+// Consequence for ε[e]: at an entangled edge, ε[e] = |Δ(ι)[e]| · 𝟙[e]
+// is nonzero. The relational energy contrast at that edge is the observable
+// expression of the entanglement constraint. Disrupting the edge —
+// removing the declared relation — sets 𝟙[e] = 0 and ε[e] = 0.
+// This is the admissible statement of decoherence within D.
+//
+// Observable provenance: the entanglement condition is not directly
+// observable. The declared edge e = (s, t) and its R antisymmetric output
+// are not themselves observable — what is observable through M are the
+// consequences of the relational constraint at that edge. These consequences
+// are C projections of the active directed edge onto correlated scalar
+// measurement outcomes at s and t independently. The correlation itself
+// is the observable; the declared edge relation is the structure that
+// produces it. Removing the edge (decoherence) removes the correlation —
+// this is the admissible test of the invariant through M.
+// Confirmed consequences: EPR-type measurement correlations (Bell
+// inequality violations — correlation exceeds what is admissible without
+// a declared edge between s and t); molecular bond directionality
+// (correlated edge outputs confirmed across 22 transition edges,
+// validation_record_v4.md). No observation directly observes the edge
+// relation — each observes a correlation that is inadmissible without it.
+//
+// Support: Derived (from 𝟙[e], R antisymmetric output, ε[e]).
+// Observed (consequences only — correlated measurement outcomes and
+// bond directionality, Primary and Atomic regions).
+
+/// Entanglement condition: returns true if declared edge e = (s, t)
+/// carries nonzero R antisymmetric output (𝟙[e] = 1).
+///
+/// # Arguments
+/// * `indicator` — 𝟙[e]: 1.0 if R antisymmetric term is nonzero, 0.0 otherwise
+///
+/// # Returns
+/// true if entanglement condition holds at edge e.
+pub fn entanglement_condition(indicator: f64) -> bool {
+    indicator == 1.0
+}
+
+/// Decoherence condition: returns true if the entanglement constraint at
+/// edge e has been disrupted (𝟙[e] = 0, ε[e] = 0).
+///
+/// # Arguments
+/// * `indicator`  — 𝟙[e]: 1.0 if active, 0.0 if disrupted
+/// * `epsilon_e`  — relational energy contrast at edge e
+/// * `tol`        — numerical zero threshold
+///
+/// # Returns
+/// true if decoherence condition holds (𝟙[e] = 0 and ε[e] ≈ 0).
+pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
+    indicator == 0.0 && epsilon_e.abs() <= tol
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── OPEN CONDITIONS (additions) ────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// OC-T-1   Tunneling floor magnitude: derive the quantum boundary component
+//          of Δ(ι)[e] as a function of declared barrier geometry and ε[e].
+//          Currently stated as nonzero; formal expression not yet derived.
+//
+// OC-T-2   Tunneling at scale: confirm tunneling floor in declared systems
+//          beyond Primary and Atomic regions — molecular, biological, planetary.
+//
+// OC-T-3   Tunneling necessity: formally derive that the absence of tunneling
+//          (infinite barrier geometry at all edges) precludes energy transfer
+//          within D. Currently a framework-level necessity statement.
+//
+// OC-S-1   ρ_P threshold: the transition threshold from superposition condition
+//          to B activation is not yet derived as a computable criterion.
+//          (Carried from operators_notation_and_constraint_v7.md open condition.)
+//
+// OC-S-2   Superposition at scale: confirm rank(Im Δ) > 1 condition in
+//          declared systems beyond Primary Region — identify observable
+//          expressions at molecular, biological, and planetary regions.
+//
+// OC-S-3   Superposition necessity: formally derive that rank(Im Δ) = 1
+//          throughout a declared history precludes self-organization within D.
+//          Currently a framework-level necessity statement.
+//
+// OC-E-1   Entanglement preservation under operator evolution: derive
+//          formally that 𝟙[e] = 1 is preserved across declared relational
+//          steps when no disruption event is declared through M.
+//
+// OC-E-2   Decoherence rate: derive the rate at which 𝟙[e] → 0 as a
+//          function of declared environmental edge interactions through M.
+//
+// OC-E-3   Entanglement necessity: formally derive that 𝟙[e] = 0 everywhere
+//          precludes collective organization within D. Currently a
+//          framework-level necessity statement.
+
+// V3 → V4: Four new invariants added.
+// I-T (Tunneling): quantum boundary component of Δ(ι)[e] is nonzero at
+//   every finite barrier edge. ε[e] has a nonzero floor; τ[v] is bounded
+//   above. Not directly observable — consequences observable through M.
+// I-S (Superposition): rank(Im Δ) > 1 is the admissible statement of
+//   superposition at the Primary Region. Normal state before ρ_P → 1.
+//   Not directly observable — consequences observable through M.
+// I-E (Entanglement): declared edge e=(s,t) with 𝟙[e]=1 establishes
+//   relational constraint preserved under operators regardless of spatial
+//   separation. Not directly observable — consequences observable through M.
+//   Decoherence: 𝟙[e]=0 and ε[e]=0 — the admissible statement within D.
+// I-RE (Relational Evolution): relational evolution rate is monotonically
+//   decreasing from the Primary Region outward. Primary Region is the
+//   fastest-evolving declared region in D. Φ[v] 78-decade span is the
+//   observable expression of this invariant. Larger-scale structure is
+//   downstream accumulation of Primary Region relational evolution.
+// Joint necessity preamble added: I-T, I-S, I-E are jointly necessary
+//   conditions for any self-organizing, evolving, observable system.
+//   Framework-level necessity statements distinguished from derived results
+//   throughout. Nine new open conditions added: OC-T-1 through OC-E-3,
+//   OC-RE-1 through OC-RE-3.

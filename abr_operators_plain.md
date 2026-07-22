@@ -225,6 +225,20 @@ The same declaration on the same observable produces the same result.
 
 ---
 
+## What the Primary Region produces — and why it matters at every scale
+
+At the Primary Region, three conditions hold simultaneously that are not confined to this region — they hold at every declared scale and domain. Their consequences are observable everywhere. The phenomena themselves are not directly observable — only their consequences are. This is not a limitation of measurement. It is a structural feature of the framework: the conditions that make observation possible are prior to observation and cannot themselves be directly observed.
+
+**Tunneling** is the condition that no energy transition edge has an infinite barrier. The quantum boundary component of the directed difference Δ is nonzero at every finite barrier edge. What this means in plain language: energy is never completely blocked. There is always a nonzero component of the directed difference at any declared transition edge. What we observe as energy transfer at any scale is the consequence of this — the classical component dominates at larger scales, but the tunneling component is structurally present. A system with no tunneling has no energy transfer. This is a framework-level observation, not yet formally derived from the kernel.
+
+**Superposition** is the condition that rank(Im Δ) > 1 — multiple edges carry nonzero directed contrast simultaneously before B activates. In plain language: before any system resolves into a single outcome, it is in a state of genuine multiple directed contrasts. B activation is what measurement is. What we observe as an outcome is always the post-resolution consequence of B having acted on a prior superposition state. Every self-organizing, evolving system was in a superposition state before it evolved. This is a framework-level observation, not yet formally derived from the kernel.
+
+**Entanglement** is the condition that a declared edge with 𝟙[e]=1 between two loci establishes a relational constraint that the operators preserve regardless of spatial separation. In plain language: two loci that share an active declared edge are not independent. Spatial separation is a projection — the relational edge is prior to it. What we observe as correlation, structural coherence, and collective behavior are consequences of persisting active edges. Decoherence — the loss of correlation — is the admissible statement of what happens when the edge is removed: 𝟙[e]=0 and ε[e]=0. This is a framework-level observation, not yet formally derived from the kernel.
+
+**Relational evolution rate** decreases monotonically from the Primary Region outward. The Primary Region is the fastest-evolving declared region in D. τ[v] is smallest at the Primary Region — relational progression intervals are shortest. At larger scales, τ[v] grows, and what was active relational evolution at the Primary Region appears as stable accumulated structure. The 78-decade span of Φ[v] confirmed across declared regions is the observable expression of this invariant. In plain language: what we observe as stable matter at larger scales is Primary Region relational evolution that has accumulated into confirmed persistence through B activation. The stability is downstream of the speed.
+
+These four conditions are jointly necessary for any self-organizing, evolving, observable system to exist within D. That is a framework-level observation stated here in plain language. It is not a mathematical result already established by the kernel. The formal derivations are open conditions. See `derived_invariants.rs V4` for the precise statements.
+
 ## What remains with the reader
 
 The operators do not interpret findings.
@@ -239,7 +253,7 @@ Those determinations remain with whoever declared the domain.
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. V6.*
+*Metatron Dynamics, Inc. V8.*
 
 ---
 
@@ -248,3 +262,5 @@ Those determinations remain with whoever declared the domain.
 **V6 → V7 changes:** "Before anything is measured" section: sequential observation requirement added as a named constraint — Phase 2 requires a declared sequence of actual observations; cold start admissible on first step only; model-generated sequences named as inadmissible substitutes for observation; zero A_persistence on a static observable named as the correct result. New section: "Relational evolution has a direction" — relational evolution direction declared as a property of the process, not of the index; temporal ordering named as a downstream projection of relational evolution, not its source; index order alone named as inadmissible direction declaration; clock readings named as relational observables in their own domain that do not transfer direction without a declared connection. A section: sequential constraint on persistence form added — E_prior must come from a prior actual observation after the first step; cold start as declared first step distinguished from relational evolution. "What this produces" section: Phase 2 requirement for a process (not a snapshot) stated explicitly; single-snapshot Phase 1 analysis named as admissible and its limitation stated.
 
 **V7 → V7 (this session):** Primary observable and mathematical primitive section added — change is the primary observable; relation is its invariant structure; both invariant across all declared scales and domains within the bounded domain of human perceptual and cognitive information; Δ and A named as the minimal mathematical expression of the primary observable; the operators do not produce change, they read it. Version header corrected to V7.
+
+**V7 → V8 changes:** New section added: "What the Primary Region produces — and why it matters at every scale" — plain language statements of I-T (Tunneling), I-S (Superposition), I-E (Entanglement), and I-RE (Relational Evolution); joint necessity observation stated; epistemic status of each phenomenon stated explicitly (not directly observable; consequences observable through M; framework-level necessity statements distinguished from derived results). Version header updated to V8.

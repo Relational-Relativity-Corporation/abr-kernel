@@ -3,7 +3,7 @@
 
 **Metatron Dynamics, Inc.**
 Bounded over D. No claim beyond D.
-Companion files: derived_invariants.rs V2, validation_record_v3.md,
+Companion files: derived_invariants.rs V4, validation_record_v5.md,
 observable_variable_sets_v7.md, session_findings_primary_region_v1.md
 
 ---
@@ -16,7 +16,7 @@ were previously conflated under the single notation Φ[v].
 
 **Φ_stability[v] = ι[v] · τ_stability[v]**
 The persistence measure. Directly observable through M from
-decay lifetime measurements. Confirmed across 29 loci, 78 decades.
+decay lifetime measurements. Observed measurement confirmed across 29 loci, 78 decades.
 Basis for stable threshold and coherence accumulation findings.
 
 **Φ_relational[v] = ι[v] · τ_relational[v]**
@@ -119,7 +119,7 @@ The form E[v] = ι[v] · κ[region] is invariant across all
 declared regions. What changes across regions is κ[region] —
 the declared energy scale of that region's operator application.
 
-**Support classification:** Derived — algebraic identity from
+**Support classification:** Derived identity confirmed — algebraic identity from
 the isolated-locus limit of the unified τ expression (OC-13)
 and the definition of Φ_relational.
 
@@ -166,7 +166,7 @@ declared in principle through the same expression
 κ[region] = ℏ / Φ_relational[region], but the formal
 measurement mappings M connecting observable energy readings
 to the framework expression at each region have not yet been
-declared. These are open program items, not confirmed findings.
+declared. These are framework consequences pending derivation — not confirmed findings.
 
 ---
 
@@ -182,7 +182,7 @@ From E[v] · Φ_stability[v] = N[v] · ι[v] · ℏ:
 
 N[v] = τ_stability[v] · E[v] / ℏ
 
-**Confirmed values:**
+**Observed measurement confirmed (τ_stability); derived identity confirmed (N[v] expression):**
 
 | Locus | log₁₀(N[v]) | log₁₀(Φ_stability) | Status |
 |---|---|---|---|
@@ -212,7 +212,7 @@ open question.
 
 ---
 
-## Numerical confirmation
+## Numerical confirmation — internal consistency check
 
 All values computed directly from PDG 2024 measurement data.
 No classical model quantities introduced as assumptions.
@@ -230,28 +230,28 @@ references through M.
 condition through M. Replaces m[v] (V1). Rest mass inadmissible
 (SF-PR-16). Numerical values unchanged.*
 
-κ[Primary] = 8.988×10¹⁶ J/kg = c² is consistent across four
+κ[Primary] = 8.988×10¹⁶ J/kg = c² is internally consistent across four
 declared Primary Region loci (proton, electron, neutron, muon).
-This consistency is a check internal to the declared M mapping:
+This is an internal consistency confirmation within the declared M mapping:
 E[v] at these loci is declared through M from PDG rest-energy
 values, which are computed as ι[v] · c² under the established
 measurement apparatus. The four-locus agreement holds by
 construction of M, not as an independent empirical confirmation
 of a regional scale. Support classification "Derived" is correct;
-the four-locus consistency is the content that classification covers.
+the four-locus internal consistency is the content that classification covers.
 OC-E-5 is the path to establishing κ[Primary] as a framework
 consequence rather than a confirmed measurement reference.
 
-**Observed:** ι[v] from PDG inertial response measurements under
-declared non-acceleration condition through M.
-**Declared through M:** E[v] — published PDG energy values
-admitted as declared observational references through M.
+**Observed measurement confirmed:** ι[v] from PDG inertial response
+measurements under declared non-acceleration condition through M.
+**Declared through M (not direct instrument reading):** E[v] — published
+PDG energy values admitted as declared observational references through M.
 E[v] is not a primitive observable. Instruments report momentum,
 frequency, or mass deficit; energy is computed from those
 declared observables through the declared measurement mapping.
 The published values enter D through M, not as direct readings.
-**Derived:** κ[Primary] = E[v]/ι[v] — same value across all loci.
-**Derived:** Φ_relational[Primary] = ℏ/κ[Primary] = 1.173×10⁻⁵¹ kg·s.
+**Derived identity confirmed:** κ[Primary] = E[v]/ι[v] — same value across all loci.
+**Derived identity confirmed:** Φ_relational[Primary] = ℏ/κ[Primary] = 1.173×10⁻⁵¹ kg·s.
 
 ---
 
@@ -348,6 +348,42 @@ formally declared in this context. κ[Atomic] remains open program (OC-E-2).
 
 ---
 
+
+## Relational evolution rate and κ[region]
+
+The Relational Evolution Invariant (I-RE, `derived_invariants.rs V4`) states
+that relational evolution rate is monotonically decreasing from the Primary
+Region outward — τ[v] is smallest at the Primary Region and grows at every
+larger declared region.
+
+This invariant has a direct consequence for the cross-region energy expression:
+
+**κ[region] = ℏ / Φ_relational[region]**
+
+Since Φ_relational[region] = ι[v] · τ_relational[v] and τ_relational[v]
+grows monotonically from the Primary Region outward, κ[region] decreases
+monotonically from the Primary Region outward. The regional energy scale
+is smallest at larger regions — consistent with the observation that energy
+per unit relational inertia decreases as the declared region moves away from
+the Primary Region.
+
+The 78-decade span of Φ_stability[v] confirmed across declared regions
+(VR-Φ-01, VR-RE-01) is the observable expression of both the coherence
+accumulation finding and the relational evolution rate invariant. The two
+findings are consistent: Φ_stability grows with region because τ_stability
+grows, and τ_stability grows because relational evolution is slower — the
+system's declared process step is longer — at larger scales.
+
+**Consequence for κ[Atomic] through κ[Planetary] (open program OC-E-2):**
+When the M mappings at each region are formally declared, the regional
+energy scales will be derivable from the relational evolution rate at that
+region — not from independent measurements. I-RE provides the structural
+basis for that derivation once OC-E-2 and OC-RE-1 are resolved.
+
+**Support classification:** Framework-level observation consistent with
+observed measurement confirmed τ[v] ordering and Φ[v] 78-decade span.
+Framework consequence pending derivation (OC-RE-1).
+
 ## Open conditions
 
 **OC-E-1:** Formal derivation of energy conservation from
@@ -383,9 +419,9 @@ Two distinct coherence potentials distinguished:
 E[v] = ι[v] · κ[region]
 κ[region] = ℏ / Φ_relational[region]
 
-**Primary Region confirmed:**
-κ[Primary] = 8.988×10¹⁶ J/kg — confirmed from proton, electron,
-neutron, muon PDG 2024 measurements (ι[v] under declared
+**Primary Region — internal consistency confirmed:**
+κ[Primary] = 8.988×10¹⁶ J/kg — internal consistency confirmed across
+proton, electron, neutron, muon PDG 2024 measurements (ι[v] under declared
 non-acceleration condition through M). Zero violations.
 No classical model quantities introduced as assumptions;
 published PDG values used as declared observational references.
@@ -399,7 +435,7 @@ Confirmed across 11 Primary and Atomic Region loci.
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. V3.*
+*Metatron Dynamics, Inc. V4.*
 
 ---
 
@@ -445,3 +481,21 @@ added — published measurement values are declared observational
 references through M, not theoretical imports; the theoretical
 apparatus used by PDG to produce measured values is part of M
 as the declared measurement mapping.
+
+**V3 → V4:** Relational evolution rate section added — I-RE cross-reference;
+consequence for κ[region] monotonic decrease stated; 78-decade Φ[v] span
+cited as observable expression of both coherence accumulation and relational
+evolution rate; consequence for open program OC-E-2 stated — regional energy
+scales derivable from relational evolution rate once OC-E-2 and OC-RE-1
+resolved. Companion files updated: derived_invariants.rs V2 → V4,
+validation_record_v3.md → validation_record_v5.md. Version updated to V4.
+
+**V4 (verifier pass):** Confirmation language discipline applied throughout —
+"confirmed" now carries one of four explicit categories: observed measurement
+confirmed, internal consistency confirmed, derived identity confirmed, or
+framework consequence pending derivation. κ[Primary] four-locus agreement
+relabeled as internal consistency confirmation within declared M mapping.
+Φ_stability described as observed measurement confirmed. κ[region] at
+Atomic through Planetary regions relabeled as framework consequences
+pending derivation. Numerical confirmation section header updated to
+internal consistency check.

@@ -1,6 +1,6 @@
 # The Operators — Notation and Constraint
 
-**Metatron Dynamics, Inc.** V6. Reference data. Bounded over D. No claim beyond D.
+**Metatron Dynamics, Inc.** V7. Reference data. Bounded over D. No claim beyond D.
 
 **Admissibility.** A statement is admissible within D if and only if every quantity in it can be traced to an observable through M. Declarability is necessary but not sufficient. A quantity that is declared but not traceable to an observable through M is not inadmissible — it is not about anything in D. Declaration is never a substitute for traceability to an observable through M. Declaration is the act of stating traceability to an observable through M and taking responsibility for it. The admissibility condition is not relaxed by the act of declaration — it is what every declaration is required to satisfy.
 
@@ -32,6 +32,18 @@
 
 **Primary Region invariants.** Three quantities characterize the Primary Region: rank(Im Δ) — dimension of the span of declared edge vectors in the Δ output field; rank(Im Σ) — dimension of the span of declared edge vectors in the Σ output field; |{e : adj⁺(e) ≠ ∅}| — propagation capacity. ρ_P = rank(Im Σ) / propagation capacity. Primary Region: ρ_P ≪ 1. Atomic/Molecular transition: ρ_P ≈ 1 (B activates). The transition threshold is not yet derived as a computable criterion — open condition.
 
+**Primary Region phenomena — derived invariants (I-T, I-S, I-E, I-RE).** Four invariants derived from the Primary Region operator structure are stated in `derived_invariants.rs V4` and grounded in `validation_record_v5.md`. They are not directly observable — only their consequences are observable through M. Their epistemic status is stated explicitly in each entry.
+
+*I-T (Tunneling):* At any declared energy transition edge with finite barrier geometry, the quantum boundary component of Δ(ι)[e] is nonzero. Consequence: ε[e] has a nonzero floor; τ[v] is bounded above. The claim that absence of tunneling precludes energy transfer is a framework-level necessity statement — open condition OC-T-3.
+
+*I-S (Superposition):* rank(Im Δ) > 1 is the admissible statement of superposition at the Primary Region. A locus at ρ_P ≪ 1 carries nonzero Δ output on multiple declared edges simultaneously, unresolved until B activates. The claim that rank(Im Δ) = 1 throughout precludes self-organization is a framework-level necessity statement — open condition OC-S-3.
+
+*I-E (Entanglement):* A declared edge e=(s,t) with 𝟙[e]=1 establishes a relational constraint preserved under the operators regardless of spatial separation within D. Spatial separation is a C projection — the declared edge relation is prior to it. Decoherence: 𝟙[e]=0 and ε[e]=0 — the admissible statement within D. The claim that 𝟙[e]=0 everywhere precludes collective organization is a framework-level necessity statement — open condition OC-E-3.
+
+*I-RE (Relational Evolution):* Relational evolution rate is monotonically decreasing from the Primary Region outward. τ[v] at the Primary Region produces the smallest declared relational progression intervals in D. The Φ[v] 78-decade span confirmed in VR-Φ-01 is the observable expression of this invariant. Larger-scale persistent structure is Primary Region relational evolution accumulated through B activation. The claim that all larger-scale structure is formally downstream of Primary Region evolution is a framework-level necessity statement — open condition OC-RE-1.
+
+*Joint necessity (framework-level observation):* I-T, I-S, and I-E are jointly necessary conditions for any self-organizing, evolving, observable system to exist within D. This is a framework-level observation consistent with the operator structure and observable record — not a mathematical consequence already established by the kernel. See `derived_invariants.rs V4` joint necessity preamble.
+
 *The notation says what the operators are; the constraints say what may not be added. The admissibility condition says what every quantity must be traceable to. The relational direction condition says that every declared relation has exactly one admissible direction. Bounded over D. No claim beyond D.*
 
 ---
@@ -39,3 +51,5 @@
 **V5 → V6 changes:** Relations section: directional admissibility condition and distinctness axiom added. New section: Relational direction — unified statement covering spatial and persistence domains. Composition: primary kernel E_primary = Σ(Δ(x)) added alongside ABR kernel; B absence distinguished from B = identity. New entries: Δ (primary directed difference) and Σ (primary antisymmetric circulation). R constraint: updated to reflect that symmetry requires independent provenance per direction under the distinctness axiom. B: absence from primary kernel stated explicitly. Primary Region invariants: new entry. Role references: none — this document states what operators are and what constraints hold.
 
 **V6 → V7 changes:** Domain section: sequential observation requirement added — Phase 1 admissible on single M(o); Phase 2 requires a declared sequence of actual observations; cold start admissible on first step only; treating cold start as relational evolution named as inadmissible. A operator: sequential constraint on persistence form added — E_prior must come from a prior actual observation after the first step; model-generated sequences and static configurations named as inadmissible inputs to A_persistence beyond first step; zero output on static geometry declared as the correct result. Relational direction section: relational evolution direction added as a distinct named constraint — the direction of relational evolution is a property of the process traceable to an observable through M, not a property of the sequence index; temporal ordering named as a downstream projection of relational evolution, not a primitive; index order alone named as inadmissible as a direction declaration.
+
+**V7 → V8 changes:** Primary Region invariants section extended — four new derived invariants (I-T, I-S, I-E, I-RE) cross-referenced from `derived_invariants.rs V4`; joint necessity framework-level observation stated; epistemic status of each invariant stated inline; open conditions OC-T-3, OC-S-3, OC-E-3, OC-RE-1 named. Version header updated to V8.
