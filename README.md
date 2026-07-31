@@ -61,6 +61,87 @@ unified τ expression. Distinguishes Φ_stability from Φ_relational.
 Confirms κ[Primary] = c² = 8.988×10¹⁶ J/kg as internal consistency
 within M. States open conditions OC-E-1 through OC-E-5. V4.
 
+The seven documents above (`docs/kernel/`) declare what the kernel
+*is* — the mathematics, operators, and observable record. The
+documents below (`docs/process/`) declare how that content is
+*checked* — a distinct concern, added 2026-07-30, that does not alter
+any of the mathematics above.
+
+**`docs/process/Verification_pass_protocol.md`**
+Governs how Origin orders an independent verification pass over a
+declared artifact — scope, evidence, reading order, and output format.
+Does not redefine roles; governs preparation of a verification
+assignment within the workflow `role_separation_and_operator_
+application.md` already declares.
+
+**`docs/process/observable_provenance_and_reverse_traceability.md`**
+States the kernel's foundational epistemic requirement: no
+mathematical construct is a source of truth by virtue of internal
+consistency alone; a chain must terminate in a declared observable,
+and that chain must be reconstructible in both directions —
+executable, not merely documented.
+
+**`docs/process/kernel_self_consistency_test.md`**
+Two-part test: a clean-room build test (does the repository run from
+nothing but what's published) and a cross-document consistency audit
+(do the notation, code, and validation record actually agree with each
+other, checked interface by interface rather than document by
+document).
+
+**`docs/process/language_discipline_rust_mandate.md`**
+Declares Rust as the only acceptable language for science- and
+math-bearing processing in this kernel, and states why — the language
+mechanism through which the provenance discipline above is actually
+enforceable rather than aspirational.
+
+**`bin/provenance_demo.rs`**
+Minimal, real worked example of the provenance requirement, built
+against one already-documented kernel quantity (the H-alpha photon
+edge, NIST ASD v5.12) rather than an invented case. Demonstrates a
+value and its provenance as a single reconstructible object, checked
+in both directions.
+
+**How the four process documents relate.** They are not four
+independent policies that happen to agree — they are four distinct
+layers, each an application of the one beneath it:
+
+```
+Observable Provenance and Reverse Traceability   (the fixed principle)
+        ↓
+Language Discipline — Rust Mandate               (one implementation
+                                                    mechanism for it)
+        ↓
+Kernel Self-Consistency Test                     (how to check the
+                                                    principle and the
+                                                    mandate are both
+                                                    actually honored)
+        ↓
+Verification Pass Ordering Protocol              (how any single
+                                                    check — including
+                                                    a self-consistency
+                                                    pass — is organized
+                                                    and run)
+```
+
+This is the same invariance discipline the kernel's mathematics
+already claims about itself — what changes is the *application*
+(implementation language, audit procedure, execution ordering); what
+does not change, at any layer, is the underlying principle that
+mathematical claims require observable termination. The governance
+layer is invariant in the same sense the operators are.
+
+**In words** (restates the diagram above; if the two ever disagree,
+the diagram is the source of truth and this paragraph is stale):
+Observable Provenance and Reverse Traceability states the foundational
+principle — mathematical claims require observable termination and
+reconstructible provenance. Language Discipline — Rust Mandate states
+one implementation mechanism intended to support that principle. The
+Kernel Self-Consistency Test states how to check that both the
+principle and the implementation discipline are actually being
+honored in a given repository. The Verification Pass Ordering Protocol
+states how any individual verification assignment is organized and
+reported, regardless of what is being verified.
+
 ---
 
 ## Contribution discipline
@@ -84,8 +165,9 @@ Concretely, a contribution must state:
 5. **The open conditions** — what remains unresolved, stated explicitly.
 
 Declaration is not a substitute for traceability to an observable
-through M. A quantity that is declared but not traceable to an observable
-through M is not inadmissible — it is not about anything in D.
+through M. A declared quantity lacking observable traceability does
+not enter the kernel as an established quantity, because it is not
+about anything in D.
 
 Contributions that import quantities from legacy theoretical frameworks
 without independent declaration through M are not admissible. The
@@ -115,6 +197,18 @@ declared source.
 ---
 
 ## Version
+
+**V7 (mathematical content). Process and provenance discipline added
+2026-07-30 — content unchanged.**
+
+The mathematics — operators, derived invariants, validation record,
+observable variable sets — remains V7 as declared below. Nothing added
+on 2026-07-30 alters `operators.rs`, `derived_invariants.rs`, or any
+VR- or OC- entry. What was added is a governance and verification
+layer around the existing content: `docs/process/`. See that
+directory's contents for what changed and why. The mathematical
+content is not claimed complete by this addition — only that this
+addition does not change it.
 
 V7. Updates from V4:
 

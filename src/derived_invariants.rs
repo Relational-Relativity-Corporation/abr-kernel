@@ -1,27 +1,40 @@
-// derived_invariants.rs — Metatron Dynamics, Inc. V4.
+// derived_invariants.rs — Metatron Dynamics, Inc. V4.1.
 // Derived Invariants: canonical mathematical expressions from the V7 kernel.
 //
 // Grounding documents (V7):
 //   operators.rs (V7)
-//   observable_variable_sets_v6.md (pending)
+//   observable_variable_sets_v7.md
 //   abr_operators_plain_v7.md
 //   role_separation_and_operator_application_v7.md
 //
 // ── What This File Contains ───────────────────────────────────────────────
 //
-// Confirmed mathematical expressions derived from the operator framework.
-// These are not operators. They are what the operators produce when applied
-// correctly over declared structure. They are collected here because:
+// This file holds TWO categories of statement. They are separated structurally
+// into Part I and Part II because they carry different epistemic status, and
+// a reader must not mistake one for the other.
+//
+// PART I — CONFIRMED DERIVED INVARIANTS.
+// Mathematical expressions derived from the operator framework. These are not
+// operators. They are what the operators produce when applied correctly over
+// declared structure. Every expression in Part I was derived from the
+// operators — proven, not declared independently. Every expression is
+// invariant in form across all declared regions; what changes across regions
+// is the numerical value, not the form. Collected here because:
 //
 //   1. They are invariant in form across all declared regions.
 //   2. Regional instantiations can reference them without reimplementing.
 //   3. Their separation from operators.rs preserves the distinction between
 //      what acts (operators) and what is produced (derived invariants).
 //
-// Every expression in this file was derived from the operators — proven,
-// not declared independently. Every expression is invariant in form across
-// all declared regions. What changes across regions is the numerical value,
-// not the form of the expression.
+// PART II — PROPOSED FRAMEWORK-LEVEL INVARIANTS (OPEN DERIVATION).
+// Statements about the Primary Region that are consistent with the operator
+// structure and with the observable record, and that are NOT yet derived from
+// the kernel. They are framework-level necessity statements: observed patterns
+// stated at the level of the framework. Each carries a named open condition
+// recording what remains to be derived. A Part II statement may not be cited
+// as a proven consequence of the operators, and may not be used to support a
+// Part I derivation. Movement from Part II to Part I requires the open
+// condition to be closed by derivation, not by additional agreement.
 //
 // ── Methodological Context ────────────────────────────────────────────────
 //
@@ -81,7 +94,7 @@
 //
 // ── Contents ─────────────────────────────────────────────────────────────
 //
-//   Layer 3 derived quantities (all confirmed):
+//   PART I — Layer 3 derived quantities (all confirmed, derived):
 //     ε[e]   — relational energy contrast
 //     τ[v]   — relational progression interval (unified expression)
 //     Φ[v]   — coherence potential (node)
@@ -89,6 +102,13 @@
 //     J[v]   — R output multiplicity
 //     𝟙[e]   — detection indicator (derived from R antisymmetry)
 //     θ[e]   — B output vector direction
+//
+//   PART II — proposed framework-level invariants (open derivation):
+//     I-T    — tunneling               (open condition OC-T-3)
+//     I-S    — superposition           (open condition OC-S-3)
+//     I-E    — entanglement            (open condition OC-E-3)
+//     I-RE   — relational evolution    (open condition OC-RE-1)
+//     Joint necessity preamble         (framework-level observation)
 //
 //   Support classifications (standing protocol):
 //     Observed  — directly from M
@@ -140,8 +160,30 @@
 //      with "declared relational intervals within the measured stability
 //      interval" (Verifier, session July 2026).
 //
+// V4 — Primary Region invariants added: I-T (tunneling), I-S (superposition),
+//      I-E (entanglement), I-RE (relational evolution). Joint necessity
+//      preamble stated as a framework-level observation, not a proven
+//      consequence. Open conditions OC-T-3, OC-S-3, OC-E-3, OC-RE-1 declared.
+//      Epistemic status stated inline per invariant.
+//      (This entry was absent from the version history until V4.1; the file
+//      carried a V4 footer with no V4 record. Reconstructed from content.)
+//
+// V4.1 — Structural separation of the file's two statement categories.
+//      Part I (confirmed derived invariants) and Part II (proposed
+//      framework-level invariants, open derivation) introduced as top-level
+//      divisions with banner headers. Purpose statement rewritten to declare
+//      both categories and their differing epistemic status. Contents list
+//      split by part. Stated explicitly that no Part I derivation depends on
+//      any Part II statement, that Part II may not be cited as a proven
+//      consequence of the operators, and that movement from Part II to Part I
+//      requires derivation rather than agreement. Grounding reference
+//      corrected: observable_variable_sets_v7.md replaces the stale
+//      "observable_variable_sets_v6.md (pending)". No content changed; the
+//      organization now matches the epistemic classification the file already
+//      stated in prose.
+//
 // Bounded over D. No claim beyond D.
-// Metatron Dynamics, Inc. V4.
+// Metatron Dynamics, Inc. V4.1.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── CONSTANTS AND PHYSICAL REFERENCES ─────────────────────────────────────
@@ -192,7 +234,12 @@ pub const H_PLANCK: f64 = 6.626_070_15e-34;
 pub const C_DECLARED: f64 = 2.997_924_58e8;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// ── PART I — CONFIRMED DERIVED INVARIANTS ─────────────────────────────────
 // ── LAYER 3 DERIVED QUANTITIES ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Everything in Part I is DERIVED: proven from the operator mathematics.
+// Nothing in Part I depends on any statement in Part II.
 // ═══════════════════════════════════════════════════════════════════════════
 
 // ── ε[e] — Relational Energy Contrast ────────────────────────────────────
@@ -807,7 +854,18 @@ mod tests {
     }
 }
 // ═══════════════════════════════════════════════════════════════════════════
+// ── PART II — PROPOSED FRAMEWORK-LEVEL INVARIANTS (OPEN DERIVATION) ────────
 // ── PRIMARY REGION INVARIANTS — TUNNELING, SUPERPOSITION, ENTANGLEMENT ─────
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// EPISTEMIC STATUS OF THIS ENTIRE PART.
+// The statements below are NOT derived from the kernel. They are framework-
+// level necessity statements: consistent with the operator structure and with
+// the observable record, and awaiting derivation. Each carries a named open
+// condition. Nothing in Part I depends on anything in this Part, and nothing
+// here may be cited as a proven consequence of the operators. The functions
+// in this Part compute declared conditions; computing correctly is not
+// derivation.
 // ═══════════════════════════════════════════════════════════════════════════
 //
 // These three invariants are statements about the Primary Region that hold

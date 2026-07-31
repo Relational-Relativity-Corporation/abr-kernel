@@ -1,6 +1,6 @@
 # The Operators — Plain Language
 
-**Metatron Dynamics, Inc.** V7. Bounded over D. No claim beyond D.
+**Metatron Dynamics, Inc.** V8. Bounded over D. No claim beyond D.
 
 ---
 
@@ -129,6 +129,56 @@ Under the directional admissibility condition, every admissible declared structu
 
 ---
 
+## The three Primary Region quantities
+
+The primary kernel produces a field. Three quantities describe the shape of
+that field, and together they are how the framework decides whether the
+primary kernel is still the right kernel.
+
+**How many independent directions the Δ output spans.** The directed
+differences across all declared edges may point in many different directions,
+or they may all lie along one. If they span more than one direction, the
+declared structure is carrying contrast on several relations at once,
+unresolved.
+
+**How many independent directions the Σ output spans.** The same question
+asked after the coupling step.
+
+**How much of the declared structure has somewhere to continue to.** Not every
+declared edge has a successor. Some are terminal. This quantity counts the
+edges that do have somewhere to continue — the part of the structure through
+which accumulation could travel if accumulation were active.
+
+The second quantity divided by the third is the ratio the framework watches.
+When it is far below one, the declared structure is at the Primary Region:
+contrast exists across relations, but not enough of it is spanning the parts of
+the structure that could carry accumulation. The primary kernel is the correct
+kernel and B is not invoked. As the ratio approaches one, the structure has
+begun to carry enough distinguishable relational contrast that accumulating
+along declared continuation would add something. That is the condition named
+elsewhere in these documents as persistence being confirmed, and it is what
+brings B into use.
+
+**Two things about this ratio are open, and both matter for how it is read.**
+
+The threshold itself has not been derived. There is no computed value at which
+the framework states that the transition has occurred; the ratio's behaviour is
+declared, its cut point is not.
+
+And the ratio has a ceiling that comes from the declaration rather than from
+the system. The number of independent directions the Σ output can span is
+limited by how many components the declared variable set carries. If a
+declaration has few components and many edges with successors, the ratio cannot
+approach one no matter what the observable does — the limit is a property of
+what was declared, not a finding about what was observed. A ratio far below one
+on a single-component declaration says nothing about the system. It says the
+declaration cannot express the quantity.
+
+The formal statement of all three quantities, the ratio, and both open
+conditions is in `operators_notation_and_constraint.md`.
+
+---
+
 ## A — directed difference (ABR kernel)
 
 A measures directed difference across declared relations.
@@ -148,6 +198,9 @@ For A_persistence to carry admissible content beyond the first declared step, E_
 B accumulates along declared continuation and nowhere else.
 
 At each edge, B adds the values of edges that continue forward from it.
+It adds the immediate continuations only — the edges that directly follow.
+It does not follow those edges onward and add what follows them.
+B is one step of accumulation, not a sum along the whole downstream chain.
 A terminal edge accumulates nothing.
 No boundary is closed to supply continuation that was not declared.
 
@@ -264,3 +317,7 @@ Those determinations remain with whoever declared the domain.
 **V7 → V7 (this session):** Primary observable and mathematical primitive section added — change is the primary observable; relation is its invariant structure; both invariant across all declared scales and domains within the bounded domain of human perceptual and cognitive information; Δ and A named as the minimal mathematical expression of the primary observable; the operators do not produce change, they read it. Version header corrected to V7.
 
 **V7 → V8 changes:** New section added: "What the Primary Region produces — and why it matters at every scale" — plain language statements of I-T (Tunneling), I-S (Superposition), I-E (Entanglement), and I-RE (Relational Evolution); joint necessity observation stated; epistemic status of each phenomenon stated explicitly (not directly observable; consequences observable through M; framework-level necessity statements distinguished from derived results). Version header updated to V8.
+
+**V7 → V8 changes:** Version header corrected — the closing attribution already read V8 while the header read V7. B section: accumulation depth stated in plain language — immediate continuations only, one step, not a sum along the whole downstream chain. Added after a downstream artifact described B as full-chain accumulation.
+
+**V8 → V8.1 changes:** New section — the three Primary Region quantities, stated in plain language without notation: the independent directions spanned by the Δ output, the independent directions spanned by the Σ output, and the count of declared edges with somewhere to continue to. The ratio governing the primary-to-ABR kernel transition described conceptually, connecting to the existing statement that B activates when persistence is confirmed. Both open conditions stated in plain terms — the threshold is not derived, and the ratio carries a ceiling imposed by the component count of the declared variable set, so a low-component declaration cannot reach activation regardless of the observable. Added after verification found the document explained every operator but never introduced the quantities used to decide which kernel applies.

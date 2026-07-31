@@ -1,0 +1,7 @@
+# Cargo build artifacts — never commit these. Anyone cloning this repo
+# builds fresh; a stale compiled target/ helps no one and bloats the repo.
+/target/
+
+# Common editor/OS cruft
+.DS_Store
+Thumbs.db

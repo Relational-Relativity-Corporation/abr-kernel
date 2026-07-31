@@ -1,0 +1,16 @@
+[package]
+name = "metatron_kernel_v7"
+version = "0.8.0"
+edition = "2021"
+description = "ABR relational kernel — Primary (Delta -> Sigma) and ABR (A -> B -> R). Bounded over D. No claim beyond D."
+
+[lib]
+name = "metatron_kernel_v7"
+path = "src/lib.rs"
+
+[[bin]]
+name = "provenance_demo"
+path = "bin/provenance_demo.rs"
+
+[dependencies]
+nalgebra = "0.33"

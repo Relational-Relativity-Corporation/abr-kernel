@@ -1,10 +1,10 @@
-// operators.rs — Metatron Dynamics, Inc. V7.
+// operators.rs — Metatron Dynamics, Inc. V8.
 // Unified Relational Kernel: Primary (Δ → Σ) and ABR (A → B → R).
 //
-// Grounding documents (V7):
-//   operators_notation_and_constraint_v7.md
-//   abr_operators_plain_v7.md
-//   role_separation_and_operator_application_v7.md
+// Grounding documents (2026-07-28):
+//   operators_notation_and_constraint_v10.md
+//   abr_operators_plain_v9.md
+//   role_separation_and_operator_application_v9.md
 //   primary_operators_delta_sigma_v6.md
 //   primary_region_formal_interior_v6.md
 //
@@ -459,10 +459,17 @@ pub fn operator_delta(x: &NodeField, rel: &DeclaredRelations) -> PrimaryEdgeFiel
 
 // ── ρ (Primary) ───────────────────────────────────────────────────────────
 //
-// ρ[e] = ρ_base · m[s] / (1 + m[s])
+// EDGE FORM of ρ — the node-form quantity evaluated at the source locus.
+//
+// ρ[e] = ρ_base · m[s] / (1 + m[s]),  s = source(e)
 // m[s] = max{ |Δ(x)[e']| : e' incident to s }
-// Derived per edge from Δ(x). No aggregation beyond the node.
-// ρ ∈ [0, ρ_base) for all declared edges.
+//
+// Derived per NODE from Δ(x); no aggregation beyond the node. Returned per
+// EDGE by evaluating the node quantity at source(e).
+// Preserves: the source locus strength. Discards: the target locus strength.
+// The asymmetry is declared, consistent with the single admissible direction
+// of the relation. See `operators_notation_and_constraint.md` ρ entry.
+// ρ ∈ [0, ρ_base) in both forms.
 
 pub fn compute_rho_primary(
     delta_field: &PrimaryEdgeField,
@@ -475,10 +482,10 @@ pub fn compute_rho_primary(
         node_incident[t].push(e);
     }
     rel.edges.iter().map(|&(s, _)| {
-        let m = node_incident[s].iter()
+        let chi = node_incident[s].iter()
             .flat_map(|&e| delta_field.field.iter().map(move |c| c[e].abs()))
             .fold(0.0_f64, f64::max);
-        rho_base * m / (1.0 + m)
+        rho_base * chi / (1.0 + chi)
     }).collect()
 }
 
@@ -591,13 +598,123 @@ pub fn im_sigma_rank(sigma_field: &PrimaryEdgeField) -> (usize, Vec<f64>) {
     im_delta_rank(sigma_field)
 }
 
+/// Declared result of a ρ_P computation.
+///
+/// ρ_P = rank(Im Σ) / propagation capacity. Notation V9 line 37 requires an
+/// implementation unable to compute the rank to DECLARE that it cannot rather
+/// than report a surrogate. A bare `f64` cannot do this: `0.0` is also a real
+/// deep-Primary reading, so one value would stand for two different states of
+/// the world.
+///
+/// OC-ρP-2 (V9 line 35) further requires that a ρ_P computed on a field whose
+/// component count bounds it below 1 be reported as ceiling-bounded rather than
+/// as a Primary Region finding. The ceiling is a property of the DECLARATION,
+/// not of the system. A caller cannot honour that requirement unless the
+/// component count and propagation capacity travel with the value.
+///
+/// Three distinguishable cases, per Origin declaration 2026-07-28:
+///   - a genuine reading,
+///   - not computable (nothing to take a rank over),
+///   - computed but pressed against a declaration-imposed ceiling.
+#[derive(Debug, Clone, PartialEq)]
+pub enum RhoP {
+    /// Computed, and the declaration does not impose a ceiling below 1.
+    Determined {
+        value: f64,
+        n_components: usize,
+        propagation_capacity: usize,
+    },
+    /// Computed, but bounded above by n_components / propagation_capacity < 1.
+    /// OC-ρP-2: NOT admissible as a Primary Region finding. The value reflects
+    /// the declaration's component count, not the observable.
+    CeilingBounded {
+        value: f64,
+        ceiling: f64,
+        n_components: usize,
+        propagation_capacity: usize,
+    },
+    /// Not computable. ρ_P is undefined, which is NOT the same statement as
+    /// ρ_P = 0. Carries the reason so a reader can trace why.
+    Undefined { reason: RhoPUndefined },
+}
+
+/// Why ρ_P could not be computed.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RhoPUndefined {
+    /// |{e : adj⁺(e) ≠ ∅}| = 0. No declared edge has a successor, so there is
+    /// no propagation capacity to divide by. The denominator does not exist;
+    /// it is not zero-valued.
+    NoPropagationCapacity,
+    /// No declared components in the Σ output field. rank(Im Σ) is not defined
+    /// over an empty component set.
+    NoDeclaredComponents,
+}
+
+impl RhoP {
+    /// The numeric value where one exists. Returns `None` for `Undefined` —
+    /// callers must handle the undefined case explicitly rather than receive
+    /// a surrogate.
+    pub fn value(&self) -> Option<f64> {
+        match self {
+            RhoP::Determined { value, .. } => Some(*value),
+            RhoP::CeilingBounded { value, .. } => Some(*value),
+            RhoP::Undefined { .. } => None,
+        }
+    }
+
+    /// True when this result may be reported as a Primary Region finding.
+    /// OC-ρP-2: a ceiling-bounded result may not; an undefined result may not.
+    pub fn admissible_as_primary_finding(&self) -> bool {
+        matches!(self, RhoP::Determined { .. })
+    }
+
+    /// Declared upper bound on ρ_P for this declaration, where one exists.
+    /// OC-ρP-2: ρ_P ≤ n_components / propagation_capacity, and ρ_P ≤ 1.
+    pub fn declared_ceiling(&self) -> Option<f64> {
+        match self {
+            RhoP::Determined { n_components, propagation_capacity, .. }
+            | RhoP::CeilingBounded { n_components, propagation_capacity, .. } => {
+                Some((*n_components as f64 / *propagation_capacity as f64).min(1.0))
+            }
+            RhoP::Undefined { .. } => None,
+        }
+    }
+}
+
 /// ρ_P = rank(Im Σ) / propagation_capacity.
-/// Primary Region: ρ_P ≪ 1. ABR transition: ρ_P ≈ 1. OPEN CONDITION.
-pub fn rho_p_ratio(sigma_field: &PrimaryEdgeField, rel: &DeclaredRelations) -> f64 {
-    let (rank_sigma, _) = im_sigma_rank(sigma_field);
+///
+/// Primary Region: ρ_P ≪ 1. ABR transition: ρ_P ≈ 1 (B activates). The
+/// transition threshold is NOT derived as a computable criterion — OC-ρP-1
+/// remains open, so this function classifies nothing. It reports the value and
+/// the conditions under which it was obtained; the regime judgement is Origin's.
+pub fn rho_p_ratio(sigma_field: &PrimaryEdgeField, rel: &DeclaredRelations) -> RhoP {
     let c_x = rel.propagation_capacity();
-    if c_x == 0 { return 0.0; }
-    rank_sigma as f64 / c_x as f64
+    if c_x == 0 {
+        return RhoP::Undefined { reason: RhoPUndefined::NoPropagationCapacity };
+    }
+    if sigma_field.n_components == 0 {
+        return RhoP::Undefined { reason: RhoPUndefined::NoDeclaredComponents };
+    }
+
+    let (rank_sigma, _) = im_sigma_rank(sigma_field);
+    let n_components = sigma_field.n_components;
+    let value = rank_sigma as f64 / c_x as f64;
+    let ceiling = n_components as f64 / c_x as f64;
+
+    if ceiling < 1.0 {
+        RhoP::CeilingBounded {
+            value,
+            ceiling,
+            n_components,
+            propagation_capacity: c_x,
+        }
+    } else {
+        RhoP::Determined {
+            value,
+            n_components,
+            propagation_capacity: c_x,
+        }
+    }
 }
 
 /// Declared edge-image admissibility check.
@@ -803,18 +920,31 @@ pub fn operator_b(g: &EdgeField, rel: &DeclaredRelations) -> EdgeField {
 
 // ── ρ (ABR) ───────────────────────────────────────────────────────────────
 //
-// ρ[i] = rho_base × m[i] / (1 + m[i])
-// m[i] = largest gradient at node i in A output.
+// ρ[i] = rho_base × χ[i] / (1 + χ[i])
+// χ[i] = declared local asymmetry magnitude at node i (replaces m[i];
+//        the symbol m is retired under SF-PR-16). Selection over the
+//        declared asymmetries incident on i: |A(x)[e]| over incident
+//        spatial edges, together with |A(x)[p][i]| over declared
+//        component pairs at i.
+// Selection, not statistical reduction — no ensemble declared or required.
+// Preserves: magnitude of the single strongest declared asymmetry at i.
+// Discards:  its direction (absolute value; in and out edges together),
+//            and every incident asymmetry other than the largest.
+// Admissible because direction is carried by R and Σ, which apply ρ as a
+// scalar gain on a directed difference, and because ρ is declared as the
+// strength at the locus rather than a summary of its neighbourhood.
 // Derived per node from A(x). No aggregation beyond the node.
 
+/// NODE FORM of ρ — returns one value per declared node.
+/// See `compute_rho_primary` for the edge form used by the primary kernel.
 pub fn compute_rho(a: &EdgeField, rel: &DeclaredRelations, rho_base: f64) -> Vec<f64> {
     (0..rel.n_nodes).map(|i| {
-        let mut m = 0.0_f64;
+        let mut chi = 0.0_f64;
         for &e in rel.out[i].iter().chain(rel.inc[i].iter()) {
-            for c in &a.spatial { m = m.max(c[e].abs()); }
+            for c in &a.spatial { chi = chi.max(c[e].abs()); }
         }
-        for c in &a.comp { m = m.max(c[i].abs()); }
-        rho_base * m / (1.0 + m)
+        for c in &a.comp { chi = chi.max(c[i].abs()); }
+        rho_base * chi / (1.0 + chi)
     }).collect()
 }
 
@@ -914,11 +1044,11 @@ pub fn compute_rho_persistence(
     rho_base: f64,
 ) -> Vec<f64> {
     (0..rel.n_nodes).map(|i| {
-        let mut m = 0.0_f64;
+        let mut chi = 0.0_f64;
         for &e in rel.out[i].iter().chain(rel.inc[i].iter()) {
-            for c in a_persistence { m = m.max(c[e].abs()); }
+            for c in a_persistence { chi = chi.max(c[e].abs()); }
         }
-        rho_base * m / (1.0 + m)
+        rho_base * chi / (1.0 + chi)
     }).collect()
 }
 
@@ -981,9 +1111,9 @@ pub fn operator_e_v5(
 ) -> (EdgeField, PersistenceOutput) {
     let e_spatial = operator_e(f, rel, pairs, rho_base);
     let a_p = operator_a_persistence(&e_spatial, &persistence_state.e_prior);
-    let rho_p = compute_rho_persistence(&a_p, rel, rho_base);
+    let rho_persistence = compute_rho_persistence(&a_p, rel, rho_base);
     let b_p = operator_b_persistence(&a_p, rel);
-    let r_p = operator_r_persistence(&b_p, rel, &rho_p);
+    let r_p = operator_r_persistence(&b_p, rel, &rho_persistence);
     (e_spatial, PersistenceOutput {
         a_persistence: a_p,
         b_persistence: b_p,
@@ -1136,7 +1266,57 @@ mod tests {
         let x = gradient_field(4);
         let (_, s) = operator_e_primary(&x, &rel, 0.2);
         let rp = rho_p_ratio(&s, &rel);
-        assert!(rp >= 0.0 && rp.is_finite());
+
+        // IR: assert the DECLARED range, not merely finiteness. The earlier
+        // nonzero-entry-count implementation returned ≈2.667 here; that value
+        // is finite and positive and would have passed a weaker assertion.
+        let v = rp.value().expect("ρ_P must be computable on a declared open DAG");
+        assert!(v.is_finite(), "ρ_P must be finite: got {}", v);
+        assert!(v >= 0.0, "ρ_P is a rank ratio and cannot be negative: got {}", v);
+        assert!(v <= 1.0,
+            "ρ_P = rank(Im Σ)/propagation capacity cannot exceed 1: got {}", v);
+
+        // OC-ρP-2: the value must also respect the declaration-imposed ceiling.
+        let ceiling = rp.declared_ceiling().expect("a computed ρ_P carries a ceiling");
+        assert!(v <= ceiling + 1e-12,
+            "ρ_P must not exceed its declared ceiling {}: got {}", ceiling, v);
+    }
+
+    #[test]
+    fn rho_p_undefined_is_not_zero() {
+        // V9 line 37: an implementation unable to compute the rank declares
+        // that it cannot. `Undefined` must be distinguishable from a genuine
+        // deep-Primary reading of 0.0.
+        let undefined = RhoP::Undefined { reason: RhoPUndefined::NoPropagationCapacity };
+        assert_eq!(undefined.value(), None,
+            "undefined ρ_P must not yield a numeric surrogate");
+        assert!(!undefined.admissible_as_primary_finding(),
+            "undefined ρ_P is not a Primary Region finding");
+
+        let genuine_zero = RhoP::Determined {
+            value: 0.0,
+            n_components: 2,
+            propagation_capacity: 2,
+        };
+        assert_eq!(genuine_zero.value(), Some(0.0));
+        assert_ne!(undefined, genuine_zero,
+            "'not computable' and 'measured zero' are different states");
+    }
+
+    #[test]
+    fn rho_p_ceiling_bounded_is_not_a_primary_finding() {
+        // OC-ρP-2: a single-component declaration against a larger propagation
+        // capacity cannot reach ρ_P ≈ 1 regardless of the observable. The
+        // ceiling is a property of the declaration, not of the system.
+        let bounded = RhoP::CeilingBounded {
+            value: 0.25,
+            ceiling: 0.25,
+            n_components: 1,
+            propagation_capacity: 4,
+        };
+        assert!(!bounded.admissible_as_primary_finding(),
+            "ceiling-bounded ρ_P must not be reported as a Primary Region finding");
+        assert_eq!(bounded.declared_ceiling(), Some(0.25));
     }
 
     #[test]
@@ -1323,9 +1503,9 @@ mod tests {
         let x = gradient_field_abr(1, 4);
         let e = operator_e(&x, &rel, &[], 0.3);
         let a_p = operator_a_persistence(&e, &e);
-        let rho_p = compute_rho_persistence(&a_p, &rel, 0.3);
+        let rho_persistence = compute_rho_persistence(&a_p, &rel, 0.3);
         let b_p = operator_b_persistence(&a_p, &rel);
-        let r_p = operator_r_persistence(&b_p, &rel, &rho_p);
+        let r_p = operator_r_persistence(&b_p, &rel, &rho_persistence);
         assert!(r_p[0].iter().all(|&v| v.abs() < 1e-12),
             "stable field: full persistence sequence must be zero");
     }

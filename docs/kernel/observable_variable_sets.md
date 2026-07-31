@@ -1,7 +1,7 @@
 # Observable Variable Sets by Region
 ## Pre-Topological, Pre-Coupling Declaration
 
-**Metatron Dynamics, Inc.** V6.
+**Metatron Dynamics, Inc.** V7.1.
 Authority document: role_separation_and_operator_application_v7.md
 Operator grounding: operators_notation_and_constraint_v7.md
 Companion files: derived_invariants.rs V1, validation_record_v2.md
@@ -517,6 +517,17 @@ A quantity is a genuine primitive at region R if and only if:
 
 **x[v] = (ε[e], q[v])**
 
+*Note on the difference from the cross-region discussion.* The
+cross-region variable inventory in Part 2 establishes ι[v] as a
+primitive node variable. The Primary Region is the declared
+exception, because the measurement locus differs from the bounded
+loci of the higher regions: at higher regions M bounds a nucleus
+or an atom as a single locus and declares the inertial response
+of that composite, whereas at the Primary Region there is no such
+composite to bound and the declared measurement is at the edge.
+The exception is a consequence of the locus declaration, not a
+change to the cross-region inventory.
+
 Revised from (ι[v], q[v]) — session finding SF-PR-16 through
 SF-PR-17 (July 13, 2026). ε[e] at the declared measurement
 edge replaces ι[v] as the Primary Region primitive. ι[v]
@@ -641,6 +652,19 @@ instantiation finding, not part of the variable set.
 | Molecular | (ι[v], q[v], Z_eff[v]) | bond_order[e] | Z_eff, bond_order | Admissible — M declarations required |
 | Biological | (ι[v], q[v]) | — | None identified | Confirmed — open question noted |
 | Planetary | (ι[v], q[v]) | — | None identified | Confirmed |
+
+**Note on Variable 3.** Variable 3 does not appear as a column in
+this table, and its absence is declared rather than incidental.
+Its observational status is CONFIRMED — it appears across every
+declared region in the observable record. Its mathematical
+expression is OPEN: no admissible name has been declared (OC-9),
+no expression has been derived (OC-10), and whether ᵙ[e] is that
+expression remains undetermined (OC-11). It therefore occupies the
+same structural level as the named primitives while carrying a
+different status from them — confirmed as observed, not yet
+expressed. It is excluded from the per-region sets above because
+those sets declare what M must supply, and an undetermined
+expression cannot be supplied.
 
 **Structural finding:** Biological and Planetary regions
 share an identical primitive variable set: x[v] = (ι[v], q[v]).
@@ -1114,6 +1138,17 @@ Structural properties that follow from the declarations.
 Cannot be overturned by new observations without changing
 the declarations themselves.
 
+The principles divide into two groups. **Core architectural
+principles (AP-1 through AP-6)** follow from the layer structure
+and the primitive variable declarations alone, and may be read in
+order from the start of Part 2. **Derived architectural principles
+(AP-7 through AP-11)** depend on concepts introduced later —
+Φ[v], the observer frame, and the Layer 2 edge variables — and
+are not readable before those sections. The division is
+readability only: both groups have the same standing.
+
+### Core architectural principles
+
 **AP-1:** Relations are established before progression is
 recorded. This is not a convention — it is the declared
 logical structure of the framework.
@@ -1140,6 +1175,8 @@ identical operators.
 **AP-6:** Every declared variable at every region is subject
 to the same provenance requirement. No variable is exempt
 by virtue of scale, domain, or familiarity.
+
+### Derived architectural principles
 
 **AP-7:** Φ[v] = ι[v] · τ[v] is the scale-invariant coherence
 potential. The form is invariant across all regions. What
@@ -1254,3 +1291,20 @@ OC-θ-2 closed; OC-CA-1 through OC-CA-5, OC-Φ-7, OC-Φ-8,
 OC-R-1, OC-22 added. Companion files declared in header.
 
 **V7 (photon edge addition):** EF-14 through EF-17 added. Atomic Region Layer 3 outputs extended: photon edge ε[e] (14 transitions, NIST ASD v5.12), τ[v] = ℏ/ε[e] (12 edges), N[v] at H n=3 (4.58×10⁶, log₁₀=6.66), 𝟙[e]=1 at all edges confirmed. M mapping hc/λ declared. ι[photon]=0 declared. κ[Primary] non-applicability to photon locus stated (EF-17). OC-γ-1 and OC-γ-2 added to open conditions register. Part 3 Layer 3 reference updated: derived_invariants.rs V2 → V3. Verifier language discipline: "relational field cycles" rejected; replaced with "declared relational intervals over the measured stability interval" (Verifier, session July 2026). Companion file: validation_record_v4.md.
+
+**V7 → V7.1 changes:** Primary Region section: transitional note
+added stating why the Primary Region variable set differs from the
+cross-region inventory — the measurement locus differs from the
+bounded loci of higher regions, and the exception follows from the
+locus declaration rather than from a change to the inventory.
+Cross-Region Summary: note on Variable 3 added, stating that its
+absence from the table is declared, its observational status
+confirmed, its mathematical expression open (OC-9, OC-10, OC-11),
+and the reason it is excluded from per-region sets. Architectural
+principles: divided into Core (AP-1 through AP-6, readable from the
+layer structure and primitive declarations alone) and Derived
+(AP-7 through AP-11, dependent on Φ[v], the observer frame, and
+Layer 2 edge variables). The division is readability only — both
+groups have the same standing; no principle renumbered, no content
+changed. Header version corrected from V6 to V7 to match the
+document's own closing attribution.

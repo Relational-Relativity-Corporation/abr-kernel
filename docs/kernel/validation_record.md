@@ -1,7 +1,7 @@
 # Validation Record — V5
 ## Observational Grounding for Derived Invariants
 
-**Metatron Dynamics, Inc.**
+**Metatron Dynamics, Inc.** V5.
 Bounded over D. No claim beyond D.
 Sources: PDG 2024 (Navas et al., Phys. Rev. D 110, 030001)
          NIST ASD v5.12 (Kramida et al., 2024)

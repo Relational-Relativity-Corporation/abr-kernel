@@ -1,7 +1,7 @@
 # Cross-Region Energy Expression
 ## E[v] · Φ_relational[v] = ι[v] · ℏ
 
-**Metatron Dynamics, Inc.**
+**Metatron Dynamics, Inc.** V4.
 Bounded over D. No claim beyond D.
 Companion files: derived_invariants.rs V4, validation_record_v5.md,
 observable_variable_sets_v7.md, session_findings_primary_region_v1.md
