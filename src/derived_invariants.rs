@@ -1,8 +1,8 @@
-// derived_invariants.rs — Metatron Dynamics, Inc. V4.3.
+// derived_invariants.rs — Metatron Dynamics, Inc. V4.3.1.
 // Derived Invariants: canonical mathematical expressions from the V7 kernel.
 //
 // Grounding documents (V7):
-//   operators.rs (V7)
+//   operators.rs (V7.1)
 //   observable_variable_sets_v7.md
 //   abr_operators_plain_v7.md
 //   role_separation_and_operator_application_v7.md
@@ -168,6 +168,11 @@
 //      (This entry was absent from the version history until V4.1; the file
 //      carried a V4 footer with no V4 record. Reconstructed from content.)
 //
+// V4.3.1 — Grounding reference updated to operators.rs V7.1 (Origin
+//   declaration, 2026-09-23: arbitrary values removed from operator bodies;
+//   ρ_base, χ₀, cc M-supplied). This file contains no operator parameter
+//   values; no formula or invariant changed.
+//
 // V4.3 — I-S redeclared. Origin declaration, 2026-09-23.
 //   Relational distinguishability declared as the observable condition
 //   the superposition invariant expresses: the Δ output field carries
@@ -308,7 +313,7 @@
 //      stated in prose.
 //
 // Bounded over D. No claim beyond D.
-// Metatron Dynamics, Inc. V4.3.
+// Metatron Dynamics, Inc. V4.3.1.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── CONSTANTS AND PHYSICAL REFERENCES ─────────────────────────────────────

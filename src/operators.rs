@@ -1,4 +1,4 @@
-// operators.rs — Metatron Dynamics, Inc. V7.
+// operators.rs — Metatron Dynamics, Inc. V7.1.
 // Unified Relational Kernel: Primary (Δ → Σ) and ABR (A → B → R).
 //
 // Grounding documents (2026-07-28):
@@ -43,6 +43,23 @@
 // D := { x ∈ ℝⁿ | n < ∞, |x[i]| < ∞ ∀ i }
 // M : O → D  declared by Origin before any operator acts.
 // The kernel acts on M(o) only.
+//
+// M-declared operator parameters (V7.1):
+//   No operator runs until M has declared every value it uses. The kernel
+//   states forms only. It holds no numerical value for any operator
+//   parameter and supplies no defaults. The values M must declare:
+//     ρ_base — dimensionless ceiling on the weight given to the directed
+//              imbalance of adjacent relations, relative to a relation's
+//              own directed difference. Required wherever ρ is computed.
+//     χ₀     — reference in the saturating map ρ = ρ_base · χ / (χ₀ + χ).
+//              Carries the dimension of χ as declared through M.
+//              Required wherever ρ is computed.
+//     cc[p]  — cross-topology coupling for each declared component pair p
+//              in R. Required when component pairs are declared; one value
+//              per pair.
+//   A call without these values is a declaration failure, not an operator
+//   result. The function signatures enforce this: none of these values has
+//   a default, and the kernel does not choose, bound, or substitute them.
 //
 // Sequential observation requirement (V7):
 //   Phase 1 is admissible on a single declared observation M(o).
@@ -138,16 +155,12 @@
 // VERIFIER CONFIRMATION. Where the chain is incomplete, OPEN is stated.
 //
 // 1. rho_base
-//    Code operation: scalar multiplier passed by Origin at call site.
+//    Code operation: scalar multiplier supplied at the call site.
 //    Declared expression: ρ_base in the operator formula.
-//    Origin grounding document: operators_notation_and_constraint_v10.md
-//      (referenced; Verifier must confirm rho_base appears explicitly there).
-//    Input provenance: supplied by Origin as a declared parameter.
-//    Status: OPEN — ORIGIN DECLARATION REQUIRED.
-//    The grounding document is referenced but not confirmed to contain an
-//    explicit declaration of rho_base as a measurement-traceable quantity.
-//    Verifier must locate the exact entry in v10.md and confirm its
-//    observable provenance before this status can be closed.
+//    Dimension: none. ρ multiplies a difference of quantities that share
+//      the dimension of the relation's own directed difference.
+//    Value: none in the kernel. Declared by M for each analysis.
+//    Status: M-SUPPLIED (V7.1).
 //
 // 2. χ[i] = max{ |A(x)[e]| : e incident to i }
 //    Code operation: f64::max fold over absolute values of incident edges.
@@ -165,27 +178,19 @@
 //      edges (rather than any other selection rule) requires explicit
 //      declaration in the grounding documents.
 //
-// 3. Nonlinear mapping χ/(1+χ)
-//    Code operation: rho_base * chi / (1.0 + chi)
-//    Declared expression: ρ[i] = ρ_base · χ[i] / (1 + χ[i])
-//    Origin grounding document: operators_notation_and_constraint_v10.md
-//      (referenced; Verifier must confirm this form appears explicitly).
-//    Input provenance: χ computed from A(x) computed from M(o).
-//    Note: the form χ/(1+χ) is a saturating map. The "1" in the denominator
-//      requires that χ be dimensionless (a dimensionless ratio). If χ carries
-//      units from the observable, the admissibility of adding "1" to it
-//      requires an explicit scale declaration through M (see OC-ε-1 in
-//      observable_variable_sets_v7.md for the analogous constraint on ε[e]).
-//      This is an OPEN condition — the dimensionality of χ as it enters
-//      the saturating map has not been explicitly traced.
-//    Status: OPEN — ORIGIN DECLARATION REQUIRED for both the form itself
-//      and its dimensional admissibility.
+// 3. Saturating map χ/(χ₀+χ)
+//    Code operation: rho_base * chi / (chi_0 + chi)
+//    Declared expression: ρ[i] = ρ_base · χ[i] / (χ₀ + χ[i])
+//    Input provenance: χ computed from A(x) computed from M(o); χ₀ declared
+//      by M in the dimension of χ.
+//    V7.1: the fixed "1" previously in the denominator was an undeclared
+//      unit choice. It is removed. With χ₀ supplied by M, the map is
+//      dimensionless for any declared unit.
+//    Dimensional admissibility: CLOSED (V7.1).
+//    The saturating form itself: OPEN — ORIGIN DECLARATION REQUIRED.
 //
-// Overall ρ status: PRESERVE PENDING PROVENANCE CONFIRMATION.
-// None of the three elements above has a fully closed provenance chain
-// in what is available to the Generator. Removal is not authorized —
-// the formula is carried from the grounding declaration. The open
-// conditions are reported for Verifier resolution.
+// Overall ρ status: values M-supplied (V7.1). Two OPEN conditions remain:
+// the max selection (element 2) and the saturating form (element 3).
 //
 // ── B Activation Condition ───────────────────────────────────────────────
 //
@@ -253,16 +258,8 @@
 //   Was used only to compute ρ_P. Suspended with ρ_P.
 //
 // cc = 0.5 in operator_r:
-//   OPEN — ORIGIN DECLARATION REQUIRED.
-//   This coefficient governs cross-topology coupling between spatial and
-//   component edges. No Origin declaration has been located in the grounding
-//   documents for this value. It is not a fitting parameter, normalization,
-//   symmetry argument, averaging, equal distribution, convenient scaling,
-//   or numerical stability choice — those rationalizations are inadmissible.
-//   The coefficient is retained in the code unchanged and flagged.
-//   It must not be modified without an explicit Origin declaration.
-//   Observable-validation claims that depend on the cc = 0.5 path of R
-//   must not be constructed until Origin resolves this coefficient.
+//   REMOVED (V7.1, Origin declaration). cc is an M-supplied value, one per
+//   declared component pair. See "M-declared operator parameters" above.
 //
 // is_fully_connected(), has_undirected_cycle():
 //   Both construct an undirected projection of the declared directed edge set.
@@ -318,8 +315,15 @@
 //      admissibility of χ in the saturating map added as OPEN condition.
 //      Version history updated.
 //
+// V7.1 — Arbitrary values removed from operator bodies (Origin declaration,
+//      2026-09-23). The fixed "1" in the saturating map is replaced by χ₀,
+//      and cc = 0.5 in R is replaced by cc[p], one per declared component
+//      pair. ρ_base, χ₀, and cc are M-supplied, with no kernel values and no
+//      defaults. The M-declared operator parameters requirement is stated in
+//      the header. Operator forms otherwise unchanged.
+//
 // Bounded over D. No claim beyond D.
-// Metatron Dynamics, Inc. V7.
+// Metatron Dynamics, Inc. V7.1.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── SHARED FOUNDATION ──────────────────────────────────────────────────────
@@ -540,7 +544,7 @@ pub fn operator_delta(x: &NodeField, rel: &DeclaredRelations) -> PrimaryEdgeFiel
 //
 // EDGE FORM of ρ — the node-form quantity evaluated at the source locus.
 //
-// ρ[e] = ρ_base · χ[s] / (1 + χ[s]),  s = source(e)
+// ρ[e] = ρ_base · χ[s] / (χ₀ + χ[s]),  s = source(e)
 // χ[s] = max{ |Δ(x)[e']| : e' incident to s }
 //
 // Derived per NODE from Δ(x); no aggregation beyond the node. Returned per
@@ -552,34 +556,54 @@ pub fn operator_delta(x: &NodeField, rel: &DeclaredRelations) -> PrimaryEdgeFiel
 //
 // STATUS — PRESERVE PENDING PROVENANCE CONFIRMATION.
 // See ρ provenance audit in the file header (§8 of purge document).
-// Three OPEN conditions remain: rho_base declaration, max selection
-// declaration, and dimensional admissibility of χ in the saturating map.
+// ρ_base and χ₀ are M-supplied (V7.1). Two OPEN conditions remain: max
+// selection declaration and the saturating form.
 //
 // AUDIT (§22):
 //   rho_base:
 //     Code operation: scalar multiplier at call site
 //     Declared expression: ρ_base
-//     Origin source: operators_notation_and_constraint_v10.md (referenced)
-//     Input provenance: OPEN — Verifier must confirm explicit entry
-//     Status: OPEN — ORIGIN DECLARATION REQUIRED
+//     Status: M-SUPPLIED (V7.1) — no kernel value
 //   χ[s] = max|Δ[e']|:
 //     Code operation: f64::max fold over c[e].abs() for incident edges
 //     Declared expression: χ[s] = max{ |Δ(x)[e']| : e' incident to s }
 //     Origin source: operators_notation_and_constraint_v10.md (referenced)
 //     Input provenance: OPEN — max selection rule requires explicit declaration
 //     Status: OPEN — ORIGIN DECLARATION REQUIRED
-//   χ/(1+χ):
-//     Code operation: chi / (1.0 + chi)
-//     Declared expression: χ/(1+χ) saturating map
-//     Origin source: operators_notation_and_constraint_v10.md (referenced)
-//     Input provenance: OPEN — form and dimensional admissibility unconfirmed
-//     Status: OPEN — ORIGIN DECLARATION REQUIRED
+//   χ/(χ₀+χ):
+//     Code operation: chi / (chi_0 + chi)
+//     Declared expression: χ/(χ₀+χ) saturating map, χ₀ M-supplied
+//     Dimensional admissibility: CLOSED (V7.1)
+//     Saturating form: OPEN — ORIGIN DECLARATION REQUIRED
+
+// ── M-Declaration Requirement ─────────────────────────────────────────────
+//
+// Structural checks only. They admit any value M declares that the formula
+// can evaluate, and they do not choose, bound, or default any value.
+//   χ₀ > 0: at χ₀ = 0 the map is 0/0 wherever χ = 0; at χ₀ < 0 it is
+//   singular at χ = −χ₀. Neither is evaluable.
+
+pub fn require_rho_declaration(rho_base: f64, chi_0: f64) {
+    assert!(rho_base.is_finite(),
+        "ρ_base must be declared by M as a finite value");
+    assert!(chi_0.is_finite() && chi_0 > 0.0,
+        "χ₀ must be declared by M as a finite positive value in the dimension of χ");
+}
+
+pub fn require_cc_declaration(cc: &[f64], pairs: &[(usize, usize)]) {
+    assert_eq!(cc.len(), pairs.len(),
+        "cc must be declared by M for every declared component pair");
+    assert!(cc.iter().all(|v| v.is_finite()),
+        "cc values declared by M must be finite");
+}
 
 pub fn compute_rho_primary(
     delta_field: &PrimaryEdgeField,
     rel: &DeclaredRelations,
     rho_base: f64,
+    chi_0: f64,
 ) -> Vec<f64> {
+    require_rho_declaration(rho_base, chi_0);
     let mut node_incident: Vec<Vec<usize>> = vec![Vec::new(); rel.n_nodes];
     for (e, &(s, t)) in rel.edges.iter().enumerate() {
         node_incident[s].push(e);
@@ -589,7 +613,7 @@ pub fn compute_rho_primary(
         let chi = node_incident[s].iter()
             .flat_map(|&e| delta_field.field.iter().map(move |c| c[e].abs()))
             .fold(0.0_f64, f64::max);
-        rho_base * chi / (1.0 + chi)
+        rho_base * chi / (chi_0 + chi)
     }).collect()
 }
 
@@ -631,10 +655,11 @@ pub fn operator_sigma(
     delta_field: &PrimaryEdgeField,
     rel: &DeclaredRelations,
     rho_base: f64,
+    chi_0: f64,
 ) -> PrimaryEdgeField {
     assert_eq!(delta_field.n_edges, rel.n_edges(),
         "delta field and declared relations must have the same edge count");
-    let rho = compute_rho_primary(delta_field, rel, rho_base);
+    let rho = compute_rho_primary(delta_field, rel, rho_base, chi_0);
     let field = (0..delta_field.n_components).map(|c| {
         (0..rel.n_edges()).map(|e| {
             let forward: f64 = rel.adj_plus[e].iter()
@@ -666,9 +691,10 @@ pub fn antisymmetric_term(
     delta_field: &PrimaryEdgeField,
     rel: &DeclaredRelations,
     rho_base: f64,
+    chi_0: f64,
 ) -> PrimaryEdgeField {
     assert_eq!(delta_field.n_edges, rel.n_edges());
-    let rho = compute_rho_primary(delta_field, rel, rho_base);
+    let rho = compute_rho_primary(delta_field, rel, rho_base, chi_0);
     let field = (0..delta_field.n_components).map(|c| {
         (0..rel.n_edges()).map(|e| {
             let forward: f64 = rel.adj_plus[e].iter()
@@ -692,9 +718,10 @@ pub fn operator_e_primary(
     x: &NodeField,
     rel: &DeclaredRelations,
     rho_base: f64,
+    chi_0: f64,
 ) -> (PrimaryEdgeField, PrimaryEdgeField) {
     let delta = operator_delta(x, rel);
-    let sigma = operator_sigma(&delta, rel, rho_base);
+    let sigma = operator_sigma(&delta, rel, rho_base, chi_0);
     (delta, sigma)
 }
 
@@ -861,26 +888,27 @@ pub fn operator_b(g: &EdgeField, rel: &DeclaredRelations) -> EdgeField {
 
 // ── ρ (ABR) ───────────────────────────────────────────────────────────────
 //
-// ρ[i] = rho_base × χ[i] / (1 + χ[i])
+// ρ[i] = rho_base × χ[i] / (χ₀ + χ[i]),  ρ_base and χ₀ M-supplied
 // χ[i] = selection over declared asymmetries incident on i.
 // Selection, not statistical reduction — no ensemble declared or required.
 // Preserves: magnitude of the single strongest declared asymmetry at i.
 // Discards:  direction (absolute value) and all weaker incident asymmetries.
 //
-// STATUS — PRESERVE PENDING PROVENANCE CONFIRMATION.
-// See ρ provenance audit in the file header. Three OPEN conditions remain.
+// STATUS — values M-supplied (V7.1). See ρ provenance audit in the file
+// header. Two OPEN conditions remain: max selection and saturating form.
 //
-// AUDIT (§22): Status: OPEN — ORIGIN DECLARATION REQUIRED (all three
-//   elements). Preserved pending Verifier confirmation.
+// AUDIT (§22): ρ_base, χ₀: M-SUPPLIED. Max selection, saturating form:
+//   OPEN — ORIGIN DECLARATION REQUIRED.
 
-pub fn compute_rho(a: &EdgeField, rel: &DeclaredRelations, rho_base: f64) -> Vec<f64> {
+pub fn compute_rho(a: &EdgeField, rel: &DeclaredRelations, rho_base: f64, chi_0: f64) -> Vec<f64> {
+    require_rho_declaration(rho_base, chi_0);
     (0..rel.n_nodes).map(|i| {
         let mut chi = 0.0_f64;
         for &e in rel.out[i].iter().chain(rel.inc[i].iter()) {
             for c in &a.spatial { chi = chi.max(c[e].abs()); }
         }
         for c in &a.comp { chi = chi.max(c[i].abs()); }
-        rho_base * chi / (1.0 + chi)
+        rho_base * chi / (chi_0 + chi)
     }).collect()
 }
 
@@ -894,20 +922,19 @@ pub fn compute_rho(a: &EdgeField, rel: &DeclaredRelations, rho_base: f64) -> Vec
 // R_anti = 0 and R_anti ≠ 0 are both admissible mathematical outcomes.
 // R_anti ≠ 0 → REVIEW SIGNAL.
 //
-// cc = 0.5: OPEN — ORIGIN DECLARATION REQUIRED.
-//   Observable-validation claims depending on the cc path must not be
-//   constructed until this coefficient is declared.
-//   Tests of R with no component pairs do not exercise this path and
-//   are not blocked by this open condition.
+// cc[p]: M-supplied, one value per declared component pair (V7.1).
+//   With no component pairs declared, cc is empty and the cross-topology
+//   term does not execute.
 //
 // AUDIT (§22):
 //   Spatial pass-through and directed sum: DECLARED — PRESERVE
-//   ρ[src(e)] as scalar gain: OPEN (inherits from ρ audit)
-//   cc = 0.5 cross-topology term: OPEN — ORIGIN DECLARATION REQUIRED
+//   ρ[src(e)] as scalar gain: values M-supplied; see ρ audit
+//   cc[p] cross-topology term: M-SUPPLIED (V7.1) — no kernel value
 
-pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64]) -> EdgeField {
+pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f64]) -> EdgeField {
     let k = bg.k;
     let pairs = &bg.comp_pairs;
+    require_cc_declaration(cc, pairs);
     let rho_e: Vec<f64> = rel.edges.iter().map(|&(s, _)| rho[s]).collect();
 
     let mut spatial: Vec<Vec<f64>> = (0..k).map(|c| {
@@ -918,15 +945,12 @@ pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64]) -> EdgeF
         }).collect()
     }).collect();
 
-    // OPEN: ORIGIN DECLARATION REQUIRED for cc = 0.5.
-    // This block executes only when component pairs are declared.
-    // Tests with empty pairs do not enter this path.
-    let cc = 0.5;
+    // cc[p] declared by M. Executes only when component pairs are declared.
     for (p, &(a, b)) in pairs.iter().enumerate() {
         for (e, &(s, d)) in rel.edges.iter().enumerate() {
             let asym = bg.comp[p][d] - bg.comp[p][s];
-            spatial[a][e] += rho_e[e] * cc * asym;
-            spatial[b][e] -= rho_e[e] * cc * asym;
+            spatial[a][e] += rho_e[e] * cc[p] * asym;
+            spatial[b][e] -= rho_e[e] * cc[p] * asym;
         }
     }
 
@@ -947,11 +971,18 @@ pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64]) -> EdgeF
 //
 // AUDIT (§22): Status: DECLARED — PRESERVE (composition).
 
-pub fn operator_e(f: &NodeField, rel: &DeclaredRelations, pairs: &[(usize, usize)], rho_base: f64) -> EdgeField {
+pub fn operator_e(
+    f: &NodeField,
+    rel: &DeclaredRelations,
+    pairs: &[(usize, usize)],
+    cc: &[f64],
+    rho_base: f64,
+    chi_0: f64,
+) -> EdgeField {
     let a = operator_a(f, rel, pairs);
-    let rho = compute_rho(&a, rel, rho_base);
+    let rho = compute_rho(&a, rel, rho_base, chi_0);
     let b = operator_b(&a, rel);
-    operator_r(&b, rel, &rho)
+    operator_r(&b, rel, &rho, cc)
 }
 
 // ── A_persistence ─────────────────────────────────────────────────────────
@@ -993,21 +1024,22 @@ pub fn operator_a_persistence(
 // ── ρ_persistence ─────────────────────────────────────────────────────────
 //
 // Same formula as compute_rho, applied to the persistence directed difference.
-// STATUS: OPEN (inherits from ρ audit).
-//
-// AUDIT (§22): Status: OPEN — ORIGIN DECLARATION REQUIRED (inherits).
+// ρ_base and χ₀ M-supplied (V7.1). Max selection and saturating form OPEN
+// (inherits from ρ audit).
 
 pub fn compute_rho_persistence(
     a_persistence: &[Vec<f64>],
     rel: &DeclaredRelations,
     rho_base: f64,
+    chi_0: f64,
 ) -> Vec<f64> {
+    require_rho_declaration(rho_base, chi_0);
     (0..rel.n_nodes).map(|i| {
         let mut chi = 0.0_f64;
         for &e in rel.out[i].iter().chain(rel.inc[i].iter()) {
             for c in a_persistence { chi = chi.max(c[e].abs()); }
         }
-        rho_base * chi / (1.0 + chi)
+        rho_base * chi / (chi_0 + chi)
     }).collect()
 }
 
@@ -1068,12 +1100,14 @@ pub fn operator_e_v5(
     f: &NodeField,
     rel: &DeclaredRelations,
     pairs: &[(usize, usize)],
+    cc: &[f64],
     persistence_state: &PersistenceState,
     rho_base: f64,
+    chi_0: f64,
 ) -> (EdgeField, PersistenceOutput) {
-    let e_spatial = operator_e(f, rel, pairs, rho_base);
+    let e_spatial = operator_e(f, rel, pairs, cc, rho_base, chi_0);
     let a_p = operator_a_persistence(&e_spatial, &persistence_state.e_prior);
-    let rho_persistence = compute_rho_persistence(&a_p, rel, rho_base);
+    let rho_persistence = compute_rho_persistence(&a_p, rel, rho_base, chi_0);
     let b_p = operator_b_persistence(&a_p, rel);
     let r_p = operator_r_persistence(&b_p, rel, &rho_persistence);
     (e_spatial, PersistenceOutput {
@@ -1119,6 +1153,11 @@ mod tests {
     //             against a declared measurement source.
     //   [CORR]  — correspondence test: checks operator output against a
     //             declared value from the validation record.
+
+    // Fixture declaration of χ₀ for synthetic tests. It reproduces the
+    // pre-V7.1 behavior of these fixtures so their expected values carry
+    // over unchanged. It is a test-fixture declaration, not a kernel value.
+    const FIXTURE_CHI_0: f64 = 1.0;
 
     fn test_rel_from_edges(n_nodes: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
         let n = edges.len();
@@ -1258,7 +1297,7 @@ mod tests {
     fn primary_sigma_equals_delta_for_isolated_edge() {
         let rel = test_rel_from_edges(2, vec![(0,1)]);
         let x = NodeField::new(vec![vec![1.0, 0.0]]);
-        let (d, s) = operator_e_primary(&x, &rel, 0.2);
+        let (d, s) = operator_e_primary(&x, &rel, 0.2, FIXTURE_CHI_0);
         assert!((s.field[0][0] - d.field[0][0]).abs() < 1e-12,
             "Σ must equal Δ for isolated edge (no adjacency)");
     }
@@ -1270,7 +1309,7 @@ mod tests {
         let rel = test_rel_from_edges(2, vec![(0,1)]);
         assert!(relational_isolation(&rel), "single edge: must be relationally isolated");
         let x = NodeField::new(vec![vec![2.0, 1.0]]);
-        let (d, s) = operator_e_primary(&x, &rel, 0.2);
+        let (d, s) = operator_e_primary(&x, &rel, 0.2, FIXTURE_CHI_0);
         assert!((d.field[0][0] - 1.0).abs() < 1e-12, "Δ[(0,1)] = 1.0");
         assert!((s.field[0][0] - 1.0).abs() < 1e-12, "Σ = Δ — B absent, not identity");
     }
@@ -1282,7 +1321,7 @@ mod tests {
     fn primary_delta_zero_on_uniform_field() {
         let rel = open_dag();
         let x = uniform_field(4, 1.0);
-        let (d, _s) = operator_e_primary(&x, &rel, 0.2);
+        let (d, _s) = operator_e_primary(&x, &rel, 0.2, FIXTURE_CHI_0);
         assert!(d.field[0].iter().all(|&v| v == 0.0),
             "uniform field: all Δ values must be zero");
     }
@@ -1292,7 +1331,7 @@ mod tests {
     fn primary_delta_nonzero_on_gradient_field() {
         let rel = open_dag();
         let x = gradient_field(4);
-        let (d, _s) = operator_e_primary(&x, &rel, 0.2);
+        let (d, _s) = operator_e_primary(&x, &rel, 0.2, FIXTURE_CHI_0);
         assert!(d.field[0].iter().any(|&v| v != 0.0),
             "gradient field: at least one Δ value must be nonzero");
     }
@@ -1375,7 +1414,7 @@ mod tests {
     fn abr_e_v4_finite() {
         let rel = open_dag();
         let x = gradient_field_abr(1, 4);
-        let e = operator_e(&x, &rel, &[], 0.3);
+        let e = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
         // Empty pairs — cc = 0.5 path not exercised.
         assert!(e.spatial[0].iter().all(|v| v.is_finite()));
     }
@@ -1395,7 +1434,7 @@ mod tests {
     fn abr_persistence_warm_state_not_cold() {
         let rel = directed_chain(3);
         let x = gradient_field_abr(1, 3);
-        let e = operator_e(&x, &rel, &[], 0.3);
+        let e = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
         let ps = PersistenceState::from_prior(e);
         assert!(!ps.is_cold_start, "warm state must not be flagged as cold start");
     }
@@ -1405,7 +1444,7 @@ mod tests {
     fn abr_a_persistence_cold_start_equals_current() {
         let rel = directed_chain(3);
         let x = gradient_field_abr(1, 3);
-        let e = operator_e(&x, &rel, &[], 0.3);
+        let e = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
         let ps = PersistenceState::cold_start(1, rel.n_edges(), &[], rel.n_nodes);
         let a_p = operator_a_persistence(&e, &ps.e_prior);
         for (idx, (&ap, &es)) in a_p[0].iter().zip(e.spatial[0].iter()).enumerate() {
@@ -1419,7 +1458,7 @@ mod tests {
     fn abr_a_persistence_stable_field_zero() {
         let rel = directed_chain(3);
         let x = gradient_field_abr(1, 3);
-        let e = operator_e(&x, &rel, &[], 0.3);
+        let e = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
         let a_p = operator_a_persistence(&e, &e);
         assert!(a_p[0].iter().all(|&v| v.abs() < 1e-12),
             "stable field: A_persistence must be zero (correct declared result)");
@@ -1431,8 +1470,8 @@ mod tests {
         let rel = open_dag();
         let x = gradient_field_abr(1, 4);
         let ps = PersistenceState::cold_start(1, rel.n_edges(), &[], rel.n_nodes);
-        let (e_v5, _) = operator_e_v5(&x, &rel, &[], &ps, 0.3);
-        let e_v4 = operator_e(&x, &rel, &[], 0.3);
+        let (e_v5, _) = operator_e_v5(&x, &rel, &[], &[], &ps, 0.3, FIXTURE_CHI_0);
+        let e_v4 = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
         for (a, b) in e_v5.spatial[0].iter().zip(e_v4.spatial[0].iter()) {
             assert!((a - b).abs() < 1e-12, "V5 spatial phase must match V4 exactly");
         }
@@ -1445,9 +1484,9 @@ mod tests {
         let x1 = gradient_field_abr(1, 4);
         let x2 = NodeField::new(vec![vec![0.1, 0.5, 0.3, 0.9]]);
         let ps_cold = PersistenceState::cold_start(1, rel.n_edges(), &[], rel.n_nodes);
-        let (e1, _) = operator_e_v5(&x1, &rel, &[], &ps_cold, 0.3);
+        let (e1, _) = operator_e_v5(&x1, &rel, &[], &[], &ps_cold, 0.3, FIXTURE_CHI_0);
         let ps_warm = PersistenceState::from_prior(e1.clone());
-        let (e2, p2) = operator_e_v5(&x2, &rel, &[], &ps_warm, 0.3);
+        let (e2, p2) = operator_e_v5(&x2, &rel, &[], &[], &ps_warm, 0.3, FIXTURE_CHI_0);
         for e in 0..rel.n_edges() {
             let expected = e2.spatial[0][e] - e1.spatial[0][e];
             assert!((p2.a_persistence[0][e] - expected).abs() < 1e-12,
@@ -1460,7 +1499,7 @@ mod tests {
     fn abr_b_persistence_open_boundary() {
         let rel = open_chain(4);
         let x = gradient_field_abr(1, 4);
-        let e_curr = operator_e(&x, &rel, &[], 0.3);
+        let e_curr = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
         let ps = PersistenceState::cold_start(1, rel.n_edges(), &[], rel.n_nodes);
         let a_p = operator_a_persistence(&e_curr, &ps.e_prior);
         let b_p = operator_b_persistence(&a_p, &rel);
@@ -1479,9 +1518,9 @@ mod tests {
     fn abr_r_persistence_stable_field_zero() {
         let rel = open_dag();
         let x = gradient_field_abr(1, 4);
-        let e = operator_e(&x, &rel, &[], 0.3);
+        let e = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
         let a_p = operator_a_persistence(&e, &e);
-        let rho_persistence = compute_rho_persistence(&a_p, &rel, 0.3);
+        let rho_persistence = compute_rho_persistence(&a_p, &rel, 0.3, FIXTURE_CHI_0);
         let b_p = operator_b_persistence(&a_p, &rel);
         let r_p = operator_r_persistence(&b_p, &rel, &rho_persistence);
         assert!(r_p[0].iter().all(|&v| v.abs() < 1e-12),
@@ -1507,16 +1546,16 @@ mod tests {
     // [IMPL] Σ and R both produce finite output on declared relations.
     // Outputs are not expected to be numerically equal — Σ acts on Δ directly;
     // R acts on B(A). No claim about antisymmetric expression is made here.
-    // Note: R with empty pairs does not exercise the cc = 0.5 path.
+    // Note: R with empty pairs does not exercise the cc path.
     #[test]
     fn sigma_and_r_both_finite_on_declared_relations() {
         let rel = directed_chain(4);
         let x = gradient_field(4);
         let d = operator_delta(&x, &rel);
-        let s = operator_sigma(&d, &rel, 0.2);
+        let s = operator_sigma(&d, &rel, 0.2, FIXTURE_CHI_0);
         let a = operator_a(&x, &rel, &[]);
-        let rho = compute_rho(&a, &rel, 0.2);
-        let r = operator_r(&a, &rel, &rho);  // empty pairs — cc path not exercised
+        let rho = compute_rho(&a, &rel, 0.2, FIXTURE_CHI_0);
+        let r = operator_r(&a, &rel, &rho, &[]);  // empty pairs — cc path not exercised
         assert!(s.field[0].iter().all(|v| v.is_finite()), "Σ output must be finite");
         assert!(r.spatial[0].iter().all(|v| v.is_finite()), "R output must be finite");
     }
@@ -1673,5 +1712,44 @@ mod tests {
         assert_eq!(d1.field[0][0], direct,
             "operator_delta output must equal x[s] - x[t] exactly — \
              no undeclared quantity may enter");
+    }
+
+    // ── V7.1 M-declaration requirement ───────────────────────────────────
+
+    // [IMPL] χ₀ must be declared by M; zero is not evaluable.
+    #[test]
+    #[should_panic(expected = "χ₀ must be declared by M")]
+    fn chi_0_undeclared_zero_is_rejected() {
+        let rel = directed_chain(4);
+        let x = gradient_field(4);
+        let _ = operator_e_primary(&x, &rel, 0.2, 0.0);
+    }
+
+    // [IMPL] cc must be declared by M for every declared component pair.
+    #[test]
+    #[should_panic(expected = "cc must be declared by M")]
+    fn cc_missing_for_declared_pair_is_rejected() {
+        let rel = directed_chain(4);
+        let x = NodeField::new(vec![vec![1.0, 2.0, 4.0, 7.0], vec![0.5, 1.0, 1.5, 3.0]]);
+        let _ = operator_e(&x, &rel, &[(0, 1)], &[], 0.3, FIXTURE_CHI_0);
+    }
+
+    // [MATH] Unit invariance: expressing the same observation in a different
+    // unit (x and χ₀ rescaled together) rescales Σ by the same factor exactly.
+    // ρ is unchanged, so no unit choice enters the relational output.
+    #[test]
+    fn sigma_invariant_under_declared_unit_change() {
+        let rel = directed_chain(4);
+        let v = vec![1.0, 2.0, 4.0, 7.0];
+        let scale = 1000.0;
+        let x1 = NodeField::new(vec![v.clone()]);
+        let x2 = NodeField::new(vec![v.iter().map(|a| a * scale).collect()]);
+        let (_, s1) = operator_e_primary(&x1, &rel, 0.3, 1.0);
+        let (_, s2) = operator_e_primary(&x2, &rel, 0.3, 1.0 * scale);
+        for e in 0..rel.n_edges() {
+            let expected = s1.field[0][e] * scale;
+            assert!((s2.field[0][e] - expected).abs() <= 1e-9 * expected.abs().max(1.0),
+                "Σ must rescale exactly with a declared unit change at edge {e}");
+        }
     }
 }
