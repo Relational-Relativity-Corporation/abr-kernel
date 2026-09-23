@@ -13,4 +13,6 @@ name = "provenance_demo"
 path = "bin/provenance_demo.rs"
 
 [dependencies]
-nalgebra = "0.33"
+# No external dependencies. nalgebra removed — SVD and matrix machinery
+# were purged from the active kernel (operators.rs V7, purge second pass).
+# No replacement matrix dependency is introduced.

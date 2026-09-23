@@ -1,10 +1,10 @@
 # Observable Variable Sets by Region
 ## Pre-Topological, Pre-Coupling Declaration
 
-**Metatron Dynamics, Inc.** V7.1.
-Authority document: role_separation_and_operator_application_v7.md
-Operator grounding: operators_notation_and_constraint_v7.md
-Companion files: derived_invariants.rs V1, validation_record_v2.md
+**Metatron Dynamics, Inc.** V7.2.
+Authority document: role_separation_and_operator_application_v8.md
+Operator grounding: operators_notation_and_constraint_v10.md
+Companion files: derived_invariants.rs V4.2 (FROZEN), validation_record_v6.md
 Bounded over D. No claim beyond D.
 
 ---
@@ -685,8 +685,8 @@ only after the operators have established the relational field
 from the declared primitive variables.
 
 Canonical mathematical forms for all derived quantities are
-in `derived_invariants.rs V1`. Observational grounding for
-all confirmed values is in `validation_record_v2.md`.
+in `derived_invariants.rs V4.2 (FROZEN)`. Observational grounding for
+all confirmed values is in `validation_record_v6.md`.
 
 ---
 
@@ -706,7 +706,7 @@ absorber loci that becomes detectable at a declared
 measurement locus.
 
 **Empirical confirmation across 22 transitions, 21 orders
-of magnitude:** See validation_record_v2.md VR-ε-01.
+of magnitude:** See validation_record_v6.md VR-ε-01.
 Primary Region: 9 transitions (PDG 2024).
 Atomic Region: 13 transitions (NIST ASD v5.12).
 Form invariant across all declared regions. Zero violations.
@@ -842,7 +842,7 @@ The ordering is correct without exception across every declared
 region.
 
 Full 29-locus table with ι[v], τ[v], and log₁₀(Φ) values:
-see validation_record_v2.md VR-Φ-01.
+see validation_record_v6.md VR-Φ-01.
 
 **Region-specific stable thresholds:**
 
@@ -899,7 +899,7 @@ potentials. The declared edges between components contribute
 coherence that no individual component provides alone.
 
 **Confirmed across six accumulation cases, four scale
-transitions:** See validation_record_v2.md VR-ΦS-01.
+transitions:** See validation_record_v6.md VR-ΦS-01.
 
 Summary:
 
@@ -945,7 +945,7 @@ of declared edges at v, halved — a structural property of the
 declaration, readable after the operators act.
 
 **Confirmed 29 of 52 cases from NIST ASD v5.12 and PDG 2024.**
-Full confirmation table: see validation_record_v2.md VR-J-01.
+Full confirmation table: see validation_record_v6.md VR-J-01.
 Remaining 23 fine structure cases pending NIST ASD transcription.
 
 **Photon case:**
@@ -1022,7 +1022,7 @@ relational progression τ[v] (unified expression), B output
 vector direction θ[e], coherence potential Φ[v] = ι[v] · τ[v],
 collective coherence potential Φ[S] = ι[S] · τ[S], and R
 output multiplicity J[v]. Canonical mathematical forms in
-derived_invariants.rs V3.
+derived_invariants.rs V4.2 (FROZEN).
 
 **Framework and domain instantiation are separated.**
 Every future regional model instantiates the same template.
@@ -1109,7 +1109,7 @@ photon edge transitions spanning Lyman, Balmer, Na doublet, Ca II doublet,
 He I, Cs I, Rb I, Hg I series. ε[e] range: 2.221e−19 J to 2.091e−18 J.
 𝟙[e] = 1 at all 14 edges. Zero violations of declared admissibility
 conditions. No symmetric edge-image detected at any declared photon edge.
-Observable source: NIST ASD v5.12. See VR-γ-01, validation_record_v4.md.
+Observable source: NIST ASD v5.12. See VR-γ-01, validation_record_v6.md.
 
 **EF-15:** [Derived] τ[v] = ℏ/ε[e] confirmed at 12 declared photon edges
 (isolated-locus case, OC-13 resolved). τ[v] range: 5.04e−17 s to
@@ -1128,7 +1128,7 @@ locus. ι[photon] = 0 by declaration. The photon edge carries ε[e] through
 the hc/λ M mapping; the form E = ι · κ has no foothold at the photon locus.
 Photon edge data is therefore a clean Atomic Region observable path that
 does not touch the c²/κ[Primary] admissibility question (Verifier note,
-Bruce Stephenson, session July 2026). See VR-γ-01, validation_record_v4.md.
+Bruce Stephenson, session July 2026). See VR-γ-01, validation_record_v6.md.
 
 ---
 
@@ -1214,7 +1214,7 @@ when they pass the same provenance test.
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. V7 (photon edge addition).*
+*Metatron Dynamics, Inc. V7.2.*
 *Authority: role_separation_and_operator_application_v7.md*
 
 ---
@@ -1290,7 +1290,7 @@ Open conditions register updated: OC-12, OC-13, OC-θ-1,
 OC-θ-2 closed; OC-CA-1 through OC-CA-5, OC-Φ-7, OC-Φ-8,
 OC-R-1, OC-22 added. Companion files declared in header.
 
-**V7 (photon edge addition):** EF-14 through EF-17 added. Atomic Region Layer 3 outputs extended: photon edge ε[e] (14 transitions, NIST ASD v5.12), τ[v] = ℏ/ε[e] (12 edges), N[v] at H n=3 (4.58×10⁶, log₁₀=6.66), 𝟙[e]=1 at all edges confirmed. M mapping hc/λ declared. ι[photon]=0 declared. κ[Primary] non-applicability to photon locus stated (EF-17). OC-γ-1 and OC-γ-2 added to open conditions register. Part 3 Layer 3 reference updated: derived_invariants.rs V2 → V3. Verifier language discipline: "relational field cycles" rejected; replaced with "declared relational intervals over the measured stability interval" (Verifier, session July 2026). Companion file: validation_record_v4.md.
+**V7 (photon edge addition):** EF-14 through EF-17 added. Atomic Region Layer 3 outputs extended: photon edge ε[e] (14 transitions, NIST ASD v5.12), τ[v] = ℏ/ε[e] (12 edges), N[v] at H n=3 (4.58×10⁶, log₁₀=6.66), 𝟙[e]=1 at all edges confirmed. M mapping hc/λ declared. ι[photon]=0 declared. κ[Primary] non-applicability to photon locus stated (EF-17). OC-γ-1 and OC-γ-2 added to open conditions register. Part 3 Layer 3 reference updated: derived_invariants.rs V2 → V3. Verifier language discipline: "relational field cycles" rejected; replaced with "declared relational intervals over the measured stability interval" (Verifier, session July 2026). Companion file: validation_record_v6.md.
 
 **V7 → V7.1 changes:** Primary Region section: transitional note
 added stating why the Primary Region variable set differs from the
@@ -1308,3 +1308,5 @@ Layer 2 edge variables). The division is readability only — both
 groups have the same standing; no principle renumbered, no content
 changed. Header version corrected from V6 to V7 to match the
 document's own closing attribution.
+
+**V7.1 → V7.2:** Companion file header corrected — derived_invariants.rs V1 → V4.2 (FROZEN); validation_record_v2.md → validation_record_v6.md. Operator grounding and authority document references updated to V10 and V8.1 respectively. All body cross-references to validation_record_v2.md updated to validation_record_v6.md; validation_record_v4.md references updated to validation_record_v6.md. Part 3 Layer 3 canonical expression reference updated: derived_invariants.rs V3 → V4.2 (FROZEN). No mathematical content changed. Version updated to V7.2.

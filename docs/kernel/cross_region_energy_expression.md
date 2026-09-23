@@ -1,9 +1,9 @@
 # Cross-Region Energy Expression
 ## E[v] · Φ_relational[v] = ι[v] · ℏ
 
-**Metatron Dynamics, Inc.** V4.
+**Metatron Dynamics, Inc.** V4.1.
 Bounded over D. No claim beyond D.
-Companion files: derived_invariants.rs V4, validation_record_v5.md,
+Companion files: derived_invariants.rs V4.2 (FROZEN), validation_record_v6.md,
 observable_variable_sets_v7.md, session_findings_primary_region_v1.md
 
 ---
@@ -351,7 +351,7 @@ formally declared in this context. κ[Atomic] remains open program (OC-E-2).
 
 ## Relational evolution rate and κ[region]
 
-The Relational Evolution Invariant (I-RE, `derived_invariants.rs V4`) states
+The Relational Evolution Invariant (I-RE, `derived_invariants.rs V4.2 (FROZEN)`) states
 that relational evolution rate is monotonically decreasing from the Primary
 Region outward — τ[v] is smallest at the Primary Region and grows at every
 larger declared region.
@@ -435,7 +435,7 @@ Confirmed across 11 Primary and Atomic Region loci.
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. V4.*
+*Metatron Dynamics, Inc. V4.1.*
 
 ---
 
@@ -481,6 +481,8 @@ added — published measurement values are declared observational
 references through M, not theoretical imports; the theoretical
 apparatus used by PDG to produce measured values is part of M
 as the declared measurement mapping.
+
+**V4 → V4.1:** Companion file references updated — derived_invariants.rs V4 → V4.2 (FROZEN); validation_record_v5.md → validation_record_v6.md. I-RE cross-reference in body updated to V4.2 (FROZEN). No mathematical content changed. Version updated to V4.1.
 
 **V3 → V4:** Relational evolution rate section added — I-RE cross-reference;
 consequence for κ[region] monotonic decrease stated; 78-decade Φ[v] span

@@ -1,7 +1,7 @@
-# Validation Record — V5
+# Validation Record — V6
 ## Observational Grounding for Derived Invariants
 
-**Metatron Dynamics, Inc.** V5.
+**Metatron Dynamics, Inc.** V6.
 Bounded over D. No claim beyond D.
 Sources: PDG 2024 (Navas et al., Phys. Rev. D 110, 030001)
          NIST ASD v5.12 (Kramida et al., 2024)
@@ -11,7 +11,7 @@ Sources: PDG 2024 (Navas et al., Phys. Rev. D 110, 030001)
 
 ## Purpose and Scope
 
-This document is the observational validation record for `derived_invariants.rs V4`.
+This document is the observational validation record for `derived_invariants.rs V4.2 (FROZEN)`.
 It is a companion to the mathematical file, not a replacement for it.
 
 The mathematical file states what the operators produce and what form each
@@ -306,38 +306,30 @@ edges, Primary and Atomic regions).
 
 ## VR-S-01 — Superposition Invariant (I-S)
 
-**Quantity:** rank(Im Δ) > 1 is the admissible statement of superposition
-at the Primary Region (ρ_P ≪ 1, B not active).
+**SUSPENDED — depends on rank(Im Δ) and ρ_P, both pending Origin redeclaration.**
 
-**Observable provenance:** The superposition condition is not directly
-observable. What is observable through M are its consequences — the
-statistical distribution of outcomes when B activates and the field
-resolves. The act of measurement is the activation of B.
+The previous declared quantity was: rank(Im Δ) > 1 as the admissible statement of superposition at the Primary Region (ρ_P ≪ 1, B not active). Both rank(Im Δ) and ρ_P are suspended in `operators.rs` V7 (purge) and `derived_invariants.rs V4.2 (FROZEN)`.
 
-**Confirmed consequences:**
+**Observable record — PRESERVED:**
+The observations cited in this entry are not suspended. The mathematical interpretation via rank(Im Δ) is what is suspended.
 
 | Observable | System | Result | Source |
 |---|---|---|---|
-| Interference pattern | Double-slit (electrons, photons) | C projection of rank(Im Δ)=2 field onto position axis | Published measurement record |
-| Measurement outcome distribution | Atomic state preparation | Statistical distribution consistent with prior rank(Im Δ) > 1 | Published measurement record |
+| Interference pattern | Double-slit (electrons, photons) | Consistent with prior unresolved directed contrast across multiple declared edges | Published measurement record |
+| Measurement outcome distribution | Atomic state preparation | Statistical distribution consistent with prior unresolved directed contrast | Published measurement record |
 
-No observation directly observes the simultaneous multi-edge state.
-Each observation is a post-resolution consequence of B activation.
+No observation directly observes the simultaneous multi-edge state. Each observation is a post-resolution consequence of B activation.
 
-**Scale and domain invariance:** rank(Im Δ) > 1 observable at any
-declared scale where B has not activated. Every observed self-organizing
-system produces data distributions consistent with prior rank(Im Δ) > 1.
+**Suspended interpretation:**
+The attribution of the above observations to rank(Im Δ) > 1 and ρ_P is suspended. The attribution must not be cited as an established result until Origin redeclares the relational quantity intended to replace rank(Im Δ) in this role.
 
-**Framework-level necessity note:** The claim that rank(Im Δ) = 1
-throughout a declared history precludes self-organization is a
-framework-level observation — not yet formally derived from the kernel
-(OC-S-3).
+**Unresolved Origin question:** What observable relational condition was rank(Im Δ) > 1 originally intended to distinguish?
 
-**Active open conditions:** OC-S-1, OC-S-2, OC-S-3
+**Framework-level necessity note:** The claim that rank(Im Δ) = 1 throughout a declared history precludes self-organization is suspended with the quantity it depends on. The observational pattern (no self-organizing system is consistent with a single resolved directed contrast from initialization) is preserved as an observation.
 
-**Support classification:** Derived (from rank(Im Δ), ρ_P, B activation).
-Observed (consequences only — interference patterns and outcome
-distributions, Primary and Atomic regions).
+**Active open conditions:** OC-S-1, OC-S-2, OC-S-3 — all reopened and resynchronized. See `derived_invariants.rs V4.2 (FROZEN)` for full suspension account and reopened condition statements.
+
+**Support classification:** SUSPENDED (previously: Derived from rank(Im Δ), ρ_P, B activation; Observed for consequences).
 
 ---
 
@@ -472,9 +464,9 @@ regions, 78-decade confirmation, VR-Φ-01).
 | OC-T-1 | Tunneling floor magnitude — formal expression not yet derived | Open | VR-T-01 |
 | OC-T-2 | Tunneling at scale — confirm beyond Primary and Atomic regions | Open | VR-T-01 |
 | OC-T-3 | Tunneling necessity — absence precludes energy transfer (framework-level) | Open | VR-T-01 |
-| OC-S-1 | ρ_P threshold — transition threshold not yet derived as computable criterion | Open | VR-S-01 |
-| OC-S-2 | Superposition at scale — confirm beyond Primary Region | Open | VR-S-01 |
-| OC-S-3 | Superposition necessity — rank(Im Δ)=1 throughout precludes self-organization (framework-level) | Open | VR-S-01 |
+| OC-S-1 | ρ_P threshold — REOPENED: cannot pursue threshold derivation while ρ_P is suspended | Reopened | VR-S-01 |
+| OC-S-2 | Superposition at scale — REOPENED: cannot confirm rank(Im Δ) > 1 while rank is suspended | Reopened | VR-S-01 |
+| OC-S-3 | Superposition necessity — REOPENED: rank(Im Δ)=1 necessity claim suspended with rank | Reopened | VR-S-01 |
 | OC-E-1 | Entanglement preservation — derive 𝟙[e]=1 preserved under operator evolution | Open | VR-E-01 |
 | OC-E-2 | Decoherence rate — derive rate at which 𝟙[e]→0 | Open | VR-E-01 |
 | OC-E-3 | Entanglement necessity — 𝟙[e]=0 everywhere precludes collective organization (framework-level) | Open | VR-E-01 |
@@ -496,7 +488,7 @@ regions, 78-decade confirmation, VR-Φ-01).
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. V5.*
+*Metatron Dynamics, Inc. V6.*
 
 ---
 
@@ -527,3 +519,10 @@ Primary Region confirmed as fastest-evolving declared region; 78-decade Φ[v]
 span cited as observable expression. Twelve new open conditions added:
 OC-T-1 through OC-T-3, OC-S-1 through OC-S-3, OC-E-1 through OC-E-3,
 OC-RE-1 through OC-RE-3. Companion file updated: derived_invariants.rs V3 → V4.
+
+**V5 → V6:** VR-S-01 suspended — rank(Im Δ) and ρ_P suspended in
+`operators.rs` V7 (purge) and `derived_invariants.rs V4.2 (FROZEN)`.
+Observable record preserved; mathematical interpretation suspended;
+OC-S-1, OC-S-2, OC-S-3 reopened. Purpose section and version history
+companion file reference updated to `derived_invariants.rs V4.2 (FROZEN)`.
+Version updated to V6.

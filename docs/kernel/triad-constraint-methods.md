@@ -1,6 +1,6 @@
 # Triad Constraint Methods
 
-**Metatron Dynamics, Inc.**
+**Metatron Dynamics, Inc.** V1.
 Verification methods for high-velocity artifact production.
 
 Derived from a verification session of 2026-07-27 in which six findings were
@@ -497,5 +497,9 @@ close enough to be dangerous.
 
 ---
 
-**Metatron Dynamics, Inc.**
+**Metatron Dynamics, Inc.** V1.
 *Bounded over D. No claim beyond D.*
+
+---
+
+**V1:** Initial declaration. Seven verification methods (CP, CS, DI, CA, IR, AG, CR) stated with motivating errors. Two Origin obligations (O1, O2) stated. Publication gate declared. Methodology validation status explicitly stated as proposed/unvalidated (n=1 for each method). Version identifier added 2026-09-22 — document was previously undated and unversioned.
