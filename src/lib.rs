@@ -1,4 +1,4 @@
-// lib.rs — Metatron Dynamics, Inc.
+// lib.rs — Metatron Dynamics, Inc. Kernel V8.
 // Crate root for the ABR relational kernel.
 // Bounded over D. No claim beyond D.
 //
@@ -20,6 +20,25 @@
 //   only and holds no parameter values. ρ_base, χ₀, and cc (one per declared
 //   component pair) are supplied by M for each analysis, with no defaults.
 //   See operators.rs, "M-declared operator parameters".
+
+// Observables, M, and D (Kernel V8, Origin declaration, 2026-09-26):
+//   O → M → D. M : O → D is declared by Origin before any operator acts.
+//   A value in D is the numerical projection of an observable through M.
+//   Relations, variables, and topology are declared through M from
+//   observed distinctions.
+//   Operators act only on declared numerical projections in D and return
+//   their results unchanged. Results are compared with the observables
+//   from which the declaration was constructed. Where correspondence is not
+//   established, the declaration may be varied by Origin and evaluated
+//   again. The kernel does not vary the declaration.
+//   The kernel makes no declaration about what exists or does not exist.
+//   Where information required by an operator has not been declared
+//   through M for the calculation, that operator is not evaluated. No
+//   substitute value or classification is introduced. A 0.0 produced by
+//   an operator over declared information is a calculated result and is
+//   returned as such.
+//   No numerical result is itself an observable. D holds projections
+//   admitted through M. Bounded over D. No claim beyond D.
 
 pub mod operators;
 pub mod derived_invariants;

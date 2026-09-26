@@ -1,4 +1,4 @@
-// provenance_demo.rs — Metatron Dynamics, Inc.
+// provenance_demo.rs — Metatron Dynamics, Inc. Kernel V8.
 //
 // Minimal public demonstration of Observable Provenance and Reverse
 // Traceability (see observable_provenance_and_reverse_traceability.md).
@@ -9,19 +9,29 @@
 // documented in the comments above epsilon_photon_edge() and
 // n_relational_cycles() in derived_invariants.rs — and demonstrates
 // the one thing that was not previously executable: given only the
-// result, reconstruct which observable and which operator produced
-// it, and confirm the reconstruction independently.
+// record, reconstruct the result from its recorded input and identified
+// calculation.
 //
-// Before this file: the H-alpha case's provenance existed as a code
-// comment a human could read. A bare f64 returned from
-// epsilon_photon_edge() carried none of that history with it.
-// After this file: the value and its provenance are the same object,
-// and a stranger with nothing but the object can verify it without
-// reading any comment or trusting any document.
+// Before this file: the H-alpha case's input and source existed as a
+// code comment a human could read. A bare f64 returned from
+// epsilon_photon_edge() carried none of that with it.
+// After this file: given a ProvenanceRecord, the numerical result can be
+// reconstructed from its recorded input and identified calculation
+// without external session context. The record also carries the declared
+// source attribution required to trace that input back to its observable
+// record. Verification of the source attribution itself requires
+// comparison with that source.
+//
+// Kernel V8 (2026-09-26): built against metatron_kernel_v8. Wording
+// synchronized with the Kernel V8 O → M → D declaration and vocabulary, and
+// narrowed per Verifier disposition to what the code establishes:
+// reconstruction of a calculation from recorded provenance, distinct from
+// independent verification of the observable source. No computation,
+// input value, or test expectation changed.
 //
 // Bounded over D. No claim beyond D.
 
-use metatron_kernel_v7::derived_invariants::{epsilon_photon_edge, H_PLANCK, C_DECLARED};
+use metatron_kernel_v8::derived_invariants::{epsilon_photon_edge, H_PLANCK, C_DECLARED};
 
 /// A provenance-carrying wrapper around a single ε[e] computation.
 ///
@@ -35,23 +45,26 @@ pub struct ProvenanceRecord {
     /// The computed value. Never handed out without the fields below.
     pub value_joules: f64,
 
-    /// The declared observable this value was computed from — not a
-    /// description, the actual input value used.
+    /// The numerical input declared through M and used in this
+    /// calculation — the actual input value, not a description.
     pub declared_wavelength_m: f64,
 
-    /// Where the declared wavelength came from. A specific, checkable
-    /// source — not "measured" or "known," a named instrument record.
+    /// The declared source attribution for the input: the named record
+    /// the input is stated to come from. The record carries this
+    /// attribution; it does not verify it. Verifying the attribution
+    /// requires comparison with the named source.
     pub observable_source: &'static str,
 
     /// Which operator/function computed this value from the
-    /// declared observable. Named explicitly so the reverse check
+    /// declared input. Named explicitly so the reverse check
     /// knows what to re-run.
     pub operator: &'static str,
 }
 
 impl ProvenanceRecord {
-    /// Forward direction: declared observable -> operator -> value,
-    /// with the provenance attached at construction, not after.
+    /// Forward direction: declared input -> operator -> value, with the
+    /// recorded input, source attribution, and calculation attached at
+    /// construction, not after.
     pub fn compute_epsilon_photon_edge(
         lambda_m: f64,
         observable_source: &'static str,
@@ -65,21 +78,23 @@ impl ProvenanceRecord {
         }
     }
 
-    /// Reverse direction: given only this record, independently
-    /// recompute the value from its own recorded observable and
-    /// confirm agreement. This is reconstruction from recorded
+    /// Reverse direction: given only this record, recompute the value
+    /// from its own recorded input and check that the stored result
+    /// reconstructs. Does not verify the source attribution. This is reconstruction from recorded
     /// provenance, not mathematical inversion of the operator — see
     /// observable_provenance_and_reverse_traceability.md's explicit
     /// distinction between the two.
     pub fn verify_reverse_traceable(&self) -> Result<(), String> {
         let recomputed = epsilon_photon_edge(self.declared_wavelength_m);
         let diff = (recomputed - self.value_joules).abs();
+        // IMPLEMENTATION-ONLY NUMERICAL TOLERANCE (J): guards finite-precision
+        // arithmetic. Not a measurement-provenance threshold.
         if diff < 1e-30 {
             Ok(())
         } else {
             Err(format!(
-                "REVERSE CHECK FAILED — stored value {:.6e} J does not \
-                 reconstruct from its own recorded observable \
+                "REVERSE CHECK: stored result does not reconstruct from \
+                 recorded input — stored value {:.6e} J \
                  (wavelength {:.6e} m, source: {}); recomputed {:.6e} J, \
                  diff {:.6e}",
                 self.value_joules, self.declared_wavelength_m,
@@ -106,7 +121,7 @@ fn main() {
     );
 
     println!("Forward computation:");
-    println!("  Declared observable: lambda = {:.3e} m", record.declared_wavelength_m);
+    println!("  Declared input through M: lambda = {:.3e} m", record.declared_wavelength_m);
     println!("  Source: {}", record.observable_source);
     println!("  Operator: {}", record.operator);
     println!("  Result: epsilon[e] = {:.6e} J\n", record.value_joules);
@@ -116,10 +131,10 @@ fn main() {
     println!("  Computed vs. documented diff: {:.3e} J\n", doc_diff);
 
     println!("Reverse check — given ONLY the ProvenanceRecord, with no\n\
-              other context, reconstruct and confirm the value:");
+              other context, reconstruct the value from its recorded input:");
     match record.verify_reverse_traceable() {
         Ok(()) => println!("  REVERSE-TRACEABLE: value reconstructs exactly from its own \
-                             recorded observable and operator."),
+                             recorded input and operator."),
         Err(e) => println!("  {}", e),
     }
 
@@ -127,10 +142,11 @@ fn main() {
     println!("  Before: epsilon_photon_edge() returns a bare f64. Its provenance\n\
               \x20 (lambda = 656.279 nm, NIST ASD v5.12) existed only as a code\n\
               \x20 comment — readable by a person, invisible to a program.");
-    println!("  After: the value and its provenance are one object. A stranger\n\
-              \x20 holding only a ProvenanceRecord — no comment, no external\n\
-              \x20 document, no memory of this session — can independently\n\
-              \x20 confirm where the number came from and that it is correct.");
+    println!("  After: given only a ProvenanceRecord, with no external session\n\
+              \x20 context, the result reconstructs from its recorded input and\n\
+              \x20 identified calculation. The record also carries the declared\n\
+              \x20 source attribution for that input. Verifying the attribution\n\
+              \x20 itself requires comparison with the named source.");
 }
 
 #[cfg(test)]
@@ -149,7 +165,7 @@ mod tests {
     }
 
     #[test]
-    fn reverse_check_passes_for_honestly_recorded_provenance() {
+    fn reverse_check_passes_for_reconstructible_record() {
         let record = ProvenanceRecord::compute_epsilon_photon_edge(
             656.279e-9,
             "NIST ASD v5.12, H n=3->2 transition (Balmer-alpha / H-alpha)",
@@ -158,10 +174,11 @@ mod tests {
     }
 
     #[test]
-    fn reverse_check_fails_if_stored_value_and_observable_disagree() {
-        // Tampered record: value doesn't match what its own recorded
-        // wavelength would produce. This is the case the reverse check
-        // exists to catch — a value whose stored provenance is false.
+    fn reverse_check_errs_when_value_does_not_reconstruct() {
+        // Altered record: the value does not match what its own recorded
+        // wavelength produces. This is the case the reverse check exists
+        // to report — a value that does not reconstruct from its recorded
+        // provenance.
         let mut record = ProvenanceRecord::compute_epsilon_photon_edge(
             656.279e-9,
             "NIST ASD v5.12, H n=3->2 transition (Balmer-alpha / H-alpha)",

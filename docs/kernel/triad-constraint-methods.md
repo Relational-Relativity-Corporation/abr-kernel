@@ -1,6 +1,6 @@
 # Triad Constraint Methods
 
-**Metatron Dynamics, Inc.** V1.
+**Metatron Dynamics, Inc.** Kernel V8.
 Verification methods for high-velocity artifact production.
 
 Derived from a verification session of 2026-07-27 in which six findings were
@@ -17,7 +17,7 @@ and the interval between draft and publication are latency-tolerant checks:
 they work because producing the artifact takes months, leaving time for the
 check to engage.
 
-At hours-per-artifact, those checks are not slow — they are absent. The
+At hours-per-artifact, those checks are not slow — they are not performed. The
 artifact is complete and published before any of them could act.
 
 Three consequences follow, and the methods below are shaped by them.
@@ -173,7 +173,7 @@ not discharge this obligation by reading a Generator's synopsis of a Verifier's
 findings, or a Verifier's characterization of a Generator's output. Summaries
 are lossy by construction — that is what a projection is, and this document's
 own Claim Provenance rule applies here. Reading a summary and acting as though
-the pass was read is a provenance failure at the level of the process.
+the pass was read leaves provenance not observed or incomplete at the level of the process.
 
 **Commentary and code are one artifact.** Reading the prose without the
 implementation, or the implementation without the prose, defeats Method DI
@@ -209,8 +209,8 @@ not to read less of each.
 statement about a system's behaviour must trace to a measurement of that
 system, through a declared M, in the same way a quantity must.
 
-A claim without a measurement behind it is a provenance failure regardless of
-whether it is true.
+A claim without a measurement behind it has provenance not observed or
+incomplete, regardless of whether it corresponds to the system.
 
 **Caught in source session.** "These distinctions are not visible in profiler
 output," published beneath a table of results computed entirely on synthetic
@@ -265,8 +265,9 @@ holds is worth more than a broad one that does not.
 ## Method 3 — Declaration–Implementation Correspondence (DI)
 
 **Rule.** A docstring is a declaration. Where implementation and declaration
-disagree, the artifact has an undeclared modelling decision, and that is a
-provenance failure independent of whether the code is correct.
+disagree, the artifact has an undeclared modelling decision, and its
+provenance is not observed or incomplete, independent of whether the code is
+correct.
 
 **Caught in source session.** ρ documented as a per-node quantity, implemented
 as one value per edge taken from the source node only. The code was
@@ -318,7 +319,9 @@ and ≈ 1 at ABR activation. On a live run it returned 2.667 — the numerator
 counts nonzero entries across all edges while the denominator counts only edges
 with successors, so the ratio is not bounded by 1 at all. Present in the code
 for as long as the code existed. Never surfaced, because nothing declared what
-the value was supposed to do.
+the value was supposed to do. (ρ_P was retired on 2026-09-23, replaced by the
+structural full-operator admissibility condition; the instance is kept as this
+method's motivating error.)
 
 **Application.** Each invariant carries `expected_range` in its declaration.
 A test asserts it. Out-of-range halts and reports; it does not warn and
@@ -497,9 +500,13 @@ close enough to be dangerous.
 
 ---
 
-**Metatron Dynamics, Inc.** V1.
+**Metatron Dynamics, Inc.** Kernel V8.
 *Bounded over D. No claim beyond D.*
 
 ---
+
+**V1 → Kernel V8 changes (2026-09-26):** "provenance failure" restated as "provenance not observed or incomplete" (Kernel V8 vocabulary); "regardless of whether it is true" restated as "regardless of whether it corresponds to the system" (Kernel V8 correspondence language); the IR motivating instance annotated to record that ρ_P was retired on 2026-09-23; "absent" checks restated as "not performed". Other uses of "failure" describe errors in artifacts and methods, not operator results, and are unchanged. The seven methods, both Origin obligations, and the publication gate are unchanged; `docs/process/repository_protocol_v1.md` cites the seven methods here. Kernel release numbering (Origin declaration): this document's own numbering ends at V1.
+
+**Historical document-local revision history — predates unified Kernel V8 release numbering.** The entry below records this document's own revision; its version number is document-local, not a kernel release version.
 
 **V1:** Initial declaration. Seven verification methods (CP, CS, DI, CA, IR, AG, CR) stated with motivating errors. Two Origin obligations (O1, O2) stated. Publication gate declared. Methodology validation status explicitly stated as proposed/unvalidated (n=1 for each method). Version identifier added 2026-09-22 — document was previously undated and unversioned.

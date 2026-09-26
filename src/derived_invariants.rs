@@ -1,11 +1,11 @@
-// derived_invariants.rs — Metatron Dynamics, Inc. V4.3.1.
-// Derived Invariants: canonical mathematical expressions from the V7 kernel.
+// derived_invariants.rs — Metatron Dynamics, Inc. Kernel V8.
+// Derived Invariants: canonical mathematical expressions from Kernel V8.
 //
-// Grounding documents (V7):
-//   operators.rs (V7.1)
-//   observable_variable_sets_v7.md
-//   abr_operators_plain_v7.md
-//   role_separation_and_operator_application_v7.md
+// Grounding documents (Kernel V8):
+//   operators.rs
+//   docs/kernel/observable_variable_sets.md
+//   docs/kernel/abr_operators_plain.md
+//   docs/kernel/role_separation_and_operator_application.md
 //
 // ── What This File Contains ───────────────────────────────────────────────
 //
@@ -125,6 +125,12 @@
 // relational structure. Change the declaration and the values change.
 // The forms are invariant. The values are not.
 //
+// Kernel V8: Layer 3 quantities are calculated results.
+// A Layer 3 result is compared with observables through M. Its numerical
+// existence alone does not establish correspondence. "Derived" states how
+// a result was obtained from the operators; it does not make the result
+// an observable.
+//
 // ── Separation from operators.rs ──────────────────────────────────────────
 //
 // operators.rs: what acts.
@@ -167,6 +173,28 @@
 //      Epistemic status stated inline per invariant.
 //      (This entry was absent from the version history until V4.1; the file
 //      carried a V4 footer with no V4 record. Reconstructed from content.)
+//
+// Kernel V8 (drafted as V4.4) — Wording synchronized with operators.rs
+//   (Origin declaration,
+//   2026-09-26). No formula, invariant, function signature, or test
+//   expectation changed. All tests pass unchanged. Layer 3 statement added
+//   to Admissibility. "numerical zero threshold" relabeled
+//   IMPLEMENTATION-ONLY NUMERICAL TOLERANCE in detection_indicator and
+//   decoherence_condition. Photon detection wording and I-S "directly
+//   observable" wording revised to separate observation through M from
+//   calculated result.
+//   Verifier findings (V4.3.2 conditional pass) applied: ι[photon] = 0
+//   statements in the photon edge doc and in photon_edge_kappa_non_applicable
+//   marked pending A-11.
+//   Held pending audit (no change): 𝟙[e] interpretation; ε[e] (downstream
+//   of 𝟙[e]); ι[photon] = 0 (audit A-11); are_proportional (edge-order
+//   dependence when a Δ vector is 0.0 in every component; documentation
+//   states Δ[e] = k·Δ[f], implementation computes k = vf/ve).
+//   Not applied (Origin wording decision): J[v] "what M observes when it
+//   measures R output multiplicity".
+//   Kernel release numbering (Origin declaration): this file carries the
+//   kernel release number, Kernel V8; its prior numbering ends at V4.3.1.
+//   Earlier version-history text is unchanged.
 //
 // V4.3.1 — Grounding reference updated to operators.rs V7.1 (Origin
 //   declaration, 2026-09-23: arbitrary values removed from operator bodies;
@@ -313,7 +341,7 @@
 //      stated in prose.
 //
 // Bounded over D. No claim beyond D.
-// Metatron Dynamics, Inc. V4.3.1.
+// Metatron Dynamics, Inc. Kernel V8.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── CONSTANTS AND PHYSICAL REFERENCES ─────────────────────────────────────
@@ -401,6 +429,8 @@ pub const C_DECLARED: f64 = 2.997_924_58e8;
 // Declared projection at C:
 //   Preserves: magnitude of directed inertia difference, gated by activity.
 //   Discards:  direction of difference (absolute value taken).
+//
+// Kernel V8 HOLD: depends on the 𝟙[e] audit below. Not changed.
 
 /// Compute ε[e] = |Δ(ι)[e]| · 𝟙[e] for a single declared edge.
 ///
@@ -431,12 +461,18 @@ pub fn epsilon_e(delta_iota_e: f64, indicator: f64) -> f64 {
 // It is read from the R operator output after the kernel has acted.
 // Spectroscopic selection rules fall out of this expression — no
 // additional declaration is required.
+//
+// Kernel V8 AUDIT PENDING: determine whether 0.0 here always means an
+// evaluated R output whose antisymmetric term is 0.0, or is ever used
+// where no relation was declared through M. The audit
+// follows Origin determination of empty-adjacency semantics in Σ and R
+// (operators.rs Kernel V8, audit A-3). No revision until the audit is complete.
 
 /// Compute 𝟙[e] from the antisymmetric term of R operator output.
 ///
 /// # Arguments
 /// * `r_antisymmetric_e` — the antisymmetric term of R(A(x)) at edge e.
-/// * `tol` — numerical zero threshold
+/// * `tol` — IMPLEMENTATION-ONLY NUMERICAL TOLERANCE for the zero comparison
 ///
 /// # Returns
 /// 1.0 if antisymmetric term is non-zero, 0.0 otherwise.
@@ -454,9 +490,13 @@ pub fn detection_indicator(r_antisymmetric_e: f64, tol: f64) -> f64 {
 //
 // ι[photon] = 0 — the photon locus has no inertial response through M.
 // The form E[v] = ι[v] · κ[region] does not apply here.
+// Kernel V8 HOLD (audit A-11): whether ι[photon] is a projected value of 0.0
+// or is not declared through M is to be determined from the measurement
+// provenance that established it. Not changed.
 //
-// 𝟙[e] = 1 at all declared photon edges — photon detection confirms
-// R(A(x))[e]_antisymmetric ≠ 0 (OC-12 resolved).
+// 𝟙[e] = 1 at all declared photon edges. Photon detection is the
+// observation through M; R(A(x))[e]_antisymmetric ≠ 0 is the calculated
+// result compared with it (OC-12 resolved).
 //
 // Edge direction: declared from each observation through M.
 // The emission observable (spectrometer-reported wavelength) establishes
@@ -493,7 +533,8 @@ pub fn detection_indicator(r_antisymmetric_e: f64, tol: f64) -> f64 {
 /// # Declared admissibility
 /// λ must be traceable to an instrument report through M (spectrometer).
 /// The formula hc/λ is part of M. No additional theoretical assumptions.
-/// ι[photon] = 0; this expression is an edge quantity, not ι[v] · κ[region].
+/// This expression is an edge quantity, not ι[v] · κ[region].
+/// ι[photon] = 0 is pending audit A-11 (see HOLD above); not established here.
 pub fn epsilon_photon_edge(lambda_m: f64) -> f64 {
     debug_assert!(lambda_m > 0.0, "λ must be positive — declared from instrument through M");
     H_PLANCK * C_DECLARED / lambda_m
@@ -997,6 +1038,11 @@ mod tests {
 
     #[test]
     fn photon_edge_kappa_non_applicable() {
+        // Kernel V8 PENDING A-11: this test supplies ι[photon] = 0.0, the
+        // interpretation held open in the photon edge section. Mathematics
+        // retained unchanged pending review of the measurement provenance
+        // that established ι[photon]. Passing this test does not establish
+        // ι[photon] = 0.
         // ι[photon] = 0. E[v] = ι[v] · κ[Primary] does not apply at photon locus.
         // ε[e] is real and nonzero; ι[photon] · κ[Primary] = 0. Structurally distinct.
         let iota_photon: f64 = 0.0;
@@ -1246,8 +1292,9 @@ pub fn tunneling_tau_bounded(tau_v: f64) -> bool {
 // of the same contrast. The declaration has more edges than the observable
 // supports in terms of relational diversity.
 //
-// This condition is directly observable from Δ(x) and M:
-//   Given the declared observable values at loci, compute Δ(x)[e] and
+// This condition is read from Δ(x) computed over declared projections
+// through M:
+//   Given the declared numerical projections at loci, compute Δ(x)[e] and
 //   Δ(x)[f] for each pair of declared edges. Check whether any pair is
 //   non-proportional. No matrix construction. No decomposition. No threshold.
 //   The check is O(n² · k) in edges and components.
@@ -1326,6 +1373,14 @@ pub fn tunneling_tau_bounded(tau_v: f64) -> bool {
 /// The check uses an IMPLEMENTATION-ONLY NUMERICAL TOLERANCE (tol) to
 /// guard finite-precision arithmetic. tol is not a measurement-provenance
 /// threshold and must not be reported as one.
+///
+/// # Kernel V8 HOLD
+/// `are_proportional` is edge-order dependent when one Δ vector is 0.0 in
+/// every component: the result depends on which edge is indexed first.
+/// Documentation states Δ[e] = k·Δ[f]; the implementation computes
+/// k = vf/ve. `tol` is used both as an absolute value in Δ units and as a
+/// relative ratio tolerance. A Δ result of 0.0 is not filtered here.
+/// No code change authorized.
 pub fn superposition_condition(delta_field: &[Vec<f64>], tol: f64) -> bool {
     let n_edges = if delta_field.is_empty() { return false; } else { delta_field[0].len() };
     let n_components = delta_field.len();
@@ -1388,7 +1443,7 @@ fn are_proportional(delta_field: &[Vec<f64>], e: usize, f: usize, n_components: 
 /// * `has_interior` — true when M has established at least one interior
 ///   locus t with independently declared incoming and continuing edges.
 ///   This is the full-operator admissibility condition from
-///   operators_notation_and_constraint.md V12.
+///   operators_notation_and_constraint.md (Kernel V8).
 ///
 /// # Returns
 /// true when the structure has moved beyond the superposition condition —
@@ -1475,7 +1530,7 @@ pub fn entanglement_condition(indicator: f64) -> bool {
 /// # Arguments
 /// * `indicator`  — 𝟙[e]: 1.0 if active, 0.0 if disrupted
 /// * `epsilon_e`  — relational energy contrast at edge e
-/// * `tol`        — numerical zero threshold
+/// * `tol`        — IMPLEMENTATION-ONLY NUMERICAL TOLERANCE for the zero comparison
 ///
 /// # Returns
 /// true if decoherence condition holds (𝟙[e] = 0 and ε[e] ≈ 0).

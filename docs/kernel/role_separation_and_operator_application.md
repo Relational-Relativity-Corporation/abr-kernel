@@ -1,6 +1,6 @@
 # Role Separation and Operator Application
 
-**Metatron Dynamics, Inc.** V8. Reference data. Bounded over D. No claim beyond D.
+**Metatron Dynamics, Inc.** Kernel V8. Reference data. Bounded over D. No claim beyond D.
 
 ## The primary observable and primary mathematical primitive
 
@@ -16,7 +16,7 @@ Roles are not named into existence. They are the functions performed, and they r
 
 **Constraints.**
 
-1. **No declaration, no evaluation** — there is nothing to evaluate before something is declared. More precisely: without a declared D and a declared M, there is no observable to trace quantities back to. Evaluation without this grounding is not constrained computation — it is computation about nothing in D.
+1. **No declaration, no evaluation** — there is nothing to evaluate before something is declared. More precisely: without a declared D and a declared M, there is no observable to trace quantities back to. Evaluation without this grounding is not constrained computation — it is computation about nothing in D. O → M → D: a value in D is the numerical projection of an observable through M. Where information required by an operator has not been declared through M for the calculation, that operator is not evaluated; no substitute value or classification is introduced (Kernel V8).
 2. **Function defines role, not the label** — a role exists when its function is performed, not when the word appears.
 3. **Description is not instantiation** — a document about a function is not the function.
 4. **Responsibility stays with what has agency** — it cannot migrate to operators, documents, frameworks, or models, none of which have any. In the current implementation domain, this is the human.
@@ -42,15 +42,15 @@ Origin is held by the human and is not assignable to a frame; the human cannot d
 
    **Relational evolution direction declaration (required before Phase 2).** Origin must declare the direction of relational evolution by identifying the observable property of the process that establishes which observation in the sequence is prior and which is current. This is a separate declaration from the sequence declaration. The direction of relational evolution is a property of the process — traceable to an observable through M — not a property of the index used to label the steps. Index order (1, 2, 3, ...) is not a direction declaration. Temporal order is a projection of relational evolution onto a one-dimensional axis; it is admissible as a direction declaration only when the connection between the clock's relational evolution and the process's relational evolution is itself declared through M. Admissible relational evolution direction declarations identify an observable property of the process: the direction of one declared process step from its prior state to its current state — for example, which phase of an oscillation is the beginning and which is the end; the direction of energy flow between declared states; the direction of conformational change from one declared configuration toward another; the direction of decay from one declared configuration toward its terminal state; the direction of growth from one declared scale toward the next. The process type does not matter. What matters is that the direction is traceable to the observable, not assigned by the analyst. If the direction of relational evolution cannot be declared from an observable property of the process, the ordering of the sequence is not admissible as a direction declaration, and Phase 2 is not admissible.
 
-2. **Generate.** The kernel applied depends on the declared relational structure. At the Primary Region — where persistence is not yet confirmed and B is not active — apply Δ → Σ → E_primary over the declared spatial relations. When persistence is confirmed (ρ_P → 1 — see open conditions OC-ρP-1 and OC-ρP-2 in `operators_notation_and_constraint.md`; the transition threshold is not yet derived as a computable criterion, and ρ_P is bounded above by n_components / propagation capacity, so a low-component declaration may be unable to reach activation regardless of the observable) — apply A → B → R → E over the declared relations: Phase 1 applies A → B → R over spatial relations to produce the spatial relational field; Phase 2 applies A → B → R over persistence relations — connecting the prior complete kernel output to the current one across one declared relational step — to produce the relational-evolution field. Both phases use the same operator formulas. The declared relational step is the system's own declared process step, not an externally imposed increment. Apply any projection as a declared one — state what it preserves and what it discards.
+2. **Generate.** The kernel applied depends on the declared relational structure. Where the full-operator admissibility condition is not established — at the Primary Region, where M can declare the relation but cannot independently resolve its constituent loci — B is not evaluated: apply Δ → Σ → E_primary over the declared spatial relations. Where the full-operator admissibility condition holds — M establishes at least one interior locus t with independently declared incoming and continuing edges, each with provenance through M (`operators_notation_and_constraint.md`; Origin declaration 2026-09-23, replacing the retired ρ_P criterion; the condition is structural, not a numerical threshold) — apply A → B → R → E over the declared relations: Phase 1 applies A → B → R over spatial relations to produce the spatial relational field; Phase 2 applies A → B → R over persistence relations — connecting the prior complete kernel output to the current one across one declared relational step — to produce the relational-evolution field. Both phases use the same operator formulas. The declared relational step is the system's own declared process step, not an externally imposed increment. Apply any projection as a declared one — state what it preserves and what it discards.
 
-   **Phase 2 generation requires a process, not a snapshot.** Phase 1 generation on a single M(o) is fully admissible. Phase 2 generation requires the declared sequence from Step 1. At each step k in the sequence: E_prior = the kernel output from step k−1; E_current = the kernel output from step k; A_persistence = E_current − E_prior. On the first step (k=1), E_prior = zero (cold start). The Generator does not treat cold start output as relational evolution — it treats it as the declared first step of a sequence whose evolution will be detected in subsequent steps. A sequence of model-generated values, a parameter sweep, or repeated evaluations of a static configuration may produce Phase 1 output at each point but does not produce admissible Phase 2 output across those points.
+   **Phase 2 generation requires a process, not a snapshot.** Phase 1 generation on a single M(o) is fully admissible. Phase 2 generation requires the declared sequence from Step 1. At each step k ≥ 2 in the sequence: E_prior = the kernel output from step k−1; E_current = the kernel output from step k; A_persistence = E_current − E_prior. At the first declared observation (k = 1), only the spatial kernel is evaluated; persistence is not evaluated and no prior value is supplied (Kernel V8). Persistence requires a declared pair of sequential observations. A sequence of model-generated values, a parameter sweep, or repeated evaluations of a static configuration may produce Phase 1 output at each point but does not produce admissible Phase 2 output across those points.
 
-3. **Verify.** One or more observers, operating from frames distinct from the Generator and from each other, detect divergence from the declared criteria and return located findings — not approval. Findings include: whether any declared relation lacks independent provenance for its declared direction; whether the declared edge-image is admissible (asymmetric); whether any failure mode is detected; whether the declared projection states what it preserves and discards. **When Phase 2 is invoked:** whether the sequential observation declaration was made in Step 1; whether E_prior at each step comes from a prior actual observation in the declared sequence; whether cold start output was treated as relational evolution (inadmissible) or as a declared first step (admissible); whether the declared relational step corresponds to the system's own declared process step or to an externally imposed increment (inadmissible). **Relational evolution direction:** whether the direction of relational evolution was declared from an observable property of the process; whether index order or temporal order was used as the direction declaration without a further declared connection to the process (inadmissible); whether the declared direction is traceable to an observable through M or is an assumption imported into the declaration.
+3. **Verify.** One or more observers, operating from frames distinct from the Generator and from each other, detect divergence from the declared criteria and return located findings — not approval. Findings include: whether any declared relation lacks independent provenance for its declared direction; whether the declared edge-image is admissible (asymmetric); whether relational isolation holds (every declared edge with empty adjacency); whether the declared projection states what it preserves and discards. **When Phase 2 is invoked:** whether the sequential observation declaration was made in Step 1; whether E_prior at each step comes from a prior actual observation in the declared sequence; whether persistence was evaluated at a step with no declared prior observation, or against a substitute prior such as a zero field (inadmissible); whether the declared relational step corresponds to the system's own declared process step or to an externally imposed increment (inadmissible). **Relational evolution direction:** whether the direction of relational evolution was declared from an observable property of the process; whether index order or temporal order was used as the direction declaration without a further declared connection to the process (inadmissible); whether the declared direction is traceable to an observable through M or is an assumption imported into the declaration.
 
-   **Legacy mathematical intrusion.** When the Generator is an LLM or operates through LLM-assisted reasoning, code, or analysis, the Verifier must explicitly check for quantities that entered the output from the Generator's training distribution rather than from Origin's declaration. These quantities are not signaled by a declaration error — they arrive as unremarked defaults, embedded in code, terminology, or analytic framing. Their presence is a provenance failure regardless of whether they compute correctly.
+   **Legacy mathematical intrusion.** When the Generator is an LLM or operates through LLM-assisted reasoning, code, or analysis, the Verifier must explicitly check for quantities that entered the output from the Generator's training distribution rather than from Origin's declaration. These quantities are not signaled by a declaration error — they arrive as unremarked defaults, embedded in code, terminology, or analytic framing. Their provenance is not observed or incomplete, regardless of whether they compute correctly.
 
-   The rule is total and applies to all mathematical quantities without exception: any mathematical quantity appearing in Generator output that was not declared by Origin as traceable to an observable through M before generation began is a provenance failure. The mathematical framework from which the quantity is drawn does not matter. Whether the quantity is conventional for the subject matter does not matter. Whether it computes correctly does not matter. The only question is provenance: was it declared by Origin through M?
+   The rule is total and applies to all mathematical quantities without exception: any mathematical quantity appearing in Generator output that was not declared by Origin as traceable to an observable through M before generation began has provenance not observed or incomplete. The mathematical framework from which the quantity is drawn does not matter. Whether the quantity is conventional for the subject matter does not matter. Whether it computes correctly does not matter. The only question is provenance: was it declared by Origin through M?
 
    The following are the most common intrusion classes when the Generator is an LLM, presented as examples of what undeclared imported mathematics looks like in practice — not as an exhaustive taxonomy. Any mathematical quantity not on this list is subject to the same rule.
 
@@ -72,15 +72,15 @@ Origin is held by the human and is not assignable to a frame; the human cannot d
 
 ## Verification and Validation Protocol
 
-Within the V7 framework these terms have distinct meanings.
+Within the kernel these terms have distinct meanings.
 
 **Verification** confirms that the framework has been constructed correctly. This includes declaration consistency, mathematical consistency, operator consistency, and implementation consistency.
 
-**Validation** confirms that the framework reproduces independent observable reality — that the declaration *corresponds* to the system it declares. This includes agreement with published measurements, reproducibility across independent datasets, and repeatability by independent investigators.
+**Validation** confirms that the framework reproduces independent observables — that the declaration *corresponds* to the system it declares. This includes agreement with published measurements, reproducibility across independent datasets, and repeatability by independent investigators.
 
 The two terms partition the error classes. Verification reaches **conformance** errors: the artifact violates a stated rule of the framework. Validation reaches **correspondence** errors: the declaration is well-formed, satisfies every rule, and does not describe the system. No internal check reaches the second class, and no accumulation of internal rules will. A PASS under the publication gate is a conformance statement and carries no correspondence claim; correspondence is established by observable validation and by domain knowledge held outside the declaration, or it is not established at all.
 
-Neither replaces the other. A mathematically correct derivation that fails observational validation requires revision. An observational regularity that lacks a completed derivation remains admissible as an observed finding but is not yet classified as derived.
+Neither replaces the other. A mathematically correct derivation that does not pass observational validation requires revision. An observational regularity that lacks a completed derivation remains admissible as an observed finding but is not yet classified as derived.
 
 ### Stage 1 — Declaration Verification
 
@@ -88,7 +88,7 @@ The Verifier confirms that the framework is mathematically admissible before any
 
 Checks include: domain D explicitly declared and bounded; observable mapping M declared; variables declared before use; relations declared before operator application; support classifications (Observed, Inferred, Derived) correctly assigned; no undeclared quantities introduced.
 
-Failure at this stage renders subsequent computation inadmissible.
+Where this stage does not pass, subsequent computation is inadmissible.
 
 ### Stage 2 — Mathematical Verification
 
@@ -106,7 +106,7 @@ For every claimed result the Verifier asks: which independent dataset is being c
 
 Typical validation targets include: PDG particle data; NIST Atomic Spectra Database; LHCb event data; IBM quantum calibration data; other independently curated observational datasets declared by Origin.
 
-The objective is agreement with independently observed reality — not agreement with the framework itself.
+The objective is agreement with independent observables — not agreement with the framework itself.
 
 ### Stage 4 — Repeatability
 
@@ -125,7 +125,7 @@ The Verifier does not verify elegance, novelty, or theoretical preference. The V
 3. The calculated results agree with independent observables
 4. The complete procedure is repeatable
 
-These four conditions define successful verification under V7.
+These four conditions define successful verification under the kernel.
 
 ### Verifier Criterion — Provenance Traceability (declared this session)
 
@@ -167,6 +167,10 @@ interpretation changes.
 *Bounded over D. No claim is made beyond D.*
 
 ---
+
+**V8 → Kernel V8 changes (2026-09-26):** *(a) Declarations of 2026-09-23 not previously written into this document (reconstructed from operators_notation_and_constraint.md and derived_invariants.rs):* Step 2 kernel selection restated as the full-operator admissibility condition; the ρ_P → 1 criterion, OC-ρP-1, OC-ρP-2, and the component ceiling removed as retired. *(b) Kernel V8 declarations:* O → M → D and the declared-information rule added to constraint 1; Phase 2 generation — persistence evaluated from the second declared observation, cold start removed; Step 3 verification targets restated accordingly (no persistence without a declared prior; no substitute prior); "failure mode" detection replaced by the relational-isolation check (the FailureMode set was retired in operators.rs V7); "provenance failure" replaced by "provenance not observed or incomplete"; "fails"/"failure" in the Verification and Validation Protocol restated as "does not pass"; "independent observable reality" restated as "independent observables". The Verification and Validation Protocol (Stages 1–4, Verifier Principle, Verifier Criterion) is otherwise unchanged and is the source cited by `docs/process/repository_protocol_v1.md`. Kernel release numbering (Origin declaration): this document's own numbering ends at V8.1.
+
+**Historical document-local revision history — predates unified Kernel V8 release numbering.** The entries below record this document's own revisions; their version numbers are document-local, not kernel release versions.
 
 **V5 → V6 changes:** Step 1 (Declare) extended: directional admissibility check added — every declared relation must have a single admissible direction; where both directions are declared, independent provenance per direction must be verified and the distinctness axiom applied. Step 2 (Generate) extended: primary kernel (Δ → Σ → E_primary) named as the correct kernel at the Primary Region; ABR kernel (A → B → R) named as the kernel when persistence is confirmed. Step 3 (Verify) extended: directional admissibility and declared edge-image asymmetry added as verification targets. Version V5 → V6.
 

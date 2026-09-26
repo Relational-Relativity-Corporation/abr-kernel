@@ -1,6 +1,6 @@
 # Kernel Self-Consistency Test
 
-**Metatron Dynamics, Inc.**
+**Metatron Dynamics, Inc.** Kernel V8.
 Reference procedure. Bounded over D. No claim beyond D.
 Declared by Origin, 2026-07-30.
 
@@ -25,7 +25,7 @@ application repository, and they require two different tests:
 
 Conflating these two questions is itself a source of false confidence:
 a repository can pass Part I perfectly and still be internally
-inconsistent, and a repository can fail Part I trivially (a missing
+inconsistent, and a repository can fall short of Part I for a trivial reason (a missing
 data file) while its actual math is sound. Both parts are required;
 neither substitutes for the other.
 
@@ -58,7 +58,7 @@ documented executable produces its documented output, using nothing
 but what `git clone` retrieved and nothing but what the README says to
 do.
 
-**Common failures this catches, based on gaps already found today:**
+**Common findings this catches, based on gaps already found today:**
 - A data file (e.g. `1MLC.pdb`) the code expects but the README never
   says to obtain, or that isn't actually committed to the repo
 - A `.gitignore` gap that either excludes something needed or fails to
@@ -69,9 +69,9 @@ do.
 - A dependency version not pinned, so a clean build pulls something
   different than what was tested against
 
-**On failure:** the fix is almost never the code. It's almost always
+**When Part I does not pass:** the correction is almost never the code. It's almost always
 the README, the `.gitignore`, or a missing committed file. Treat a
-Part I failure as a documentation/completeness finding, not a
+Part I finding as a documentation/completeness finding, not a
 correctness finding.
 
 ---
@@ -124,12 +124,12 @@ menu to select from.
    observable cited in `validation_record.md` actually appear in
    `observable_variable_sets.md`'s declared primitive set at the
    region in question? An observable used but never declared at that
-   region is an undeclared import — the exact failure mode CP-01's
+   region is an undeclared import — the exact pattern CP-01's
    resonance-theory justification was.
 
 4. **Language discipline → actual usage.** Do `operators.rs` and
    `derived_invariants.rs` avoid every term the notation declares
-   inadmissible (see `/areas/v7-framework.md`'s language-disciplines
+   inadmissible (see the language disciplines declared in the kernel documents and code headers
    list — "violation" → "asymmetry", "flavor" inadmissible, `c` not a
    named variable, etc.)? This is checkable by direct text search and
    should be, rather than assumed.
@@ -151,7 +151,7 @@ menu to select from.
 
 **Output:** follow `Verification_pass_protocol.md` Section 12 exactly
 — located findings, cleared findings, items not verifiable, evidence
-additionally required. This is not a pass/fail gate; it's the same
+additionally required. This is not a gate; it's the same
 disciplined findings-return process already used today.
 
 ---
@@ -181,3 +181,20 @@ being satisfied in practice, across the whole kernel rather than one
 document or one file at a time — consistent with
 `Verification_pass_protocol.md` Section 9's principle that verification
 of continuity, not isolated correctness, is the objective.
+
+---
+
+## Kernel V8 synchronization (2026-09-26)
+
+**Wording.** Finding-based wording replaces "failure" for Part I outcomes. The language-disciplines reference previously pointed to `/areas/v7-framework.md`, a path outside this repository; it now points to the kernel documents and code headers.
+
+**Additions to the required interface checks under Kernel V8:**
+
+- **Check 1 (notation → code) also covers the declared-information rule.** No operator is evaluated with a substitute value for an input not declared through M. For example, persistence is not evaluated against a zero prior at the first declared observation.
+- **Check 4 (language discipline) also covers the Kernel V8 vocabulary:**
+  - values in D are numerical projections through M, not observables;
+  - "not evaluated", not "absent", for operators and quantities;
+  - "provenance not observed or incomplete", not "provenance failure";
+  - DRIFT SIGNAL means legacy mathematics inserted into or before the operators, or otherwise undeclared.
+
+This document ran for the V7 → Kernel V8 transition, as its "when to run" section anticipates.

@@ -1,6 +1,6 @@
 # Language Discipline — Rust Mandate
 
-**Metatron Dynamics, Inc.**
+**Metatron Dynamics, Inc.** Kernel V8.
 Kernel doctrine. Bounded over D. No claim beyond D.
 Declared by Origin, 2026-07-30.
 
@@ -226,3 +226,11 @@ applied for the first time against a biological dataset rather than a
 physics one. This document does not introduce a new principle. It
 extends an existing one to cover implementation language as well as
 declared content.
+
+---
+
+## Kernel V8 synchronization (2026-09-26)
+
+**Scope of vocabulary.** "Failure" in this document refers to implementation-level errors in software: silent `NaN`s, unhandled parse errors, test-harness failures. Kernel V8's vocabulary for operator results does not apply to these; it governs how operator results and declarations are described. Neither this vocabulary nor the rule itself changed.
+
+**Kernel crate.** The kernel crate is `metatron_kernel_v8` from Kernel V8. It remains Rust only, with no external dependencies.

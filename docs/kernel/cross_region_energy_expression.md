@@ -1,10 +1,11 @@
 # Cross-Region Energy Expression
 ## E[v] · Φ_relational[v] = ι[v] · ℏ
 
-**Metatron Dynamics, Inc.** V4.1.
+**Metatron Dynamics, Inc.** Kernel V8.
 Bounded over D. No claim beyond D.
-Companion files: derived_invariants.rs V4.2 (FROZEN), validation_record_v6.md,
-observable_variable_sets_v7.md, session_findings_primary_region_v1.md
+Companion files: derived_invariants.rs, validation_record.md,
+observable_variable_sets.md (Kernel V8); session_findings_primary_region_v1.md
+(not held in this repository)
 
 ---
 
@@ -41,8 +42,8 @@ Bounded over D. No claim beyond D.
 
 ### Φ_stability[v] = ι[v] · τ_stability[v]
 
-τ_stability[v] is the directly observable persistence interval —
-the decay lifetime of the locus. Directly measurable through M.
+τ_stability[v] is the persistence interval taken from the measurement
+record through M — the measured decay lifetime of the locus.
 
 Φ_stability[v] measures how much relational structure a locus
 sustains over its lifetime. Confirmed across 29 declared loci
@@ -50,7 +51,7 @@ spanning 78 decades. Basis for the stable threshold, the locus
 ordering, and the coherence accumulation findings.
 
 Observable source: PDG 2024, NIST ASD v5.12.
-Support: Observed. Confirmed in validation_record_v2.md VR-Φ-01.
+Support: Observed. Confirmed in validation_record.md VR-Φ-01.
 
 ### Φ_relational[v] = ι[v] · τ_relational[v] = ι[v] · ℏ / E[v]
 
@@ -257,7 +258,7 @@ The published values enter D through M, not as direct readings.
 
 ## What energy is in the framework
 
-Energy is not a primitive. It is not directly observable through M.
+Energy is not a primitive. M does not report energy as such.
 What M reports is always one of:
 - A frequency at a detection locus → ε[e] through declared mapping
 - A mass deficit between declared loci → ε[e] binding energy
@@ -323,6 +324,16 @@ the measurement edge). The photon locus does not satisfy this condition.
 No inertial response of the photon is traceable through M. ι[photon] = 0
 by declaration.
 
+*Kernel V8 HOLD (audit A-11):* under the Kernel V8 declared-information
+rule, a quantity with no measurement traceable through M is not declared,
+and an operator requiring it is not evaluated; no substitute value is
+introduced. The provenance recorded here — no inertial response traceable
+through M, with 0 assigned by declaration — indicates that ι[photon] is not
+declared through M rather than measured as 0.0. The consequence stated
+below (E[v] = ι[v] · κ[region] does not apply at the photon locus) holds
+under either reading. The determination is pending Origin and Verifier
+disposition of A-11; the text is unchanged.
+
 Consequence: the form E[v] = ι[v] · κ[region] does not apply at the
 photon locus. κ[region] is not computable from photon edge data alone.
 The photon edge energy ε[e] = hc/λ enters D through the M mapping from
@@ -333,7 +344,7 @@ NIST ASD v5.12; it is an edge quantity, not a node quantity of the form
 
 Because ι[photon] = 0, photon edge data does not generate a κ[Atomic]
 candidate. The 14 confirmed Atomic Region photon edge transitions
-(VR-γ-01, validation_record_v4.md) extend the observable record at the
+(VR-γ-01, validation_record.md) extend the observable record at the
 Atomic Region without touching the κ[Primary] = c² admissibility question.
 ε[e], τ[v], and N[v] are all confirmed from photon edge data; their
 provenance is clean and independent of the κ · ι = E identity.
@@ -351,7 +362,7 @@ formally declared in this context. κ[Atomic] remains open program (OC-E-2).
 
 ## Relational evolution rate and κ[region]
 
-The Relational Evolution Invariant (I-RE, `derived_invariants.rs V4.2 (FROZEN)`) states
+The Relational Evolution Invariant (I-RE, `derived_invariants.rs`, Kernel V8) states
 that relational evolution rate is monotonically decreasing from the Primary
 Region outward — τ[v] is smallest at the Primary Region and grows at every
 larger declared region.
@@ -435,9 +446,13 @@ Confirmed across 11 Primary and Atomic Region loci.
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. V4.1.*
+*Metatron Dynamics, Inc. Kernel V8.*
 
 ---
+
+**V4.1 → Kernel V8 changes (2026-09-26):** Companion file references updated to the Kernel V8 documents (unversioned file names); session_findings_primary_region_v1.md noted as not held in this repository. The README previously listed this document as V4.2 for the same reference update; no V4.2 was written. τ_stability[v] described as taken from the measurement record through M rather than "directly observable"; "Energy ... is not directly observable through M" restated as "M does not report energy as such". A-11 hold note added at ι[photon] = 0, recording that the stated provenance (no inertial response traceable through M; 0 by declaration) bears on the A-11 determination. No mathematical content changed. Kernel release numbering (Origin declaration): this document's own numbering ends at V4.1.
+
+**Historical document-local revision history — predates unified Kernel V8 release numbering.** The entries below record this document's own revisions; their version numbers are document-local, not kernel release versions.
 
 **V2:** ι[v] replaces m[v] throughout. Rest mass declared
 inadmissible (SF-PR-16). ι[v] declared as relational inertia —

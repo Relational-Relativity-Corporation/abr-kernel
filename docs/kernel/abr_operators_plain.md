@@ -1,6 +1,6 @@
 # The Operators — Plain Language
 
-**Metatron Dynamics, Inc.** V8.2. Bounded over D. No claim beyond D.
+**Metatron Dynamics, Inc.** Kernel V8. Bounded over D. No claim beyond D.
 
 ---
 
@@ -40,7 +40,9 @@ Verification remains available to you directly.
 
 A domain must be declared before any operator acts.
 A measurement mapping M must be declared before any operator acts.
-The operators act on M(o) only — on what M produces from the observable, and nothing else.
+The operators act on M(o) only — on what M produces from the observable, and nothing else. What M produces is a number: the numerical projection of the observable into D. The number is not the observable itself.
+
+Where information an operator needs has not been declared through M, that operator is not evaluated. Nothing is substituted for the missing information — no stand-in value, and no classification.
 
 *Constraint: there is nothing to evaluate before something is declared.*
 
@@ -52,13 +54,11 @@ Phase 2 acts on the directed difference between two consecutive kernel outputs �
 
 A sequence of model-generated values is not a sequence of observations through M. It is a formal construction. It may be declared within M only when the model itself is declared as a transducer from prior observable inputs — not as a substitute for observation.
 
-On the first declared step, E_prior = zero is admissible. This is the cold start: no relational history has been declared. What Phase 2 produces on a cold start is the relational structure of the current observation against no prior history. This is not relational evolution. Treating it as such is inadmissible.
+Phase 2 needs two declared observations — a prior one and a current one. At the first declared observation there is no prior, so Phase 2 is not evaluated there. Only Phase 1 runs. Nothing is supplied in place of the prior. Phase 2 begins with the second declared observation, and from then on E_prior is always the kernel output of the preceding actual observation in the declared sequence.
 
-After the first step, E_prior must come from the preceding actual observation in the declared sequence.
+When the observable does not change between two declared steps — when M(oₖ) = M(oₖ₋₁) — A_persistence = zero. That zero is a calculated result from two declared observations: no relational evolution occurred across that step.
 
-When the observable does not change between two declared steps — when M(oₖ) = M(oₖ₋₁) — A_persistence = zero. This is the correct result. It states that no relational evolution occurred across that step. It is not a failure of the operators.
-
-*Constraint: Phase 2 requires a declared sequence of actual observations. Cold start is admissible on the first step only. Model-generated sequences are not observations through M.*
+*Constraint: Phase 2 requires a declared pair of sequential observations. At the first declared observation, only Phase 1 is evaluated. Model-generated sequences are not observations through M.*
 
 ---
 
@@ -129,53 +129,17 @@ Under the directional admissibility condition, every admissible declared structu
 
 ---
 
-## The three Primary Region quantities
+## When B is evaluated — the full-operator admissibility condition
 
-The primary kernel produces a field. Three quantities describe the shape of
-that field, and together they are how the framework decides whether the
-primary kernel is still the right kernel.
+The primary kernel (Δ, then Σ) and the full kernel (A, then B, then R) are the same operators. What decides which one applies is whether the declared structure has an interior.
 
-**How many independent directions the Δ output spans.** The directed
-differences across all declared edges may point in many different directions,
-or they may all lie along one. If they span more than one direction, the
-declared structure is carrying contrast on several relations at once,
-unresolved.
+An interior is a locus t that M has established with a declared relation coming in and a declared relation continuing out: s → t → u. Both relations must have their own observable provenance through M. At such a locus there is something for B to accumulate — an incoming directed difference with a declared continuation.
 
-**How many independent directions the Σ output spans.** The same question
-asked after the coupling step.
+Where M can declare the relations but cannot independently resolve their constituent loci, no interior is established. The primary kernel is the correct kernel. B is not evaluated.
 
-**How much of the declared structure has somewhere to continue to.** Not every
-declared edge has a successor. Some are terminal. This quantity counts the
-edges that do have somewhere to continue — the part of the structure through
-which accumulation could travel if accumulation were active.
+Where M establishes at least one interior locus, the full kernel A → B → R applies.
 
-The second quantity divided by the third is the ratio the framework watches.
-When it is far below one, the declared structure is at the Primary Region:
-contrast exists across relations, but not enough of it is spanning the parts of
-the structure that could carry accumulation. The primary kernel is the correct
-kernel and B is not invoked. As the ratio approaches one, the structure has
-begun to carry enough distinguishable relational contrast that accumulating
-along declared continuation would add something. That is the condition named
-elsewhere in these documents as persistence being confirmed, and it is what
-brings B into use.
-
-**Two things about this ratio are open, and both matter for how it is read.**
-
-The threshold itself has not been derived. There is no computed value at which
-the framework states that the transition has occurred; the ratio's behaviour is
-declared, its cut point is not.
-
-And the ratio has a ceiling that comes from the declaration rather than from
-the system. The number of independent directions the Σ output can span is
-limited by how many components the declared variable set carries. If a
-declaration has few components and many edges with successors, the ratio cannot
-approach one no matter what the observable does — the limit is a property of
-what was declared, not a finding about what was observed. A ratio far below one
-on a single-component declaration says nothing about the system. It says the
-declaration cannot express the quantity.
-
-The formal statement of all three quantities, the ratio, and both open
-conditions is in `operators_notation_and_constraint.md`.
+The condition is structural, not a number reached by a ratio. It replaces an earlier criterion (a ratio of rank-based quantities, ρ_P) that has been retired. The formal statement is in operators_notation_and_constraint.md.
 
 ---
 
@@ -187,9 +151,9 @@ In the spatial domain, a relation is a directed edge (s, t) whose existence is t
 
 In the relational-evolutionary domain (V6), a relation connects two complete kernel output states across one declared relational step. A takes the difference E_current[e] − E_prior[e] — the same directed-difference formula, applied to edge-valued loci rather than node-valued loci. The direction is fixed: E_current − E_prior. E_prior is the state before the declared relational step; E_current is the state after it. The reverse direction is not traceable to an observable through M.
 
-For A_persistence to carry admissible content beyond the first declared step, E_prior must be the kernel output produced from the preceding actual observation in the declared sequence {M(o₁), M(o₂), ...}. E_prior cannot be a zero field (except on the first step), a model-generated value, or a repeated snapshot of a static configuration and still produce admissible relational evolution output. On a cold start, A_persistence = E_current — the entire current kernel state is declared new. This is admissible as a declared first step. It does not constitute evidence of relational evolution.
+A_persistence is evaluated only over a declared pair: E_prior must be the kernel output produced from the preceding actual observation in the declared sequence {M(o₁), M(o₂), ...}. It cannot be a zero field, a model-generated value, or a repeated snapshot of a static configuration. At the first declared observation, A_persistence is not evaluated.
 
-*Constraint: no relation and no direction may be added that the declaration did not trace to an observable through M. This holds for both spatial and persistence loci. After the first declared step, E_prior must come from a prior actual observation in the declared sequence.*
+*Constraint: no relation and no direction may be added that the declaration did not trace to an observable through M. This holds for both spatial and persistence loci. E_prior must come from a prior actual observation in the declared sequence.*
 
 ---
 
@@ -204,7 +168,7 @@ B is one step of accumulation, not a sum along the whole downstream chain.
 A terminal edge accumulates nothing.
 No boundary is closed to supply continuation that was not declared.
 
-B is absent from the primary kernel — it is not an identity operator that happens to do nothing. It is simply not invoked. B activates when persistence is confirmed: when enough consistently non-zero relational contrast has been established across declared steps that accumulation along paths adds distinguishable structure.
+B is not evaluated in the primary kernel — it is not an identity operator that happens to do nothing. B is evaluated when the full-operator admissibility condition holds: M has established at least one interior locus with a declared incoming relation and a declared continuing relation.
 
 *Constraint: accumulation follows declared structure. It does not supply structure.*
 
@@ -214,7 +178,7 @@ B is absent from the primary kernel — it is not an identity operator that happ
 
 R couples declared relations through observed asymmetry.
 
-At each edge, R adds the difference between what continues forward and what arrives from behind, scaled by local contrast. Where declared relation families couple, the asymmetry of each contributes to the other according to the declared coupling.
+At each edge, R adds the difference between what continues forward and what arrives from behind, scaled by local contrast. Where declared relation families couple, the asymmetry of each contributes to the other according to the declared coupling — a value M declares for each coupled pair. The kernel supplies no coupling value of its own.
 
 Under the directional admissibility condition, every admissible declared structure is asymmetric — each declared relation has a single admissible direction, and the reverse requires independent provenance. Symmetry is therefore not a legitimate declared state within the admissibility conditions of this framework. Do not assume the two directions are equal: without independent provenance for each direction, only one direction is admissible.
 
@@ -226,8 +190,9 @@ Under the directional admissibility condition, every admissible declared structu
 
 ρ scales coupling according to local contrast.
 
-At each node, ρ is derived from the largest gradient present at that node in the operator's output.
+At each node, ρ is derived from the largest directed difference present at that node in the operator's output.
 ρ does not aggregate beyond the node.
+The two values that set the scale of ρ — its ceiling and its reference level — are declared by M for each analysis. The kernel supplies no value for either. If M has not declared them, ρ is not evaluated.
 
 *Constraint: coupling strength is derived locally. It is not assigned globally.*
 
@@ -257,15 +222,15 @@ Everything else requires declaration with preserved and discarded invariants sta
 
 ## What this produces
 
-**At the Primary Region** — where persistence is not yet confirmed and path accumulation has not been established — the primary kernel applies:
+**At the Primary Region** — where the full-operator admissibility condition is not established — the primary kernel applies:
 
 Δ, then Σ: the operators ask whether anything distinguishable exists, and whether what exists is asymmetrically organized in its immediate neighborhood. The result reflects the declared relational structure of the observable at its most minimal. No interior is assumed. No history is carried.
 
-**When persistence is confirmed** — the ABR kernel applies in two phases:
+**When the full-operator admissibility condition holds** — the ABR kernel applies in two phases:
 
 Phase 1 (spatial): A → B → R over declared spatial relations produces the spatial relational field. One declared observation M(o) is sufficient.
 
-Phase 2 (persistence): A → B → R over declared persistence relations — each connecting the prior complete kernel output to the current one across one relational step — produces the relational-evolution field over one declared relational step. This phase requires a declared sequence of actual observations. The relational step is the system's own declared process step, not an externally imposed increment. What the operators detect is how the relational field changes from one actual observation to the next — not the structure of a single frozen configuration, and not the output of a model used as a substitute for observation.
+Phase 2 (persistence): A → B → R over declared persistence relations — each connecting the prior complete kernel output to the current one across one relational step — produces the relational-evolution field over one declared relational step. This phase requires a declared sequence of actual observations and is evaluated from the second declared observation onward. The relational step is the system's own declared process step, not an externally imposed increment. What the operators detect is how the relational field changes from one actual observation to the next — not the structure of a single frozen configuration, and not the output of a model used as a substitute for observation.
 
 Both phases use the same operator formulas. What changes between phases is what the operators act over, not how they act. The direction of every relation — spatial or persistence — is determined by the observable and fixed by the declaration.
 
@@ -280,17 +245,17 @@ The same declaration on the same observable produces the same result.
 
 ## What the Primary Region produces — and why it matters at every scale
 
-At the Primary Region, three conditions hold simultaneously that are not confined to this region — they hold at every declared scale and domain. Their consequences are observable everywhere. The phenomena themselves are not directly observable — only their consequences are. This is not a limitation of measurement. It is a structural feature of the framework: the conditions that make observation possible are prior to observation and cannot themselves be directly observed.
+At the Primary Region, three conditions hold simultaneously that are not confined to this region — they hold at every declared scale and domain. How they appear in the observable record depends on scale. At the Primary Region, M reports their expression but cannot yet resolve their internal mechanism (expression-observed). At larger scales, the loci and relations involved can be independently declared through M (locus-resolved). "Not directly observable" is not used as a blanket description; the status is always stated for the scale in question.
 
-**Tunneling** is the condition that no energy transition edge has an infinite barrier. The quantum boundary component of the directed difference Δ is nonzero at every finite barrier edge. What this means in plain language: energy is never completely blocked. There is always a nonzero component of the directed difference at any declared transition edge. What we observe as energy transfer at any scale is the consequence of this — the classical component dominates at larger scales, but the tunneling component is structurally present. A system with no tunneling has no energy transfer. This is a framework-level observation, not yet formally derived from the kernel.
+**Tunneling** is the condition that at every declared transition edge where M establishes a relational energy contrast, that contrast is present: ε[e] > 0. In plain language: at any declared transition, the energy contrast across it is not zero. What the established literature calls tunneling is what M reports where this contrast is present but its mechanism is not yet resolvable at the available scale. At larger scales the same condition is locus-resolved. That the absence of this condition would preclude energy transfer is a framework-level observation, not yet formally derived from the kernel.
 
-**Superposition** — SUSPENDED pending Origin redeclaration. The previous plain language statement was: "Superposition is the condition that rank(Im Δ) > 1 — multiple edges carry nonzero directed contrast simultaneously before B activates." rank(Im Δ) and ρ_P are suspended in `operators.rs` V7 (purge) and `derived_invariants.rs V4.2 (FROZEN)`. The observable record stands: before any system resolves into a single outcome, it exhibits data distributions consistent with multiple simultaneous directed contrasts. The mathematical expression of that condition via rank(Im Δ) is suspended. B activation is what measurement is. The framework-level observation that every self-organizing, evolving system was in a state of unresolved directed contrast before it evolved is preserved as an observation. The formal expression awaits Origin redeclaration.
+**Superposition** is the condition in which several distinct directed contrasts are operative at once across declared relations, before B accumulates them. It is read from the Δ output as relational distinguishability: at least two declared relations carry directed differences that are not proportional to each other — they do not differ merely by a common scale factor. If every relation's directed difference is a scaled copy of every other, accumulation would only repeat one contrast, and no new relational structure could emerge. The condition is read from the calculated Δ output and compared with the observable record through M; it needs no matrix construction and no threshold. It resolves structurally when M establishes an interior locus, not at a numerical threshold. (This replaces an earlier rank-based statement that has been retired.)
 
 **Entanglement** is the condition that a declared edge with 𝟙[e]=1 between two loci establishes a relational constraint that the operators preserve regardless of spatial separation. In plain language: two loci that share an active declared edge are not independent. Spatial separation is a projection — the relational edge is prior to it. What we observe as correlation, structural coherence, and collective behavior are consequences of persisting active edges. Decoherence — the loss of correlation — is the admissible statement of what happens when the edge is removed: 𝟙[e]=0 and ε[e]=0. This is a framework-level observation, not yet formally derived from the kernel.
 
 **Relational evolution rate** decreases monotonically from the Primary Region outward. The Primary Region is the fastest-evolving declared region in D. τ[v] is smallest at the Primary Region — relational progression intervals are shortest. At larger scales, τ[v] grows, and what was active relational evolution at the Primary Region appears as stable accumulated structure. The 78-decade span of Φ[v] confirmed across declared regions is the observable expression of this invariant. In plain language: what we observe as stable matter at larger scales is Primary Region relational evolution that has accumulated into confirmed persistence through B activation. The stability is downstream of the speed.
 
-These four conditions are jointly necessary for any self-organizing, evolving, observable system to exist within D. That is a framework-level observation stated here in plain language. It is not a mathematical result already established by the kernel. The formal derivations are open conditions. The I-S component is suspended pending Origin redeclaration. See `derived_invariants.rs V4.2 (FROZEN)` for the precise statements and suspension account.
+These four conditions are jointly necessary for any self-organizing, evolving, observable system to exist within D. That is a framework-level observation stated here in plain language. It is not a mathematical result already established by the kernel. The formal derivations are open conditions. See `derived_invariants.rs` (Kernel V8) for the precise statements.
 
 ## What remains with the reader
 
@@ -306,9 +271,13 @@ Those determinations remain with whoever declared the domain.
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. V8.2.*
+*Metatron Dynamics, Inc. Kernel V8.*
 
 ---
+
+**V8.2 → Kernel V8 changes (2026-09-26):** *(a) Declarations of 2026-09-23 not previously written into this document (reconstructed from operators_notation_and_constraint.md and derived_invariants.rs):* "The three Primary Region quantities" section (rank-based quantities and the ρ_P ratio) replaced by "When B is evaluated — the full-operator admissibility condition"; Superposition restated as relational distinguishability of the Δ output (no longer suspended); Tunneling restated in framework-native terms (ε[e] > 0 at declared transition edges); Primary Region phenomena restated with scale-conditional observational status in place of "not directly observable"; joint necessity I-S component declared. *(b) Kernel V8 declarations:* values from M described as numerical projections; the declared-information rule stated in plain language; Phase 2 evaluated from the second declared observation — cold start removed from "Before anything is measured" and from A; A_persistence = 0 described as a calculated result; B "not evaluated" replacing "absent", with the full-operator condition replacing "persistence confirmed"; R and ρ: coupling and ρ scale values declared by M with no kernel values (V7.1); "largest gradient" corrected to "largest directed difference" (the term "gradient" was retired in notation V10). Not changed: Entanglement wording on 𝟙[e] = 0 and ε[e] = 0 (Part II audit, separate). Kernel release numbering (Origin declaration): this document's own numbering ends at V8.2.
+
+**Historical document-local revision history — predates unified Kernel V8 release numbering.** The entries below record this document's own revisions; their version numbers are document-local, not kernel release versions.
 
 **V5 → V6 changes:** New section: "Every relation has one direction" — states the directional admissibility condition and distinctness axiom in plain language; derives ring inadmissibility from first principles. New section: "Δ and Σ — the primary operators" — plain language description of the primary kernel, including the consequence of Position B for Σ. A section: persistence direction stated as fixed (E_current − E_prior); reverse direction named as inadmissible. B section: absence from primary kernel distinguished from identity operator. R section: symmetry recharacterized — within the admissibility conditions, every admissible declared structure is asymmetric; symmetry signals inadmissible structure. Before Δ / Before A: heading updated to cover both operators. What this produces: primary kernel output added alongside ABR kernel output, with condition for each. No universal claims about observables — all claims scoped to "within the declared admissibility conditions of this framework."
 

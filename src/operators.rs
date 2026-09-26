@@ -1,10 +1,12 @@
-// operators.rs — Metatron Dynamics, Inc. V7.1.
+// operators.rs — Metatron Dynamics, Inc. Kernel V8.
 // Unified Relational Kernel: Primary (Δ → Σ) and ABR (A → B → R).
 //
-// Grounding documents (2026-07-28):
-//   operators_notation_and_constraint_v10.md
-//   abr_operators_plain_v9.md
-//   role_separation_and_operator_application_v9.md
+// Grounding documents (Kernel V8, docs/kernel/):
+//   operators_notation_and_constraint.md
+//   abr_operators_plain.md
+//   role_separation_and_operator_application.md
+// Earlier grounding (2026-07-28), cited as Origin sources in AUDIT blocks
+// below and not held in this repository:
 //   primary_operators_delta_sigma_v6.md
 //   primary_region_formal_interior_v6.md
 //
@@ -14,14 +16,15 @@
 //
 // Primary kernel  (V6 — unchanged):
 //   E_primary = Σ(Δ(x))
-//   Used at the Primary Region where persistence is not confirmed and B
-//   is not active. Two operators. No path structure assumed.
+//   Used at the Primary Region, where the full-operator admissibility
+//   condition is not established and B is not evaluated. Two operators.
+//   No path structure assumed.
 //
 // ABR kernel  (V5 — unchanged):
 //   Phase 1 (spatial):     E_spatial = R(B(A(x)), ρ(A(x)))
 //   Phase 2 (persistence): A_p → B_p → R_p over edge-valued loci
-//   Used when persistence is confirmed (open condition — kernel transition
-//   criterion pending Origin redeclaration; see §SUSPENDED below).
+//   Used when the full-operator admissibility condition holds (see B
+//   Activation Condition below).
 //
 // ── Foundation ───────────────────────────────────────────────────────────
 //
@@ -38,11 +41,28 @@
 //
 // Numerical existence is not observational significance.
 //
+// Relation (Kernel V8): a relation is declared through M from an observed
+// distinction. Δ and A compute the numerical directed difference over a
+// declared relation. The computation does not declare the relation.
+//
+// Declared information (Kernel V8): the kernel makes no declaration about what
+// exists or does not exist. Where information required by an operator has
+// not been declared through M for the calculation, that operator is not
+// evaluated. No substitute value or classification is introduced. A 0.0
+// produced by an operator over declared information is a calculated
+// result and is returned as such.
+//
 // ── Domain and Measurement ───────────────────────────────────────────────
 //
 // D := { x ∈ ℝⁿ | n < ∞, |x[i]| < ∞ ∀ i }
-// M : O → D  declared by Origin before any operator acts.
-// The kernel acts on M(o) only.
+//
+//   O → M → D
+//
+// O: observables. M : O → D, declared by Origin before any operator acts.
+// A value in D is the numerical projection of an observable through M.
+// The kernel acts on M(o) only. Operator outputs are calculated results.
+// A calculated result may be mapped to an observable prediction and
+// compared with observation; it remains a calculated result.
 //
 // M-declared operator parameters (V7.1):
 //   No operator runs until M has declared every value it uses. The kernel
@@ -57,8 +77,9 @@
 //     cc[p]  — cross-topology coupling for each declared component pair p
 //              in R. Required when component pairs are declared; one value
 //              per pair.
-//   A call without these values is a declaration failure, not an operator
-//   result. The function signatures enforce this: none of these values has
+//   Where these values are not declared by M, the operator is not
+//   evaluated and there is no operator result. The function signatures
+//   enforce this: none of these values has
 //   a default, and the kernel does not choose, bound, or substitute them.
 //
 // Sequential observation requirement (V7):
@@ -69,9 +90,13 @@
 //   not an externally imposed increment and not a model-generated value.
 //   A model-generated trajectory is not an observable sequence through M
 //   unless the model is itself declared as a transducer from observable
-//   inputs. Cold start (E_prior = zero) is admissible on the first
-//   declared step only. Treating cold start output as relational evolution
-//   is inadmissible.
+//   inputs.
+//   Persistence (Kernel V8, Origin declaration, 2026-09-26): persistence requires
+//   a declared pair of sequential observations. At the first declared
+//   observation, only the spatial kernel is evaluated. A_persistence,
+//   B_persistence, and R_persistence are evaluated over (E_{n−1}, E_n) once
+//   both have been declared through M. No prior value is supplied where no
+//   prior observation was declared.
 //
 // Relational evolution direction (V7):
 //   The ordering of {M(o₁), ..., M(oₙ)} has exactly one admissible
@@ -104,6 +129,27 @@
 //   fixed-point equation to have a definite value, which is not traceable
 //   to an observable through M.
 //
+// ── Declaration Correspondence (Kernel V8) ───────────────────────────────────
+//
+// Analysis proceeds from declared observables without expectation of
+// numerical outcome. Relations, variables, and topology are declared
+// through M. Operators act only on those declared numerical projections
+// and return their results unchanged.
+//
+//   observable → M → numerical projection in D → declared topology
+//     → operators → calculated result → comparison with observables
+//
+// Where the numerical projection produced by Δ or A does not preserve the
+// observed distinction on which a declared relation is based,
+// correspondence is not established. The declaration may be varied and
+// evaluated again: topology first, with variable determination and M.
+// The kernel does not vary the declaration. Topology is varied in response
+// to comparison with observables, not to obtain a particular numerical
+// result.
+//
+// No numerical result is itself an observable. No interpretation beyond
+// the declared observable correspondence follows from calculation alone.
+//
 // ── Legacy Mathematical Intrusion Warning (V7) ───────────────────────────
 //
 // The Verifier is required to check Generator output — including all code
@@ -111,8 +157,8 @@
 // Generator's training distribution rather than from Origin's declaration.
 //
 // The general rule: any mathematical quantity in Generator output that was
-// not declared by Origin as traceable through M before generation began is
-// a provenance failure. The mathematical framework from which the quantity
+// not declared by Origin as traceable through M before generation began has
+// provenance not observed or incomplete. The mathematical framework from which the quantity
 // is drawn does not matter. Correctness is not the question. Provenance is.
 //
 // Common intrusion classes for LLM Generators:
@@ -165,7 +211,7 @@
 // 2. χ[i] = max{ |A(x)[e]| : e incident to i }
 //    Code operation: f64::max fold over absolute values of incident edges.
 //    Declared expression: selection of the strongest local asymmetry.
-//    Origin grounding document: operators_notation_and_constraint_v10.md
+//    Origin grounding document: operators_notation_and_constraint.md
 //      (referenced; Verifier must confirm χ selection appears explicitly).
 //    Input provenance: computed from A(x), which is computed from M(o).
 //    Absolute value: declared projection — direction is carried by R and Σ;
@@ -194,11 +240,18 @@
 //
 // ── B Activation Condition ───────────────────────────────────────────────
 //
-// B is absent from the primary kernel — not an identity operator.
-// B activates when persistence is confirmed. The transition criterion
-// previously referenced ρ_P — which has been suspended pending Origin
-// redeclaration (see §SUSPENDED). Until redeclaration, do not introduce
-// B at the Primary Region. The transition threshold remains an open condition.
+// B is not evaluated in the primary kernel — not an identity operator.
+// B is evaluated when the full-operator admissibility condition holds: M
+// establishes at least one interior locus t with independently declared
+// incoming and continuing edges, each with provenance through M (Origin
+// declaration, 2026-09-23; ρ_P retired). The condition is structural, not a
+// numerical threshold. The kernel does not compute it from DeclaredRelations;
+// M establishes it.
+//
+// Not evaluated ≠ evaluated with result 0.0 (Kernel V8). B and R are not
+// evaluated to produce 0.0 where their required relational inputs have not
+// been declared through M. Where evaluated, antisymmetric expression is
+// returned unchanged, 0.0 or otherwise.
 //
 // ── Non-Agency ───────────────────────────────────────────────────────────
 //
@@ -212,9 +265,17 @@
 // observed in evolving systems: closed boundary, bidirectional symmetry,
 // uniform degree, exact recurrence. Any ring, torus, np.roll, or
 // periodic-index operation proposed for an application is a DRIFT SIGNAL.
+// DRIFT SIGNAL (Kernel V8): legacy mathematics inserted into or before the
+// operators, or otherwise undeclared.
 // Refuse it and require declared relations with provenance.
 //
 // ── §SUSPENDED — Quantities Pending Origin Redeclaration ─────────────────
+//
+// Kernel V8 status: rank(Im Δ), rank(Im Σ), ρ_P, and the rank formulation
+// of I-S are RETIRED (Origin declaration, 2026-09-23). The Origin question
+// recorded below for rank(Im Δ) is answered: relational distinguishability
+// of the Δ output (derived_invariants.rs, I-S) is the condition. These
+// quantities are not reinstated. The entries below are kept as record.
 //
 // The following quantities have been removed from the active kernel pending
 // Origin redeclaration. They must not be reintroduced, substituted, or
@@ -273,6 +334,8 @@
 //   The formulation rank(Im Δ) > 1 must not remain classified as an
 //   established relational definition of superposition while conventional
 //   rank is suspended. See §DOWNSTREAM IMPACT in the purge report.
+//   Kernel V8: resolved — I-S redeclared as relational distinguishability
+//   (derived_invariants.rs, 2026-09-23). See status note above.
 //
 // ── Version History ──────────────────────────────────────────────────────
 //
@@ -322,8 +385,53 @@
 //      defaults. The M-declared operator parameters requirement is stated in
 //      the header. Operator forms otherwise unchanged.
 //
+// Kernel V8 — Declaration and wording revision (Origin declaration, 2026-09-26).
+//      Declaration synchronization: no operator form, parameter, return
+//      type, or test expectation changed.
+//      Added: O → M → D statement; relation declared through M from observed
+//      distinction; declared-information rule (an operator whose required
+//      inputs are not declared through M is not evaluated; no substitute
+//      value or classification is introduced; the kernel makes no
+//      declaration about what exists or does not exist); Declaration
+//      Correspondence section; not-evaluated versus 0.0 note at B
+//      activation; Δ and A correspondence notes. Wording that identified
+//      values in D with observables revised to "numerical projection
+//      through M". Stale cc = 0.5 test comments corrected. Primary ρ status
+//      label aligned with the V7.1 statement.
+//      Vocabulary (Origin declaration): "provenance failure" replaced by
+//      "provenance not observed or incomplete"; "declaration failure" (call
+//      without M-supplied values) replaced by "the operator is not
+//      evaluated"; DRIFT SIGNAL defined as legacy mathematics inserted into
+//      or before the operators, or otherwise undeclared.
+//      Verifier findings (V7.2 conditional pass) applied. Declaration
+//      synchronization: VERIFIER PASS.
+//      Persistence revision (Origin declaration, 2026-09-26; audit A-1
+//      CLOSED): persistence requires a declared pair of sequential
+//      observations; at the first declared observation only the spatial
+//      kernel is evaluated. Removed: EdgeField::zero,
+//      PersistenceState::cold_start, PersistenceState::is_cold_start.
+//      PersistenceState is constructed only by from_prior. No operator
+//      formula changed. Tests: abr_cold_start_flag,
+//      abr_persistence_warm_state_not_cold, and
+//      abr_a_persistence_cold_start_equals_current removed (they tested the
+//      substitute prior); abr_e_v5_spatial_matches_v4,
+//      abr_two_cycle_evolution, and abr_b_persistence_open_boundary
+//      rewritten over two declared observations, assertions unchanged.
+//      Audit items carried OPEN (no code change, Origin disposition pending):
+//        A-3  empty adjacency: sums over an empty declared set evaluate to
+//             0.0 in Σ, R, R_persistence. Whether these sums are defined over
+//             the set of declared adjacent relations is to be established
+//             from the operator declaration. Not classified.
+//      Synchronized with the 2026-09-23 declarations (derived_invariants
+//      V4.3): file header and B Activation Condition state the full-operator
+//      admissibility condition; §SUSPENDED marks rank(Im Δ), rank(Im Σ), ρ_P
+//      and the rank formulation of I-S as retired; "B is absent" revised to
+//      "B is not evaluated". Grounding references updated to the Kernel V8
+//      documents. Kernel release numbering (Origin declaration): every file
+//      in the repository carries the kernel release number, Kernel V8.
+//
 // Bounded over D. No claim beyond D.
-// Metatron Dynamics, Inc. V7.1.
+// Metatron Dynamics, Inc. Kernel V8.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── SHARED FOUNDATION ──────────────────────────────────────────────────────
@@ -440,7 +548,7 @@ impl DeclaredRelations {
 
 // ── Node Field (unified) ──────────────────────────────────────────────────
 //
-// Observable field over declared nodes. Input to both kernels.
+// Numerical projection through M over declared nodes. Input to both kernels.
 // Formerly NodeField (ABR) and ObservableField (Primary) — same structure.
 // Unified here under NodeField. n_components = k; n_nodes = n.
 
@@ -459,7 +567,7 @@ impl NodeField {
         assert!(data.iter().all(|c| c.len() == n),
             "all components must have the same node count");
         assert!(data.iter().all(|c| c.iter().all(|v| v.is_finite())),
-            "all observable values must be finite (∈ D)");
+            "all values projected through M must be finite (∈ D)");
         NodeField { data, k, n }
     }
 
@@ -482,8 +590,8 @@ impl NodeField {
 // Δ is A under a declared renaming — formula identical.
 // Σ is R applied directly to Δ(x) without prior B accumulation.
 //
-// B is absent — not an identity operator that happens to do nothing.
-// It is simply not invoked here.
+// B is not evaluated here — not an identity operator that happens to do
+// nothing.
 
 // ── Primary Edge Field ────────────────────────────────────────────────────
 //
@@ -513,13 +621,21 @@ impl PrimaryEdgeField {
 //
 // Δ(x)[e] = x[s] − x[t]  for each declared edge e = (s, t).
 //
-// Directed difference of the observable field across each declared relation.
-// Direction determined by the declared observable — not by convention.
+// Directed difference of the numerical projection through M across each
+// declared relation. Direction determined by the declared observable — not
+// by convention.
 //
 // Formula identical to A. Role: irreducible primitive of the primary kernel.
 //
 // Constraint: directed difference only. No relation and no direction may
 // be added that the declaration did not trace to an observable through M.
+//
+// Correspondence (Kernel V8): the relation is declared through M from an
+// observed distinction. Δ computes the numerical directed difference over
+// that declaration. Every result, including 0.0, is returned unchanged: not
+// deleted, thresholded, or reclassified. Correspondence
+// with the observed distinction is examined per Declaration Correspondence
+// in the file header. No correspondence-reporting mechanism is implemented.
 //
 // AUDIT (§22):
 //   Code operation: x.data[c][s] - x.data[c][t]
@@ -531,7 +647,7 @@ impl PrimaryEdgeField {
 
 pub fn operator_delta(x: &NodeField, rel: &DeclaredRelations) -> PrimaryEdgeField {
     assert_eq!(x.n, rel.n_nodes,
-        "observable field and declared relations must have the same node count");
+        "node field and declared relations must have the same node count");
     let field = (0..x.k)
         .map(|c| rel.edges.iter()
             .map(|&(s, t)| x.data[c][s] - x.data[c][t])
@@ -554,7 +670,7 @@ pub fn operator_delta(x: &NodeField, rel: &DeclaredRelations) -> PrimaryEdgeFiel
 // of the relation.
 // ρ ∈ [0, ρ_base) in both forms.
 //
-// STATUS — PRESERVE PENDING PROVENANCE CONFIRMATION.
+// STATUS — M-SUPPLIED VALUES (V7.1); TWO OPEN CONDITIONS.
 // See ρ provenance audit in the file header (§8 of purge document).
 // ρ_base and χ₀ are M-supplied (V7.1). Two OPEN conditions remain: max
 // selection declaration and the saturating form.
@@ -567,7 +683,7 @@ pub fn operator_delta(x: &NodeField, rel: &DeclaredRelations) -> PrimaryEdgeFiel
 //   χ[s] = max|Δ[e']|:
 //     Code operation: f64::max fold over c[e].abs() for incident edges
 //     Declared expression: χ[s] = max{ |Δ(x)[e']| : e' incident to s }
-//     Origin source: operators_notation_and_constraint_v10.md (referenced)
+//     Origin source: operators_notation_and_constraint.md (referenced)
 //     Input provenance: OPEN — max selection rule requires explicit declaration
 //     Status: OPEN — ORIGIN DECLARATION REQUIRED
 //   χ/(χ₀+χ):
@@ -650,6 +766,11 @@ pub fn compute_rho_primary(
 //     Status: DECLARED — PRESERVE
 //   ρ[e] as scalar gain:
 //     Status: OPEN (inherits from ρ audit above)
+//   Empty adjacency (Kernel V8, audit A-3):
+//     Sums over an empty adj⁺ or adj⁻ evaluate to 0.0. Whether Σ is defined
+//     over the set of declared adjacent relations, so that an empty set
+//     contributes nothing, is to be established from the operator
+//     declaration. Status: OPEN — not classified. No change.
 
 pub fn operator_sigma(
     delta_field: &PrimaryEdgeField,
@@ -729,7 +850,7 @@ pub fn operator_e_primary(
 //
 // All declared edges are isolated — every edge has empty adj⁺ and adj⁻.
 // When this holds, the antisymmetric term of Σ is structurally zero for
-// any observable field. This is a structural property of the declared
+// any node field. This is a structural property of the declared
 // adjacency, not a numerical test.
 //
 // AUDIT (§22):
@@ -798,41 +919,26 @@ pub struct EdgeField {
     pub k: usize,
 }
 
-impl EdgeField {
-    /// Zero EdgeField — declared cold-start prior state.
-    /// All spatial values = 0.0. Represents no relational history.
-    /// Admissible on the first declared step only.
-    pub fn zero(k: usize, n_edges: usize, comp_pairs: &[(usize, usize)], n_nodes: usize) -> Self {
-        EdgeField {
-            spatial: vec![vec![0.0; n_edges]; k],
-            comp: vec![vec![0.0; n_nodes]; comp_pairs.len()],
-            comp_pairs: comp_pairs.to_vec(),
-            k,
-        }
-    }
-}
-
 // ── Persistence State ─────────────────────────────────────────────────────
+//
+// Kernel V8: a PersistenceState holds a declared prior only. It is constructed
+// from the kernel output of a completed declared observation. There is no
+// constructor without a declared prior: at the first declared observation
+// only the spatial kernel (operator_e) is evaluated and no PersistenceState
+// exists. EdgeField::zero, PersistenceState::cold_start, and is_cold_start
+// were removed in Kernel V8 (audit A-1).
 
 #[derive(Clone, Debug)]
 pub struct PersistenceState {
     pub e_prior: EdgeField,
-    pub is_cold_start: bool,
 }
 
 impl PersistenceState {
-    pub fn cold_start(k: usize, n_edges: usize, comp_pairs: &[(usize, usize)], n_nodes: usize) -> Self {
-        PersistenceState {
-            e_prior: EdgeField::zero(k, n_edges, comp_pairs, n_nodes),
-            is_cold_start: true,
-        }
-    }
-
     /// Prior state from a completed declared process step's kernel output.
     /// Must come from an actual observation — not a model, parameter value,
     /// or static configuration.
     pub fn from_prior(e_prior: EdgeField) -> Self {
-        PersistenceState { e_prior, is_cold_start: false }
+        PersistenceState { e_prior }
     }
 }
 
@@ -851,6 +957,11 @@ pub struct PersistenceOutput {
 // NodeField → EdgeField.
 // Constraint: directed difference only. No relation added beyond declared.
 //
+// Correspondence (Kernel V8): as for Δ. Every result, including 0.0, is returned
+// unchanged. The same applies to component-pair differences at a node for
+// a declared pair (a, b). Correspondence is examined per Declaration
+// Correspondence in the file header. No reporting mechanism is implemented.
+//
 // AUDIT (§22): Status: DECLARED — PRESERVE.
 
 pub fn operator_a(f: &NodeField, rel: &DeclaredRelations, pairs: &[(usize, usize)]) -> EdgeField {
@@ -867,8 +978,9 @@ pub fn operator_a(f: &NodeField, rel: &DeclaredRelations, pairs: &[(usize, usize
 // ── Operator B ────────────────────────────────────────────────────────────
 //
 // B(g)[e] = g[e] + Σ_{f ∈ succ(e)} g[f], same direction only.
-// Terminal edges accumulate nothing. No wraparound. B is absent from
-// the primary kernel — it activates when persistence is confirmed.
+// Terminal edges accumulate nothing. No wraparound. B is not evaluated in
+// the primary kernel — it is evaluated when the full-operator admissibility
+// condition holds.
 //
 // AUDIT (§22): Status: DECLARED — PRESERVE.
 
@@ -930,6 +1042,8 @@ pub fn compute_rho(a: &EdgeField, rel: &DeclaredRelations, rho_base: f64, chi_0:
 //   Spatial pass-through and directed sum: DECLARED — PRESERVE
 //   ρ[src(e)] as scalar gain: values M-supplied; see ρ audit
 //   cc[p] cross-topology term: M-SUPPLIED (V7.1) — no kernel value
+//   Empty adjacency (Kernel V8, audit A-3): as for Σ. Status: OPEN — not
+//     classified. No change. Applies also to operator_r_persistence.
 
 pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f64]) -> EdgeField {
     let k = bg.k;
@@ -993,9 +1107,9 @@ pub fn operator_e(
 // Direction is fixed: E_current − E_prior.
 // The reverse direction is not traceable to an observable through M.
 //
-// On cold start (E_prior = zero): A_persistence = E_current.
-// This is admissible as the first declared step only. It does not
-// constitute evidence of relational evolution.
+// Evaluated only over a declared pair (E_prior, E_current), both kernel
+// outputs of declared observations through M. Not evaluated at the first
+// declared observation (Kernel V8).
 //
 // A_persistence over a stable observable (E_current = E_prior) produces
 // zero — the correct declared result.
@@ -1091,8 +1205,9 @@ pub fn operator_r_persistence(
 // Phase 1 (spatial): E_spatial = R(B(A(x)), ρ(A(x)))  [V4, unchanged]
 // Phase 2 (persistence): A_p → B_p → R_p over edge-valued loci [V5]
 //
-// Cold start output is the declared first step only — not evidence of
-// relational evolution.
+// Requires a PersistenceState holding the kernel output of the prior
+// declared observation. At the first declared observation, operator_e is
+// evaluated alone (Kernel V8).
 //
 // AUDIT (§22): Status: DECLARED — PRESERVE (composition).
 
@@ -1127,7 +1242,7 @@ mod tests {
 
     // ── Synthetic test fixture declaration ────────────────────────────────
     //
-    // Observable values, relational direction, relational provenance, and
+    // Numerical values, relational direction, relational provenance, and
     // measurement mapping M supplied to synthetic fixtures below are treated
     // as Origin-declared inputs for purposes of operator implementation
     // verification. These tests do not independently establish physical
@@ -1149,7 +1264,7 @@ mod tests {
     //             same declared inputs must agree. Establishes determinism,
     //             not provenance.
     //   [OBS]   — observable validation: drives the operator chain from a
-    //             declared M-mapped observable value and checks the result
+    //             declared M-mapped numerical projection and checks the result
     //             against a declared measurement source.
     //   [CORR]  — correspondence test: checks operator output against a
     //             declared value from the validation record.
@@ -1302,7 +1417,7 @@ mod tests {
             "Σ must equal Δ for isolated edge (no adjacency)");
     }
 
-    // [MATH] B is absent from the primary kernel. Single edge: adj⁺ = adj⁻ = ∅.
+    // [MATH] B is not evaluated in the primary kernel. Single edge: adj⁺ = adj⁻ = ∅.
     // relational_isolation() = true. Σ = Δ.
     #[test]
     fn primary_b_absent_no_accumulation() {
@@ -1316,7 +1431,8 @@ mod tests {
 
     // [MATH] Uniform field: Δ = 0 everywhere regardless of topology.
     // The antisymmetric expression is zero as a field effect, not a structural one.
-    // This is not a failure mode — it is the declared mathematical result.
+    // The 0.0 results are returned unchanged. On declared relations, they are
+    // compared with the observed distinctions per Declaration Correspondence.
     #[test]
     fn primary_delta_zero_on_uniform_field() {
         let rel = open_dag();
@@ -1408,49 +1524,15 @@ mod tests {
     }
 
     // [IMPL] E V4 produces finite output on declared DAG.
-    // Note: this test exercises the cc = 0.5 path only if pairs is non-empty.
-    // With empty pairs, the cross-topology block does not execute.
+    // Note: the cross-topology block executes only when component pairs are
+    // declared, with cc[p] supplied by M. With empty pairs it does not execute.
     #[test]
     fn abr_e_v4_finite() {
         let rel = open_dag();
         let x = gradient_field_abr(1, 4);
         let e = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
-        // Empty pairs — cc = 0.5 path not exercised.
+        // Empty pairs — cross-topology (cc[p]) path not exercised.
         assert!(e.spatial[0].iter().all(|v| v.is_finite()));
-    }
-
-    // [IMPL] cold_start sets is_cold_start and e_prior to zero.
-    #[test]
-    fn abr_cold_start_flag() {
-        let rel = directed_chain(3);
-        let ps = PersistenceState::cold_start(1, rel.n_edges(), &[], rel.n_nodes);
-        assert!(ps.is_cold_start, "cold start must be flagged");
-        assert!(ps.e_prior.spatial[0].iter().all(|&v| v == 0.0),
-            "cold start E_prior must be zero");
-    }
-
-    // [IMPL] from_prior does not set is_cold_start.
-    #[test]
-    fn abr_persistence_warm_state_not_cold() {
-        let rel = directed_chain(3);
-        let x = gradient_field_abr(1, 3);
-        let e = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
-        let ps = PersistenceState::from_prior(e);
-        assert!(!ps.is_cold_start, "warm state must not be flagged as cold start");
-    }
-
-    // [MATH] Cold start: A_persistence = E_current (E_prior = zero).
-    #[test]
-    fn abr_a_persistence_cold_start_equals_current() {
-        let rel = directed_chain(3);
-        let x = gradient_field_abr(1, 3);
-        let e = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
-        let ps = PersistenceState::cold_start(1, rel.n_edges(), &[], rel.n_nodes);
-        let a_p = operator_a_persistence(&e, &ps.e_prior);
-        for (idx, (&ap, &es)) in a_p[0].iter().zip(e.spatial[0].iter()).enumerate() {
-            assert!((ap - es).abs() < 1e-12,
-                "cold start: A_persistence[{}] must equal E_current[{}]", idx, idx);
-        }
     }
 
     // [MATH] Stable field: A_persistence = 0. Correct declared result.
@@ -1465,11 +1547,15 @@ mod tests {
     }
 
     // [MATH] V5 spatial phase is identical to V4 E output.
+    // Kernel V8: evaluated at a second declared observation; the first declared
+    // observation is evaluated by operator_e alone and supplies the prior.
     #[test]
     fn abr_e_v5_spatial_matches_v4() {
         let rel = open_dag();
+        let x_prior = NodeField::new(vec![vec![0.1, 0.5, 0.3, 0.9]]);
         let x = gradient_field_abr(1, 4);
-        let ps = PersistenceState::cold_start(1, rel.n_edges(), &[], rel.n_nodes);
+        let ps = PersistenceState::from_prior(
+            operator_e(&x_prior, &rel, &[], &[], 0.3, FIXTURE_CHI_0));
         let (e_v5, _) = operator_e_v5(&x, &rel, &[], &[], &ps, 0.3, FIXTURE_CHI_0);
         let e_v4 = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
         for (a, b) in e_v5.spatial[0].iter().zip(e_v4.spatial[0].iter()) {
@@ -1478,15 +1564,15 @@ mod tests {
     }
 
     // [MATH] Two-step evolution: A_persistence[step 2] = E_step2 − E_step1.
+    // Kernel V8: the first declared observation is evaluated by operator_e alone.
     #[test]
     fn abr_two_cycle_evolution() {
         let rel = open_dag();
         let x1 = gradient_field_abr(1, 4);
         let x2 = NodeField::new(vec![vec![0.1, 0.5, 0.3, 0.9]]);
-        let ps_cold = PersistenceState::cold_start(1, rel.n_edges(), &[], rel.n_nodes);
-        let (e1, _) = operator_e_v5(&x1, &rel, &[], &[], &ps_cold, 0.3, FIXTURE_CHI_0);
-        let ps_warm = PersistenceState::from_prior(e1.clone());
-        let (e2, p2) = operator_e_v5(&x2, &rel, &[], &[], &ps_warm, 0.3, FIXTURE_CHI_0);
+        let e1 = operator_e(&x1, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
+        let ps = PersistenceState::from_prior(e1.clone());
+        let (e2, p2) = operator_e_v5(&x2, &rel, &[], &[], &ps, 0.3, FIXTURE_CHI_0);
         for e in 0..rel.n_edges() {
             let expected = e2.spatial[0][e] - e1.spatial[0][e];
             assert!((p2.a_persistence[0][e] - expected).abs() < 1e-12,
@@ -1496,12 +1582,14 @@ mod tests {
 
     // [MATH] Terminal persistence edge does not accumulate (no wraparound).
     #[test]
+    // Kernel V8: evaluated over two declared observations.
     fn abr_b_persistence_open_boundary() {
         let rel = open_chain(4);
+        let x_prior = NodeField::new(vec![vec![0.1, 0.5, 0.3, 0.9]]);
         let x = gradient_field_abr(1, 4);
+        let e_prior = operator_e(&x_prior, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
         let e_curr = operator_e(&x, &rel, &[], &[], 0.3, FIXTURE_CHI_0);
-        let ps = PersistenceState::cold_start(1, rel.n_edges(), &[], rel.n_nodes);
-        let a_p = operator_a_persistence(&e_curr, &ps.e_prior);
+        let a_p = operator_a_persistence(&e_curr, &e_prior);
         let b_p = operator_b_persistence(&a_p, &rel);
         for e in 0..rel.n_edges() {
             if rel.succ(e).is_empty() {
@@ -1562,10 +1650,10 @@ mod tests {
 
     // ── Observable validation (Category A) ───────────────────────────────
     //
-    // These tests drive the operator chain from declared M-mapped observable
-    // values and check results against declared measurement sources.
+    // These tests drive the operator chain from declared M-mapped numerical
+    // projections and check results against declared measurement sources.
     //
-    // Fixture declaration: observable values and relational direction are
+    // Fixture declaration: numerical values and relational direction are
     // treated as Origin-declared inputs for operator implementation
     // verification. They do not independently establish physical provenance.
     //
@@ -1645,6 +1733,9 @@ mod tests {
     // at node 1 (detection locus). Edge direction: emitter → detector,
     // declared from the emission observable.
     // 𝟙[e] = 1 is assumed as a fixture. R → 𝟙 derivation is outside scope.
+    // Kernel V8 OPEN (audit A-2): the detector locus value 0.0 is not established
+    // through M. Fixture declaration pending Origin. Applies also to the Hα
+    // tests below. The hc/λ mapping is unchanged.
     #[test]
     fn obs_operator_chain_lyman_alpha() {
         const H_PLANCK: f64 = 6.626_070_15e-34;
@@ -1691,7 +1782,7 @@ mod tests {
     }
 
     // [REPR] Two independent forward applications from identical declared
-    // observable inputs (Hα) must agree exactly.
+    // M-mapped inputs (Hα) must agree exactly.
     #[test]
     fn repr_operator_chain_two_applications_agree() {
         const H_PLANCK: f64 = 6.626_070_15e-34;

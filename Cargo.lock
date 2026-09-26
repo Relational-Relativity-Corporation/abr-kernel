@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "metatron_kernel_v7"
-version = "0.8.0"
+name = "metatron_kernel_v8"
+version = "8.0.0"

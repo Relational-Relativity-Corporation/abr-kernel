@@ -1,10 +1,10 @@
 # Observable Variable Sets by Region
 ## Pre-Topological, Pre-Coupling Declaration
 
-**Metatron Dynamics, Inc.** V7.2.
-Authority document: role_separation_and_operator_application_v8.md
-Operator grounding: operators_notation_and_constraint_v10.md
-Companion files: derived_invariants.rs V4.2 (FROZEN), validation_record_v6.md
+**Metatron Dynamics, Inc.** Kernel V8.
+Authority document: role_separation_and_operator_application.md
+Operator grounding: operators_notation_and_constraint.md
+Companion files: derived_invariants.rs, validation_record.md (Kernel V8)
 Bounded over D. No claim beyond D.
 
 ---
@@ -77,9 +77,9 @@ direct measurement. Z_eff is extractable from that measurement through
 a declared mapping. Its admissibility rests on the direct measurement,
 not on atomic theory as a framework.
 
-Quantities that did not pass this test are absent from the variable
-sets regardless of their role in legacy frameworks. Their absence is
-not a claim that they are wrong. It is a statement that they are not
+Quantities that did not pass this test are not declared in the variable
+sets, regardless of their role in legacy frameworks. Leaving them
+undeclared is not a claim that they are wrong. It is a statement that they are not
 directly traceable to an observable through M at the declared region
 under the admissibility conditions of this framework.
 
@@ -110,11 +110,11 @@ operators. This is where ι[v] and q[v] are declared through M.
 **2. Establish the relational field**
 The operators act on the declared variable set. E_primary or
 E_ABR is produced. The relational field exists for the first
-time at this declared step. On the first declared step:
-E_prior = 0 — the cold start. Not because nothing existed
-before — because no prior declared observation is in M.
-The cold start is the declaration that this is where the
-observable record begins.
+time at this declared step. At the first declared observation
+only the spatial relational field is evaluated; no prior
+observation is declared in M, so no prior value is supplied
+and persistence is not evaluated. The first declared
+observation is where the declared observable record begins.
 
 **3. Progression becomes readable**
 τ[v] is now readable from the operator output. The declared
@@ -125,7 +125,8 @@ field exists.
 
 **4. Relational evolution becomes detectable**
 A_persistence = E_current − E_prior across consecutive
-declared steps. Only now is relational change in D.
+declared steps, evaluated from the second declared observation
+onward. Only now is relational change in D.
 Only now can the direction of evolution be confirmed
 from the observable. Phase 2 requires this step.
 
@@ -175,7 +176,7 @@ explicitly separated.
 
 ## What must be declared before this document is instantiated
 
-Required by role_separation_and_operator_application_v7.md
+Required by role_separation_and_operator_application.md
 before any variable set is used. Not variables — declaration
 protocol. Layer 1. Identical across all regions.
 
@@ -377,7 +378,8 @@ holds at every declared scale.
 
 **Empirical finding — deviation from additivity:**
 δι = ι[composite] − Σ ι[constituents] is a declared observable.
-Scaling from observable record: δι ~ ι[composite]^0.5057
+Scaling from observable record (downstream projection):
+δι ~ ι[composite]^0.5057
 (log-log fit, 8 declared composite loci; R² = 0.527 —
 declared projection: ratio of explained to total sum of
 squares in the log-log plane, relative to a flat-fit
@@ -654,7 +656,7 @@ instantiation finding, not part of the variable set.
 | Planetary | (ι[v], q[v]) | — | None identified | Confirmed |
 
 **Note on Variable 3.** Variable 3 does not appear as a column in
-this table, and its absence is declared rather than incidental.
+this table, and its omission is declared rather than incidental.
 Its observational status is CONFIRMED — it appears across every
 declared region in the observable record. Its mathematical
 expression is OPEN: no admissible name has been declared (OC-9),
@@ -685,8 +687,8 @@ only after the operators have established the relational field
 from the declared primitive variables.
 
 Canonical mathematical forms for all derived quantities are
-in `derived_invariants.rs V4.2 (FROZEN)`. Observational grounding for
-all confirmed values is in `validation_record_v6.md`.
+in `derived_invariants.rs` (Kernel V8). Observational grounding for
+all confirmed values is in `validation_record.md`.
 
 ---
 
@@ -706,7 +708,7 @@ absorber loci that becomes detectable at a declared
 measurement locus.
 
 **Empirical confirmation across 22 transitions, 21 orders
-of magnitude:** See validation_record_v6.md VR-ε-01.
+of magnitude:** See validation_record.md VR-ε-01.
 Primary Region: 9 transitions (PDG 2024).
 Atomic Region: 13 transitions (NIST ASD v5.12).
 Form invariant across all declared regions. Zero violations.
@@ -772,6 +774,8 @@ coupling geometry — cos(θ) → 0 making denominator very small]
 [Framework interpretation: τ ratio stretch/bend = 8.5 =
 1/cos(θ). cos(θ) inferred from observed τ ratio, not
 independently measured]
+[Internal consistency, not independent confirmation: cos(θ)
+is inferred from the same τ ratio it reproduces]
 
 **KF-8:** Unified τ expression unifies isolated decay,
 coupled vibrational modes, metastable states, and NMR
@@ -837,12 +841,13 @@ Their product is Layer 3: readable only after both are established.
 [Observed] Φ[v] = ι[v] · τ[v] computed across 29 declared loci
 spanning five regions — Primary Region, atomic, molecular,
 biological, planetary — covering 78 decades in Φ. ι[v] and τ[v]
-are directly observable through M. Φ[v] is derived from them.
+values are taken from the measurement record through M (numerical
+projections into D). Φ[v] is calculated from them.
 The ordering is correct without exception across every declared
 region.
 
 Full 29-locus table with ι[v], τ[v], and log₁₀(Φ) values:
-see validation_record_v6.md VR-Φ-01.
+see validation_record.md VR-Φ-01.
 
 **Region-specific stable thresholds:**
 
@@ -899,7 +904,7 @@ potentials. The declared edges between components contribute
 coherence that no individual component provides alone.
 
 **Confirmed across six accumulation cases, four scale
-transitions:** See validation_record_v6.md VR-ΦS-01.
+transitions:** See validation_record.md VR-ΦS-01.
 
 Summary:
 
@@ -921,7 +926,7 @@ not observed anywhere.
 When all components are already stable with τ[v] at the
 proton lifetime floor, combining them does not change τ[S].
 Φ[S] ≈ Σ Φ[vᵢ]. The accumulation is expressed as binding
-energy ε[e], not as Φ[S] excess. Not a failure of accumulation.
+energy ε[e], not as Φ[S] excess. This is a calculated result, not an exception to accumulation.
 
 **Active open conditions:**
 - OC-CA-1: Formal derivation of Φ[S] accumulation from operators
@@ -945,7 +950,7 @@ of declared edges at v, halved — a structural property of the
 declaration, readable after the operators act.
 
 **Confirmed 29 of 52 cases from NIST ASD v5.12 and PDG 2024.**
-Full confirmation table: see validation_record_v6.md VR-J-01.
+Full confirmation table: see validation_record.md VR-J-01.
 Remaining 23 fine structure cases pending NIST ASD transcription.
 
 **Photon case:**
@@ -1022,7 +1027,7 @@ relational progression τ[v] (unified expression), B output
 vector direction θ[e], coherence potential Φ[v] = ι[v] · τ[v],
 collective coherence potential Φ[S] = ι[S] · τ[S], and R
 output multiplicity J[v]. Canonical mathematical forms in
-derived_invariants.rs V4.2 (FROZEN).
+derived_invariants.rs (Kernel V8).
 
 **Framework and domain instantiation are separated.**
 Every future regional model instantiates the same template.
@@ -1049,7 +1054,8 @@ required at Primary, Biological, or Planetary regions.
 spanning 21 orders of magnitude. The entire EM spectrum is
 photonic.
 
-**EF-3:** δι scales approximately as ι[composite]^0.5. The
+**EF-3:** δι scales approximately as ι[composite]^0.5 (downstream
+projection — exponent from the log-log fit in Part 2). The
 deviation from additivity is structurally organized.
 
 **EF-4:** Net charge neutrality does not imply relational
@@ -1067,7 +1073,7 @@ special case of the unified τ expression (OC-13 resolved).
 **EF-7:** Φ[v] = ι[v] · τ[v] is scale and domain invariant.
 Confirmed across 29 declared loci spanning Primary Region,
 atomic, molecular, biological, and planetary regions — 78
-decades in Φ — from two directly observable quantities with
+decades in Φ — from two quantities taken from the measurement record through M, with
 no additional theoretical assumptions beyond the declared
 measurement mapping M.
 
@@ -1109,7 +1115,7 @@ photon edge transitions spanning Lyman, Balmer, Na doublet, Ca II doublet,
 He I, Cs I, Rb I, Hg I series. ε[e] range: 2.221e−19 J to 2.091e−18 J.
 𝟙[e] = 1 at all 14 edges. Zero violations of declared admissibility
 conditions. No symmetric edge-image detected at any declared photon edge.
-Observable source: NIST ASD v5.12. See VR-γ-01, validation_record_v6.md.
+Observable source: NIST ASD v5.12. See VR-γ-01, validation_record.md.
 
 **EF-15:** [Derived] τ[v] = ℏ/ε[e] confirmed at 12 declared photon edges
 (isolated-locus case, OC-13 resolved). τ[v] range: 5.04e−17 s to
@@ -1128,7 +1134,7 @@ locus. ι[photon] = 0 by declaration. The photon edge carries ε[e] through
 the hc/λ M mapping; the form E = ι · κ has no foothold at the photon locus.
 Photon edge data is therefore a clean Atomic Region observable path that
 does not touch the c²/κ[Primary] admissibility question (Verifier note,
-Bruce Stephenson, session July 2026). See VR-γ-01, validation_record_v6.md.
+Bruce Stephenson, session July 2026). See VR-γ-01, validation_record.md.
 
 ---
 
@@ -1214,10 +1220,14 @@ when they pass the same provenance test.
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. V7.2.*
-*Authority: role_separation_and_operator_application_v7.md*
+*Metatron Dynamics, Inc. Kernel V8.*
+*Authority: role_separation_and_operator_application.md*
 
 ---
+
+**V7.2 → Kernel V8 changes (2026-09-26):** *(a) Items the repository README attributed to V7.4 but not previously written into this document (reconstructed):* the δι log-log fit (Part 2) and EF-3 labeled downstream projections; the near-perpendicular τ case labeled internal consistency, not independent confirmation (cos(θ) is inferred from the same τ ratio it reproduces). *(b) Kernel V8 declarations:* relational field ordering — at the first declared observation only the spatial field is evaluated and persistence is not evaluated; cold start (E_prior = 0) removed; "absent"/"absence" for undeclared quantities restated as "not declared"/"omission"; ι[v] and τ[v] values described as taken from the measurement record through M (numerical projections) rather than "directly observable"; "Not a failure of accumulation" restated. Companion, authority, and grounding references updated to the Kernel V8 documents (unversioned file names). Held for Origin/Verifier: the R² = 0.527 statistic at the δι fit (see the 2026-07-28 correlation finding F6 carried into validation_record.md — the same class of ensemble statistic); the photon "structurally absent" interpretation at J[v] (Part II "absence" audit). Kernel release numbering (Origin declaration): this document's own numbering ends at V7.2.
+
+**Historical document-local revision history — predates unified Kernel V8 release numbering.** The entries below record this document's own revisions; their version numbers are document-local, not kernel release versions.
 
 **V1 → V2:** Architecture added. Six findings stated.
 Variables 1 and 2 extended. Variable 4 added. Reference
@@ -1290,7 +1300,7 @@ Open conditions register updated: OC-12, OC-13, OC-θ-1,
 OC-θ-2 closed; OC-CA-1 through OC-CA-5, OC-Φ-7, OC-Φ-8,
 OC-R-1, OC-22 added. Companion files declared in header.
 
-**V7 (photon edge addition):** EF-14 through EF-17 added. Atomic Region Layer 3 outputs extended: photon edge ε[e] (14 transitions, NIST ASD v5.12), τ[v] = ℏ/ε[e] (12 edges), N[v] at H n=3 (4.58×10⁶, log₁₀=6.66), 𝟙[e]=1 at all edges confirmed. M mapping hc/λ declared. ι[photon]=0 declared. κ[Primary] non-applicability to photon locus stated (EF-17). OC-γ-1 and OC-γ-2 added to open conditions register. Part 3 Layer 3 reference updated: derived_invariants.rs V2 → V3. Verifier language discipline: "relational field cycles" rejected; replaced with "declared relational intervals over the measured stability interval" (Verifier, session July 2026). Companion file: validation_record_v6.md.
+**V7 (photon edge addition):** EF-14 through EF-17 added. Atomic Region Layer 3 outputs extended: photon edge ε[e] (14 transitions, NIST ASD v5.12), τ[v] = ℏ/ε[e] (12 edges), N[v] at H n=3 (4.58×10⁶, log₁₀=6.66), 𝟙[e]=1 at all edges confirmed. M mapping hc/λ declared. ι[photon]=0 declared. κ[Primary] non-applicability to photon locus stated (EF-17). OC-γ-1 and OC-γ-2 added to open conditions register. Part 3 Layer 3 reference updated: derived_invariants.rs V2 → V3. Verifier language discipline: "relational field cycles" rejected; replaced with "declared relational intervals over the measured stability interval" (Verifier, session July 2026). Companion file: validation_record.md.
 
 **V7 → V7.1 changes:** Primary Region section: transitional note
 added stating why the Primary Region variable set differs from the
@@ -1309,4 +1319,4 @@ groups have the same standing; no principle renumbered, no content
 changed. Header version corrected from V6 to V7 to match the
 document's own closing attribution.
 
-**V7.1 → V7.2:** Companion file header corrected — derived_invariants.rs V1 → V4.2 (FROZEN); validation_record_v2.md → validation_record_v6.md. Operator grounding and authority document references updated to V10 and V8.1 respectively. All body cross-references to validation_record_v2.md updated to validation_record_v6.md; validation_record_v4.md references updated to validation_record_v6.md. Part 3 Layer 3 canonical expression reference updated: derived_invariants.rs V3 → V4.2 (FROZEN). No mathematical content changed. Version updated to V7.2.
+**V7.1 → V7.2:** Companion file header corrected — derived_invariants.rs V1 → V4.2 (FROZEN); validation_record_v2.md → validation_record.md. Operator grounding and authority document references updated to V10 and V8.1 respectively. All body cross-references to validation_record_v2.md updated to validation_record.md; validation_record_v4.md references updated to validation_record.md. Part 3 Layer 3 canonical expression reference updated: derived_invariants.rs V3 → V4.2 (FROZEN). No mathematical content changed. Version updated to V7.2.

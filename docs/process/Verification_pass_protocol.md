@@ -1,6 +1,6 @@
 # Verification Pass Ordering Protocol
 
-**Metatron Dynamics, Inc.**\
+**Metatron Dynamics, Inc.** Kernel V8.\
 Reference procedure. Bounded over D. No claim beyond D.
 
 ## Purpose
@@ -34,7 +34,7 @@ Before ordering a verification pass, Origin declares:
 -   the revision or commit being reviewed;
 -   the purpose of the pass.
 
-Verification is inadmissible if any required declaration is absent,
+Verification is inadmissible if any required declaration is not supplied,
 incomplete, internally inconsistent, or otherwise insufficient to
 identify the declared artifact and its observable provenance. There is
 no partial admissibility arising from partial declaration.
@@ -97,7 +97,7 @@ If evidence is unavailable, Origin states this explicitly.
 The Verifier shall distinguish between:
 
 -   evidence supplied,
--   evidence absent,
+-   evidence not supplied,
 -   evidence required but unavailable.
 
 ------------------------------------------------------------------------
@@ -200,10 +200,10 @@ examined artifact is individually consistent.
 
 # 10. Missing Evidence
 
-If required evidence is absent, the Verifier shall identify precisely
+If required evidence is not supplied, the Verifier shall identify precisely
 what is missing.
 
-Absence of evidence is not evidence of correctness.
+Evidence not supplied establishes nothing about correctness.
 
 The pass may still return verified findings for the material that was
 supplied.
@@ -279,3 +279,9 @@ materials.
 This protocol establishes procedure only. It introduces no mathematical
 declarations, no admissibility criteria, and no role definitions beyond
 those already declared elsewhere in the kernel.
+
+---
+
+## Kernel V8 synchronization (2026-09-26)
+
+Wording aligned with the Kernel V8 vocabulary: "absent" / "absence" of declarations and evidence restated as "not supplied". No procedure changed.

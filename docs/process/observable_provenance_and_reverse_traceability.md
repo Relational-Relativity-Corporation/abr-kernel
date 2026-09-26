@@ -1,22 +1,24 @@
 # Observable Provenance and Reverse Traceability
 
-**Metatron Dynamics, Inc.**
+**Metatron Dynamics, Inc.** Kernel V8.
 Reference procedure. Bounded over D. No claim beyond D.
 Declared by Origin, 2026-07-30.
 
 ---
 
-## Foundational principle — truth requires observable relationship
+## Foundational principle — correspondence requires observable relationship
 
-**No mathematical construct may be treated as a source of truth by
+**No mathematical construct enters the kernel record as established by
 virtue of its internal properties alone.** Consistency, elegance,
 symmetry, generality, or predictive success measured entirely within
 the mathematics itself — none of these substitute for an established
 relationship to an observable. A construct may be proposed and
-explored. It does not become admissible as true by being internally
-well-formed. It becomes admissible only when a chain from the
-construct terminates in something observed outside the framework, not
-merely in another step declared inside it.
+explored. It does not enter the record as established by being
+internally well-formed. A calculated result is supported within the
+declared domain when its provenance is reconstructible and its
+declared correspondence with observable data is established — when a
+chain from the construct terminates in something observed outside the
+framework, not merely in another step declared inside it.
 
 This is the deepest reason reverse traceability matters, and it is
 worth stating as its own requirement rather than leaving it implied by
@@ -46,7 +48,7 @@ discovery:
 2. **A candidate relationship may still be proposed and tested before
    it is established.** Exploration must remain possible, or the
    framework could only ever confirm what is already known. A proposed
-   relationship does not need to be true to be proposed — but it must
+   relationship does not need to be established to be proposed — but it must
    be *traceable to an observable* (so it is testable at all, not
    free-floating theory) and *plausible*, meaning grounded in
    something already declared elsewhere in the kernel or in an
@@ -144,7 +146,7 @@ pub fn epsilon_e(delta_iota_e: f64, indicator: f64) -> f64
 pub fn tau_v(a_persistence_coupling: f64, cos_theta: f64) -> f64
 pub fn phi_v(iota_v: f64, tau_v: f64) -> f64
 pub fn operator_a(f: &NodeField, rel: &DeclaredRelations, pairs: &[(usize, usize)]) -> EdgeField
-pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64]) -> EdgeField
+pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f64]) -> EdgeField
 ```
 
 These are pure functions: given the same declared inputs, they always
@@ -176,7 +178,7 @@ identity* — region, observable identifiers, edge or node identifier.
 Given the invariant and its identity, there is currently no function
 that answers: *which* `NodeField`, *which* `DeclaredRelations`, and
 *which* operator sequence produced this number. The forward functions
-exist and are tested (58/58 passing, per `test_log.txt`). No
+exist and are tested (58/58 passing at 2026-07-30, per `test_log.txt`). No
 corresponding reverse lookup exists.
 
 This is not a defect in the current kernel — reverse lookup was never
@@ -249,7 +251,7 @@ later), the following must be constructible, not merely narratable:
    distances, extended to cover an actual operator application rather
    than a bare geometric computation.
 
-This is a real, non-trivial addition to `metatron_kernel_v7` — it
+This is a real, non-trivial addition to the kernel crate (`metatron_kernel_v7` at the time of writing; `metatron_kernel_v8` from Kernel V8) — it
 likely means every Layer 3 function's return type changes from a bare
 `f64` to a struct carrying both the value and its provenance, mirroring
 the `DerivedQuantity` pattern already built and tested in
@@ -296,9 +298,25 @@ mathematics is Origin's disposition to make, per the note above — this
 document deliberately states both readings rather than choosing one.
 What is not in question either way: it operationalizes a claim Origin
 has already made about what the kernel is for — bidirectional
-traceability between observable, operator, and invariant, and no
-source of truth outside that relationship — into something buildable
+traceability between observable, operator, and invariant, with no
+calculated result entering the kernel record as established without
+traceability to its declared inputs through M and its operator
+sequence — into something buildable
 and testable, following the same discipline already applied today to
 `abr-biological-binding`: build the smallest real example first,
 verify it actually executes, and only then generalize the pattern into
 kernel doctrine.
+
+---
+
+## Kernel V8 synchronization (2026-09-26)
+
+**Signature.** The `operator_r` signature above is shown as it stands in Kernel V8: `cc: &[f64]`, the cross-topology coupling declared by M for each declared component pair, was added in V7.1. The other signatures are unchanged. The test count of 58 is recorded as it stood on 2026-07-30; Kernel V8 runs 61 library tests and 3 `provenance_demo` tests.
+
+**Worked example now in the kernel.** `bin/provenance_demo.rs` implements the minimum requirement above for one Layer 3 function, `epsilon_photon_edge()` (ε[e] = hc/λ at the H-alpha photon edge). A `ProvenanceRecord` carries the value, the numerical input declared through M, the declared source attribution for that input, and the calculation used. `verify_reverse_traceable()` recomputes the value from the recorded input and reports whether the stored result reconstructs.
+
+**Boundary between reconstruction and source verification (Verifier disposition, 2026-09-26).** What the record establishes is reconstruction of a calculation from recorded provenance: given the record, the result can be reconstructed from its recorded input and identified calculation without external session context. The record also carries the declared source attribution required to trace that input back to its observable record. Verification of the source attribution itself requires comparison with that source; the record carries the attribution and does not verify it. Item 2 of the minimum requirement ("the specific declared observable(s) consumed") is met in this sense: the record identifies the numerical input declared through M and its declared source.
+
+**Consistency with Kernel V8 declarations.** Values in D are numerical projections of observables through M (O → M → D). A recorded input in a provenance record is such a projection, not the observable itself.
+
+**Correspondence language (Verifier disposition, 2026-09-26).** The foundational section and the closing section previously used "source of truth", "admissible as true", and "true". These are restated in Kernel V8 correspondence and traceability terms. A calculated result is supported within the declared domain when its provenance is reconstructible and its declared correspondence with observable data is established. No calculated result enters the kernel record as established without traceability to its declared inputs through M and its operator sequence. The requirements themselves are unchanged.

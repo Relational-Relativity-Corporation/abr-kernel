@@ -1,7 +1,7 @@
-# Validation Record — V6
+# Validation Record — Kernel V8
 ## Observational Grounding for Derived Invariants
 
-**Metatron Dynamics, Inc.** V6.
+**Metatron Dynamics, Inc.** Kernel V8.
 Bounded over D. No claim beyond D.
 Sources: PDG 2024 (Navas et al., Phys. Rev. D 110, 030001)
          NIST ASD v5.12 (Kramida et al., 2024)
@@ -11,7 +11,7 @@ Sources: PDG 2024 (Navas et al., Phys. Rev. D 110, 030001)
 
 ## Purpose and Scope
 
-This document is the observational validation record for `derived_invariants.rs V4.2 (FROZEN)`.
+This document is the observational validation record for `derived_invariants.rs` (Kernel V8).
 It is a companion to the mathematical file, not a replacement for it.
 
 The mathematical file states what the operators produce and what form each
@@ -19,7 +19,7 @@ derived invariant takes. This document states what was observed, from which
 sources, and what was confirmed. The two documents are intentionally separated:
 
 - `derived_invariants.rs` — mathematical expressions and their derivations
-- `validation_record_v5.md` — observational grounding and confirmation records
+- `validation_record.md` — observational grounding and confirmation records
 
 Every claim in `derived_invariants.rs` marked Confirmed or Observed has a
 corresponding entry here. Every entry states the declared quantity, the
@@ -32,6 +32,25 @@ the support classification.
   principle be otherwise
 - **Derived** — proven from operator mathematics; cannot be otherwise
   given the declarations
+
+*Scale-conditional Observed subcategories* (per the observational resolution
+principle in `operators_notation_and_constraint.md`):
+- **Observed — locus-resolved** (ℛ_M = 1, 𝓜_M = 1): the constituent loci and
+  their directed relations are independently declarable through M.
+- **Observed — expression-observed, mechanism-unresolved** (ℛ_M = 1,
+  𝓜_M = 0): the observable record contains a traceable expression of the
+  condition through M; its internal mechanism is not yet resolvable by M at
+  the available scale.
+
+*Downstream projection:* a quantity computed from observed values by a
+declared reduction (for example a fit) is labeled a downstream projection. It
+is a calculated result, not itself an observation, and states what it
+preserves and discards.
+
+*Kernel V8:* values entered here from M are numerical projections of
+observables into D. Operator outputs compared against them are calculated
+results. Where a record entry compares the two, the comparison is the
+correspondence being recorded.
 
 ---
 
@@ -111,8 +130,9 @@ record; the primitive interpretation changes.*
 
 **Deviation from additivity (observed):**
 δι = ι[composite] − Σ ι[constituents] is a declared observable.
-Scaling from observable record: δι ~ ι[composite]^0.5057
-(log-log fit, 8 declared composite loci, correlation 0.726).
+Scaling from observable record (downstream projection — log-log fit over
+8 declared composite loci; preserves the exponent of the fitted relation,
+discards per-locus residuals): δι ~ ι[composite]^0.5057.
 Range: δι/ι[composite] from 0.20 to 0.99.
 Interpretation: δι = ε[e] with 𝟙[e] = 0 at constituent edges.
 
@@ -262,35 +282,39 @@ Unchanged from V4.
 
 ## VR-T-01 — Tunneling Invariant (I-T)
 
-**Quantity:** Quantum boundary component of Δ(ι)[e] is nonzero at every
-declared energy transition edge with finite barrier geometry.
+**Quantity:** At every declared transition edge where a relational energy
+contrast is established through M, ε[e] > 0 — the directed inertia contrast
+Δ(ι)[e] is nonzero at that edge.
 
 **Derived consequences:**
-- ε[e] > 0 at every finite barrier edge (nonzero floor)
-- τ[v] < ∞ at every finite barrier edge (bounded above)
-- 𝟙[e] retains nonzero amplitude at finite barriers
+- ε[e] > 0 at every such edge (nonzero floor)
+- τ[v] < ∞ at every such edge (bounded above)
+- 𝟙[e] = 1 at every such edge
 
-**Observable provenance:** The tunneling condition is not directly observable.
-What is observable through M are its consequences — transition rates at
-declared edges where classical suppression would predict zero probability.
-These consequences are C projections of the nonzero quantum boundary
-component of Δ(ι)[e] onto a scalar rate observable.
+**Observable provenance (scale-conditional):** Expression-observed at the
+Primary Region (ℛ_M = 1, 𝓜_M = 0) — nonzero transition rates at declared
+edges are in the observable record through M where the primary kernel alone,
+acting on unresolved mechanism, predicts zero contrast; the mechanism is not
+yet resolvable by M at this scale. Locus-resolved at larger scales
+(ℛ_M = 1, 𝓜_M = 1). What the established literature calls tunneling is what
+M reports where ε[e] > 0 at a declared transition edge and 𝓜_M = 0.
 
 **Confirmed consequences:**
 
 | Observable | System | Result | Source |
 |---|---|---|---|
-| Transition rate at classically suppressed edge | Semiconductor tunnel junction | Nonzero — inadmissible under classical Δ alone | Published measurement record |
+| Transition rate at a declared transition edge | Semiconductor tunnel junction | Nonzero where the primary kernel alone predicts zero | Published measurement record |
 | Field emission current | Metal surface under applied field | Nonzero below classical barrier | Fowler-Nordheim confirmed |
 | Alpha decay rate | Po-210, Ra-226 (representative) | Geiger-Nuttall relation confirmed | PDG 2024 |
 
-None of these observations directly observes tunneling. Each observes a
-rate that is inadmissible under the classical Δ alone. The tunneling
-invariant is the declared relational structure that produces them.
+Each observation records a nonzero rate at a declared transition edge where
+the primary kernel alone, acting on unresolved mechanism, predicts zero. The
+tunneling invariant is the declared relational structure compared against
+these records.
 
-**Scale and domain invariance:** Quantum boundary component of Δ present
-at every declared finite barrier edge regardless of region. No infinite
-barrier edge declared through M in any confirmed region.
+**Scale and domain invariance:** ε[e] > 0 at every declared transition edge
+regardless of region. No declared transition edge has been confirmed through
+M with ε[e] = 0.
 
 **Framework-level necessity note:** The claim that absence of tunneling
 would preclude energy transfer is a framework-level observation — not yet
@@ -299,37 +323,63 @@ formally derived from the kernel (OC-T-3).
 **Active open conditions:** OC-T-1, OC-T-2, OC-T-3
 
 **Support classification:** Derived (from ε[e], τ[v], 𝟙[e]).
-Observed (consequences only — transition rates at classically suppressed
-edges, Primary and Atomic regions).
+Observed — expression-observed, mechanism-unresolved (Primary Region);
+locus-resolved (Atomic Region and larger).
 
 ---
 
 ## VR-S-01 — Superposition Invariant (I-S)
 
-**SUSPENDED — depends on rank(Im Δ) and ρ_P, both pending Origin redeclaration.**
+**Quantity (Origin declaration, 2026-09-23):** The superposition condition
+is the condition in which the Δ output field carries relational
+distinguishability before B accumulation resolves it: there exist declared
+edges e and f such that Δ(x)[e] and Δ(x)[f] are not proportional — there is
+no scalar k with Δ(x)[e][c] = k · Δ(x)[f][c] for every component c. The
+condition is read from the calculated Δ output over declared projections
+through M. No matrix construction, no decomposition, no threshold.
 
-The previous declared quantity was: rank(Im Δ) > 1 as the admissible statement of superposition at the Primary Region (ρ_P ≪ 1, B not active). Both rank(Im Δ) and ρ_P are suspended in `operators.rs` V7 (purge) and `derived_invariants.rs V4.2 (FROZEN)`.
+**Resolution:** structural — the condition resolves when M establishes at
+least one interior locus (full-operator admissibility condition,
+`operators_notation_and_constraint.md`), not at a numerical threshold.
 
-**Observable record — PRESERVED:**
-The observations cited in this entry are not suspended. The mathematical interpretation via rank(Im Δ) is what is suspended.
+**Previous formulation (retired):** rank(Im Δ) > 1 with ρ_P ≪ 1. rank(Im Δ),
+rank(Im Σ), and ρ_P are retired; the Origin question of what observable
+relational condition rank(Im Δ) > 1 was intended to distinguish is answered
+by relational distinguishability.
+
+**Observable provenance (scale-conditional):** Expression-observed at the
+Primary Region (ℛ_M = 1, 𝓜_M = 0) — distributed directed contrast across
+multiple declared edges is in the observable record through M; the mechanism
+by which multiple non-proportional directed contrasts are simultaneously
+operative is not yet resolvable by M at this scale. Locus-resolved at larger
+scales (ℛ_M = 1, 𝓜_M = 1).
+
+**Observable record:**
 
 | Observable | System | Result | Source |
 |---|---|---|---|
-| Interference pattern | Double-slit (electrons, photons) | Consistent with prior unresolved directed contrast across multiple declared edges | Published measurement record |
-| Measurement outcome distribution | Atomic state preparation | Statistical distribution consistent with prior unresolved directed contrast | Published measurement record |
+| Interference pattern | Double-slit (electrons, photons) | Consistent with multiple non-proportional directed contrasts operative before B accumulation | Published measurement record |
+| Measurement outcome distribution | Atomic state preparation | Consistent with multiple non-proportional directed contrasts operative before B accumulation | Published measurement record |
 
-No observation directly observes the simultaneous multi-edge state. Each observation is a post-resolution consequence of B activation.
+Each observation is recorded after resolution. The comparison recorded here
+is between these observations and the relational distinguishability
+condition declared above.
 
-**Suspended interpretation:**
-The attribution of the above observations to rank(Im Δ) > 1 and ρ_P is suspended. The attribution must not be cited as an established result until Origin redeclares the relational quantity intended to replace rank(Im Δ) in this role.
+**Framework-level necessity note:** The claim that the absence of relational
+distinguishability throughout a declared history precludes self-organization
+within D is a framework-level observation — not yet formally derived from the
+kernel (OC-S-3).
 
-**Unresolved Origin question:** What observable relational condition was rank(Im Δ) > 1 originally intended to distinguish?
+**Implementation hold:** `are_proportional` in `derived_invariants.rs` is
+held — its result depends on edge order when a Δ vector is 0.0 in every
+component, and its tolerance is used in two units. No code change is
+authorized.
 
-**Framework-level necessity note:** The claim that rank(Im Δ) = 1 throughout a declared history precludes self-organization is suspended with the quantity it depends on. The observational pattern (no self-organizing system is consistent with a single resolved directed contrast from initialization) is preserved as an observation.
+**Active open conditions:** OC-S-2, OC-S-3. OC-S-1 closed (2026-09-23).
 
-**Active open conditions:** OC-S-1, OC-S-2, OC-S-3 — all reopened and resynchronized. See `derived_invariants.rs V4.2 (FROZEN)` for full suspension account and reopened condition statements.
-
-**Support classification:** SUSPENDED (previously: Derived from rank(Im Δ), ρ_P, B activation; Observed for consequences).
+**Support classification:** Declared condition (Origin, 2026-09-23), read
+from the calculated Δ output. Observed — expression-observed,
+mechanism-unresolved (Primary Region); locus-resolved (larger scales).
 
 ---
 
@@ -343,9 +393,11 @@ of spatial separation within D.
 decoherence within D. Removing the declared relation removes the
 correlation. This is the admissible test of the invariant through M.
 
-**Observable provenance:** The entanglement condition is not directly
-observable. What is observable through M are its consequences —
-correlated measurement outcomes at s and t independently.
+**Observable provenance (scale-conditional):** Expression-observed at the
+Primary Region (ℛ_M = 1, 𝓜_M = 0) — correlated measurement outcomes at s
+and t are in the observable record through M; the internal mechanism
+constituting the edge relation is not yet resolvable by M at this scale.
+Locus-resolved at larger scales (ℛ_M = 1, 𝓜_M = 1).
 
 **Confirmed consequences:**
 
@@ -464,9 +516,9 @@ regions, 78-decade confirmation, VR-Φ-01).
 | OC-T-1 | Tunneling floor magnitude — formal expression not yet derived | Open | VR-T-01 |
 | OC-T-2 | Tunneling at scale — confirm beyond Primary and Atomic regions | Open | VR-T-01 |
 | OC-T-3 | Tunneling necessity — absence precludes energy transfer (framework-level) | Open | VR-T-01 |
-| OC-S-1 | ρ_P threshold — REOPENED: cannot pursue threshold derivation while ρ_P is suspended | Reopened | VR-S-01 |
-| OC-S-2 | Superposition at scale — REOPENED: cannot confirm rank(Im Δ) > 1 while rank is suspended | Reopened | VR-S-01 |
-| OC-S-3 | Superposition necessity — REOPENED: rank(Im Δ)=1 necessity claim suspended with rank | Reopened | VR-S-01 |
+| OC-S-1 | Kernel boundary criterion — CLOSED 2026-09-23: the boundary is the full-operator admissibility condition, not a numerical threshold | Closed | VR-S-01 |
+| OC-S-2 | Superposition at scale — confirm relational distinguishability of the Δ output beyond the Primary Region | Open | VR-S-01 |
+| OC-S-3 | Superposition necessity — absence of relational distinguishability throughout a declared history precludes self-organization (framework-level) | Open | VR-S-01 |
 | OC-E-1 | Entanglement preservation — derive 𝟙[e]=1 preserved under operator evolution | Open | VR-E-01 |
 | OC-E-2 | Decoherence rate — derive rate at which 𝟙[e]→0 | Open | VR-E-01 |
 | OC-E-3 | Entanglement necessity — 𝟙[e]=0 everywhere precludes collective organization (framework-level) | Open | VR-E-01 |
@@ -488,9 +540,13 @@ regions, 78-decade confirmation, VR-Φ-01).
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. V6.*
+*Metatron Dynamics, Inc. Kernel V8.*
 
 ---
+
+**V6 → Kernel V8 changes (2026-09-26):** *(a) Declarations of 2026-09-23 not previously written into this document (reconstructed from operators_notation_and_constraint.md, derived_invariants.rs, and the repository README):* VR-S-01 redeclared with the relational distinguishability condition (no longer suspended); OC-S-1 closed, OC-S-2 and OC-S-3 restated; VR-T-01 restated in framework-native terms (ε[e] > 0 at declared transition edges; "quantum boundary component", "finite barrier", and "classically suppressed" removed from the operative statement); VR-T-01 and VR-E-01 observable provenance restated scale-conditionally in place of "not directly observable"; support classification protocol extended with scale-conditional Observed subcategories and the downstream projection label; the δι log-log fit labeled a downstream projection. *(b) Correction carried forward:* the correlation statistic (0.726) at the deviation-from-additivity entry is removed. A 2026-07-28 Verifier pass (finding F6) removed it because correlation is inadmissible absent an ensemble declared by Origin through M, and no ensemble was declared at that entry; that correction was recorded in a separate local copy of this document and was not published until this revision. *(c) Kernel V8 declarations:* values from M described as numerical projections into D; comparisons described as correspondence between observations and calculated results. Held: `are_proportional` implementation (noted at VR-S-01). Not changed: VR-E-01 decoherence wording on 𝟙[e] = 0 (Part II audit, separate). Companion references updated to derived_invariants.rs (Kernel V8). Kernel release numbering (Origin declaration): this document's own numbering ends at V6.
+
+**Historical document-local revision history — predates unified Kernel V8 release numbering.** The entries below record this document's own revisions; their version numbers are document-local, not kernel release versions.
 
 **V1:** Initial document. Nine validation entries.
 
