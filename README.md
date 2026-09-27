@@ -300,7 +300,11 @@ was not previously published.
   set are defined over the set of declared adjacent relations. Not
   classified.
 - 𝟙[e] interpretation audit, and ε[e] downstream of it.
-- A-11 — ι[photon] = 0: measured as 0.0, or not declared through M.
+- ~~A-11 — ι[photon] = 0~~ **CLOSED (2026-09-27):** ι is not declared
+  through M at the photon locus. The legacy "photon rest mass = 0" imports
+  a definition requiring a frame with no declared relational motion —
+  inadmissible in D (SF-PR-16). Under the declared-information rule, ι is
+  not evaluated at photon edges. ε[e] = hc/λ stands on its own M mapping.
 - `are_proportional` in `derived_invariants.rs`: result depends on edge
   order when a Δ vector is 0.0 in every component; tolerance used in two
   units.
@@ -310,6 +314,31 @@ was not previously published.
   statistic as the removed correlation).
 - J[v] wording on what M observes.
 - OPEN conditions on ρ: the max selection rule and the saturating form.
+
+---
+
+**Update (2026-09-27):**
+
+- A-11 CLOSED across all files: ι at the photon locus was an import of
+  the legacy quantity "photon rest mass = 0," whose definition requires a
+  frame with no declared relational motion — inadmissible in D (SF-PR-16).
+  Under the declared-information rule, ι is not evaluated at photon edges.
+  ε[e] = hc/λ stands on its own M mapping.
+- Test `photon_edge_kappa_non_applicable` renamed to
+  `photon_edge_iota_not_declared` and rewritten structurally — no
+  manufactured 0.0.
+- "Rest mass" language purged from all documents; replaced with "m[v] as
+  primitive inadmissible (SF-PR-16)" and the structural reason: its
+  definition requires a frame with no declared relational motion, which
+  does not exist in D.
+- I-RE passages in `abr_operators_plain.md` and
+  `operators_notation_and_constraint.md` corrected: the 78-decade Φ span
+  is the observable expression of the τ_stability ordering; τ_relational
+  is a distinct quantity whose ordering is not established by the
+  stability data alone. I-RE remains open derivation (OC-RE-1).
+- `validation_record.md`: "not directly observable" replaced with
+  scale-conditional language (expression-observed, mechanism-unresolved).
+- 61 library tests + 3 provenance_demo tests: all pass.
 
 ---
 
@@ -382,8 +411,9 @@ V7. Updates from V4:
   relational evolution; epistemic status explicit throughout
 - cross_region_energy_expression.md V4.2: companion file references
   updated to current versions. Mathematical content unchanged from V4.
-  V4: I-RE cross-reference added; κ[region] monotonic decrease stated;
-  confirmation language discipline applied
+  V4: I-RE cross-reference added; κ[region] monotonic decrease stated
+  as proposed (pending derivation OC-RE-1); confirmation language
+  discipline applied
 
 **Kernel purge and synchronization pass (2026-09-23):**
 
@@ -412,7 +442,7 @@ V7. Updates from V4:
 - Sequential observation requirement added (operators_notation_and_constraint.md)
 - Relational evolution direction as distinct named constraint added
 - Primary kernel E_primary = Σ(Δ(x)) declared alongside ABR kernel
-- ι[v] replaces m[v] throughout — rest mass declared inadmissible (SF-PR-16)
+- ι[v] replaces m[v] throughout — m[v] as primitive declared inadmissible (SF-PR-16)
 - derived_invariants.rs V3 — photon edge functions, N[v], five new tests
 - validation_record.md V4 — VR-γ-01, VR-γ-τ-01, VR-γ-N-01
 - observable_variable_sets.md V7.4: downstream projections labeled
