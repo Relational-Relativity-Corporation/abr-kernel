@@ -237,7 +237,7 @@ result was obtained; it does not make the result an observable.
 |---|---|---|
 | ε[e] relational energy contrast | \|Δ(ι)[e]\| · 𝟙[e] | `epsilon_e(delta_iota_e, indicator)` |
 | 𝟙[e] detection indicator | 1 iff R(A(x))[e] antisymmetric term ≠ 0 | `detection_indicator(r_anti, tol)` |
-| ε[e] at photon edges | hc/λ (part of M at the Atomic Region) | `epsilon_photon_edge(lambda_m)` |
+| ε[e] at photon edges | hc/λ (part of M at the Atomic Region; stands on its own M mapping — ι is not declared through M at the photon locus, so E[v] = ι[v]·κ[region] is not evaluated there) | `epsilon_photon_edge(lambda_m)` |
 | τ[v] at photon edges | ℏ / ε[e] | `tau_photon_edge(lambda_m)` |
 | N[v] at photon-emitting loci | τ_stability · ε[e] / ℏ | `n_relational_cycles(tau_stability_s, lambda_m)` |
 | τ[v] unified | ℏ / \|A_persistence[e_coupling] · cos θ\| | `tau_v(a_p, cos_theta)`; isolated case `tau_v_isolated(e_v)` |
@@ -348,7 +348,7 @@ Verified / Inference / Not Verifiable); `docs/process/kernel_self_consistency_te
 |---|---|---|
 | A-3 — empty adjacency in Σ, R, R_persistence | `operators.rs` | OPEN — not classified |
 | 𝟙[e] interpretation audit; ε[e] downstream | `derived_invariants.rs` | HOLD |
-| A-11 — ι[photon] = 0 | `derived_invariants.rs`, `cross_region_energy_expression.md` | HOLD |
+| A-11 — ι at photon locus not declared through M | `derived_invariants.rs`, `cross_region_energy_expression.md` | CLOSED — legacy import (SF-PR-16); declared-information rule applies |
 | `are_proportional` edge-order dependence and two-unit tolerance | `derived_invariants.rs` | HOLD |
 | ρ max-selection rule; saturating form | `operators.rs`, notation | OPEN — Origin declaration required |
 | Part II "absence" wording | I-E, joint necessity, photon J[v] | Separate audit |
@@ -375,3 +375,10 @@ Verified / Inference / Not Verifiable); `docs/process/kernel_self_consistency_te
 reference for people and AI systems. It restates existing declarations from
 the files listed under "Purpose and use" and introduces no declaration of its
 own.
+
+**Kernel V8 update (2026-09-27):** A-11 closed. ι at the photon locus was an
+import of the legacy quantity "photon rest mass = 0," whose definition requires
+a frame with no declared relational motion — inadmissible in D for the same
+structural reason that retired m[v] as a primitive (SF-PR-16). Under the
+declared-information rule, ι is not evaluated at photon edges. ε[e] = hc/λ
+stands on its own M mapping. Photon edge ε[e] entry in Part I table updated.

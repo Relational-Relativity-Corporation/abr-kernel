@@ -61,9 +61,10 @@ independently of any theoretical commitment?
 The inertial response observable — what the measurement record has
 historically named mass — passed this test. The framework admits it
 as relational inertia ι[v]: the inertial response of a declared locus
-under the declared non-acceleration condition through M. Rest mass
-is inadmissible (SF-PR-16) — it requires a rest frame not observable
-through M. The observable that passed the test is ι[v], not rest mass.
+under the declared non-acceleration condition through M. m[v] as
+primitive is inadmissible (SF-PR-16) — its definition requires a frame
+with no declared relational motion, which does not exist in D. The
+observable that passed the test is ι[v], not m[v].
 Within the declared framework, the observable admitted through M is
 represented by ι[v]; the primitive interpretation differs from legacy
 frameworks, the numerical values from the measurement record do not.
@@ -339,8 +340,9 @@ Non-acceleration is declared through M as this condition —
 not as an absolute rest frame claim. No rest frame required.
 No zero-momentum assumption required.
 
-Replaces m[v] throughout. Rest mass declared inadmissible
-(SF-PR-16) — requires a rest frame not observable through M.
+Replaces m[v] throughout. m[v] as primitive declared inadmissible
+(SF-PR-16) — its definition requires a frame with no declared
+relational motion, which does not exist in D.
 Numerical values unchanged. Within the declared framework,
 the observable admitted through the declared measurement
 mapping M is represented by ι[v]. The numerical values
@@ -1129,9 +1131,14 @@ log₁₀ = 6.66. N[H n=3] corresponds to approximately 4.6 million declared
 relational intervals over the measured stability interval. Form invariant;
 extension to additional loci is open program (OC-γ-2).
 
-**EF-17:** [Derived] E[v] = ι[v] · κ[region] does not apply at the photon
-locus. ι[photon] = 0 by declaration. The photon edge carries ε[e] through
-the hc/λ M mapping; the form E = ι · κ has no foothold at the photon locus.
+**EF-17:** [Derived] E[v] = ι[v] · κ[region] is not evaluated at the photon
+locus. ι is not declared through M at the photon locus (A-11 CLOSED): no
+measurement provenance establishes an inertial-response projection there,
+and the legacy "photon rest mass = 0" imports a definition requiring a
+frame with no declared relational motion — inadmissible in D (SF-PR-16).
+The photon edge carries ε[e] through
+the hc/λ M mapping; ε[e] stands on its own M mapping and does not route
+through ι or κ.
 Photon edge data is therefore a clean Atomic Region observable path that
 does not touch the c²/κ[Primary] admissibility question (Verifier note,
 Bruce Stephenson, session July 2026). See VR-γ-01, validation_record.md.
@@ -1255,7 +1262,7 @@ as invariant reference. Three-tier support classification
 added. EF-7 through EF-10 added. AP-7 through AP-9 added.
 OC-Φ-1 through OC-Φ-6 added.
 
-**V6 → V7:** ι[v] replaces m[v] throughout. Rest mass declared
+**V6 → V7:** ι[v] replaces m[v] throughout. m[v] as primitive declared
 inadmissible (SF-PR-16). ι[v] declared as relational inertia —
 inertial response under declared non-acceleration condition
 (A_persistence = 0 at measurement edge). Primary Region variable
@@ -1300,7 +1307,7 @@ Open conditions register updated: OC-12, OC-13, OC-θ-1,
 OC-θ-2 closed; OC-CA-1 through OC-CA-5, OC-Φ-7, OC-Φ-8,
 OC-R-1, OC-22 added. Companion files declared in header.
 
-**V7 (photon edge addition):** EF-14 through EF-17 added. Atomic Region Layer 3 outputs extended: photon edge ε[e] (14 transitions, NIST ASD v5.12), τ[v] = ℏ/ε[e] (12 edges), N[v] at H n=3 (4.58×10⁶, log₁₀=6.66), 𝟙[e]=1 at all edges confirmed. M mapping hc/λ declared. ι[photon]=0 declared. κ[Primary] non-applicability to photon locus stated (EF-17). OC-γ-1 and OC-γ-2 added to open conditions register. Part 3 Layer 3 reference updated: derived_invariants.rs V2 → V3. Verifier language discipline: "relational field cycles" rejected; replaced with "declared relational intervals over the measured stability interval" (Verifier, session July 2026). Companion file: validation_record.md.
+**V7 (photon edge addition):** EF-14 through EF-17 added. Atomic Region Layer 3 outputs extended: photon edge ε[e] (14 transitions, NIST ASD v5.12), τ[v] = ℏ/ε[e] (12 edges), N[v] at H n=3 (4.58×10⁶, log₁₀=6.66), 𝟙[e]=1 at all edges confirmed. M mapping hc/λ declared. ι not declared through M at photon locus (originally stated as ι[photon]=0; corrected to A-11 CLOSED in Kernel V8 update 2026-09-27). κ[Primary] non-applicability to photon locus stated (EF-17). OC-γ-1 and OC-γ-2 added to open conditions register. Part 3 Layer 3 reference updated: derived_invariants.rs V2 → V3. Verifier language discipline: "relational field cycles" rejected; replaced with "declared relational intervals over the measured stability interval" (Verifier, session July 2026). Companion file: validation_record.md.
 
 **V7 → V7.1 changes:** Primary Region section: transitional note
 added stating why the Primary Region variable set differs from the

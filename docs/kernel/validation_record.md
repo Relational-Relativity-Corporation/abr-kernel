@@ -74,7 +74,8 @@ direct measurement that puts this quantity into D through M?
 ## VR-ι-01 — Primitive Variable: Relational Inertia ι[v]
 
 **Replaces:** VR-m-01 (V1, V2). m[v] declared inadmissible as a primitive
-(SF-PR-16) — rest mass requires a rest frame not observable through M.
+(SF-PR-16) — its definition requires a frame with no declared relational
+motion, which does not exist in D.
 
 **Quantity:** ι[v] = μ[v] · ι_unit, μ[v] ∈ ℝ⁺
 
@@ -555,8 +556,8 @@ separated; row-level support classifications added; "No theoretical imports"
 replaced with "No additional theoretical assumptions beyond declared M";
 CA-1 through CA-4 reformatted.
 
-**V2 → V3:** ι[v] replaces m[v] throughout. VR-m-01 → VR-ι-01. Rest mass
-declared inadmissible (SF-PR-16). ι[v] declared as relational inertia.
+**V2 → V3:** ι[v] replaces m[v] throughout. VR-m-01 → VR-ι-01. m[v] as
+primitive declared inadmissible (SF-PR-16). ι[v] declared as relational inertia.
 Numerical values unchanged. OC-1, OC-2, OC-3 → OC-ι-1, OC-ι-2, OC-ι-3.
 
 **V3 → V4:** VR-γ-01, VR-γ-τ-01, VR-γ-N-01 added. Photon edge functions
@@ -564,11 +565,13 @@ confirmed. OC-γ-1 and OC-γ-2 added. Companion file updated to V3.
 
 **V4 → V5:** Four new invariant validation entries added corresponding to
 derived_invariants.rs V4. VR-T-01 (Tunneling): consequences observed at
-classically suppressed edges; phenomenon not directly observable; three
-confirmed consequence types. VR-S-01 (Superposition): consequences observed
-as interference patterns and outcome distributions; phenomenon not directly
-observable. VR-E-01 (Entanglement): consequences observed as Bell inequality
-violations and bond directionality; phenomenon not directly observable;
+declared transition edges; expression-observed, mechanism-unresolved at
+Primary Region; three confirmed consequence types. VR-S-01 (Superposition):
+consequences observed as interference patterns and outcome distributions;
+expression-observed, mechanism-unresolved at Primary Region. VR-E-01
+(Entanglement): consequences observed as Bell inequality
+violations and bond directionality; expression-observed,
+mechanism-unresolved at Primary Region;
 decoherence as admissible test through M. VR-RE-01 (Relational Evolution):
 monotonic τ[v] ordering confirmed across 29 loci spanning 78 decades;
 Primary Region confirmed as fastest-evolving declared region; 78-decade Φ[v]

@@ -61,8 +61,10 @@
 //
 // ── V1 → V2 Change: ι[v] replaces m[v] throughout ───────────────────────
 //
-// m[v] declared inadmissible as a primitive — it imports rest mass, which
-// requires a rest frame not observable through M (SF-PR-16).
+// m[v] declared inadmissible as a primitive — its definition requires a
+// frame with no declared relational motion, which does not exist in D
+// (SF-PR-16). No locus in D is at rest; a locus with no declared
+// relations is inadmissible.
 //
 // Replacement: ι[v] — relational inertia.
 //
@@ -145,7 +147,7 @@
 //      J[v], 𝟙[e] (OC-12 resolved), θ[e] (OC-θ-1, OC-θ-2 resolved).
 //      Methodological context stated. Separation from operators.rs declared.
 //
-// V2 — ι[v] replaces m[v] throughout. Rest mass declared inadmissible
+// V2 — ι[v] replaces m[v] throughout. m[v] declared inadmissible
 //      (SF-PR-16). ι[v] declared as relational inertia — inertial response
 //      under declared non-acceleration condition through M. Numerical values
 //      unchanged. Standing language discipline declared: "mass" inadmissible
@@ -157,8 +159,8 @@
 //      added as declared M-mapping references (confined to hc/λ mapping;
 //      C_DECLARED is not a named framework variable). epsilon_photon_edge,
 //      tau_photon_edge, n_relational_cycles declared and confirmed.
-//      Five photon edge tests added. ι[photon]=0 stated structurally.
-//      κ[Primary] non-applicability to photon locus confirmed by test.
+//      Five photon edge tests added.
+//      κ[Primary] non-applicability at photon edges confirmed by test.
 //      Input validation note added: debug_assert! is correct for internal
 //      kernel use; consider Result<f64,Error> if functions are later
 //      exposed through a public API (Verifier recommendation, July 2026).
@@ -183,11 +185,17 @@
 //   decoherence_condition. Photon detection wording and I-S "directly
 //   observable" wording revised to separate observation through M from
 //   calculated result.
-//   Verifier findings (V4.3.2 conditional pass) applied: ι[photon] = 0
-//   statements in the photon edge doc and in photon_edge_kappa_non_applicable
-//   marked pending A-11.
+//   A-11 closed: ι[photon] was an import of a legacy quantity (rest mass =
+//   0) whose definition requires a frame with no declared relational motion.
+//   No measurement provenance through M independently establishes ι at the
+//   photon locus. Under the declared-information rule, ι is not evaluated
+//   at photon edges — not evaluated-and-equal-to-zero. E[v] = ι[v]·κ[region]
+//   is therefore not evaluated at photon edges. ε[e] = hc/λ stands on its
+//   own M mapping and does not route through ι or κ.
+//   photon_edge_kappa_non_applicable test rewritten to assert the structural
+//   absence of the ι/κ path, not a numeric identity with a manufactured 0.0.
 //   Held pending audit (no change): 𝟙[e] interpretation; ε[e] (downstream
-//   of 𝟙[e]); ι[photon] = 0 (audit A-11); are_proportional (edge-order
+//   of 𝟙[e]); are_proportional (edge-order
 //   dependence when a Δ vector is 0.0 in every component; documentation
 //   states Δ[e] = k·Δ[f], implementation computes k = vf/ve).
 //   Not applied (Origin wording decision): J[v] "what M observes when it
@@ -370,7 +378,7 @@ pub const E_UNIT: f64 = 1.602_176_634e-19;
 /// The inertial response of the electron to a declared applied contrast
 /// under confirmed non-acceleration through M.
 ///
-/// Replaces M_UNIT_ELECTRON (V1). Rest mass framing inadmissible (SF-PR-16).
+/// Replaces M_UNIT_ELECTRON (V1). m[v] as primitive inadmissible (SF-PR-16).
 /// Numerical value unchanged. Within the declared framework, the observable
 /// admitted through the declared measurement mapping M is represented by ι[v].
 /// The numerical value carries forward from the measurement record;
@@ -417,7 +425,7 @@ pub const C_DECLARED: f64 = 2.997_924_58e8;
 // declared edge e, gated by the detection indicator 𝟙[e].
 //
 // ι[v]: inertial response under declared non-acceleration condition through M.
-// Replaces m[v] throughout. Rest mass inadmissible (SF-PR-16).
+// Replaces m[v] throughout. m[v] as primitive inadmissible (SF-PR-16).
 //
 // 𝟙[e] = 1 iff R(A(x))[e]_antisymmetric ≠ 0  (OC-12, resolved).
 // Symmetric modes: R antisymmetry cancels → 𝟙[e] = 0 → IR inactive.
@@ -488,11 +496,16 @@ pub fn detection_indicator(r_antisymmetric_e: f64, tol: f64) -> f64 {
 // The formula hc/λ is part of M at the Atomic Region. No theoretical
 // assumptions beyond the declared measurement mapping M.
 //
-// ι[photon] = 0 — the photon locus has no inertial response through M.
-// The form E[v] = ι[v] · κ[region] does not apply here.
-// Kernel V8 HOLD (audit A-11): whether ι[photon] is a projected value of 0.0
-// or is not declared through M is to be determined from the measurement
-// provenance that established it. Not changed.
+// ι at the photon locus: not declared through M (A-11 CLOSED).
+// No measurement provenance independently establishes an inertial-response
+// projection at the photon locus. The legacy quantity "photon rest mass = 0"
+// imports a definition (mass in the frame where the locus is at rest) that
+// requires a frame with no declared relational motion — inadmissible in D
+// for the same structural reason that retired m[v] as a primitive (SF-PR-16).
+// Under the declared-information rule, ι is not evaluated at photon edges —
+// not evaluated-and-equal-to-zero. E[v] = ι[v] · κ[region] is therefore
+// not evaluated at photon edges. ε[e] = hc/λ stands on its own M mapping
+// and does not route through ι or κ.
 //
 // 𝟙[e] = 1 at all declared photon edges. Photon detection is the
 // observation through M; R(A(x))[e]_antisymmetric ≠ 0 is the calculated
@@ -533,8 +546,9 @@ pub fn detection_indicator(r_antisymmetric_e: f64, tol: f64) -> f64 {
 /// # Declared admissibility
 /// λ must be traceable to an instrument report through M (spectrometer).
 /// The formula hc/λ is part of M. No additional theoretical assumptions.
-/// This expression is an edge quantity, not ι[v] · κ[region].
-/// ι[photon] = 0 is pending audit A-11 (see HOLD above); not established here.
+/// This expression is an edge quantity. ι is not declared through M at
+/// the photon locus (A-11 closed); E[v] = ι[v] · κ[region] is not
+/// evaluated at photon edges.
 pub fn epsilon_photon_edge(lambda_m: f64) -> f64 {
     debug_assert!(lambda_m > 0.0, "λ must be positive — declared from instrument through M");
     H_PLANCK * C_DECLARED / lambda_m
@@ -658,7 +672,7 @@ pub fn equilibrium_bond_angle_deg(n_bonds: usize) -> Option<f64> {
 // Support: Observed throughout (formal derivation OC-Φ-1 pending).
 //
 // ι[v]: relational inertia under declared non-acceleration through M.
-// Replaces m[v] (V1). Rest mass inadmissible (SF-PR-16).
+// Replaces m[v] (V1). m[v] as primitive inadmissible (SF-PR-16).
 // Numerical values unchanged — PDG inertia values carry forward as ι[v].
 //
 // Scale and domain invariant. Confirmed across 29 declared loci spanning
@@ -1037,24 +1051,26 @@ mod tests {
     }
 
     #[test]
-    fn photon_edge_kappa_non_applicable() {
-        // Kernel V8 PENDING A-11: this test supplies ι[photon] = 0.0, the
-        // interpretation held open in the photon edge section. Mathematics
-        // retained unchanged pending review of the measurement provenance
-        // that established ι[photon]. Passing this test does not establish
-        // ι[photon] = 0.
-        // ι[photon] = 0. E[v] = ι[v] · κ[Primary] does not apply at photon locus.
-        // ε[e] is real and nonzero; ι[photon] · κ[Primary] = 0. Structurally distinct.
-        let iota_photon: f64 = 0.0;
+    fn photon_edge_iota_not_declared() {
+        // A-11 CLOSED. ι is not declared through M at the photon locus.
+        // No measurement provenance establishes an inertial-response
+        // projection there. The legacy "photon rest mass = 0" imports a
+        // definition requiring a frame with no declared relational motion,
+        // inadmissible in D (SF-PR-16).
+        //
+        // This test confirms the structural situation:
+        //   1. ε[e] = hc/λ is real and nonzero — it stands on its own
+        //      M mapping and does not route through ι or κ.
+        //   2. No ι value is supplied, consumed, or tested — because
+        //      ι is not declared through M at photon edges.
+        //   3. E[v] = ι[v] · κ[region] is not evaluated here.
         let lambda_m = 656.279e-9_f64;
         let eps = epsilon_photon_edge(lambda_m);
-        assert!(eps > 0.0, "photon edge carries ε[e] > 0");
-        let kappa_primary = 8.988e16_f64;
-        let e_from_iota_kappa = iota_photon * kappa_primary;
-        assert!((e_from_iota_kappa).abs() < 1e-30,
-            "ι[photon]·κ[Primary] = 0; does not equal ε[e]");
-        assert!((eps - e_from_iota_kappa).abs() > 1e-20,
-            "ε[photon edge] must not equal ι[photon]·κ[Primary]");
+        assert!(eps > 0.0,
+            "photon edge carries ε[e] > 0 from its own M mapping (hc/λ)");
+        // No ι variable declared. No κ product computed. The absence is
+        // the test: epsilon_photon_edge takes λ only and returns ε[e]
+        // without any inertia or regional-constant input.
     }
 }
 // ═══════════════════════════════════════════════════════════════════════════

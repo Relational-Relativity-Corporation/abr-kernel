@@ -64,7 +64,7 @@ lifetime. It is the inverse of the relational field magnitude.
 field magnitude at the declared locus.
 
 ι[v] — relational inertia — replaces m[v] throughout this document.
-Rest mass declared inadmissible (SF-PR-16). ι[v] is the inertial
+m[v] as primitive declared inadmissible (SF-PR-16). ι[v] is the inertial
 response of a declared locus under the declared non-acceleration
 condition through M. Numerical values unchanged. Within the
 declared framework, the observable admitted through M is
@@ -228,7 +228,7 @@ references through M.
 | Muon | 1.884×10⁻²⁸ | 1.692×10⁻¹¹ | 8.988×10¹⁶ | Yes |
 
 *ι[v] values from PDG 2024 under declared non-acceleration
-condition through M. Replaces m[v] (V1). Rest mass inadmissible
+condition through M. Replaces m[v] (V1). m[v] as primitive inadmissible
 (SF-PR-16). Numerical values unchanged.*
 
 κ[Primary] = 8.988×10¹⁶ J/kg = c² is internally consistent across four
@@ -315,24 +315,21 @@ motivated those quantities.
 
 ## Photon edges and κ[region]
 
-### ι[photon] = 0 — the photon locus is not an inertial locus
+### ι at the photon locus — not declared through M (A-11 CLOSED)
 
 The cross-region energy expression E[v] = ι[v] · κ[region] holds for
 declared inertial loci: loci whose inertial response is traceable through
 M under the declared non-acceleration condition (A_persistence = 0 at
 the measurement edge). The photon locus does not satisfy this condition.
-No inertial response of the photon is traceable through M. ι[photon] = 0
-by declaration.
+No measurement provenance independently establishes an inertial-response
+projection at the photon locus. The legacy quantity "photon rest mass = 0"
+imports a definition (mass in the frame where the locus is at rest) that
+requires a frame with no declared relational motion — inadmissible in D
+for the same structural reason that retired m[v] as a primitive (SF-PR-16).
 
-*Kernel V8 HOLD (audit A-11):* under the Kernel V8 declared-information
-rule, a quantity with no measurement traceable through M is not declared,
-and an operator requiring it is not evaluated; no substitute value is
-introduced. The provenance recorded here — no inertial response traceable
-through M, with 0 assigned by declaration — indicates that ι[photon] is not
-declared through M rather than measured as 0.0. The consequence stated
-below (E[v] = ι[v] · κ[region] does not apply at the photon locus) holds
-under either reading. The determination is pending Origin and Verifier
-disposition of A-11; the text is unchanged.
+Under the Kernel V8 declared-information rule, ι is not evaluated at the
+photon locus — not evaluated-and-equal-to-zero. No substitute value is
+introduced.
 
 Consequence: the form E[v] = ι[v] · κ[region] does not apply at the
 photon locus. κ[region] is not computable from photon edge data alone.
@@ -342,7 +339,7 @@ NIST ASD v5.12; it is an edge quantity, not a node quantity of the form
 
 ### Photon edges as a clean Atomic Region observable path
 
-Because ι[photon] = 0, photon edge data does not generate a κ[Atomic]
+Because ι is not declared through M at the photon locus, photon edge data does not generate a κ[Atomic]
 candidate. The 14 confirmed Atomic Region photon edge transitions
 (VR-γ-01, validation_record.md) extend the observable record at the
 Atomic Region without touching the κ[Primary] = c² admissibility question.
@@ -413,7 +410,7 @@ discretely across regions (connected to OC-Φ-2).
 
 **OC-E-5:** Derivation of κ[Primary] from operator expressions
 acting on Primary Region declared structure — without using
-observed rest mass energies as input. This would establish
+observed ι[v] · c² energies as input. This would establish
 the regional energy scale as a consequence of the operator
 framework rather than a confirmed measurement reference.
 
@@ -450,11 +447,11 @@ Confirmed across 11 Primary and Atomic Region loci.
 
 ---
 
-**V4.1 → Kernel V8 changes (2026-09-26):** Companion file references updated to the Kernel V8 documents (unversioned file names); session_findings_primary_region_v1.md noted as not held in this repository. The README previously listed this document as V4.2 for the same reference update; no V4.2 was written. τ_stability[v] described as taken from the measurement record through M rather than "directly observable"; "Energy ... is not directly observable through M" restated as "M does not report energy as such". A-11 hold note added at ι[photon] = 0, recording that the stated provenance (no inertial response traceable through M; 0 by declaration) bears on the A-11 determination. No mathematical content changed. Kernel release numbering (Origin declaration): this document's own numbering ends at V4.1.
+**V4.1 → Kernel V8 changes (2026-09-26, updated 2026-09-27):** Companion file references updated to the Kernel V8 documents (unversioned file names); session_findings_primary_region_v1.md noted as not held in this repository. The README previously listed this document as V4.2 for the same reference update; no V4.2 was written. τ_stability[v] described as taken from the measurement record through M rather than "directly observable"; "Energy ... is not directly observable through M" restated as "M does not report energy as such". A-11 closed: ι at the photon locus was an import of the legacy quantity "photon rest mass = 0," whose definition requires a frame with no declared relational motion — inadmissible in D (SF-PR-16). Under the declared-information rule, ι is not evaluated at photon edges. Section heading and body revised accordingly. No mathematical content changed. Kernel release numbering (Origin declaration): this document's own numbering ends at V4.1.
 
 **Historical document-local revision history — predates unified Kernel V8 release numbering.** The entries below record this document's own revisions; their version numbers are document-local, not kernel release versions.
 
-**V2:** ι[v] replaces m[v] throughout. Rest mass declared
+**V2:** ι[v] replaces m[v] throughout. m[v] as primitive declared
 inadmissible (SF-PR-16). ι[v] declared as relational inertia —
 inertial response under declared non-acceleration through M.
 Numerical values unchanged. Within the declared framework, the
@@ -465,7 +462,9 @@ E[v] · Φ_relational[v] = ι[v] · ℏ. All Φ expressions updated.
 κ[Primary] = E[v]/ι[v] confirmed unchanged. Companion files
 updated to V2/V3/V7. Document belongs in active_kernel_v7/.
 
-**V3:** Photon edge section added — ι[photon]=0 declared;
+**V3:** Photon edge section added — ι not declared through M at photon
+locus (originally stated as ι[photon]=0; corrected to A-11 CLOSED in
+Kernel V8 update 2026-09-27);
 E[v]=ι·κ non-applicability to photon locus stated; 14-transition Atomic
 Region confirmation noted (VR-γ-01, validation_record_v4.md); κ[Atomic]
 path through ι[emitting locus] declared as open program (OC-E-2).
