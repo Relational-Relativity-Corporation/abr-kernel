@@ -141,8 +141,9 @@ This criterion applies without exception to all mathematical quantities in Gener
 
 ### Standing Language Discipline — ι[v] (declared this session)
 
-"mass" is inadmissible as a primitive within D. Rest mass requires a rest
-frame not observable through M (SF-PR-16).
+"mass" is inadmissible as a primitive within D. Its definition requires a
+frame with no declared relational motion, which does not exist in D
+(SF-PR-16).
 
 Replacement: ι[v] — relational inertia. The inertial response of a declared
 locus to an applied contrast at a declared measurement edge, under the
@@ -182,6 +183,6 @@ interpretation changes.
 
 **V7 → V8 changes:** Step 4 (Revise): termination and publication sub-step added — the pass repeats until PASS as defined in `triad-constraint-methods.md`; qualified verdicts named as non-PASS; Origin obligations O1 (iterate to PASS, declining refinements only on the record) and O2 (read every pass in full, no summaries substituted) stated; publication gate referenced. Added because `triad-constraint-methods.md` was committed to the kernel without a cross-reference from this document, leaving two workflow authorities uncoupled.
 
-**V8 → V8.1 changes:** Verification and Validation Protocol: conformance and correspondence named as the error classes the two terms partition; stated that no internal check reaches correspondence and that a gate PASS carries no correspondence claim. Step 2 (Generate): kernel-selection point cross-referenced to OC-ρP-1 and OC-ρP-2 in `operators_notation_and_constraint.md`, including the declaration-imposed ceiling on ρ_P.
+**V8 → V8.1 changes:** Verification and Validation Protocol: conformance and correspondence named as the error classes the two terms partition; stated that no internal check reaches correspondence and that a gate PASS carries no correspondence claim. Step 2 (Generate): kernel-selection point cross-referenced to OC-ρP-1 and OC-ρP-2 (both since retired; the full-operator admissibility condition replaced the ρ_P criterion — see Kernel V8 entry above).
 
 **Declined refinement, recorded under O1.** The Verifier observed that projection discipline — "apply any projection as a declared one, state what it preserves and what it discards" — may eventually warrant its own subsection here rather than a single sentence in Step 2. Declined for this revision. Rationale: C is fully specified in `operators_notation_and_constraint.md`, which is the operator authority. Expanding it here would place a second specification of projection discipline in a second document, which is a cross-artifact consistency risk of exactly the class that produced the B accumulation-depth contradiction. The single sentence in Step 2 is a workflow instruction pointing at that authority, and that is the correct division. If projection declarations later acquire structure beyond what the C entry specifies — typed projections, a projection register, per-projection provenance — that structure belongs in the operator authority first, and this document gains a pointer to it rather than a parallel account. Revisit when that condition is met.
