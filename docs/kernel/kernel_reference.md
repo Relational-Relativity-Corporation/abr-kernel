@@ -382,3 +382,72 @@ a frame with no declared relational motion — inadmissible in D for the same
 structural reason that retired m[v] as a primitive (SF-PR-16). Under the
 declared-information rule, ι is not evaluated at photon edges. ε[e] = hc/λ
 stands on its own M mapping. Photon edge ε[e] entry in Part I table updated.
+
+
+---
+
+## 11. Declaration sufficiency and experimental acquisition
+
+### Declaration sufficiency
+
+Declaration is sufficient when the quantities, relations, mappings, and
+parameters required for the next mathematical operation are traceable to the
+bounded observable record through M.
+
+Do not require additional declarations for distinctions that do not alter the
+operation being evaluated, its provenance, the declared topology or admissible
+direction, or the interpretation of its result.
+
+A bounded experimental domain does not require exhaustive characterization
+outside its declared scope. When D is declared for a particular system,
+instrument, run set, observation interval, or other bounded record, quantities
+outside that declared scope are not missing declarations for that analysis.
+
+Where information required by an operator will be established by an
+observation that has not yet been made, do not introduce a substitute,
+provisional value, additional reduction, or artificial observational state
+solely to permit the operator to run. Acquire and preserve the observation
+first. Until the required information is declared through M, only the
+dependent operator is not evaluated.
+
+**No declaration, no evaluation is local to the operation requiring the
+declaration. It does not require every possible property of the system to be
+declared before other adequately declared observations, mappings, or
+operations may proceed.**
+
+### Verification proportionality
+
+A blocking Verification finding requires an unresolved issue that can
+materially affect at least one of the following:
+
+1. an operator input or mathematical result;
+2. provenance from an observable through M;
+3. the declared topology or admissible direction;
+4. correspondence between the implementation and the declared mathematics; or
+5. the interpretation of a calculated result as an observable.
+
+Additional precision that does not materially affect one of these conditions
+is a documentation refinement, not a blocking Verification finding.
+
+Verification does not require expansion of a bounded declaration merely
+because further distinctions could be made. The Verifier applies the criterion
+in Section 8 to the calculation actually declared.
+
+### Observation before parameterization
+
+When an M-declared operator parameter depends on the bounded observations being
+acquired, acquisition of those observations may precede declaration of that
+parameter. The observational record is preserved and frozen first; the
+parameter is then declared through M before the operator requiring it is
+evaluated.
+
+This ordering does not authorize fitting, tuning, or selection to obtain a
+preferred operator result. The parameter declaration must be fixed from the
+bounded observable record before the dependent operator is evaluated.
+
+---
+
+**Kernel V8 clarification (2026-09-28):** Section 11 was appended at Origin's
+request to clarify declaration sufficiency, proportional Verification, and the
+ordering of experimental acquisition and parameter declaration. No preceding
+Kernel Reference text was removed or modified.
