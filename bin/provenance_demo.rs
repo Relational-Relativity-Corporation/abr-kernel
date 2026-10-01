@@ -31,7 +31,7 @@
 //
 // Bounded over D. No claim beyond D.
 
-use metatron_kernel_v8::derived_invariants::{epsilon_photon_edge, H_PLANCK, C_DECLARED};
+use abr_kernel::derived_invariants::{epsilon_photon_edge, H_PLANCK, C_DECLARED};
 
 /// A provenance-carrying wrapper around a single ε[e] computation.
 ///

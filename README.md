@@ -37,7 +37,7 @@ cargo test
 cargo run --bin provenance_demo
 ```
 
-`cargo test` runs 61 library tests (`metatron_kernel_v8`) and 3
+`cargo test` runs 61 library tests (`abr_kernel`) and 3
 `provenance_demo` tests. `cargo run --bin provenance_demo` prints the
 H-alpha photon edge reconstruction described below.
 
@@ -247,8 +247,9 @@ declared source.
 ### Kernel V8 (2026-09-26)
 
 Kernel V8 is one release across every file: code, kernel documents, process
-documents, and this README. The crate is `metatron_kernel_v8`, package
-version 8.0.0.
+documents, and this README. The package is `abr-kernel` (library crate `abr_kernel`), package
+version 8.0.0. Renamed from `metatron_kernel_v8` on 2026-10-01; no
+operator formula changed.
 
 **Declarations carried into every file:**
 - Observable → M → numerical projection in D → operators → calculated

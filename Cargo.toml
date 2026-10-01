@@ -1,11 +1,11 @@
 [package]
-name = "metatron_kernel_v8"
+name = "abr-kernel"
 version = "8.0.0"
 edition = "2021"
 description = "ABR relational kernel — Primary (Delta -> Sigma) and ABR (A -> B -> R). Bounded over D. No claim beyond D."
 
 [lib]
-name = "metatron_kernel_v8"
+name = "abr_kernel"
 path = "src/lib.rs"
 
 [[bin]]
