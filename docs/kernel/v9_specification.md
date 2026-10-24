@@ -1,7 +1,7 @@
-# Kernel V9 — Specification (Second Milestone)
+# Kernel V9 — Specification (Third Milestone)
 
 **Metatron Dynamics, Inc.**  
-Kernel V9 specification. Second milestone: Relational Primitive Provenance Invariant.  
+Kernel V9 specification. Third milestone: Origin declaration and admission interface design.  
 Bounded over D. No claim beyond D.
 
 ---
@@ -10,16 +10,13 @@ Bounded over D. No claim beyond D.
 
 This document is the governing specification for Kernel V9 development.
 
-The **second V9 milestone** establishes the Relational Primitive Provenance
-Invariant (RPPI) — the governing requirement that every admitted mathematical
-variable, quantity, operation, and result must have a continuous, verifiable
-provenance path to an Origin-declared observable relation within D.
-
-The first milestone (specification and conformance test suite, commit `1a54d08`)
-documented the executable relation definition and the provenance survival gap.
-This milestone names the invariant, distinguishes provenance identity from
-provenance derivation, defines the four RPPI failure modes, and establishes the
-IRRS rejection requirement.
+**Milestone history:**
+- Milestone 1 (commit `1a54d08`): Executable relation definition and conformance test suite.
+- Milestone 2 (commit `ee46735`): RPPI established; four failure modes defined; RPPI
+  conformance tests added. Verifier accepted 2026-10-24.
+- **Milestone 3 (this document):** Origin declaration of relational identity and derivation
+  requirements. Declaration record / calculation record distinction established.
+  V9 admission interface design. No operator modifications.
 
 Work proceeds on the `kernel-v9` branch. No change is merged to `main` without
 Verifier review.
@@ -45,15 +42,44 @@ Verifier review.
 | **Provenance label** | Describes a category of relation. Does not constitute a derivation path. Does not establish that any admitted result traces to a declared observable. | `EdgeProvenance::Continuation` — names a class; not a record. |
 | **Provenance record** | Complete enough that every admitted result can be traced through every contributing mathematical input to a declared observable relation. Establishes derivation; does not merely name it. | `ObservableRelationDeclaration` with `observable_source`, `direction_basis`, `m_mapping_ref` — the target of Milestone 3. |
 
-This distinction guards against undeclared abstractions entering the mathematical
-treatment without prohibiting useful, simple numerical representations. A variable
-need not be complex; its representation can be simple, provided its derivation from
-the observable relational primitive is established through a complete record, not
-asserted through a label.
+---
 
-**Next milestone:** Origin declaration of the relational identity and derivation
-requirements, followed by a separate V9 admission interface design. See §10 for
-the updated milestone order.
+## Origin Declaration — Milestone 3 (2026-10-24)
+
+The following seven requirements are hereby authorized by Origin as governing
+constraints for Kernel V9. They supersede and incorporate all prior OPEN conditions
+on relational identity and derivation. No implementation proceeds without each
+requirement either closed by Origin declaration or explicitly held OPEN.
+
+**Req-1 Relational origin:** Every admitted value traces to one or more declared
+observable relations within D. A numerical value is a representation, not an
+independently admitted primitive.
+
+**Req-2 Mapping identity:** Every projection identifies the M that produced it,
+the relevant input relations, and its declared domain.
+
+**Req-3 Direction:** Direction is established by a declared relational distinction,
+not inferred from index ordering.
+
+**Req-4 Complete derivation:** Every operator output retains the identities of all
+contributing values, relations, mappings, and applicable declared parameters.
+
+**Req-5 Admission boundary:** V9 admits complete derivation records through a
+separate interface. Existing V8 constructors and operators remain unchanged.
+
+**Req-6 Independent verification:** IRRS checks the actual derivation structure
+against the declarations, rather than trusting a provenance label or the Generator's
+account of execution.
+
+**Req-7 Open conditions:** Missing or unverifiable provenance remains OPEN and
+cannot be admitted as established.
+
+**Simulated observations:** Simulated observations may be admitted, provided their
+simulated origin is declared. A valid simulated derivation does not become empirical
+evidence merely because its provenance is complete.
+
+**Milestone 3 scope:** The next milestone produces an interface design and
+executable conformance criteria. No operator modifications.
 
 ---
 
@@ -69,6 +95,9 @@ The following are **frozen**. They must not be modified in any V9 milestone:
 - `NodeField` finite-projection enforcement.
 - `PersistenceState::from_prior` — no cold-start constructor added.
 
+This is consistent with Req-5: V8 constructors and operators are unchanged.
+V9 adds a separate admission interface alongside them, not replacing them.
+
 Conformance: all `[V8-BASELINE]` tests in `tests/v9_conformance.rs` must
 pass without modification to operator code.
 
@@ -80,7 +109,7 @@ pass without modification to operator code.
 
 > Every admitted mathematical variable, quantity, operation, and result must
 > have a continuous, verifiable provenance path to an Origin-declared observable
-> relation within D.
+> relation within D. (Req-1)
 
 A variable need not itself be complex. Its mathematical representation can be
 simple, provided its derivation from the observable relational primitive is
@@ -90,7 +119,7 @@ established.
 
 > No mathematical result can be admitted solely on numerical correctness,
 > structural validity, or named provenance. Its derivation must terminate in
-> declared observable relations.
+> declared observable relations. (Req-7)
 
 This invariant is constitutive, not supplementary. The foundational primitive is
 "a directed relation declared from observable information." Provenance is not an
@@ -102,11 +131,11 @@ without provenance derivation is a number, not a projection through M.
 
 | Requirement | Question answered | What it is NOT |
 |---|---|---|
-| **Provenance identity** | Which observable relation was declared, through which M, with which direction basis? | An `EdgeProvenance` class (Continuation, Coupling, Persistence) is NOT a provenance identity. It is a provenance label — it describes a category; it does not identify a declared observable. |
-| **Provenance derivation** | How does this variable or result trace back to that identity, through every contributing mathematical input and through M and authorized operators only? | Numerical correctness is NOT derivation. Structural validity is NOT derivation. A provenance label is NOT derivation — it describes but does not establish. |
+| **Provenance identity** | Which observable relation was declared, through which M (Req-2), with which direction basis (Req-3)? | An `EdgeProvenance` class (Continuation, Coupling, Persistence) is NOT a provenance identity. It is a provenance label — it describes a category; it does not identify a declared observable. |
+| **Provenance derivation** | How does this variable or result trace back to that identity, through every contributing mathematical input (Req-4), through M and authorized operators only? | Numerical correctness is NOT derivation. Structural validity is NOT derivation. A provenance label is NOT derivation — it describes but does not establish. |
 
 Both requirements must be satisfied for admission. A result that satisfies only
-one is inadmissible.
+one is inadmissible (Req-7).
 
 **The record/label boundary (Verifier disposition, 2026-10-24):**
 
@@ -117,341 +146,373 @@ declared observable relations. A **provenance label** merely describes a categor
 
 ---
 
-## 3. Provenance Identity — ObservableRelationDeclaration
+## 3. Declaration Record and Calculation Record
 
-An admitted observable relation is identified by an `ObservableRelationDeclaration`
-(working name — subject to Verifier review before implementation). This is the
-formal record of an Origin-declared observable relation within D.
+Origin declares two distinct record types (Req-4, Req-6). They have distinct
+authors, distinct contents, and distinct verification roles.
 
-Under V9, every edge in `DeclaredRelations` carries one.
+**Declaration record:** Identifies what Origin admitted as observable and how
+it was mapped. Records the observable, the M that mapped it, the relevant
+input relations, and the declared domain. Set at construction time, before
+any operator runs. Origin is the author.
 
-**Required fields:**
+**Calculation record:** Records what the operators actually used and produced.
+Records the actual input values used, the relations traversed, the operator
+parameters applied (ρ_base, χ₀, cc), and the outputs computed. Generated at
+computation time by the operators. The Generator is the author.
 
-| Field | Description | Status |
+| Property | Declaration record | Calculation record |
 |---|---|---|
-| `observable_source` | A named reference to the specific observable or physical measurement from which this relation was declared through M. Not a class — a specific named declaration (e.g., "H-alpha spectroscopic edge, loci i=3 → i=4, declared 2026-09-26", not "Continuation"). | **OPEN** — returned to Origin for declaration |
-| `direction_basis` | A named reference to the observable basis that establishes which end is source and which is target. Not index order. | **OPEN** — returned to Origin for declaration |
-| `m_mapping_ref` | A reference to the declared M mapping that projects this observable into D. Required for fabrication detection: an `observable_source` that cannot be verified against a declared M is inadmissible. | **OPEN** — returned to Origin for declaration |
+| Author | Origin | Generator (operator execution) |
+| Set at | Construction time, before operators run | Computation time, during operator execution |
+| Contents | Observable identity, M identity, input relations, declared domain | Actual input values, relations used, parameters applied, outputs produced |
+| Verifiable against | Origin's stated declarations | Declaration records — IRRS checks (Req-6) |
+| Current V8 analog | `DeclaredRelations` (partially — class, not identity) | **Absent** — this is the structural gap |
 
-These three fields together constitute the provenance identity of the relation.
+**What independent verification requires (Req-6):**
 
-**Without an `ObservableRelationDeclaration`:** a relation carries a class but
-not an identity. It is not an admitted observable relation — it is a fabrication
-within D. Its loci have no standing. Any variable derived from it has no
-derivation path to a declared observable.
+IRRS does not accept the Generator's summary of what was computed. It checks the
+calculation record's inputs against the declaration records directly:
+- Every input value in the calculation record must trace to a declaration record
+  (Req-1, Req-2).
+- The direction used in computation must match the declared direction basis (Req-3).
+- Parameters used (ρ_base, χ₀, cc) must match the M-declared values.
+- If any input is unverifiable against a declaration record, the result is OPEN (Req-7).
 
-**Current state:** `EdgeProvenance` records the class only. The three fields
-above do not exist in the current API. Their precise representation — struct
-definition, field types, constructor changes — is an implementation decision
-returned to Origin as a declaration requirement (§7, OPEN Conditions).
+**What this is not:**
+
+The Generator does not certify its own execution. A provenance label on the output
+("this was produced by a Continuation operator") is not an alternative to a
+calculation record checked against declaration records. Labels describe; records
+establish.
+
+**Simulated observations:**
+
+A simulated observation may have a complete declaration record (its simulated
+origin is declared) and a complete calculation record (its derivation traces
+correctly). Completeness does not change epistemic status: a simulated derivation
+does not become empirical evidence. IRRS admits it as a valid computation over a
+declared simulated observable — not as an observation of D.
 
 ---
 
-## 4. Provenance Derivation Contract
+## 4. Provenance Identity — ObservableRelationDeclaration
+
+An admitted observable relation is identified by an `ObservableRelationDeclaration`
+(working name — subject to Verifier review before implementation). This is the
+**declaration record** for a single declared edge: the formal record of what
+Origin admitted as an observable relation within D.
+
+Under V9, every edge in `DeclaredRelations` carries one.
+
+**Required fields (each corresponds to an Origin declaration requirement):**
+
+| Field | Requirement | Description | Status |
+|---|---|---|---|
+| `observable_source` | Req-1, Req-2 | The specific named observable from which this relation was declared through M. Not a class. A specific declaration: names the observable and the date of admission. | **OPEN** — returned to Origin for field definition |
+| `direction_basis` | Req-3 | The declared relational distinction that establishes which end is source and which is target. Not index order. | **OPEN** — returned to Origin for field definition |
+| `m_mapping_ref` | Req-2 | The declared M mapping (O → D) that projected this observable into D. Required for Req-6: IRRS checks the actual mapping used against this declaration. | **OPEN** — returned to Origin for field definition |
+| `declared_domain` | Req-2 | The declared domain of this projection — the subset of D into which this observable was admitted. | **OPEN** — returned to Origin for field definition |
+
+These fields together constitute the declaration record for one declared edge. Without
+them, a relation carries a class but not an identity. Its loci have no standing.
+Any variable derived from it has no declaration record to check against.
+
+**NodeField declaration record (Req-1, Req-2):**
+
+Every value in `NodeField` is a projection through M of an observable at a locus.
+Under the RPPI, each value must also carry a declaration record: the M that projected
+it, the observable it represents, and the locus at which it was declared.
+
+Currently `NodeField::new` enforces finiteness only. Under V9, a declared `NodeField`
+value is not merely a finite number — it is a declared projection through M. The
+declaration record for each value is an OPEN condition (see §8).
+
+**Current state:** `EdgeProvenance` records the class only. The `ObservableRelationDeclaration`
+fields do not exist in the current API. Their precise representation is returned to
+Origin as declaration requirements (§8, OPEN Conditions).
+
+---
+
+## 5. Provenance Derivation Contract
 
 Provenance derivation is the chain from a variable, quantity, or result back
 to its provenance identity, through every contributing mathematical input,
-through M and authorized operators only.
+through M and authorized operators only (Req-4).
 
-**Every contributing mathematical input** means the derivation path must be
-complete. For an operator output `Δ(x)[e]`, traceability requires:
-- The provenance identity of edge `e` (which observable relation was declared), and
-- The declared M-mapping origin of each NodeField value (`x[src]` and `x[tgt]`)
-  that was the numerical input to the operator.
+**Every contributing mathematical input (Req-4):**
 
-It is not sufficient to record edge provenance if the NodeField values that
-were operated on are themselves ungrounded — numbers admitted without a declared
-M-mapping origin. The derivation path must terminate in declared observable
-relations at every input, not only at the edge declaration.
+Traceability is not limited to edge provenance. For an operator output `Δ(x)[e]`,
+a complete derivation record includes:
+- The declaration record of edge `e` (which observable relation was declared), and
+- The declaration record of each NodeField value (`x[src]`, `x[tgt]`) — which M
+  projected them, from which observable, at which locus.
+
+Edge provenance alone is insufficient if the NodeField values are ungrounded.
+The derivation must trace every contributing input.
 
 **A derivation path is continuous** when every step is either:
-- A declared M mapping (O → D), or
+- A declared M mapping (O → D) with a declaration record, or
 - An authorized operator application (Δ, Σ, A, B, R) acting on values that
-  are themselves already grounded through declared M mappings.
+  themselves have declaration records — and when the resulting calculation record
+  retains those declaration records.
 
 **A derivation path is broken** when it passes through any value whose origin
-is asserted rather than traced. This includes:
-- Operator outputs that carry no reference to the provenance of their inputs
-  (the current state — documented in §5.3).
-- NodeField values declared by numerical assignment without a declared M-mapping
-  origin (currently: `NodeField::new` enforces finiteness only, not M-mapping
-  origin — an OPEN condition, see §7).
+is asserted rather than traced (Req-7). This includes:
+- Operator outputs that carry no calculation record (the current state — §6.3).
+- NodeField values admitted without a declaration record (currently: `NodeField::new`
+  enforces finiteness only — OPEN condition, §8).
 - Results composed from inputs of mixed relational origin without a record
   of which origin contributed each part.
 
 ### Current state (V8)
 
-| Output type | Carries provenance identity? | Carries derivation reference? |
-|---|---|---|
-| `PrimaryEdgeField` (Δ, Σ output) | No | No |
-| `EdgeField` (A, B, R output) | No | No |
-| `DeclaredRelations` | Class only (identity: OPEN) | N/A — this is the declared source |
-
-No operator output can currently satisfy the derivation requirement from its
-type alone. The verifier bridges the gap by retaining `(DeclaredRelations,
-output)` as a pair — but this is external coupling, not derivation carried in
-the output.
+| Output type | Carries declaration record? | Carries calculation record? | Independent verification possible? |
+|---|---|---|---|
+| `PrimaryEdgeField` (Δ, Σ output) | No | No | Only with externally retained `DeclaredRelations` |
+| `EdgeField` (A, B, R output) | No | No | Only with externally retained `DeclaredRelations` |
+| `DeclaredRelations` | Partial (class only; identity OPEN) | N/A — this is the declared source | Partial |
+| `NodeField` | No | N/A — this is an input | Not from type alone |
 
 ### V9 requirement
 
-Each operator output must carry a derivation reference enabling tracing of
-every output entry back to the provenance record of the edge(s) and the
-M-mapping origin of every input value that produced it:
+Each operator output must carry a **calculation record** that retains all of the
+following (Req-4), enabling independent verification against declaration records (Req-6):
 
-| Output | Derivation requirement |
+| Output | Calculation record must retain |
 |---|---|
-| `Δ(x)[e]` | Provenance record of edge `e`; declared M-mapping origin of `x[src]` and `x[tgt]` |
-| `Σ(Δ(x))[e]` | Provenance record of edge `e` and its adj⁺/adj⁻ contributing edges; M-mapping origins of all contributing `x` values |
-| `A(x)[e]` | Provenance record of edge `e`; declared M-mapping origin of each `x[i]` that contributed |
-| `B(A(x))[e]` | Provenance records and M-mapping origins of all A-output entries that contributed |
-| `R(B(A(x)))[e]` | Provenance records and M-mapping origins of all B-output entries that contributed |
+| `Δ(x)[e]` | Declaration record of edge `e`; declaration records of `x[src]` and `x[tgt]` |
+| `Σ(Δ(x))[e]` | Declaration records of edge `e` and adj⁺/adj⁻ contributing edges; declaration records of all contributing `x` values; declared parameters (ρ_base, χ₀) |
+| `A(x)[e]` | Declaration record of edge `e`; declaration records of each `x[i]` that contributed |
+| `B(A(x))[e]` | Calculation records of all A-output entries that contributed |
+| `R(B(A(x)))[e]` | Calculation records of all B-output entries that contributed; declared parameters (ρ, cc) |
 
-**V9 adds** `ProvenancedOutput<T>` (working name) — a wrapper over the existing
-field types that carries an edge-indexed reference to the `ObservableRelationDeclaration`
-of each contributing edge:
+**V9 adds** `ProvenancedOutput<T>` (working name) — a wrapper over the existing field
+types that carries the full calculation record for each output entry:
 
 ```
 ProvenancedOutput<T> {
-    output: T,                                      // PrimaryEdgeField or EdgeField (unchanged)
-    declarations: &ObservableRelationDeclaration,   // identity of each contributing edge
+    output: T,                // the existing PrimaryEdgeField or EdgeField (unchanged)
+    calculation_record: ...,  // identities of all contributing values, relations,
+                              // mappings, and declared parameters (Req-4)
 }
 ```
 
-This does not change any operator formula. Existing operator functions are
-wrapped; their internal computation is unchanged. The precise representation is
-subject to Verifier review.
+This does not change any operator formula (Req-5). The precise structure of
+`calculation_record` is the subject of Milestone 3 interface design. Returned to
+Verifier review before implementation.
 
 ---
 
-## 5. RPPI Failure Modes
+## 6. RPPI Failure Modes
 
-Four failure modes violate the RPPI. Each requires detection and rejection.
-The V8 boundary separating relational treatment from instrumentation and
-independent validation is preserved: these are structural enforcement additions,
-not new operator mathematics.
+Four failure modes violate the RPPI. Each requires detection and rejection (Req-7).
+The V8 boundary is preserved: these are structural enforcement additions,
+not new operator mathematics (Req-5).
 
-### 5.1 Missing Provenance
+### 6.1 Missing Provenance
 
-A relation or variable has no `ObservableRelationDeclaration`. The provenance
-identity is absent.
+A relation or variable has no declaration record. The provenance identity is absent.
 
 - **Current state (V8):** `EdgeProvenance::Continuation` is accepted without an
-  `observable_source`. Construction succeeds. The relation carries a class but not
-  an identity.
-- **V9 enforcement:** `from_edges_with_provenance` must reject when
-  `ObservableRelationDeclaration` is absent for any edge. A class label alone is
-  insufficient for admission.
-- **Conformance:** `rppi_missing_observable_source_gap` (documents current state,
-  `[RPPI-GAP]`); `rppi_missing_observable_source_rejected` (V9 contract, `[V9-REQUIRED]`,
-  `#[ignore]` until enforcement implemented).
+  `ObservableRelationDeclaration`. The relation carries a label but not a record.
+- **V9 enforcement (Req-1, Req-2, Req-7):** Construction must reject when
+  `ObservableRelationDeclaration` is absent for any edge. A label alone is insufficient.
+- **Conformance:** `rppi_missing_observable_source_gap` (`[RPPI-GAP]`);
+  `rppi_missing_observable_source_rejected` (`[V9-REQUIRED]`, `#[ignore]`).
 
-### 5.2 Fabricated Provenance
+### 6.2 Fabricated Provenance
 
 A relation carries an `ObservableRelationDeclaration` whose `observable_source`
-or `m_mapping_ref` names an observable or M that was never declared by Origin.
-The identity is asserted, not traced.
+or `m_mapping_ref` cannot be verified against Origin's declarations. The identity
+is asserted, not traced.
 
-- **Current state (V8):** `EdgeProvenance` class is an enum variant. Any edge can
-  carry any variant. There is no mechanism to verify that the class corresponds to
-  an observable declared through M. Fabrication cannot be detected.
-- **V9 enforcement:** Construction must verify that `m_mapping_ref` names an M
-  declared by Origin. An `observable_source` that cannot be verified against a
-  declared M mapping must be rejected.
-- **Conformance:** `rppi_fabricated_provenance_gap` (documents current state,
-  `[RPPI-GAP]`); `rppi_fabricated_observable_source_rejected` (V9 contract,
-  `[V9-REQUIRED]`, `#[ignore]` until M-mapping verification implemented).
+- **Current state (V8):** No M-mapping verification exists. Any class label is accepted.
+- **V9 enforcement (Req-2, Req-6, Req-7):** Construction must verify `m_mapping_ref`
+  against Origin's declared M mappings. An unverifiable source must be rejected.
+- **Conformance:** `rppi_fabricated_provenance_gap` (`[RPPI-GAP]`);
+  `rppi_fabricated_observable_source_rejected` (`[V9-REQUIRED]`, `#[ignore]`).
 
-### 5.3 Disconnected Provenance
+### 6.3 Disconnected Provenance
 
-A result exists and is numerically correct, but its derivation path to the
-declared observable relation that produced it is broken. Numerical correctness
-and structural validity are satisfied; relational grounding is not.
+A result exists and is numerically correct, but carries no calculation record. Its
+derivation path to the declared observable relation that produced it is broken.
+Numerical correctness and structural validity are satisfied; relational grounding
+in the output type is not.
 
-This is the RPPI framing of the provenance survival gap documented in §4.
-Disconnected provenance is not just a structural limitation — it is an RPPI
-violation. A result that cannot establish its own derivation path does not satisfy
-the invariant and must not be admitted to IRRS.
+This is the RPPI framing of the provenance survival gap. Under Req-4 and Req-6,
+a result without a calculation record cannot be independently verified and must
+not be admitted.
 
-- **Current state (V8):** All operator outputs are disconnected in this sense.
-  `PrimaryEdgeField` and `EdgeField` carry no derivation reference.
-- **V9 enforcement:** IRRS must reject any result that does not carry a continuous
-  derivation path through `ProvenancedOutput<T>`. Numerical correctness without a
-  derivation path does not constitute admission.
-- **Conformance:** `rppi_disconnected_provenance_gap` (documents current state,
-  `[RPPI-GAP]`); `rppi_disconnected_provenance_rejected_by_irrs` (V9 contract,
-  `[V9-REQUIRED]`, `#[ignore]` until ProvenancedOutput implemented).
+- **Current state (V8):** All operator outputs are disconnected. `PrimaryEdgeField`
+  and `EdgeField` carry no calculation record.
+- **V9 enforcement (Req-4, Req-5, Req-6):** IRRS must reject any result not wrapped
+  in `ProvenancedOutput<T>` with a complete calculation record.
+- **Conformance:** `rppi_disconnected_provenance_gap` (`[RPPI-GAP]`);
+  `rppi_disconnected_provenance_rejected_by_irrs` (`[V9-REQUIRED]`, `#[ignore]`).
 
-### 5.4 Misattributed Provenance
+### 6.4 Misattributed Provenance
 
-A result carries a derivation record that attributes it to a declared observable
-relation other than the one that actually produced it. The attribution is present,
+A result carries a calculation record that attributes it to a declared relation
+other than the one that actually produced it. The attribution is present,
 internally consistent, and wrong.
 
-- **Current state (V8):** No attribution mechanism exists. Misattribution cannot
-  be detected because attribution cannot occur. The structural gap precedes the
-  attribution gap: before a result can be attributed incorrectly, it must be
-  possible to attribute it at all.
-- **V9 enforcement:** `ProvenancedOutput<T>` carries a binding reference to the
-  `DeclaredRelations` that produced it. IRRS verifies this binding during admission.
-  A result presented with a substituted or exchanged declaration must be rejected.
-- **Conformance:** `rppi_misattributed_provenance_gap` (documents current state,
-  `[RPPI-GAP]`); `rppi_misattributed_provenance_rejected_by_irrs` (V9 contract,
-  `[V9-REQUIRED]`, `#[ignore]` until attribution verification implemented).
+- **Current state (V8):** No calculation record exists. Misattribution cannot occur
+  because attribution cannot occur. The structural gap precedes the attribution gap.
+- **V9 enforcement (Req-4, Req-6):** `ProvenancedOutput<T>` carries a binding to the
+  `DeclaredRelations` that produced it. IRRS verifies the binding. A substituted
+  declaration must be rejected.
+- **Conformance:** `rppi_misattributed_provenance_gap` (`[RPPI-GAP]`);
+  `rppi_misattributed_provenance_rejected_by_irrs` (`[V9-REQUIRED]`, `#[ignore]`).
 
 ---
 
-## 6. Admissibility Enforcement Contract
+## 7. Admissibility Enforcement Contract
 
 The following admissibility conditions are currently enforced at construction.
-They must be preserved in V9:
+They must be preserved in V9 (Req-5):
 
 - `from_edges_with_provenance` panics if provenance count ≠ edge count.
 - `from_edges_with_provenance` panics if any node index ≥ `n_nodes`.
 - `from_edges_with_provenance` panics if any spatial edge carries
-  `EdgeProvenance::Persistence` (persistence loci are edge-valued, not node-valued).
+  `EdgeProvenance::Persistence`.
 - `NodeField::new` panics if any value is non-finite (not in D).
 - `require_rho_declaration` panics if `ρ_base` is non-finite or `χ₀` ≤ 0.
 
-**V9 adds enforcement for (per RPPI §5):**
+**V9 adds enforcement (per RPPI §6 and Origin declaration):**
 
-| Failure mode | Enforcement point | Enforcement action |
-|---|---|---|
-| Missing (§5.1) | `from_edges_with_provenance` | Reject when `ObservableRelationDeclaration` absent for any edge |
-| Fabricated (§5.2) | `from_edges_with_provenance` | Reject when `observable_source` or `m_mapping_ref` unverifiable against declared M |
-| Disconnected (§5.3) | IRRS admission function | Reject any result not wrapped in `ProvenancedOutput<T>` |
-| Misattributed (§5.4) | IRRS admission function | Reject `ProvenancedOutput<T>` whose derivation binding does not match producing `DeclaredRelations` |
+| Failure mode | Enforcement point | Req | Enforcement action |
+|---|---|---|---|
+| Missing (§6.1) | `from_edges_with_provenance` | Req-1, 2, 7 | Reject when `ObservableRelationDeclaration` absent for any edge |
+| Fabricated (§6.2) | `from_edges_with_provenance` | Req-2, 6, 7 | Reject when `m_mapping_ref` unverifiable against declared M |
+| Disconnected (§6.3) | V9 admission interface | Req-4, 5, 6 | Reject any result not wrapped in `ProvenancedOutput<T>` |
+| Misattributed (§6.4) | V9 admission interface | Req-4, 6 | Reject `ProvenancedOutput<T>` whose calculation record binding does not match the producing `DeclaredRelations` |
 
 ---
 
-## 7. Open Condition Preservation Contract
+## 8. Open Condition Preservation Contract
 
-OPEN conditions must propagate explicitly. No assumed value may be substituted.
+OPEN conditions must propagate explicitly. No assumed value may be substituted (Req-7).
 
-The following OPEN conditions are carried from V8:
+**Carried from V8:**
 
-| Condition | Status | Location |
+| Condition | Status |
+|---|---|
+| ρ max-selection declaration | OPEN — Origin declaration required |
+| ρ saturating form declaration | OPEN — Origin declaration required |
+| A-3 empty adjacency: Σ, R, R_persistence sums over empty declared sets evaluate to 0.0 | OPEN — Origin disposition pending |
+
+**Added by RPPI and Origin declaration:**
+
+| Condition | Req | Notes |
 |---|---|---|
-| ρ max-selection declaration | OPEN — Origin declaration required | `operators.rs`, ρ provenance audit §2 |
-| ρ saturating form declaration | OPEN — Origin declaration required | `operators.rs`, ρ provenance audit §3 |
-| A-3 empty adjacency: Σ, R, R_persistence sums over empty declared sets evaluate to 0.0 | OPEN — Origin disposition pending | `operators.rs`, Kernel V8 notes |
-
-V9 adds OPEN conditions from the RPPI and Verifier disposition:
-
-| Condition | Added in | Notes |
-|---|---|---|
-| `observable_source` field definition | V9 spec §3 | Name, type, admissibility rules, and constructor requirements |
-| `direction_basis` field definition | V9 spec §3 | Name, type, admissibility rules, and what constitutes a valid direction declaration |
-| `m_mapping_ref` field definition | V9 spec §3 | How an M mapping is named and verified against Origin declarations |
-| `ObservableRelationDeclaration` structure | V9 spec §3 | Full struct definition: name, fields, constructor, invariants, V8 interface integration |
-| `ProvenancedOutput<T>` structure | V9 spec §4 | Full wrapper definition: name, fields, constructor, binding invariants |
-| NodeField provenance declaration | V9 spec §4, Verifier disposition | How each NodeField value declares its declared M-mapping origin. Currently `NodeField::new` enforces finiteness only. Under the complete RPPI, the M-mapping origin of each value must also be declared — not just that the value is finite, but that it is a projection through a named M from a declared observable. |
-| V9 admission interface definition | Verifier disposition | The IRRS admission function design: what it accepts, what it verifies, what it returns or rejects. Separate from ProvenancedOutput<T>; designed before implementation. |
+| `observable_source` field definition | Req-1, 2 | Name, type, admissibility rules, constructor requirements. What constitutes a valid named observable source. |
+| `direction_basis` field definition | Req-3 | Name, type, admissibility rules. What constitutes a declared relational distinction establishing direction. |
+| `m_mapping_ref` field definition | Req-2 | How an M mapping is named, stored, and verified against Origin's declared M set. |
+| `declared_domain` field definition | Req-2 | What the declared domain of a projection records and how it is checked at construction. |
+| `ObservableRelationDeclaration` structure | Req-1, 2, 3 | Full struct definition: name, fields, constructor, invariants, V8 interface integration (how it extends `DeclaredRelations` without modifying it). |
+| NodeField declaration record | Req-1, 2 | How each value in `NodeField` carries a declaration record. Currently enforces finiteness only. The M-mapping origin of each value must also be declared — but the form of that declaration (new type, companion struct, extended constructor) is OPEN. |
+| `ProvenancedOutput<T>` structure | Req-4, 5 | Full wrapper definition including the complete `calculation_record` type (all contributing values, relations, mappings, declared parameters). |
+| `calculation_record` type | Req-4, 6 | The internal structure of the calculation record: how it records contributing values, which identities it carries, how IRRS traverses it. |
+| V9 admission interface | Req-5, 6 | The separate interface through which V9 admits complete derivation records. What it accepts, what it verifies, what it returns or rejects. Designed in Milestone 3. |
 
 None of these is closed by the Generator. They require Origin declaration.
 
 ---
 
-## 8. Conformance Test Contract
+## 9. Conformance Test Contract
 
 The test suite in `tests/v9_conformance.rs` must demonstrate:
 
 | Category | Tag | What is tested |
 |---|---|---|
-| V8 baseline | `[V8-BASELINE]` | Existing operator behavior unchanged. Any operator code change that fails a baseline test violates the V8 preservation contract. |
+| V8 baseline | `[V8-BASELINE]` | Existing operator behavior unchanged (Req-5). Any code change that fails a baseline test violates V8 preservation. |
 | Executable relation | `[V8-BASELINE]` | Provenance required at construction; out-of-range nodes rejected; Persistence excluded from spatial list; finite projection enforced. |
-| Provenance survival gap | `[GAP]` | Documents that `PrimaryEdgeField` and `EdgeField` carry no provenance reference. Not a failure — a documented gap that V9 closes. |
+| Provenance survival gap | `[GAP]` | `PrimaryEdgeField` and `EdgeField` carry no calculation record. |
 | Open condition | `[V8-BASELINE]` | `PersistenceState` requires a real prior — no cold-start constructor. |
 | V8 continuity | `[V8-BASELINE]` | Full Δ→Σ and A→B→R chains produce finite output on valid declarations. |
-| IRRS tracing gap | `[GAP]` | Documents that tracing from operator output to observable provenance requires externally retaining `DeclaredRelations`. |
-| RPPI — missing provenance | `[RPPI-GAP]` | Class-only provenance accepted without observable identity. Documents inadmissible current behavior. |
-| RPPI — missing provenance | `[V9-REQUIRED]` | Construction without `ObservableRelationDeclaration` must be rejected. `#[ignore]` until enforcement implemented. |
-| RPPI — fabricated provenance | `[RPPI-GAP]` | Enum variant accepted without M-mapping verification; fabrication undetectable. |
-| RPPI — fabricated provenance | `[V9-REQUIRED]` | Unverifiable `observable_source` must be rejected at construction. `#[ignore]` until M-mapping verification implemented. |
-| RPPI — disconnected provenance | `[RPPI-GAP]` | Operator result is finite and numerically correct; carries no derivation path to its declared observable. |
-| RPPI — disconnected provenance | `[V9-REQUIRED]` | IRRS must reject results without continuous derivation path. `#[ignore]` until `ProvenancedOutput<T>` implemented. |
-| RPPI — misattributed provenance | `[RPPI-GAP]` | No attribution mechanism exists; substituting one relation's output for another's is undetectable. |
-| RPPI — misattributed provenance | `[V9-REQUIRED]` | IRRS must reject `ProvenancedOutput<T>` whose binding is wrong. `#[ignore]` until attribution verification implemented. |
+| IRRS tracing gap | `[GAP]` | Tracing from operator output requires externally retaining `DeclaredRelations`. |
+| RPPI — missing provenance | `[RPPI-GAP]` | Class-only provenance accepted without declaration record (Req-1, 2). |
+| RPPI — missing provenance | `[V9-REQUIRED]` | Construction without `ObservableRelationDeclaration` must be rejected. `#[ignore]`. |
+| RPPI — fabricated provenance | `[RPPI-GAP]` | Asserted class accepted without M-mapping verification (Req-6). |
+| RPPI — fabricated provenance | `[V9-REQUIRED]` | Unverifiable `m_mapping_ref` must be rejected. `#[ignore]`. |
+| RPPI — disconnected provenance | `[RPPI-GAP]` | Operator result is finite; carries no calculation record (Req-4). |
+| RPPI — disconnected provenance | `[V9-REQUIRED]` | V9 admission interface rejects results without calculation record. `#[ignore]`. |
+| RPPI — misattributed provenance | `[RPPI-GAP]` | No calculation record exists; substituting one relation's output for another's is undetectable. |
+| RPPI — misattributed provenance | `[V9-REQUIRED]` | V9 admission interface rejects wrong derivation binding. `#[ignore]`. |
 
 **Test counts:**
 - 27 existing tests (`[V8-BASELINE]` and `[GAP]`) — all must pass.
-- 4 new `[RPPI-GAP]` tests — document inadmissible current behavior; must pass.
-- 4 new `[V9-REQUIRED]` tests — define V9 enforcement contract; `#[ignore]` until
-  implementing milestones are verified. Remove `#[ignore]` and confirm all 35 tests
-  pass after each V9 enforcement milestone.
+- 4 new `[RPPI-GAP]` tests — must pass.
+- 4 new `[V9-REQUIRED]` tests — `#[ignore]` until implementing milestones are verified.
 
 ---
 
-## 9. IRRS Integration Contract
+## 10. IRRS Integration Contract
 
 The Verifier must be able to trace results to relational observations without
-relying on the Generator's assertions. This requires:
+relying on the Generator's assertions (Req-6). This requires:
 
-1. The output type carries sufficient information to identify the provenance
-   identity of every contributing edge — addressed by `ProvenancedOutput<T>` (§4).
-2. The provenance class is supplemented by the full `ObservableRelationDeclaration`
-   (observable source, direction basis, M-mapping reference) — addressed by §3.
-3. The direction of each edge is grounded in a declared observable basis, not
-   index order — addressed by §3 (`direction_basis` field).
+1. **Declaration records for every admitted edge** — addressed by `ObservableRelationDeclaration`
+   (§4), covering M identity (Req-2), direction basis (Req-3), and observable source (Req-1).
+2. **Declaration records for every admitted value** — addressed by NodeField declaration
+   record (§4, §8), covering M-mapping origin of each projected value (Req-1, Req-2).
+3. **Calculation records for every operator output** — addressed by `ProvenancedOutput<T>`
+   (§5), covering all contributing values, relations, mappings, and declared parameters (Req-4).
+4. **A separate V9 admission interface** that checks calculation records against declaration
+   records independently of the Generator's account (Req-5, Req-6).
 
-**Current state:** The verifier can trace results by retaining `(DeclaredRelations,
-output)` as a pair. The `[GAP]` tests in `tests/v9_conformance.rs` document this
-explicitly.
+**Current state:** The verifier can trace by retaining `(DeclaredRelations, output)` as
+a pair. The `[GAP]` tests in `tests/v9_conformance.rs` document this explicitly.
 
-**V9 requirement:** The output type alone is sufficient for tracing. The IRRS
-does not retain `DeclaredRelations` separately.
+**V9 requirement:** The output type alone is sufficient for tracing. The IRRS does not
+retain `DeclaredRelations` separately.
 
-**V9 rejection requirement (per RPPI §5):**
+**IRRS rejection requirement:**
 
-The IRRS must reject admission of any result that:
-- Cannot be traced to an `ObservableRelationDeclaration` — missing or disconnected
-  provenance (§5.1, §5.3).
-- Carries an `observable_source` that cannot be verified against a declared M
-  mapping — fabricated provenance (§5.2).
-- Carries a derivation record that does not bind to the `DeclaredRelations` that
-  produced it — misattributed provenance (§5.4).
+The V9 admission interface must reject any result where (Req-7):
+- A declaration record is absent or unverifiable (§6.1 missing, §6.2 fabricated).
+- A calculation record is absent (§6.3 disconnected).
+- A calculation record's binding does not match the producing `DeclaredRelations`
+  (§6.4 misattributed).
 
-The IRRS does not admit results based on numerical correctness, structural
-validity, or provenance class alone. Derivation must terminate in declared
-observable relations.
+The IRRS does not admit results based on numerical correctness, structural validity,
+or provenance labels alone. Derivation must terminate in declared observable relations,
+and the derivation structure must survive independent verification.
 
 ---
 
-## 10. Development Constraints
+## 11. Development Constraints
 
 - All V9 work is on the `kernel-v9` branch.
 - No V9 addition merges to `main` without Verifier review.
-- V8 operator forms are not changed.
+- V8 operator forms are not changed (Req-5).
 - OPEN conditions are not closed by the Generator; they require Origin declaration.
-- `ObservableRelationDeclaration`, `ProvenancedOutput`, `observable_source`,
-  `direction_basis`, and `m_mapping_ref` are working names. The Verifier confirms
-  or revises names before implementation.
-- `[V9-REQUIRED]` tests are `#[ignore]` until the implementing milestone is
-  verified. Remove `#[ignore]` and confirm all 35 tests pass after each V9
-  enforcement milestone.
+- Working names (`ObservableRelationDeclaration`, `ProvenancedOutput`, `calculation_record`,
+  `observable_source`, `direction_basis`, `m_mapping_ref`, `declared_domain`) are subject
+  to Verifier confirmation before implementation.
+- `[V9-REQUIRED]` tests are `#[ignore]` until the implementing milestone is verified.
+  Remove `#[ignore]` and confirm all 35 tests pass after each V9 enforcement milestone.
 - The order of milestones:
     1. (Milestone 1, commit `1a54d08`) Specification + conformance test suite.
     2. (Milestone 2, commit `ee46735`) RPPI established; four failure modes defined;
-       RPPI conformance tests added. Verifier disposition accepted 2026-10-24.
-    3. **(Milestone 3 — next)** Origin declaration of relational identity and
-       derivation requirements, and V9 admission interface design. Governed by:
-       *Every admitted result must be traceable through every contributing
-       mathematical input to declared observable relations.* Specifically:
-       - Origin declares `ObservableRelationDeclaration` fields: `observable_source`,
-         `direction_basis`, `m_mapping_ref` — as a complete provenance record, not
-         a provenance label.
-       - Origin declares NodeField provenance: how each NodeField value records
-         its declared M-mapping origin (not only finiteness).
-       - Origin declares the V9 admission interface: what it accepts, verifies,
-         and returns or rejects — designed before any implementation.
+       RPPI conformance tests added.
+    3. (Milestone 3, commit `ab6d4f0` + this document) Origin declaration accepted;
+       declaration record / calculation record distinction established.
+       **Next:** Interface design and executable conformance criteria for:
+       - `ObservableRelationDeclaration` (declaration record for edges)
+       - NodeField declaration record
+       - `ProvenancedOutput<T>` and `calculation_record` type
+       - V9 admission interface (separate from V8 constructors)
     4. Implementation of `ObservableRelationDeclaration` enforcement at construction
-       (closes RPPI failure modes: missing, fabricated).
-    5. Implementation of `ProvenancedOutput<T>` wrapper with full through-every-input
-       derivation record (closes RPPI failure modes: disconnected, misattributed).
-    6. IRRS rejection enforcement for all four failure modes.
+       (closes RPPI failure modes: missing §6.1, fabricated §6.2).
+    5. Implementation of `ProvenancedOutput<T>` with full `calculation_record`
+       (closes RPPI failure modes: disconnected §6.3, misattributed §6.4).
+    6. Implementation of V9 admission interface with independent verification.
     7. IRRS integration verification.
 
 ---
 
 *The operators hold no agency. Responsibility stays with Origin.*  
 *Bounded over D. No claim beyond D.*  
-**Metatron Dynamics, Inc. Kernel V9 — Second Milestone Specification.**
+**Metatron Dynamics, Inc. Kernel V9 — Third Milestone Specification.**
