@@ -14,12 +14,48 @@ This document is the governing specification for Kernel V9 development.
 - Milestone 1 (commit `1a54d08`): Executable relation definition and conformance test suite.
 - Milestone 2 (commit `ee46735`): RPPI established; four failure modes defined; RPPI
   conformance tests added. Verifier accepted 2026-10-24.
-- **Milestone 3 (this document):** Origin declaration of relational identity and derivation
-  requirements. Declaration record / calculation record distinction established.
-  V9 admission interface design. No operator modifications.
+- **Milestone 3 (this document):** Origin declaration accepted. Declaration record /
+  calculation record distinction established. Two Verifier corrections incorporated:
+  enforcement belongs to V9 admission interface (not frozen V8 constructors); IRRS
+  must independently recompute or verify, not merely match names and references.
+  Interface design OPEN — Rust types, admission outcomes, and conformance tests are
+  the next deliverable. No operator modifications.
 
 Work proceeds on the `kernel-v9` branch. No change is merged to `main` without
 Verifier review.
+
+---
+
+## Verifier Disposition — Milestone 3 (2026-10-24)
+
+**Status:** Origin declaration accepted. Interface design OPEN.
+
+**Two corrections incorporated before interface implementation:**
+
+**Correction 1 — Record authorship must not become self-certification.**
+The Generator authors calculation records as an execution responsibility. But
+IRRS must independently recompute or otherwise verify the recorded operations
+and their bindings. Matching names and references alone cannot establish that
+the recorded calculation actually occurred. The calculation record is evidence
+to be checked, not a certified account to be trusted. (Governs §3, §10.)
+
+**Correction 2 — Enforcement belongs to the V9 admission interface, not the frozen V8 constructor.**
+The enforcement of ObservableRelationDeclaration presence (§6.1) and
+m_mapping_ref verifiability (§6.2) applies to the V9 admission interface.
+V8 constructors are frozen per Req-5. Placing enforcement at
+`from_edges_with_provenance` would contradict Req-5. (Governs §6, §7.)
+
+**Traceable chain required by interface design:**
+
+> Declared observable relation → declared M → projected input →
+> authorized operator execution → calculation record →
+> independent IRRS verification.
+
+The interface design must establish this chain as an enforceable
+computational foundation, not only as a statement of mathematical intent.
+
+**Next Generator deliverable:** Rust types, their relationships, admission
+outcomes, and conformance tests. No operator modifications. No V8 changes.
 
 ---
 
@@ -171,20 +207,27 @@ computation time by the operators. The Generator is the author.
 
 **What independent verification requires (Req-6):**
 
-IRRS does not accept the Generator's summary of what was computed. It checks the
-calculation record's inputs against the declaration records directly:
+IRRS does not accept the Generator's summary of what was computed. It
+independently recomputes or verifies the recorded operations and their bindings
+against declaration records directly. Matching names and references alone does not
+establish that the recorded calculation occurred. Specific checks:
 - Every input value in the calculation record must trace to a declaration record
-  (Req-1, Req-2).
-- The direction used in computation must match the declared direction basis (Req-3).
-- Parameters used (ρ_base, χ₀, cc) must match the M-declared values.
+  (Req-1, Req-2) — verified against the declared observable, not just named.
+- The direction used in computation must match the declared direction basis (Req-3)
+  — verified against the declaration record, not asserted in the calculation record.
+- Parameters used (ρ_base, χ₀, cc) must match the M-declared values — verified
+  against Origin's declared parameters, not against what the Generator recorded.
 - If any input is unverifiable against a declaration record, the result is OPEN (Req-7).
 
 **What this is not:**
 
-The Generator does not certify its own execution. A provenance label on the output
-("this was produced by a Continuation operator") is not an alternative to a
-calculation record checked against declaration records. Labels describe; records
-establish.
+The Generator does not certify its own execution. A calculation record produced by
+the Generator is evidence to be checked against declaration records — not a certified
+account to be accepted as-is. A provenance label ("this was produced by a Continuation
+operator") is not an alternative to independent verification. A calculation record
+that cannot be independently recomputed or verified fails Req-6 regardless of its
+internal consistency. Labels describe; declaration records establish identity;
+independently verified calculation records establish derivation.
 
 **Simulated observations:**
 
@@ -316,8 +359,11 @@ A relation or variable has no declaration record. The provenance identity is abs
 
 - **Current state (V8):** `EdgeProvenance::Continuation` is accepted without an
   `ObservableRelationDeclaration`. The relation carries a label but not a record.
-- **V9 enforcement (Req-1, Req-2, Req-7):** Construction must reject when
-  `ObservableRelationDeclaration` is absent for any edge. A label alone is insufficient.
+- **V9 enforcement (Req-1, Req-2, Req-7):** The V9 admission interface must
+  reject any admitted relation that lacks an `ObservableRelationDeclaration` for
+  any edge. V8 constructors are frozen (Req-5); this enforcement belongs to the
+  separate V9 admission interface, not to `from_edges_with_provenance`. A label
+  alone is insufficient.
 - **Conformance:** `rppi_missing_observable_source_gap` (`[RPPI-GAP]`);
   `rppi_missing_observable_source_rejected` (`[V9-REQUIRED]`, `#[ignore]`).
 
@@ -328,8 +374,10 @@ or `m_mapping_ref` cannot be verified against Origin's declarations. The identit
 is asserted, not traced.
 
 - **Current state (V8):** No M-mapping verification exists. Any class label is accepted.
-- **V9 enforcement (Req-2, Req-6, Req-7):** Construction must verify `m_mapping_ref`
-  against Origin's declared M mappings. An unverifiable source must be rejected.
+- **V9 enforcement (Req-2, Req-6, Req-7):** The V9 admission interface must
+  verify `m_mapping_ref` against Origin's declared M mappings. V8 constructors
+  are frozen (Req-5); this enforcement belongs to the separate V9 admission
+  interface. An unverifiable source must be rejected.
 - **Conformance:** `rppi_fabricated_provenance_gap` (`[RPPI-GAP]`);
   `rppi_fabricated_observable_source_rejected` (`[V9-REQUIRED]`, `#[ignore]`).
 
@@ -383,8 +431,8 @@ They must be preserved in V9 (Req-5):
 
 | Failure mode | Enforcement point | Req | Enforcement action |
 |---|---|---|---|
-| Missing (§6.1) | `from_edges_with_provenance` | Req-1, 2, 7 | Reject when `ObservableRelationDeclaration` absent for any edge |
-| Fabricated (§6.2) | `from_edges_with_provenance` | Req-2, 6, 7 | Reject when `m_mapping_ref` unverifiable against declared M |
+| Missing (§6.1) | V9 admission interface | Req-1, 2, 7 | Reject when `ObservableRelationDeclaration` absent for any edge |
+| Fabricated (§6.2) | V9 admission interface | Req-2, 6, 7 | Reject when `m_mapping_ref` unverifiable against declared M |
 | Disconnected (§6.3) | V9 admission interface | Req-4, 5, 6 | Reject any result not wrapped in `ProvenancedOutput<T>` |
 | Misattributed (§6.4) | V9 admission interface | Req-4, 6 | Reject `ProvenancedOutput<T>` whose calculation record binding does not match the producing `DeclaredRelations` |
 
@@ -462,11 +510,27 @@ relying on the Generator's assertions (Req-6). This requires:
 4. **A separate V9 admission interface** that checks calculation records against declaration
    records independently of the Generator's account (Req-5, Req-6).
 
+**Traceable chain (Verifier disposition, 2026-10-24):**
+
+> Declared observable relation → declared M → projected input →
+> authorized operator execution → calculation record →
+> independent IRRS verification.
+
+This chain must be enforceable at every link, not only stated as intent.
+
 **Current state:** The verifier can trace by retaining `(DeclaredRelations, output)` as
 a pair. The `[GAP]` tests in `tests/v9_conformance.rs` document this explicitly.
 
 **V9 requirement:** The output type alone is sufficient for tracing. The IRRS does not
 retain `DeclaredRelations` separately.
+
+**Independent verification requirement (Req-6):**
+
+IRRS independently recomputes or verifies the recorded operations and their bindings.
+It does not accept the Generator's calculation record as a certified account of
+execution. A calculation record is evidence to be verified against declaration records
+— matching names and references is not sufficient to establish that the recorded
+calculation occurred.
 
 **IRRS rejection requirement:**
 
@@ -475,6 +539,8 @@ The V9 admission interface must reject any result where (Req-7):
 - A calculation record is absent (§6.3 disconnected).
 - A calculation record's binding does not match the producing `DeclaredRelations`
   (§6.4 misattributed).
+- A calculation record cannot be independently recomputed or verified against
+  declaration records — even if internally consistent.
 
 The IRRS does not admit results based on numerical correctness, structural validity,
 or provenance labels alone. Derivation must terminate in declared observable relations,
@@ -497,8 +563,11 @@ and the derivation structure must survive independent verification.
     1. (Milestone 1, commit `1a54d08`) Specification + conformance test suite.
     2. (Milestone 2, commit `ee46735`) RPPI established; four failure modes defined;
        RPPI conformance tests added.
-    3. (Milestone 3, commit `ab6d4f0` + this document) Origin declaration accepted;
-       declaration record / calculation record distinction established.
+    3. (Milestone 3, commits `ab6d4f0`, `e118199`, this document) Origin declaration
+       accepted. Declaration record / calculation record distinction established.
+       Two Verifier corrections: RPPI failure mode enforcement (§6.1, §6.2) belongs
+       to V9 admission interface, not frozen V8 constructors; IRRS must independently
+       recompute or verify, not match names and references (self-certification excluded).
        **Next:** Interface design and executable conformance criteria for:
        - `ObservableRelationDeclaration` (declaration record for edges)
        - NodeField declaration record
