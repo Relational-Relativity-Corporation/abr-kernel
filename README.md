@@ -1,4 +1,4 @@
-# ABR Invariant Relational Kernel — Kernel V8
+# ABR Invariant Relational Kernel — Kernel V9
 
 **Metatron Dynamics, Inc.** relationalrelativity.dev | arXiv:2601.22389
 
