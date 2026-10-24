@@ -1,8 +1,16 @@
-# ABR Invariant Relational Kernel — Kernel V8
+# ABR Invariant Relational Kernel — Kernel V9
 
 **Metatron Dynamics, Inc.** relationalrelativity.dev | arXiv:2601.22389
 
 ---
+
+**The foundational observable primitive is a directed relation declared from
+observable information.** A relation is observable when its two loci can be
+distinguished and a direction between them can be established from what is
+measured — not from what is assumed. Every quantity in D is a representation
+of a relation, or a computation over relations. A numerical value is not
+itself a primitive; it is the projection of an observed relational distinction
+through a declared measurement mapping M.
 
 This repository is the canonical declaration of the ABR/ABRCE kernel:
 operator constraints, role separation protocol, reference implementation,
@@ -14,15 +22,48 @@ classes of output — ε[e], τ[v], Φ[v], 𝟙[e], θ[e], J[v] — at every
 declared region from Primary through Planetary. What changes across regions
 is the declared measurement mapping M, not the operators or their constraints.
 
-Observable → M → numerical projection in D → declared topology → operators
-→ calculated result → comparison with observables. A value in D is the
-numerical projection of an observable through M, not the observable itself.
-Where information an operator requires has not been declared through M, that
-operator is not evaluated, and no substitute value or classification is
-introduced.
+Declared observable relation → M → numerical projection in D → declared
+topology → operators → calculated result → comparison with observables.
+A value in D is the numerical projection of an observable through M,
+not the observable itself. Where information an operator requires has not
+been declared through M, that operator is not evaluated, and no substitute
+value or classification is introduced.
 
 All definitions bounded over D := { x ∈ ℝⁿ | n < ∞, |x[i]| < ∞ }.
 No claim beyond D.
+
+---
+
+## Relational Primitive Provenance Invariant (RPPI)
+
+Every admitted value, operation, and result must have a continuous,
+verifiable provenance path to an Origin-declared observable relation within D.
+Three things must be held distinct:
+
+**Provenance label** — describes a category of relation (e.g.,
+`EdgeProvenance::Continuation`). Names a class. Does not identify a declared
+observable. Does not constitute a derivation path. A label describes; it does
+not establish.
+
+**Declaration record** — identifies what was admitted as an observable
+relation: through which measurement mapping M, with which direction basis,
+and into which declared domain. Set at construction time by Origin. This is
+provenance identity. Without it, a relation carries a class but not an
+identity; any value derived from it carries no declaration to check against.
+
+**Calculation record** — records what the operators actually used and produced:
+the input values, the relations traversed, the parameters applied (ρ_base,
+χ₀, cc), and the outputs computed. Generated at computation time. The
+Independent Relational Reconstruction System (IRRS) independently recomputes
+or verifies the recorded operations and their bindings against declaration
+records. Matching names and references alone is insufficient; the Generator's
+account of execution is evidence to be checked, not a certification to be
+accepted.
+
+A result is admissible only when its derivation can be traced, through every
+contributing mathematical input, to declared observable relations. Numerical
+correctness, structural validity, and a provenance label are not substitutes
+for a verifiable derivation path.
 
 ---
 
@@ -37,9 +78,13 @@ cargo test
 cargo run --bin provenance_demo
 ```
 
-`cargo test` runs 61 library tests (`abr_kernel`) and 3
+`cargo test` on `main` runs 61 library tests (`abr_kernel`) and 3
 `provenance_demo` tests. `cargo run --bin provenance_demo` prints the
 H-alpha photon edge reconstruction described below.
+
+On the `kernel-v9` branch, `cargo test` also runs 31 additional conformance
+tests in `tests/v9_conformance.rs` (4 further tests are `#[ignore]` pending
+V9 enforcement milestones — see Kernel V9 Development Status below).
 
 ---
 
@@ -239,6 +284,46 @@ The `derived_invariants.rs` functions are the shared computational
 foundation. Application repositories draw from this file rather than
 reimplementing locally, so that updates propagate from a single
 declared source.
+
+---
+
+## Kernel V9 — Development Status
+
+V9 enforcement of the Relational Primitive Provenance Invariant is under
+development on the `kernel-v9` branch. The RPPI and its enforcement
+architecture are specified in `docs/kernel/v9_specification.md`.
+
+**Completed milestones:**
+
+- **Milestone 1** — Executable relation definition; 35-test conformance suite
+  establishing V8 baseline behavior and documenting the provenance survival
+  gap.
+- **Milestone 2** — RPPI established. Four failure modes documented:
+  missing provenance (no identity), fabricated provenance (unverifiable
+  against declared M), disconnected provenance (no derivation path through
+  operator output), misattributed provenance (wrong relation attributed).
+  Verifier accepted 2026-10-24.
+- **Milestone 3** — Origin declaration of seven relational identity and
+  derivation requirements (Req-1 through Req-7). Declaration record /
+  calculation record distinction established. Two Verifier corrections
+  incorporated: enforcement belongs to the V9 admission interface rather than
+  frozen V8 constructors (Req-5); IRRS must independently recompute or verify
+  recorded operations against declaration records — self-certification excluded.
+  Verifier accepted 2026-10-24.
+
+**OPEN — V9 enforcement not yet implemented:**
+
+- `ObservableRelationDeclaration`: declaration record for each edge —
+  observable source, direction basis, M mapping reference, declared domain.
+  Returned to Origin for field definition.
+- NodeField declaration record: M-mapping origin of each projected value.
+- `ProvenancedOutput<T>`: calculation record wrapper carrying the identities
+  of all contributing values, relations, mappings, and declared parameters.
+- V9 admission interface: separate from V8 constructors; independently
+  recomputes or verifies calculation records against declaration records.
+
+V8 constructors and operators are unchanged (Req-5). The `kernel-v9` branch
+passes all V8 tests without modification to operator code.
 
 ---
 
