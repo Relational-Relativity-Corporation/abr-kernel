@@ -82,9 +82,9 @@ cargo run --bin provenance_demo
 `provenance_demo` tests. `cargo run --bin provenance_demo` prints the
 H-alpha photon edge reconstruction described below.
 
-On the `kernel-v9` branch, `cargo test` also runs 31 additional conformance
-tests in `tests/v9_conformance.rs` (4 further tests are `#[ignore]` pending
-V9 enforcement milestones — see Kernel V9 Development Status below).
+`cargo test` also runs the V9 conformance suite in `tests/v9_conformance.rs`:
+31 active tests pass; 4 tests are `#[ignore]` pending V9 enforcement
+milestones (see Kernel V9 Development Status below).
 
 ---
 
@@ -295,9 +295,10 @@ architecture are specified in `docs/kernel/v9_specification.md`.
 
 **Completed milestones:**
 
-- **Milestone 1** — Executable relation definition; 35-test conformance suite
-  establishing V8 baseline behavior and documenting the provenance survival
-  gap.
+- **Milestone 1** — Executable relation definition; conformance suite in
+  `tests/v9_conformance.rs` with 31 active tests and 4 `#[ignore]` tests
+  pending V9 enforcement milestones. Active tests establish V8 baseline
+  behavior and document the provenance survival gap.
 - **Milestone 2** — RPPI established. Four failure modes documented:
   missing provenance (no identity), fabricated provenance (unverifiable
   against declared M), disconnected provenance (no derivation path through
