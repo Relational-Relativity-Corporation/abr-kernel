@@ -1,7 +1,7 @@
-# Kernel V8 — Complete Reference
+# Kernel V9 — Complete Reference
 
 **Metatron Dynamics, Inc.**  
-Kernel V8 (2026-09-27). Operational discipline added 2026-09-29.  
+Kernel V9 (2026-10-24). Foundational primitive established.  
 Bounded over D. No claim beyond D.
 
 This document is the single reference for any reader — human or AI — who needs
@@ -41,6 +41,59 @@ Origin.
 ---
 
 ## 1. Foundation
+
+### The Foundational Primitive
+
+This framework introduces one primitive that has not previously existed in
+mathematics:
+
+**A DIRECTED RELATION DECLARED FROM OBSERVABLE INFORMATION.**
+
+Every operator, every invariant, every admissibility condition in this
+framework exists because of this primitive and cannot be used without it.
+
+The primitive is not derived. It is the starting point. It arises from the
+distillation of human experience into three irreducible characteristics:
+
+**1. COMPLEXITY**  
+Observable systems are complex. They are not reducible to a single governing
+variable or a universal parameter set. The structure of a hydrogen atom, a
+magnetospheric current sheet, a biochemical oscillator, and a social network
+are incommensurable. Complexity makes domain-specific declaration structurally
+unavoidable — not a limitation to be overcome, but the correct description of
+what is actually there.
+
+**2. CHANGE AS THE ONLY OBSERVABLE CONSTANT**  
+What is consistently observable across all domains is not a stable object, but
+change. The directed relation captures change at its most elementary form: a
+declared difference between two loci, with direction. Nothing in this framework
+assumes a stable substrate beneath the change. Change is what is declared.
+Change is what the operators act on.
+
+**3. BOUNDED DOMAIN OF ANALYSIS**  
+Every declaration is bounded. D contains only what has been declared through M
+from observable evidence. There is no unbounded extension, no inference beyond
+the declared boundary, no silent default. The boundary is not a deficiency — it
+is what makes the result correspond to what was actually observed rather than to
+a model of it.
+
+These three characteristics — complexity, change, and bounded domain — jointly
+determine that the correct primitive is a DIRECTED RELATION, not a point, not a
+set, not an object with properties. Standard mathematics constructs relations
+from objects. This framework takes the directed relation itself as primitive and
+derives everything else from it.
+
+**The operators (A, B, R, Δ, Σ) are not independent mathematical objects.**
+They are the forms that act on declared directed relations. They cannot be
+applied to anything that was not declared through M, and they cannot produce
+output that carries meaning beyond the declared boundary.
+
+**The operators exist because of the primitive. The primitive does not exist
+because of the operators.**
+
+---
+
+### The Chain
 
 **The chain.**
 
@@ -88,7 +141,7 @@ The framework begins with human observation within a bounded domain.
 
 **Change is the observable constant. Relation is primitive within the bounded declared domain.**
 
-These are not hypotheses the kernel tests. They are the ground the kernel stands on. They cannot be argued with from within the framework, because the framework is built on them.
+These are not hypotheses the kernel tests. They are the ground the kernel stands on. They cannot be argued with from within the framework, because the framework is built on them. The full account of why these are the correct governing constants — tracing through complexity, change as the only observable constant, and bounded domain — is in Section 1.
 
 The governing order is:
 
@@ -1080,9 +1133,10 @@ Generator output.
 | derived_invariants V4.3.1 | Grounding reference updated to operators.rs V7.1 |
 | Kernel V8 (derived_invariants) | Wording synchronized; A-11 closed; photon_edge_kappa_non_applicable rewritten; 𝟙[e] audit HOLD; are_proportional HOLD |
 | Operational discipline (2026-09-29) | Sections 2, 4, 7, 16 added (Origin declaration): observational order and governing constants; task scope and frozen-kernel rule; observable record vs. legacy interpretation; experimental execution discipline. Section 5 (Workflow Step 2) revised: declaration-completeness vs. correspondence distinction added; execute-or-stop-exactly rule added. Section 10 (Kernel Selection) revised: R-is-not-optional rule added; Primary Region clarification added. No operator form, invariant form, Rust function, or source file content changed. |
+| Kernel V9 (2026-10-24) | Foundational primitive established as Section 1 preamble: "a directed relation declared from observable information" — a primitive not previously existing in mathematics. Three roots stated: complexity, change as the only observable constant, bounded domain of analysis. Operator dependence on the primitive stated explicitly: operators exist because of the primitive and cannot be applied to anything not declared through M. Section 2 updated to reference Section 1 for the full account. No operator form, invariant form, Rust function, or source file content changed. |
 
 ---
 
 *The operators hold no agency. Responsibility stays with Origin.*  
 *Bounded over D. No claim beyond D.*  
-**Metatron Dynamics, Inc. Kernel V8.**
+**Metatron Dynamics, Inc. Kernel V9.**
