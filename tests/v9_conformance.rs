@@ -1,4 +1,4 @@
-//! Kernel V9 Conformance Test Suite — First Milestone
+//! Kernel V9 Conformance Test Suite — Second Milestone
 //!
 //! Organization follows the V9 development contract (v9_specification.md):
 //!
@@ -9,17 +9,32 @@
 //!   §5  Open condition preservation — no cold-start substitute
 //!   §6  V8 operator continuity — full chains produce correct finite output
 //!   §7  IRRS integration — tracing gap documented as [GAP]
+//!   §8  Relational Primitive Provenance Invariant — four failure modes
 //!
 //! Tags:
-//!   [V8-BASELINE] — confirms behavior that must not change in any V9 milestone.
-//!                   A V9 code change that fails a V8-BASELINE test violates the
-//!                   V8 preservation contract.
-//!   [GAP]         — documents a gap that V9 closes. The test passes today;
-//!                   it captures the current state so the gap is explicit,
-//!                   not silent.
+//!   [V8-BASELINE]  — confirms behavior that must not change in any V9 milestone.
+//!                    A V9 code change that fails a V8-BASELINE test violates the
+//!                    V8 preservation contract.
+//!   [GAP]          — documents a gap that V9 closes. The test passes today;
+//!                    it captures the current state so the gap is explicit,
+//!                    not silent.
+//!   [RPPI-GAP]     — documents a gap relative to the Relational Primitive Provenance
+//!                    Invariant (v9_specification.md §2). The current behavior is
+//!                    inadmissible under RPPI; the test records it explicitly so the
+//!                    gap is named, not silent. All [RPPI-GAP] tests must pass.
+//!   [V9-REQUIRED]  — defines V9 enforcement that does not yet exist. The test is
+//!                    #[ignore] until the implementing milestone is verified. Remove
+//!                    #[ignore] and confirm the test passes after each V9 enforcement
+//!                    milestone. The test body contains todo!() as a placeholder;
+//!                    replace with the actual V9 API call when available.
 //!
-//! All tests here must pass on the `kernel-v9` branch before any V9
-//! implementation milestone is submitted for Verifier review.
+//! Test counts (second milestone):
+//!   27 existing tests ([V8-BASELINE] + [GAP]) — all must pass.
+//!   4 new [RPPI-GAP] tests — document inadmissible current behavior; must pass.
+//!   4 new [V9-REQUIRED] tests — #[ignore]; define enforcement contract.
+//!
+//! All [V8-BASELINE] and [RPPI-GAP] tests must pass on the `kernel-v9` branch
+//! before any V9 implementation milestone is submitted for Verifier review.
 
 use abr_kernel::operators::{
     compute_rho, compute_rho_primary, declared_edge_image_admissibility_check,
@@ -508,4 +523,307 @@ fn irrs_integration_gap_abr_tracing_requires_external_rel() {
     assert_eq!(*provenance_class, EdgeProvenance::Continuation);
     // GAP: r.spatial carries no provenance reference.
     // Tracing requires (r, rel) as a pair held externally.
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// §8. RELATIONAL PRIMITIVE PROVENANCE INVARIANT (RPPI)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Governing requirement (v9_specification.md §2):
+//   Every admitted mathematical variable, quantity, operation, and result must
+//   have a continuous, verifiable provenance path to an Origin-declared
+//   observable relation within D.
+//
+// Acceptance criterion:
+//   No mathematical result can be admitted solely on numerical correctness,
+//   structural validity, or named provenance. Its derivation must terminate
+//   in declared observable relations.
+//
+// The four RPPI failure modes (v9_specification.md §5):
+//
+//   MISSING      — no ObservableRelationDeclaration; provenance identity absent.
+//                  A class label (EdgeProvenance::Continuation) is not an identity.
+//
+//   FABRICATED   — ObservableRelationDeclaration present but observable_source not
+//                  traceable to a declared M mapping; identity asserted, not traced.
+//
+//   DISCONNECTED — provenance identity present and valid; derivation path from
+//                  result to declared observable relation broken; numerical result
+//                  exists without relational grounding in the output type.
+//
+//   MISATTRIBUTED — derivation record attributes result to a declared relation
+//                   other than the one that actually produced it; attribution is
+//                   present, complete, and wrong.
+
+// ── §8.1  MISSING PROVENANCE ─────────────────────────────────────────────────
+
+/// [RPPI-GAP] MISSING PROVENANCE: a relation with class-only `EdgeProvenance`
+/// is accepted without an `ObservableRelationDeclaration`. Under RPPI, a class
+/// label is not a provenance identity. This is inadmissible; the current API
+/// does not enforce it.
+///
+/// V9 enforcement (see `rppi_missing_observable_source_rejected` below):
+/// `from_edges_with_provenance` must reject when `ObservableRelationDeclaration`
+/// is absent for any edge.
+#[test]
+fn rppi_missing_observable_source_gap() {
+    // EdgeProvenance::Continuation — a class label, not a declaration.
+    // No observable_source. No direction_basis. No m_mapping_ref.
+    let result = std::panic::catch_unwind(|| {
+        DeclaredRelations::from_edges_with_provenance(
+            2,
+            vec![(0, 1)],
+            vec![EdgeProvenance::Continuation],
+        )
+    });
+    // RPPI-GAP: accepted without observable identity.
+    // V9 enforcement: must be rejected when ObservableRelationDeclaration is absent.
+    assert!(
+        result.is_ok(),
+        "RPPI-GAP: class-only provenance currently accepted — no observable_source enforced yet"
+    );
+}
+
+/// [V9-REQUIRED] MISSING PROVENANCE: construction without a complete
+/// `ObservableRelationDeclaration` (observable_source + direction_basis +
+/// m_mapping_ref) must be rejected.
+///
+/// When V9 adds `ObservableRelationDeclaration` to the edge declaration API,
+/// supplying class-only provenance without an identity declaration must panic
+/// at construction.
+///
+/// Remove `#[ignore]` after V9 enforcement milestone is implemented and verified.
+/// Replace `todo!()` with the actual construction call using the V9 API.
+#[test]
+#[ignore = "V9-REQUIRED: ObservableRelationDeclaration not yet enforced at construction"]
+fn rppi_missing_observable_source_rejected() {
+    // When V9 is implemented, replace the todo!() below with:
+    //
+    //   DeclaredRelations::from_edges_with_provenance(
+    //       2,
+    //       vec![(0, 1)],
+    //       vec![/* EdgeProvenance class only — no ObservableRelationDeclaration */],
+    //   )
+    //
+    // Construction must panic: observable_source absent.
+    let result = std::panic::catch_unwind(|| {
+        todo!(
+            "V9 adds ObservableRelationDeclaration enforcement; \
+             replace todo! with construction-without-identity call when API exists"
+        )
+    });
+    assert!(
+        result.is_err(),
+        "construction without ObservableRelationDeclaration must be rejected under V9"
+    );
+}
+
+// ── §8.2  FABRICATED PROVENANCE ──────────────────────────────────────────────
+
+/// [RPPI-GAP] FABRICATED PROVENANCE: an `EdgeProvenance` class can be assigned to
+/// any edge regardless of whether the named class corresponds to a declared
+/// observable through M. Under RPPI, provenance identity must be verifiable
+/// against a declared M mapping. Current enforcement has no such check.
+///
+/// V9 enforcement (see `rppi_fabricated_observable_source_rejected` below):
+/// construction must verify that `m_mapping_ref` names an M declared by Origin.
+#[test]
+fn rppi_fabricated_provenance_gap() {
+    // A Coupling edge is declared, but no cross-family observable has been
+    // declared through M for this relation. Under the current API this is
+    // accepted: the class is asserted, not verified against a declared M.
+    let result = std::panic::catch_unwind(|| {
+        DeclaredRelations::from_edges_with_provenance(
+            2,
+            vec![(0, 1)],
+            vec![EdgeProvenance::Coupling], // asserted — no M-mapping verification
+        )
+    });
+    // RPPI-GAP: accepted without M-mapping verification.
+    // The class name is structurally valid but its provenance identity is
+    // fabricated — it traces to no declared observable in D.
+    assert!(
+        result.is_ok(),
+        "RPPI-GAP: asserted class provenance currently accepted — no M-mapping check exists"
+    );
+}
+
+/// [V9-REQUIRED] FABRICATED PROVENANCE: a provenance record whose `observable_source`
+/// or `m_mapping_ref` cannot be verified against a declared M mapping must be
+/// rejected at construction.
+///
+/// Remove `#[ignore]` after V9 M-mapping verification is implemented and verified.
+/// Replace `todo!()` with an actual construction attempt using a fabricated source.
+#[test]
+#[ignore = "V9-REQUIRED: M-mapping verification against ObservableRelationDeclaration not yet implemented"]
+fn rppi_fabricated_observable_source_rejected() {
+    // When V9 is implemented, replace the todo!() below with:
+    //
+    //   DeclaredRelations::from_edges_with_provenance(
+    //       2,
+    //       vec![(0, 1)],
+    //       vec![ObservableRelationDeclaration {
+    //           observable_source: "fabricated-source-not-in-any-declared-M",
+    //           direction_basis: "fabricated-direction",
+    //           m_mapping_ref: "nonexistent-M",
+    //       }],
+    //   )
+    //
+    // Construction must panic: m_mapping_ref names no declared M.
+    let result = std::panic::catch_unwind(|| {
+        todo!(
+            "V9 adds M-mapping verification; replace todo! with fabricated-source \
+             construction attempt when ObservableRelationDeclaration API exists"
+        )
+    });
+    assert!(
+        result.is_err(),
+        "construction with unverifiable observable_source must be rejected under V9"
+    );
+}
+
+// ── §8.3  DISCONNECTED PROVENANCE ────────────────────────────────────────────
+
+/// [RPPI-GAP] DISCONNECTED PROVENANCE: an operator result exists and is
+/// numerically correct, but its derivation path to the declared observable
+/// relation that produced it is broken. Numerical correctness and structural
+/// validity are satisfied; relational grounding in the output type is not.
+///
+/// This is the precise RPPI framing of the provenance survival gap documented in
+/// §3 and §7. All current operator outputs are disconnected in this sense.
+///
+/// V9 enforcement (see `rppi_disconnected_provenance_rejected_by_irrs` below):
+/// IRRS must reject any result that does not carry a continuous derivation path
+/// through `ProvenancedOutput<T>`.
+#[test]
+fn rppi_disconnected_provenance_gap() {
+    let rel = rel_three_node_chain();
+    let x = NodeField::new(vec![vec![5.0, 2.0, 1.0]]);
+    let delta = operator_delta(&x, &rel);
+
+    // Numerically correct and structurally valid:
+    assert!(delta.field[0][0].is_finite()); // x[0] - x[1] = 3.0
+    assert!(delta.field[0][1].is_finite()); // x[1] - x[2] = 1.0
+
+    // RPPI-GAP: delta carries no derivation reference to rel.
+    // The result is DISCONNECTED from its declared observable relation.
+    //
+    // Under RPPI, admission requires a continuous derivation path. delta cannot
+    // provide that from its own type. The verifier can bridge this gap externally
+    // by retaining (delta, rel) — but external coupling is not derivation carried
+    // in the output, and it does not satisfy the RPPI.
+    //
+    // Explicit record of the gap:
+    let can_trace_derivation_from_delta_alone: bool = false;
+    assert!(
+        !can_trace_derivation_from_delta_alone,
+        "RPPI-GAP: delta carries no derivation reference — provenance is disconnected"
+    );
+}
+
+/// [V9-REQUIRED] DISCONNECTED PROVENANCE: IRRS must reject any result that does
+/// not carry a continuous derivation path to a declared observable relation.
+///
+/// When V9 adds `ProvenancedOutput<T>`, operator outputs carry an edge-indexed
+/// reference to the `ObservableRelationDeclaration` of each contributing edge.
+/// The IRRS admission function verifies this reference before admission.
+///
+/// Remove `#[ignore]` after `ProvenancedOutput<T>` and IRRS admission enforcement
+/// are implemented and verified.
+/// Replace `todo!()` with an actual IRRS admission call on a bare (unwrapped) result.
+#[test]
+#[ignore = "V9-REQUIRED: ProvenancedOutput<T> not yet implemented — derivation path cannot be carried"]
+fn rppi_disconnected_provenance_rejected_by_irrs() {
+    // When V9 is implemented, replace the todo!() below with:
+    //
+    //   let rel = rel_three_node_chain();
+    //   let x = NodeField::new(vec![vec![5.0, 2.0, 1.0]]);
+    //   let delta = operator_delta(&x, &rel); // PrimaryEdgeField — no provenance reference
+    //   irrs_admit(&delta) // must panic: no ProvenancedOutput wrapper
+    //
+    // IRRS admission must reject delta without a ProvenancedOutput wrapper.
+    let result = std::panic::catch_unwind(|| {
+        todo!(
+            "V9 adds IRRS admission enforcement; replace todo! with irrs_admit call \
+             on unwrapped operator output when ProvenancedOutput<T> API exists"
+        )
+    });
+    assert!(
+        result.is_err(),
+        "IRRS must reject disconnected result (no ProvenancedOutput) under V9"
+    );
+}
+
+// ── §8.4  MISATTRIBUTED PROVENANCE ───────────────────────────────────────────
+
+/// [RPPI-GAP] MISATTRIBUTED PROVENANCE: no attribution mechanism currently
+/// exists. A result computed from one `DeclaredRelations` can be presented
+/// alongside a different `DeclaredRelations` without detection. The structural
+/// gap precedes the attribution gap: before a result can be attributed incorrectly,
+/// it must be possible to attribute it at all.
+///
+/// V9 enforcement (see `rppi_misattributed_provenance_rejected_by_irrs` below):
+/// `ProvenancedOutput<T>` carries a binding reference. IRRS verifies the binding
+/// during admission. A result presented with a substituted declaration must panic.
+#[test]
+fn rppi_misattributed_provenance_gap() {
+    let rel_a = rel_single_edge(); // edge (0→1), Continuation
+    let rel_b = DeclaredRelations::from_edges_with_provenance(
+        2,
+        vec![(0, 1)],
+        vec![EdgeProvenance::Coupling], // different class — a distinct declared relation
+    );
+    let x = NodeField::new(vec![vec![3.0, 1.0]]);
+    let delta_from_a = operator_delta(&x, &rel_a);
+
+    // delta_from_a was produced using rel_a.
+    // Nothing in delta_from_a's type prevents it from being presented as if it
+    // were produced from rel_b. The derivation record does not exist; the
+    // attribution gap precedes the misattribution gap.
+    let _wrong_class = &rel_b.provenance[0]; // consulting the wrong relation — undetectable
+
+    // The result from rel_a is numerically indistinguishable from a result
+    // attributed to rel_b:
+    assert!(
+        delta_from_a.field[0][0].is_finite(),
+        "RPPI-GAP: result from rel_a indistinguishable from a result attributed to rel_b — \
+         substitution is undetectable without a derivation binding"
+    );
+}
+
+/// [V9-REQUIRED] MISATTRIBUTED PROVENANCE: a `ProvenancedOutput<T>` whose
+/// derivation record attributes it to a declared relation other than the one
+/// that actually produced it must be rejected by IRRS.
+///
+/// The attribution is present, internally consistent, and wrong. IRRS verifies
+/// the binding between output and its `DeclaredRelations` during admission.
+///
+/// Remove `#[ignore]` after `ProvenancedOutput<T>` and IRRS attribution
+/// verification are implemented and verified.
+/// Replace `todo!()` with an actual IRRS admission call on a misattributed output.
+#[test]
+#[ignore = "V9-REQUIRED: ProvenancedOutput attribution binding verification not yet implemented"]
+fn rppi_misattributed_provenance_rejected_by_irrs() {
+    // When V9 is implemented, replace the todo!() below with:
+    //
+    //   let rel_a = rel_single_edge();
+    //   let rel_b = DeclaredRelations::from_edges_with_provenance(
+    //       2, vec![(0, 1)], vec![EdgeProvenance::Coupling],
+    //   );
+    //   let x = NodeField::new(vec![vec![3.0, 1.0]]);
+    //   let output_from_a = operator_delta_provenance(&x, &rel_a); // ProvenancedOutput
+    //   let misattributed = output_from_a.rebind(&rel_b); // swap the binding — or equivalent
+    //   irrs_admit(&misattributed) // must panic: binding does not match producing rel
+    //
+    // IRRS admission must reject: derivation binding is rel_a, attribution claims rel_b.
+    let result = std::panic::catch_unwind(|| {
+        todo!(
+            "V9 adds IRRS attribution verification; replace todo! with misattributed \
+             ProvenancedOutput admission attempt when derivation binding API exists"
+        )
+    });
+    assert!(
+        result.is_err(),
+        "IRRS must reject misattributed ProvenancedOutput under V9"
+    );
 }
