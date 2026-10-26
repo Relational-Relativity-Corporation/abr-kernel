@@ -22,19 +22,33 @@
 //!                    Invariant (v9_specification.md §2). The current behavior is
 //!                    inadmissible under RPPI; the test records it explicitly so the
 //!                    gap is named, not silent. All [RPPI-GAP] tests must pass.
-//!   [V9-REQUIRED]  — defines V9 enforcement that does not yet exist. The test is
-//!                    #[ignore] until the implementing milestone is verified. Remove
-//!                    #[ignore] and confirm the test passes after each V9 enforcement
-//!                    milestone. The test body contains todo!() as a placeholder;
-//!                    replace with the actual V9 API call when available.
+//!   [V9-REQUIRED]  — V9 enforcement through the admission interface
+//!                    (src/admission.rs). Each test constructs a declared context,
+//!                    executes or reconstructs the canonical calculation, invokes
+//!                    admission, and asserts the exact OPEN or REJECTED outcome and
+//!                    its evidence. Bounded scope: see src/admission.rs.
 //!
-//! Test counts (second milestone):
+//! Test counts:
 //!   27 existing tests ([V8-BASELINE] + [GAP]) — all must pass.
-//!   4 new [RPPI-GAP] tests — document inadmissible current behavior; must pass.
-//!   4 new [V9-REQUIRED] tests — #[ignore]; define enforcement contract.
+//!   4 [RPPI-GAP] tests — document that the frozen V8 constructors still accept
+//!     class-only provenance (they are unchanged, Req-5); must pass.
+//!   4 [V9-REQUIRED] tests — executable since the V9 admission interface
+//!     (src/admission.rs): each constructs one invalid case and asserts the exact
+//!     OPEN or REJECTED outcome and its evidence. None is ignored and none
+//!     has a placeholder body.
+//!     Renamed to state their outcomes (Origin correction 2026-10-25: absence
+//!     is OPEN; only an established contradiction is REJECTED).
 //!
 //! All [V8-BASELINE] and [RPPI-GAP] tests must pass on the `kernel-v9` branch
 //! before any V9 implementation milestone is submitted for Verifier review.
+
+mod common;
+
+use abr_kernel::admission::{admit, AdmissionOutcome, BasisOf, DeclKind, Link, OpenCondition, RppiViolation};
+use abr_kernel::derived_invariants::epsilon_photon_edge;
+use abr_kernel::provenance::CalculatedOutput;
+use abr_kernel::provenanced_exec::{execute_edge_m_projection, execute_primary};
+use common::*;
 
 use abr_kernel::operators::{
     compute_rho, compute_rho_primary, declared_edge_image_admissibility_check,
@@ -562,7 +576,7 @@ fn irrs_integration_gap_abr_tracing_requires_external_rel() {
 /// label is not a provenance identity. This is inadmissible; the current API
 /// does not enforce it.
 ///
-/// V9 enforcement (see `rppi_missing_observable_source_rejected` below):
+/// V9 enforcement (see `rppi_missing_provenance_not_admitted` below):
 /// the V9 admission interface must reject when `ObservableRelationDeclaration`
 /// is absent for any edge. V8 constructors remain frozen (Req-5;
 /// v9_specification.md Correction 2).
@@ -585,37 +599,56 @@ fn rppi_missing_observable_source_gap() {
     );
 }
 
-/// [V9-REQUIRED] MISSING PROVENANCE: construction without a complete
-/// `ObservableRelationDeclaration` (observable_source + direction_basis +
-/// m_mapping_ref) must be rejected.
+/// [V9-REQUIRED] MISSING PROVENANCE — enforced (v9_specification.md §6.1; Req-1,
+/// Req-2, Req-7).
 ///
-/// When V9 adds the admission interface, submitting class-only provenance
-/// without an identity declaration must be rejected there. V8 constructors
-/// remain frozen (Req-5; v9_specification.md Correction 2).
+/// An input without a complete, verifiable observational provenance chain
+/// remains OPEN and is not admitted. Absence is not a contradiction, so it is
+/// never REJECTED (Origin correction 2026-10-25, rules 6–7).
 ///
-/// Remove `#[ignore]` after V9 enforcement milestone is implemented and verified.
-/// Replace `todo!()` with the actual V9 admission-interface call.
+/// Case 1 — the canonical H-alpha photon edge, with exactly the declarations
+/// the canonical repository holds (tests/common: quoted verbatim, nothing
+/// supplied). The Generator can execute the frozen ε[e] = hc/λ; executing it
+/// establishes nothing. Admission reports each declaration that is absent.
+/// Case 2 — a declared structure references a relation with no declaration.
+/// Case 3 — an observable names no external record: not a terminus.
 #[test]
-#[ignore = "V9-REQUIRED: ObservableRelationDeclaration not yet enforced at construction"]
-fn rppi_missing_observable_source_rejected() {
-    // When the V9 admission interface is implemented, replace the todo!()
-    // below with a submission to that interface (working names subject to
-    // Verifier review, v9_specification.md §11), e.g.:
-    //
-    //   v9_admit(/* DeclaredRelations with EdgeProvenance class only —
-    //               no ObservableRelationDeclaration */)
-    //
-    // Admission must be rejected: observable_source absent. V8 constructors
-    // (from_edges_with_provenance) remain frozen (Req-5; Correction 2).
-    let result = std::panic::catch_unwind(|| {
-        todo!(
-            "V9 adds ObservableRelationDeclaration enforcement; \
-             replace todo! with construction-without-identity call when API exists"
-        )
-    });
-    assert!(
-        result.is_err(),
-        "construction without ObservableRelationDeclaration must be rejected under V9"
+fn rppi_missing_provenance_not_admitted() {
+    // Case 1.
+    let reg = halpha_canonical_registry();
+    let po = execute_edge_m_projection(&reg, HA_EDGE).expect("frozen ε[e] = hc/λ executes");
+    assert_eq!(po.record.outputs[0].value.to_bits(), epsilon_photon_edge(656.279e-9).to_bits());
+    assert_eq!(
+        admit(&po, &reg),
+        AdmissionOutcome::Open(vec![
+            OpenCondition::MissingMeasurementConditions { observable: HA_LAMBDA.into() },
+            OpenCondition::MissingMeasurementConditions { observable: HA_REF_H.into() },
+            OpenCondition::MissingMeasurementConditions { observable: HA_REF_C.into() },
+            OpenCondition::MissingDeclaration { kind: DeclKind::Domain, id: HA_DOMAIN.into() },
+            OpenCondition::MissingObservationalBasis { of: BasisOf::Class(HA_EDGE.into()) },
+        ]),
+        "canonical H-alpha chain is incomplete: OPEN, not admitted"
+    );
+
+    // Case 2 (synthetic): the record is a correct execution; the authoritative
+    // registry lacks the relation's declaration record.
+    let full = synthetic_primary_registry();
+    let po = execute_primary(&full, SYN_DELTA).unwrap();
+    let mut reg = full.clone();
+    reg.relations.retain(|r| r.id != SYN_REL_01);
+    assert_eq!(
+        admit(&po, &reg),
+        AdmissionOutcome::Open(vec![OpenCondition::MissingDeclaration {
+            kind: DeclKind::Relation, id: SYN_REL_01.into(),
+        }])
+    );
+
+    // Case 3 (synthetic): an observable with no external record.
+    let mut reg = full.clone();
+    reg.observables.iter_mut().find(|o| o.id == "syn.obs.a").unwrap().record = None;
+    assert_eq!(
+        admit(&po, &reg),
+        AdmissionOutcome::Open(vec![OpenCondition::NoExternalTerminus { observable: "syn.obs.a".into() }])
     );
 }
 
@@ -626,7 +659,7 @@ fn rppi_missing_observable_source_rejected() {
 /// observable through M. Under RPPI, provenance identity must be verifiable
 /// against a declared M mapping. Current enforcement has no such check.
 ///
-/// V9 enforcement (see `rppi_fabricated_observable_source_rejected` below):
+/// V9 enforcement (see `rppi_fabricated_provenance_rejected` below):
 /// the V9 admission interface must verify that `m_mapping_ref` names an M
 /// declared by Origin. V8 constructors remain frozen (Req-5).
 #[test]
@@ -650,36 +683,61 @@ fn rppi_fabricated_provenance_gap() {
     );
 }
 
-/// [V9-REQUIRED] FABRICATED PROVENANCE: a provenance record whose `observable_source`
-/// or `m_mapping_ref` cannot be verified against a declared M mapping must be
-/// rejected by the V9 admission interface (not by frozen V8 constructors).
+/// [V9-REQUIRED] FABRICATED PROVENANCE — enforced (v9_specification.md §6.2;
+/// Req-2, Req-6, Req-7).
 ///
-/// Remove `#[ignore]` after V9 M-mapping verification is implemented and verified.
-/// Replace `todo!()` with an actual V9 admission attempt using a fabricated source.
+/// A demonstrated contradiction between a claimed declaration and the
+/// authoritative declaration with the same id is REJECTED, with both sides as
+/// evidence. A claim citing a declaration that is not available cannot be
+/// verified and remains OPEN. Synthetic fixtures; enforcement behaviour only.
 #[test]
-#[ignore = "V9-REQUIRED: M-mapping verification against ObservableRelationDeclaration not yet implemented"]
-fn rppi_fabricated_observable_source_rejected() {
-    // When the V9 admission interface is implemented, replace the todo!()
-    // below with a submission to that interface (working names subject to
-    // Verifier review, v9_specification.md §11), e.g.:
-    //
-    //   v9_admit(/* ObservableRelationDeclaration {
-    //       observable_source: "fabricated-source-not-in-any-declared-M",
-    //       direction_basis:   "fabricated-direction",
-    //       m_mapping_ref:     "nonexistent-M",
-    //   } */)
-    //
-    // Admission must be rejected: m_mapping_ref names no declared M.
-    // V8 constructors remain frozen (Req-5; Correction 2).
-    let result = std::panic::catch_unwind(|| {
-        todo!(
-            "V9 adds M-mapping verification; replace todo! with fabricated-source \
-             construction attempt when ObservableRelationDeclaration API exists"
-        )
-    });
-    assert!(
-        result.is_err(),
-        "construction with unverifiable observable_source must be rejected under V9"
+fn rppi_fabricated_provenance_rejected() {
+    let reg = synthetic_primary_registry();
+    let po = execute_primary(&reg, SYN_DELTA).unwrap();
+    assert!(matches!(admit(&po, &reg), AdmissionOutcome::Admitted(_)), "control: unaltered record admitted");
+
+    // Claimed observable source contradicts the declared external record.
+    let mut forged = po.clone();
+    forged.record.inputs[0].claimed_source = "NIST ASD v5.12".into();
+    assert_eq!(
+        admit(&forged, &reg),
+        AdmissionOutcome::Rejected(RppiViolation::Fabricated {
+            id: "syn.obs.a".into(), field: "source".into(),
+            declared: SYN_SOURCE.into(), recorded: "NIST ASD v5.12".into(),
+        })
+    );
+
+    // Claimed observed value contradicts the declared reported value.
+    let mut forged = po.clone();
+    forged.record.inputs[1].observed_value = 1.5;
+    assert_eq!(
+        admit(&forged, &reg),
+        AdmissionOutcome::Rejected(RppiViolation::Fabricated {
+            id: "syn.obs.b".into(), field: "reported_value".into(),
+            declared: "1e0".into(), recorded: "1.5e0".into(),
+        })
+    );
+
+    // Claimed parameter value contradicts the declared parameter observable.
+    let po_chain = execute_primary(&reg, SYN_CHAIN).unwrap();
+    let mut forged = po_chain.clone();
+    forged.record.parameters[0].value = 0.25;
+    assert_eq!(
+        admit(&forged, &reg),
+        AdmissionOutcome::Rejected(RppiViolation::Fabricated {
+            id: "syn.obs.rho_base".into(), field: "parameter rho_base".into(),
+            declared: "5e-1".into(), recorded: "2.5e-1".into(),
+        })
+    );
+
+    // Unverifiable, not contradicted: the cited observable is not declared.
+    let mut forged = po.clone();
+    forged.record.inputs[0].observable_ref = "obs.not_declared".into();
+    assert_eq!(
+        admit(&forged, &reg),
+        AdmissionOutcome::Open(vec![OpenCondition::Unverifiable {
+            kind: DeclKind::Observable, id: "obs.not_declared".into(),
+        }])
     );
 }
 
@@ -693,7 +751,7 @@ fn rppi_fabricated_observable_source_rejected() {
 /// This is the precise RPPI framing of the provenance survival gap documented in
 /// §3 and §7. All current operator outputs are disconnected in this sense.
 ///
-/// V9 enforcement (see `rppi_disconnected_provenance_rejected_by_irrs` below):
+/// V9 enforcement (see `rppi_disconnected_derivation_rejected` below):
 /// IRRS must reject any result that does not carry a continuous derivation path
 /// through `ProvenancedOutput<T>`.
 #[test]
@@ -722,37 +780,75 @@ fn rppi_disconnected_provenance_gap() {
     );
 }
 
-/// [V9-REQUIRED] DISCONNECTED PROVENANCE: IRRS must reject any result that does
-/// not carry a continuous derivation path to a declared observable relation.
+/// [V9-REQUIRED] DISCONNECTED DERIVATION — enforced (v9_specification.md §6.3;
+/// Req-4, Req-6).
 ///
-/// When V9 adds `ProvenancedOutput<T>`, operator outputs carry an edge-indexed
-/// reference to the `ObservableRelationDeclaration` of each contributing edge.
-/// The IRRS admission function verifies this reference before admission.
-///
-/// Remove `#[ignore]` after `ProvenancedOutput<T>` and IRRS admission enforcement
-/// are implemented and verified.
-/// Replace `todo!()` with an actual IRRS admission call on a bare (unwrapped) result.
+/// A calculation record that contradicts the independently reconstructed
+/// derivation is REJECTED at the located link. Admission rebuilds inputs,
+/// traversal, and outputs from the declarations alone (it never reads the
+/// record's account or the V8 structures it carries) and compares. The links
+/// below are identity and traversal contradictions, not merely numerical
+/// disagreement. Synthetic fixtures (Primary Δ and Σ, ρ_base and χ₀ declared
+/// synthetically); enforcement behaviour only.
 #[test]
-#[ignore = "V9-REQUIRED: ProvenancedOutput<T> not yet implemented — derivation path cannot be carried"]
-fn rppi_disconnected_provenance_rejected_by_irrs() {
-    // When V9 is implemented, replace the todo!() below with:
-    //
-    //   let rel = rel_three_node_chain();
-    //   let x = NodeField::new(vec![vec![5.0, 2.0, 1.0]]);
-    //   let delta = operator_delta(&x, &rel); // PrimaryEdgeField — no provenance reference
-    //   irrs_admit(&delta) // must panic: no ProvenancedOutput wrapper
-    //
-    // IRRS admission must reject delta without a ProvenancedOutput wrapper.
-    let result = std::panic::catch_unwind(|| {
-        todo!(
-            "V9 adds IRRS admission enforcement; replace todo! with irrs_admit call \
-             on unwrapped operator output when ProvenancedOutput<T> API exists"
-        )
-    });
-    assert!(
-        result.is_err(),
-        "IRRS must reject disconnected result (no ProvenancedOutput) under V9"
+fn rppi_disconnected_derivation_rejected() {
+    let reg = synthetic_primary_registry();
+    let po = execute_primary(&reg, SYN_CHAIN).unwrap();
+    assert!(matches!(admit(&po, &reg), AdmissionOutcome::Admitted(_)), "control: unaltered record admitted");
+
+    // Input binding: locus 0 is bound to a different declared observation. Its
+    // source and value are that observation's own, so nothing is fabricated;
+    // the binding contradicts the locus declaration.
+    let mut forged = po.clone();
+    forged.record.inputs[0].observable_ref = "syn.obs.c".into();
+    forged.record.inputs[0].observed_value = 2.0;
+    forged.record.inputs[0].projected_value = 2.0;
+    assert_eq!(
+        admit(&forged, &reg),
+        AdmissionOutcome::Rejected(RppiViolation::Disconnected {
+            link: Link::InputBinding, entry: "syn.locus.0".into(),
+            reconstructed: "syn.obs.a via syn.m.identity".into(),
+            recorded: "syn.obs.c via syn.m.identity".into(),
+        })
     );
+
+    // Traversal: the record claims Σ read no successor at edge 0; the declared
+    // relations give adj⁺(0) = {1}.
+    let mut forged = po.clone();
+    forged.record.relations[0].adj_plus = vec![];
+    match admit(&forged, &reg) {
+        AdmissionOutcome::Rejected(RppiViolation::Disconnected { link: Link::Traversal, entry, reconstructed, recorded }) => {
+            assert_eq!(entry, "relation[0]");
+            assert!(reconstructed.contains("adj+[1]") && recorded.contains("adj+[]"), "{reconstructed} / {recorded}");
+        }
+        other => panic!("expected Disconnected(Traversal), got {other:?}"),
+    }
+
+    // Output derivation: the record's derivation of Σ[syn.rel.01] omits the
+    // declared parameters ρ_base and χ₀ the reconstructed Σ used.
+    let mut forged = po.clone();
+    let k = forged.record.outputs.iter()
+        .position(|o| o.relation_ref == SYN_REL_01 && format!("{:?}", o.step) == "Sigma").unwrap();
+    forged.record.outputs[k].contributing.retain(|d| d != "syn.obs.rho_base" && d != "syn.obs.chi_0");
+    match admit(&forged, &reg) {
+        AdmissionOutcome::Rejected(RppiViolation::Disconnected { link: Link::OutputDerivation, entry, reconstructed, recorded }) => {
+            assert_eq!(entry, format!("Sigma[{SYN_REL_01}]"));
+            assert!(reconstructed.contains("syn.obs.rho_base") && !recorded.contains("syn.obs.rho_base"));
+        }
+        other => panic!("expected Disconnected(OutputDerivation), got {other:?}"),
+    }
+
+    // Output derivation: the carried V8 output was altered after execution
+    // while the record still describes the declared calculation.
+    let mut forged = po.clone();
+    if let CalculatedOutput::Primary { delta, .. } = &mut forged.output {
+        delta.field[0][0] += 1.0;
+    }
+    assert!(matches!(
+        admit(&forged, &reg),
+        AdmissionOutcome::Rejected(RppiViolation::Disconnected { link: Link::OutputDerivation, ref entry, .. })
+            if entry == "carried output"
+    ));
 }
 
 // ── §8.4  MISATTRIBUTED PROVENANCE ───────────────────────────────────────────
@@ -763,7 +859,7 @@ fn rppi_disconnected_provenance_rejected_by_irrs() {
 /// gap precedes the attribution gap: before a result can be attributed incorrectly,
 /// it must be possible to attribute it at all.
 ///
-/// V9 enforcement (see `rppi_misattributed_provenance_rejected_by_irrs` below):
+/// V9 enforcement (see `rppi_misattributed_provenance_rejected` below):
 /// `ProvenancedOutput<T>` carries a binding reference. IRRS verifies the binding
 /// during admission. A result presented with a substituted declaration must panic.
 #[test]
@@ -792,39 +888,36 @@ fn rppi_misattributed_provenance_gap() {
     );
 }
 
-/// [V9-REQUIRED] MISATTRIBUTED PROVENANCE: a `ProvenancedOutput<T>` whose
-/// derivation record attributes it to a declared relation other than the one
-/// that actually produced it must be rejected by IRRS.
+/// [V9-REQUIRED] MISATTRIBUTED PROVENANCE — enforced (v9_specification.md §6.4;
+/// Req-4, Req-6).
 ///
-/// The attribution is present, internally consistent, and wrong. IRRS verifies
-/// the binding between output and its `DeclaredRelations` during admission.
-///
-/// Remove `#[ignore]` after `ProvenancedOutput<T>` and IRRS attribution
-/// verification are implemented and verified.
-/// Replace `todo!()` with an actual IRRS admission call on a misattributed output.
+/// The output is produced through declared relation syn.rel.01 (0→1,
+/// Continuation). The record attributes it to syn.rel.01.coupling — a declared
+/// relation over the same loci with a different class. The numerical values are
+/// identical; the attribution contradicts the reconstructed producing relation
+/// and is REJECTED. Synthetic fixtures; enforcement behaviour only.
 #[test]
-#[ignore = "V9-REQUIRED: ProvenancedOutput attribution binding verification not yet implemented"]
-fn rppi_misattributed_provenance_rejected_by_irrs() {
-    // When V9 is implemented, replace the todo!() below with:
-    //
-    //   let rel_a = rel_single_edge();
-    //   let rel_b = DeclaredRelations::from_edges_with_provenance(
-    //       2, vec![(0, 1)], vec![EdgeProvenance::Coupling],
-    //   );
-    //   let x = NodeField::new(vec![vec![3.0, 1.0]]);
-    //   let output_from_a = operator_delta_provenance(&x, &rel_a); // ProvenancedOutput
-    //   let misattributed = output_from_a.rebind(&rel_b); // swap the binding — or equivalent
-    //   irrs_admit(&misattributed) // must panic: binding does not match producing rel
-    //
-    // IRRS admission must reject: derivation binding is rel_a, attribution claims rel_b.
-    let result = std::panic::catch_unwind(|| {
-        todo!(
-            "V9 adds IRRS attribution verification; replace todo! with misattributed \
-             ProvenancedOutput admission attempt when derivation binding API exists"
-        )
-    });
-    assert!(
-        result.is_err(),
-        "IRRS must reject misattributed ProvenancedOutput under V9"
+fn rppi_misattributed_provenance_rejected() {
+    let reg = synthetic_primary_registry();
+    let po = execute_primary(&reg, SYN_DELTA).unwrap();
+    assert!(matches!(admit(&po, &reg), AdmissionOutcome::Admitted(_)), "control: unaltered record admitted");
+
+    let mut forged = po.clone();
+    forged.record.relations[0].relation_ref = SYN_REL_01_COUPLING.into();
+    forged.record.outputs[0].relation_ref = SYN_REL_01_COUPLING.into();
+    for c in forged.record.outputs[0].contributing.iter_mut() {
+        if c == SYN_REL_01 {
+            *c = SYN_REL_01_COUPLING.into();
+        }
+    }
+    assert_eq!(forged.record.outputs[0].value.to_bits(), po.record.outputs[0].value.to_bits(),
+        "numerical output unchanged");
+    assert_eq!(
+        admit(&forged, &reg),
+        AdmissionOutcome::Rejected(RppiViolation::Misattributed {
+            entry: "relation[0]".into(),
+            claimed: SYN_REL_01_COUPLING.into(),
+            reconstructed: SYN_REL_01.into(),
+        })
     );
 }
