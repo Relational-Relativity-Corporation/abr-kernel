@@ -99,8 +99,9 @@ milestones (see Kernel V9 Development Status below).
 identifiers remain only where needed to describe prior implementations,
 release history, or explicitly frozen source. Document-local revision numbers
 are historical identifiers, not alternate canonical kernel versions.
-The Rust package still reports `8.0.0` until its release metadata and
-compatibility are migrated; this does not supersede the V9 documentation.
+The Rust package `abr-kernel` (library crate `abr_kernel`) is version
+`9.0.0`, the Kernel V9 release. Its operator formulas and public API are
+unchanged from the frozen V8 implementation (`8.0.0`).
 
 ### `docs/kernel/` — what the kernel is
 
@@ -348,6 +349,19 @@ preserve the provenance of earlier implementations; they do not designate
 V8 as the current canonical mathematical reference. The frozen V8 operator
 implementation is an implementation baseline within the V9 development
 record, not a second source of mathematical authority.
+
+### Kernel V9 package release (2026-10-25)
+
+- Package `abr-kernel` version `8.0.0` → `9.0.0` (Origin decision). Package
+  name and library crate name `abr_kernel` unchanged.
+- No operator formula, function signature, return type, parameter, or test
+  expectation changed. The major version marks the canonical Kernel V9
+  release; it does not indicate an API break.
+- Consumers that depend on `branch = "main"` without a version
+  requirement build unchanged.
+- Tests: 61 library tests, 3 `provenance_demo` tests, 31 active V9
+  conformance tests pass; 4 `[V9-REQUIRED]` tests remain `#[ignore]`
+  (RPPI enforcement not implemented; see `kernel_reference.md` §18).
 
 ### Historical Kernel V8 implementation (2026-09-26)
 
