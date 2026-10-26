@@ -1,6 +1,6 @@
 # Verification Pass Ordering Protocol
 
-**Metatron Dynamics, Inc.** Kernel V8.\
+**Metatron Dynamics, Inc.** Kernel V9.\
 Reference procedure. Bounded over D. No claim beyond D.
 
 ## Purpose
@@ -285,3 +285,7 @@ those already declared elsewhere in the kernel.
 ## Kernel V8 synchronization (2026-09-26)
 
 Wording aligned with the Kernel V8 vocabulary: "absent" / "absence" of declarations and evidence restated as "not supplied". No procedure changed.
+
+## Kernel V9 synchronization (2026-10-25)
+
+Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.

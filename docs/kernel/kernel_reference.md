@@ -33,7 +33,7 @@ Origin.
 15. Derived invariants — Part II (open derivation)
 16. Experimental execution discipline
 17. Verification
-18. Open conditions held at Kernel V8
+18. Open conditions (held since Kernel V8; RPPI enforcement status)
 19. Suspended quantities (record only)
 20. Legacy mathematical intrusion — classes and rule
 21. Version history (summary)
@@ -195,8 +195,8 @@ Before beginning work, classify the active task. These scopes must not be silent
 | Scope | What it may examine |
 |---|---|
 | **Kernel audit** | Operator derivation; invariant derivation; kernel declarations; implementation correspondence; internal kernel consistency; OPEN/HOLD conditions; source-level contradictions. |
-| **Application construction** | Declaring and executing the kernel over a particular observable system. Treats established Kernel V8 content as governing. |
-| **Application verification** | Whether the application conforms to Kernel V8, the application's Origin declarations, its declared M, its declared topology, and its observable comparison criteria. Does NOT recursively re-audit Kernel V8. |
+| **Application construction** | Declaring and executing the kernel over a particular observable system. Treats established Kernel V9 content as governing. |
+| **Application verification** | Whether the application conforms to Kernel V9, the application's Origin declarations, its declared M, its declared topology, and its observable comparison criteria. Does NOT recursively re-audit Kernel V9. |
 
 **Frozen-kernel rule (application construction and verification).** During application construction or application verification, do NOT reopen, rederive, independently justify, replace, reinterpret, or demand new observational proof for:
 
@@ -207,7 +207,7 @@ Before beginning work, classify the active task. These scopes must not be silent
 - established admissibility rules
 - established implementation behavior
 - admitted measurement references
-- or other Kernel V8 content explicitly classified as established
+- or other Kernel V9 content explicitly classified as established
 
 Only Origin may intentionally escalate an application task into a Kernel audit.
 
@@ -249,7 +249,7 @@ Declaration completeness is checked before execution. Declaration correspondence
 
 **Step 3 — Verify (Verifier)**
 
-Return located findings against the declared criteria (section 17). Once Verifier establishes that (1) the required application declaration exists, (2) it enters through the declared M, (3) the applicable established kernel operation was selected, (4) implementation matches that operation, and (5) no undeclared quantity entered — the mathematical provenance inquiry for that operation is complete. Proceed to observable comparison. Do not recursively investigate established Kernel V8 mathematics unless Origin explicitly requests a Kernel audit.
+Return located findings against the declared criteria (section 17). Once Verifier establishes that (1) the required application declaration exists, (2) it enters through the declared M, (3) the applicable established kernel operation was selected, (4) implementation matches that operation, and (5) no undeclared quantity entered — the mathematical provenance inquiry for that operation is complete. Proceed to observable comparison. Do not recursively investigate established Kernel V9 mathematics unless Origin explicitly requests a Kernel audit.
 
 **Step 4 — Revise (Origin)**
 
@@ -300,7 +300,7 @@ An observable record is not rendered inadmissible merely because the publication
 
 Observable quantities that may enter the framework through the declared M include: temperature, wavelength, frequency, charge, voltage, timing, occupation, position, energy transition, instrument response, and any other directly reported quantity.
 
-The source's legacy mathematical interpretation does NOT thereby enter Kernel V8. Do not import a Hamiltonian, probability distribution, statistical estimator, conventional force law, information-theoretic quantity, or other legacy construct merely because it appears beside the observational record.
+The source's legacy mathematical interpretation does NOT thereby enter Kernel V9. Do not import a Hamiltonian, probability distribution, statistical estimator, conventional force law, information-theoretic quantity, or other legacy construct merely because it appears beside the observational record.
 
 Likewise, do not reject usable observational data solely because such mathematics appears in its source.
 
@@ -633,7 +633,7 @@ pub fn epsilon_e(delta_iota_e: f64, indicator: f64) -> f64 {
 }
 ```
 
-Kernel V8 HOLD: depends on the 𝟙[e] audit (A-3 open condition). No change.
+HOLD (since Kernel V8): depends on the 𝟙[e] audit (A-3 open condition). No change.
 
 ### 13.4 𝟙[e] — Detection Indicator
 
@@ -652,7 +652,7 @@ pub fn detection_indicator(r_antisymmetric_e: f64, tol: f64) -> f64 {
 // tol is IMPLEMENTATION-ONLY NUMERICAL TOLERANCE
 ```
 
-Kernel V8 AUDIT PENDING: determine whether 0.0 always means an evaluated R
+AUDIT PENDING (since Kernel V8): determine whether 0.0 always means an evaluated R
 output whose antisymmetric term is 0.0, or is ever used where no relation was
 declared through M. Follows Origin determination of empty-adjacency semantics
 (audit A-3).
@@ -892,7 +892,7 @@ pub fn superposition_condition(delta_field: &[Vec<f64>], tol: f64) -> bool {
 pub fn superposition_resolved(has_interior: bool) -> bool { has_interior }
 ```
 
-Kernel V8 HOLD on `are_proportional`: edge-order dependent when one Δ vector
+HOLD (since Kernel V8) on `are_proportional`: edge-order dependent when one Δ vector
 is 0.0 in every component. No code change authorized.
 
 ### 15.4 I-E — Entanglement Invariant
@@ -1024,7 +1024,7 @@ verification only. Synthetic test provenance is not empirical provenance.
 
 ---
 
-## 18. Open Conditions Held at Kernel V8
+## 18. Open Conditions (Held Since Kernel V8) and RPPI Enforcement Status
 
 | Item | Where | Status |
 |---|---|---|
@@ -1058,6 +1058,24 @@ verification only. Synthetic test provenance is not empirical provenance.
 | OC-ι-1 | ι_unit structurally fundamental or instrumentally bounded | OPEN |
 | OC-ι-2 | Relational inertia ratios (ι[μ]/ι[e], ι[τ]/ι[e]) — no declared relational origin | OPEN |
 | OC-ι-3 | δι ~ ι^0.5 scaling — connection to ρ saturation not derived | OPEN |
+
+**Kernel V9 RPPI enforcement — specified, not implemented** (`v9_specification.md` §6–§10).
+Kernel V9 is canonical; canonical status does not mean these admission requirements are
+enforced. Each is held OPEN and tracked by an `#[ignore]` `[V9-REQUIRED]` test in
+`tests/v9_conformance.rs`. Results are not admitted as established on the basis of these
+requirements until the implementing milestone is verified.
+
+| RPPI failure mode | Required V9 enforcement (admission interface, not V8 constructors) | Tracking test | Status |
+|---|---|---|---|
+| Missing provenance (§6.1) | Reject any relation without an `ObservableRelationDeclaration` | `rppi_missing_observable_source_rejected` | NOT IMPLEMENTED |
+| Fabricated provenance (§6.2) | Reject an `m_mapping_ref` unverifiable against Origin's declared M | `rppi_fabricated_observable_source_rejected` | NOT IMPLEMENTED |
+| Disconnected provenance (§6.3) | Reject any result not carried in `ProvenancedOutput<T>` with a calculation record | `rppi_disconnected_provenance_rejected_by_irrs` | NOT IMPLEMENTED |
+| Misattributed provenance (§6.4) | Reject a calculation-record binding that does not match the producing `DeclaredRelations` | `rppi_misattributed_provenance_rejected_by_irrs` | NOT IMPLEMENTED |
+
+Also OPEN (Origin field definition, `v9_specification.md` §8): `observable_source`,
+`direction_basis`, `m_mapping_ref`, `declared_domain`; NodeField declaration record;
+`calculation_record` type; the V9 admission interface with independent IRRS
+reconstruction (Req-6).
 
 ---
 
@@ -1133,6 +1151,7 @@ Generator output.
 | derived_invariants V4.3.1 | Grounding reference updated to operators.rs V7.1 |
 | Kernel V8 (derived_invariants) | Wording synchronized; A-11 closed; photon_edge_kappa_non_applicable rewritten; 𝟙[e] audit HOLD; are_proportional HOLD |
 | Operational discipline (2026-09-29) | Sections 2, 4, 7, 16 added (Origin declaration): observational order and governing constants; task scope and frozen-kernel rule; observable record vs. legacy interpretation; experimental execution discipline. Section 5 (Workflow Step 2) revised: declaration-completeness vs. correspondence distinction added; execute-or-stop-exactly rule added. Section 10 (Kernel Selection) revised: R-is-not-optional rule added; Primary Region clarification added. No operator form, invariant form, Rust function, or source file content changed. |
+| Kernel V9 synchronization (2026-10-25) | Kernel V9 established as the sole canonical release across all files (Origin directive, README `e54fcec`). Release designations updated; foundational-primitive statement added to the crate root, `operators.rs`, and governing kernel documents; RPPI enforcement status register added to §18. No operator form, invariant form, Rust function, or test expectation changed. |
 | Kernel V9 (2026-10-24) | Foundational primitive established as Section 1 preamble: "a directed relation declared from observable information" — a primitive not previously existing in mathematics. Three roots stated: complexity, change as the only observable constant, bounded domain of analysis. Operator dependence on the primitive stated explicitly: operators exist because of the primitive and cannot be applied to anything not declared through M. Section 2 updated to reference Section 1 for the full account. No operator form, invariant form, Rust function, or source file content changed. |
 
 ---

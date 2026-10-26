@@ -1,7 +1,7 @@
-// operators.rs — Metatron Dynamics, Inc. Kernel V8.
+// operators.rs — Metatron Dynamics, Inc. Kernel V9.
 // Unified Relational Kernel: Primary (Δ → Σ) and ABR (A → B → R).
 //
-// Grounding documents (Kernel V8, docs/kernel/):
+// Grounding documents (Kernel V9, docs/kernel/):
 //   operators_notation_and_constraint.md
 //   abr_operators_plain.md
 //   role_separation_and_operator_application.md
@@ -27,6 +27,13 @@
 //   Activation Condition below).
 //
 // ── Foundation ───────────────────────────────────────────────────────────
+//
+// Foundational primitive (Kernel V9): the foundational observable primitive is a
+// directed relation declared from observable information. A numerical value is not
+// itself a primitive; it is the projection of an observed relational distinction
+// through a declared measurement mapping M. Observed relations, measurement mappings
+// M, numerical projections in D, and calculated results are held distinct.
+// See docs/kernel/kernel_reference.md §1.
 //
 // Within this framework there are no assumptions, only observations.
 //
@@ -430,8 +437,15 @@
 //      documents. Kernel release numbering (Origin declaration): every file
 //      in the repository carries the kernel release number, Kernel V8.
 //
+// Kernel V9 synchronization (2026-10-25, Origin directive) — Kernel V9 is the
+//      sole canonical release. Release designation updated; foundational-
+//      primitive statement added to Foundation. Comment-only change: no
+//      operator form, signature, parameter, or test expectation changed.
+//      Kernel V8 identifiers below and above are retained as historical
+//      record, dated declarations, or the frozen V8 implementation baseline.
+//
 // Bounded over D. No claim beyond D.
-// Metatron Dynamics, Inc. Kernel V8.
+// Metatron Dynamics, Inc. Kernel V9.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── SHARED FOUNDATION ──────────────────────────────────────────────────────
@@ -766,7 +780,7 @@ pub fn compute_rho_primary(
 //     Status: DECLARED — PRESERVE
 //   ρ[e] as scalar gain:
 //     Status: OPEN (inherits from ρ audit above)
-//   Empty adjacency (Kernel V8, audit A-3):
+//   Empty adjacency (audit A-3, open since Kernel V8):
 //     Sums over an empty adj⁺ or adj⁻ evaluate to 0.0. Whether Σ is defined
 //     over the set of declared adjacent relations, so that an empty set
 //     contributes nothing, is to be established from the operator
@@ -1042,7 +1056,7 @@ pub fn compute_rho(a: &EdgeField, rel: &DeclaredRelations, rho_base: f64, chi_0:
 //   Spatial pass-through and directed sum: DECLARED — PRESERVE
 //   ρ[src(e)] as scalar gain: values M-supplied; see ρ audit
 //   cc[p] cross-topology term: M-SUPPLIED (V7.1) — no kernel value
-//   Empty adjacency (Kernel V8, audit A-3): as for Σ. Status: OPEN — not
+//   Empty adjacency (audit A-3, open since Kernel V8): as for Σ. Status: OPEN — not
 //     classified. No change. Applies also to operator_r_persistence.
 
 pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f64]) -> EdgeField {
@@ -1733,7 +1747,7 @@ mod tests {
     // at node 1 (detection locus). Edge direction: emitter → detector,
     // declared from the emission observable.
     // 𝟙[e] = 1 is assumed as a fixture. R → 𝟙 derivation is outside scope.
-    // Kernel V8 OPEN (audit A-2): the detector locus value 0.0 is not established
+    // OPEN since Kernel V8 (audit A-2): the detector locus value 0.0 is not established
     // through M. Fixture declaration pending Origin. Applies also to the Hα
     // tests below. The hc/λ mapping is unchanged.
     #[test]

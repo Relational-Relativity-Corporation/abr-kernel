@@ -1,4 +1,4 @@
-// provenance_demo.rs — Metatron Dynamics, Inc. Kernel V8.
+// provenance_demo.rs — Metatron Dynamics, Inc. Kernel V9.
 //
 // Minimal public demonstration of Observable Provenance and Reverse
 // Traceability (see observable_provenance_and_reverse_traceability.md).
@@ -28,6 +28,10 @@
 // reconstruction of a calculation from recorded provenance, distinct from
 // independent verification of the observable source. No computation,
 // input value, or test expectation changed.
+//
+// Kernel V9 synchronization (2026-10-25): release designation updated; built
+// against abr-kernel (library crate abr_kernel). No computation, input value,
+// or test expectation changed.
 //
 // Bounded over D. No claim beyond D.
 

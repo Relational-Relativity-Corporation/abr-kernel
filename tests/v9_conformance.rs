@@ -1,4 +1,4 @@
-//! Kernel V9 Conformance Test Suite — Second Milestone
+//! Kernel V9 Conformance Test Suite — Third Milestone
 //!
 //! Organization follows the V9 development contract (v9_specification.md):
 //!
@@ -539,7 +539,7 @@ fn irrs_integration_gap_abr_tracing_requires_external_rel() {
 //   structural validity, or named provenance. Its derivation must terminate
 //   in declared observable relations.
 //
-// The four RPPI failure modes (v9_specification.md §5):
+// The four RPPI failure modes (v9_specification.md §6):
 //
 //   MISSING      — no ObservableRelationDeclaration; provenance identity absent.
 //                  A class label (EdgeProvenance::Continuation) is not an identity.
@@ -563,8 +563,9 @@ fn irrs_integration_gap_abr_tracing_requires_external_rel() {
 /// does not enforce it.
 ///
 /// V9 enforcement (see `rppi_missing_observable_source_rejected` below):
-/// `from_edges_with_provenance` must reject when `ObservableRelationDeclaration`
-/// is absent for any edge.
+/// the V9 admission interface must reject when `ObservableRelationDeclaration`
+/// is absent for any edge. V8 constructors remain frozen (Req-5;
+/// v9_specification.md Correction 2).
 #[test]
 fn rppi_missing_observable_source_gap() {
     // EdgeProvenance::Continuation — a class label, not a declaration.
@@ -588,24 +589,24 @@ fn rppi_missing_observable_source_gap() {
 /// `ObservableRelationDeclaration` (observable_source + direction_basis +
 /// m_mapping_ref) must be rejected.
 ///
-/// When V9 adds `ObservableRelationDeclaration` to the edge declaration API,
-/// supplying class-only provenance without an identity declaration must panic
-/// at construction.
+/// When V9 adds the admission interface, submitting class-only provenance
+/// without an identity declaration must be rejected there. V8 constructors
+/// remain frozen (Req-5; v9_specification.md Correction 2).
 ///
 /// Remove `#[ignore]` after V9 enforcement milestone is implemented and verified.
-/// Replace `todo!()` with the actual construction call using the V9 API.
+/// Replace `todo!()` with the actual V9 admission-interface call.
 #[test]
 #[ignore = "V9-REQUIRED: ObservableRelationDeclaration not yet enforced at construction"]
 fn rppi_missing_observable_source_rejected() {
-    // When V9 is implemented, replace the todo!() below with:
+    // When the V9 admission interface is implemented, replace the todo!()
+    // below with a submission to that interface (working names subject to
+    // Verifier review, v9_specification.md §11), e.g.:
     //
-    //   DeclaredRelations::from_edges_with_provenance(
-    //       2,
-    //       vec![(0, 1)],
-    //       vec![/* EdgeProvenance class only — no ObservableRelationDeclaration */],
-    //   )
+    //   v9_admit(/* DeclaredRelations with EdgeProvenance class only —
+    //               no ObservableRelationDeclaration */)
     //
-    // Construction must panic: observable_source absent.
+    // Admission must be rejected: observable_source absent. V8 constructors
+    // (from_edges_with_provenance) remain frozen (Req-5; Correction 2).
     let result = std::panic::catch_unwind(|| {
         todo!(
             "V9 adds ObservableRelationDeclaration enforcement; \
@@ -626,7 +627,8 @@ fn rppi_missing_observable_source_rejected() {
 /// against a declared M mapping. Current enforcement has no such check.
 ///
 /// V9 enforcement (see `rppi_fabricated_observable_source_rejected` below):
-/// construction must verify that `m_mapping_ref` names an M declared by Origin.
+/// the V9 admission interface must verify that `m_mapping_ref` names an M
+/// declared by Origin. V8 constructors remain frozen (Req-5).
 #[test]
 fn rppi_fabricated_provenance_gap() {
     // A Coupling edge is declared, but no cross-family observable has been
@@ -650,26 +652,25 @@ fn rppi_fabricated_provenance_gap() {
 
 /// [V9-REQUIRED] FABRICATED PROVENANCE: a provenance record whose `observable_source`
 /// or `m_mapping_ref` cannot be verified against a declared M mapping must be
-/// rejected at construction.
+/// rejected by the V9 admission interface (not by frozen V8 constructors).
 ///
 /// Remove `#[ignore]` after V9 M-mapping verification is implemented and verified.
-/// Replace `todo!()` with an actual construction attempt using a fabricated source.
+/// Replace `todo!()` with an actual V9 admission attempt using a fabricated source.
 #[test]
 #[ignore = "V9-REQUIRED: M-mapping verification against ObservableRelationDeclaration not yet implemented"]
 fn rppi_fabricated_observable_source_rejected() {
-    // When V9 is implemented, replace the todo!() below with:
+    // When the V9 admission interface is implemented, replace the todo!()
+    // below with a submission to that interface (working names subject to
+    // Verifier review, v9_specification.md §11), e.g.:
     //
-    //   DeclaredRelations::from_edges_with_provenance(
-    //       2,
-    //       vec![(0, 1)],
-    //       vec![ObservableRelationDeclaration {
-    //           observable_source: "fabricated-source-not-in-any-declared-M",
-    //           direction_basis: "fabricated-direction",
-    //           m_mapping_ref: "nonexistent-M",
-    //       }],
-    //   )
+    //   v9_admit(/* ObservableRelationDeclaration {
+    //       observable_source: "fabricated-source-not-in-any-declared-M",
+    //       direction_basis:   "fabricated-direction",
+    //       m_mapping_ref:     "nonexistent-M",
+    //   } */)
     //
-    // Construction must panic: m_mapping_ref names no declared M.
+    // Admission must be rejected: m_mapping_ref names no declared M.
+    // V8 constructors remain frozen (Req-5; Correction 2).
     let result = std::panic::catch_unwind(|| {
         todo!(
             "V9 adds M-mapping verification; replace todo! with fabricated-source \

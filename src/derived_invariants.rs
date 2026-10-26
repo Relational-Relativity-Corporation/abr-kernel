@@ -1,7 +1,7 @@
-// derived_invariants.rs — Metatron Dynamics, Inc. Kernel V8.
-// Derived Invariants: canonical mathematical expressions from Kernel V8.
+// derived_invariants.rs — Metatron Dynamics, Inc. Kernel V9.
+// Derived Invariants: canonical mathematical expressions from Kernel V9.
 //
-// Grounding documents (Kernel V8):
+// Grounding documents (Kernel V9):
 //   operators.rs
 //   docs/kernel/observable_variable_sets.md
 //   docs/kernel/abr_operators_plain.md
@@ -348,8 +348,12 @@
 //      organization now matches the epistemic classification the file already
 //      stated in prose.
 //
+// Kernel V9 synchronization (2026-10-25, Origin directive): release designation
+//   updated to Kernel V9. Comment-only change; no function, constant, invariant
+//   form, or test expectation changed.
+//
 // Bounded over D. No claim beyond D.
-// Metatron Dynamics, Inc. Kernel V8.
+// Metatron Dynamics, Inc. Kernel V9.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── CONSTANTS AND PHYSICAL REFERENCES ─────────────────────────────────────
@@ -438,7 +442,7 @@ pub const C_DECLARED: f64 = 2.997_924_58e8;
 //   Preserves: magnitude of directed inertia difference, gated by activity.
 //   Discards:  direction of difference (absolute value taken).
 //
-// Kernel V8 HOLD: depends on the 𝟙[e] audit below. Not changed.
+// HOLD (since Kernel V8): depends on the 𝟙[e] audit below. Not changed.
 
 /// Compute ε[e] = |Δ(ι)[e]| · 𝟙[e] for a single declared edge.
 ///
@@ -470,11 +474,12 @@ pub fn epsilon_e(delta_iota_e: f64, indicator: f64) -> f64 {
 // Spectroscopic selection rules fall out of this expression — no
 // additional declaration is required.
 //
-// Kernel V8 AUDIT PENDING: determine whether 0.0 here always means an
+// AUDIT PENDING (since Kernel V8): determine whether 0.0 here always means an
 // evaluated R output whose antisymmetric term is 0.0, or is ever used
 // where no relation was declared through M. The audit
 // follows Origin determination of empty-adjacency semantics in Σ and R
-// (operators.rs Kernel V8, audit A-3). No revision until the audit is complete.
+// (operators.rs, audit A-3, open since Kernel V8). No revision until the
+// audit is complete.
 
 /// Compute 𝟙[e] from the antisymmetric term of R operator output.
 ///
@@ -1390,7 +1395,7 @@ pub fn tunneling_tau_bounded(tau_v: f64) -> bool {
 /// guard finite-precision arithmetic. tol is not a measurement-provenance
 /// threshold and must not be reported as one.
 ///
-/// # Kernel V8 HOLD
+/// # HOLD (since Kernel V8)
 /// `are_proportional` is edge-order dependent when one Δ vector is 0.0 in
 /// every component: the result depends on which edge is indexed first.
 /// Documentation states Δ[e] = k·Δ[f]; the implementation computes
@@ -1459,7 +1464,7 @@ fn are_proportional(delta_field: &[Vec<f64>], e: usize, f: usize, n_components: 
 /// * `has_interior` — true when M has established at least one interior
 ///   locus t with independently declared incoming and continuing edges.
 ///   This is the full-operator admissibility condition from
-///   operators_notation_and_constraint.md (Kernel V8).
+///   operators_notation_and_constraint.md (Kernel V9).
 ///
 /// # Returns
 /// true when the structure has moved beyond the superposition condition —

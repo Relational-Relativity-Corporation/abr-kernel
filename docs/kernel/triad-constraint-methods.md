@@ -1,6 +1,6 @@
 # Triad Constraint Methods
 
-**Metatron Dynamics, Inc.** Kernel V8.
+**Metatron Dynamics, Inc.** Kernel V9.
 Verification methods for high-velocity artifact production.
 
 Derived from a verification session of 2026-07-27 in which six findings were
@@ -500,10 +500,12 @@ close enough to be dangerous.
 
 ---
 
-**Metatron Dynamics, Inc.** Kernel V8.
+**Metatron Dynamics, Inc.** Kernel V9.
 *Bounded over D. No claim beyond D.*
 
 ---
+
+**Kernel V8 → Kernel V9 changes (2026-10-25):** Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.
 
 **V1 → Kernel V8 changes (2026-09-26):** "provenance failure" restated as "provenance not observed or incomplete" (Kernel V8 vocabulary); "regardless of whether it is true" restated as "regardless of whether it corresponds to the system" (Kernel V8 correspondence language); the IR motivating instance annotated to record that ρ_P was retired on 2026-09-23; "absent" checks restated as "not performed". Other uses of "failure" describe errors in artifacts and methods, not operator results, and are unchanged. The seven methods, both Origin obligations, and the publication gate are unchanged; `docs/process/repository_protocol_v1.md` cites the seven methods here. Kernel release numbering (Origin declaration): this document's own numbering ends at V1.
 

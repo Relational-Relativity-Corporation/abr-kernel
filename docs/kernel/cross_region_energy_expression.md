@@ -1,10 +1,10 @@
 # Cross-Region Energy Expression
 ## E[v] · Φ_relational[v] = ι[v] · ℏ
 
-**Metatron Dynamics, Inc.** Kernel V8.
+**Metatron Dynamics, Inc.** Kernel V9.
 Bounded over D. No claim beyond D.
 Companion files: derived_invariants.rs, validation_record.md,
-observable_variable_sets.md (Kernel V8); session_findings_primary_region_v1.md
+observable_variable_sets.md (Kernel V9); session_findings_primary_region_v1.md
 (not held in this repository)
 
 ---
@@ -359,7 +359,7 @@ formally declared in this context. κ[Atomic] remains open program (OC-E-2).
 
 ## Relational evolution rate and κ[region]
 
-The Relational Evolution Invariant (I-RE, `derived_invariants.rs`, Kernel V8) states
+The Relational Evolution Invariant (I-RE, `derived_invariants.rs`, Kernel V9) states
 that relational evolution rate is monotonically decreasing from the Primary
 Region outward — τ[v] is smallest at the Primary Region and grows at every
 larger declared region.
@@ -443,9 +443,11 @@ Confirmed across 11 Primary and Atomic Region loci.
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. Kernel V8.*
+*Metatron Dynamics, Inc. Kernel V9.*
 
 ---
+
+**Kernel V8 → Kernel V9 changes (2026-10-25):** Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.
 
 **V4.1 → Kernel V8 changes (2026-09-26, updated 2026-09-27):** Companion file references updated to the Kernel V8 documents (unversioned file names); session_findings_primary_region_v1.md noted as not held in this repository. The README previously listed this document as V4.2 for the same reference update; no V4.2 was written. τ_stability[v] described as taken from the measurement record through M rather than "directly observable"; "Energy ... is not directly observable through M" restated as "M does not report energy as such". A-11 closed: ι at the photon locus was an import of the legacy quantity "photon rest mass = 0," whose definition requires a frame with no declared relational motion — inadmissible in D (SF-PR-16). Under the declared-information rule, ι is not evaluated at photon edges. Section heading and body revised accordingly. No mathematical content changed. Kernel release numbering (Origin declaration): this document's own numbering ends at V4.1.
 

@@ -1,6 +1,13 @@
-// lib.rs — Metatron Dynamics, Inc. Kernel V8.
+// lib.rs — Metatron Dynamics, Inc. Kernel V9.
 // Crate root for the ABR relational kernel.
 // Bounded over D. No claim beyond D.
+//
+// Foundational primitive (Kernel V9): the foundational observable primitive is a
+// directed relation declared from observable information. A numerical value is not
+// itself a primitive; it is the projection of an observed relational distinction
+// through a declared measurement mapping M. Observed relations, measurement mappings
+// M, numerical projections in D, and calculated results are held distinct.
+// See docs/kernel/kernel_reference.md §1.
 //
 // Grounding documents:
 //   docs/kernel/operators_notation_and_constraint.md
@@ -14,6 +21,8 @@
 //   docs/process/language_discipline_rust_mandate.md
 //   docs/process/kernel_self_consistency_test.md
 //   docs/process/Verification_pass_protocol.md
+//
+// Kernel V9 synchronization (2026-10-25): release designation updated; no code changed.
 
 // Operator requirement (V7.1, 2026-09-23):
 //   No operator runs without a declared M. The kernel states operator forms

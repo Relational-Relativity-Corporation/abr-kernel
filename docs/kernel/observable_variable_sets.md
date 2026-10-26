@@ -1,10 +1,10 @@
 # Observable Variable Sets by Region
 ## Pre-Topological, Pre-Coupling Declaration
 
-**Metatron Dynamics, Inc.** Kernel V8.
+**Metatron Dynamics, Inc.** Kernel V9.
 Authority document: role_separation_and_operator_application.md
 Operator grounding: operators_notation_and_constraint.md
-Companion files: derived_invariants.rs, validation_record.md (Kernel V8)
+Companion files: derived_invariants.rs, validation_record.md (Kernel V9)
 Bounded over D. No claim beyond D.
 
 ---
@@ -689,7 +689,7 @@ only after the operators have established the relational field
 from the declared primitive variables.
 
 Canonical mathematical forms for all derived quantities are
-in `derived_invariants.rs` (Kernel V8). Observational grounding for
+in `derived_invariants.rs` (Kernel V9). Observational grounding for
 all confirmed values is in `validation_record.md`.
 
 ---
@@ -1029,7 +1029,7 @@ relational progression τ[v] (unified expression), B output
 vector direction θ[e], coherence potential Φ[v] = ι[v] · τ[v],
 collective coherence potential Φ[S] = ι[S] · τ[S], and R
 output multiplicity J[v]. Canonical mathematical forms in
-derived_invariants.rs (Kernel V8).
+derived_invariants.rs (Kernel V9).
 
 **Framework and domain instantiation are separated.**
 Every future regional model instantiates the same template.
@@ -1227,10 +1227,12 @@ when they pass the same provenance test.
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. Kernel V8.*
+*Metatron Dynamics, Inc. Kernel V9.*
 *Authority: role_separation_and_operator_application.md*
 
 ---
+
+**Kernel V8 → Kernel V9 changes (2026-10-25):** Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.
 
 **V7.2 → Kernel V8 changes (2026-09-26):** *(a) Items the repository README attributed to V7.4 but not previously written into this document (reconstructed):* the δι log-log fit (Part 2) and EF-3 labeled downstream projections; the near-perpendicular τ case labeled internal consistency, not independent confirmation (cos(θ) is inferred from the same τ ratio it reproduces). *(b) Kernel V8 declarations:* relational field ordering — at the first declared observation only the spatial field is evaluated and persistence is not evaluated; cold start (E_prior = 0) removed; "absent"/"absence" for undeclared quantities restated as "not declared"/"omission"; ι[v] and τ[v] values described as taken from the measurement record through M (numerical projections) rather than "directly observable"; "Not a failure of accumulation" restated. Companion, authority, and grounding references updated to the Kernel V8 documents (unversioned file names). Held for Origin/Verifier: the R² = 0.527 statistic at the δι fit (see the 2026-07-28 correlation finding F6 carried into validation_record.md — the same class of ensemble statistic); the photon "structurally absent" interpretation at J[v] (Part II "absence" audit). Kernel release numbering (Origin declaration): this document's own numbering ends at V7.2.
 

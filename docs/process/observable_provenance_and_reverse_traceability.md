@@ -1,6 +1,6 @@
 # Observable Provenance and Reverse Traceability
 
-**Metatron Dynamics, Inc.** Kernel V8.
+**Metatron Dynamics, Inc.** Kernel V9.
 Reference procedure. Bounded over D. No claim beyond D.
 Declared by Origin, 2026-07-30.
 
@@ -320,3 +320,7 @@ kernel doctrine.
 **Consistency with Kernel V8 declarations.** Values in D are numerical projections of observables through M (O → M → D). A recorded input in a provenance record is such a projection, not the observable itself.
 
 **Correspondence language (Verifier disposition, 2026-09-26).** The foundational section and the closing section previously used "source of truth", "admissible as true", and "true". These are restated in Kernel V8 correspondence and traceability terms. A calculated result is supported within the declared domain when its provenance is reconstructible and its declared correspondence with observable data is established. No calculated result enters the kernel record as established without traceability to its declared inputs through M and its operator sequence. The requirements themselves are unchanged.
+
+## Kernel V9 synchronization (2026-10-25)
+
+Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.

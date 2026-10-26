@@ -1,6 +1,6 @@
 # Repository Protocol — Metatron Dynamics, Inc.
 ## Declared workflow for all ABR/ABRCE repositories
-### Version 1.1 — Declared August 10, 2026 (Verifier corrections applied) — Kernel V8
+### Version 1.1 — Declared August 10, 2026 (Verifier corrections applied) — Kernel V9
 
 Bounded over D. No claim beyond D.
 
@@ -72,7 +72,7 @@ The Verifier prompt must specify:
 - A request for file-by-file source review
 - An explicit request for PASS / PASS WITH CONDITIONS / NOT PASS verdict
 
-The Verifier reviews against the current kernel release (Kernel V8). All findings must be resolved before proceeding to Step 4. If the Verifier returns NOT PASS, the Generator addresses all findings and returns to Step 3 — a new ZIP to a new cold Verifier instance.
+The Verifier reviews against the current kernel release (Kernel V9). All findings must be resolved before proceeding to Step 4. If the Verifier returns NOT PASS, the Generator addresses all findings and returns to Step 3 — a new ZIP to a new cold Verifier instance.
 
 **The Verifier prompt and the Verifier response are both retained** in the session record as part of the verification audit trail.
 
@@ -160,3 +160,7 @@ The four stages and the Verifier criterion are declared in `docs/kernel/role_sep
 **Current release.** Repositories built under this protocol are verified against Kernel V8 (`metatron_kernel_v8`). Repositories built against `metatron_kernel_v7` remain on V7 until rebuilt; each rebuild against V8 is a functional change and follows Steps 3 and 4.
 
 **Verification references (2026-09-26).** This protocol previously attributed the four-stage Verification and Validation Protocol and the Verifier Criterion to `operators.rs` V7, and cited "seven verification categories". The four stages and the criterion are declared in `docs/kernel/role_separation_and_operator_application.md`; the seven verification methods are declared in `docs/kernel/triad-constraint-methods.md`. References are corrected to those documents, and each stage is mapped to its supporting procedures. No procedure in Steps 1–4 changed.
+
+## Kernel V9 synchronization (2026-10-25)
+
+Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). Repositories are verified against Kernel V9, crate `abr-kernel` (library crate `abr_kernel`), renamed from `metatron_kernel_v8` on 2026-10-01. Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.

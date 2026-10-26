@@ -108,9 +108,10 @@ compatibility are migrated; this does not supersede the V9 documentation.
 A single reference for people and AI systems using the kernel: roles and
 workflow, the foundation (O → M → D, declared information, declaration
 correspondence), every operator with its form and Rust function, the derived
-invariants, the language discipline, the verification requirements, and the
-items open at Kernel V8. It restates the files below and adds nothing of its
-own; where it and a source file differ, the source file governs.
+invariants, the language discipline, the verification requirements, the
+open conditions held since Kernel V8, and the status of RPPI enforcement.
+It restates the files below and adds nothing of its own; where it and a
+source file differ, the source file governs.
 
 **`operators_notation_and_constraint.md`**
 Formal operator definitions and constraints. The notation says what the
@@ -333,8 +334,10 @@ architecture are specified in `docs/kernel/v9_specification.md`.
 - V9 admission interface: separate from V8 constructors; independently
   recomputes or verifies calculation records against declaration records.
 
-V8 constructors and operators are unchanged (Req-5). The `kernel-v9` branch
-passes all V8 tests without modification to operator code.
+V8 constructors and operators are unchanged (Req-5). `main` passes all
+`[V8-BASELINE]` tests without modification to operator code. The four V9
+enforcement requirements above are not implemented; each is tracked by an
+`#[ignore]` `[V9-REQUIRED]` test in `tests/v9_conformance.rs`.
 
 ---
 

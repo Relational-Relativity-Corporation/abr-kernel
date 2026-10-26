@@ -1,6 +1,8 @@
 # Role Separation and Operator Application
 
-**Metatron Dynamics, Inc.** Kernel V8. Reference data. Bounded over D. No claim beyond D.
+**Metatron Dynamics, Inc.** Kernel V9. Reference data. Bounded over D. No claim beyond D.
+
+**Foundational primitive (Kernel V9).** The foundational observable primitive is a directed relation declared from observable information. A numerical value is not itself a primitive; it is the projection of an observed relational distinction through a declared measurement mapping M. Observed relations, measurement mappings M, numerical projections in D, and calculated results are held distinct. See `kernel_reference.md` §1.
 
 ## The primary observable and primary mathematical primitive
 
@@ -182,6 +184,8 @@ interpretation changes.
 *Bounded over D. No claim is made beyond D.*
 
 ---
+
+**Kernel V8 → Kernel V9 changes (2026-10-25):** Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). The Kernel V9 foundational-primitive statement is added at the head of this document. Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.
 
 **V8 → Kernel V8 changes (2026-09-26):** *(a) Declarations of 2026-09-23 not previously written into this document (reconstructed from operators_notation_and_constraint.md and derived_invariants.rs):* Step 2 kernel selection restated as the full-operator admissibility condition; the ρ_P → 1 criterion, OC-ρP-1, OC-ρP-2, and the component ceiling removed as retired. *(b) Kernel V8 declarations:* O → M → D and the declared-information rule added to constraint 1; Phase 2 generation — persistence evaluated from the second declared observation, cold start removed; Step 3 verification targets restated accordingly (no persistence without a declared prior; no substitute prior); "failure mode" detection replaced by the relational-isolation check (the FailureMode set was retired in operators.rs V7); "provenance failure" replaced by "provenance not observed or incomplete"; "fails"/"failure" in the Verification and Validation Protocol restated as "does not pass"; "independent observable reality" restated as "independent observables". The Verification and Validation Protocol (Stages 1–4, Verifier Principle, Verifier Criterion) is otherwise unchanged and is the source cited by `docs/process/repository_protocol_v1.md`. Kernel release numbering (Origin declaration): this document's own numbering ends at V8.1.
 

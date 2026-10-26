@@ -1,6 +1,8 @@
 # The Operators — Plain Language
 
-**Metatron Dynamics, Inc.** Kernel V8. Bounded over D. No claim beyond D.
+**Metatron Dynamics, Inc.** Kernel V9. Bounded over D. No claim beyond D.
+
+**Foundational primitive (Kernel V9).** The foundational observable primitive is a directed relation declared from observable information. A numerical value is not itself a primitive; it is the projection of an observed relational distinction through a declared measurement mapping M. Observed relations, measurement mappings M, numerical projections in D, and calculated results are held distinct. See `kernel_reference.md` §1.
 
 ---
 
@@ -255,7 +257,7 @@ At the Primary Region, three conditions hold simultaneously that are not confine
 
 **Relational evolution rate** is proposed to decrease monotonically from the Primary Region outward — this is a framework-level consequence pending derivation (I-RE, open condition OC-RE-1). The 78-decade span of Φ[v] confirmed across declared regions is the observable expression of the τ_stability ordering: measured persistence intervals grow from the Primary Region outward. The τ_relational ordering (ℏ/E) is a distinct quantity; the stability data is consistent with it but does not by itself establish it. In plain language: what we observe as stable matter at larger scales is Primary Region relational evolution that has accumulated into confirmed persistence through B activation. The stability is downstream of the speed — but the formal derivation that connects τ_relational to the observed τ_stability ordering remains open.
 
-These four conditions are jointly necessary for any self-organizing, evolving, observable system to exist within D. That is a framework-level observation stated here in plain language. It is not a mathematical result already established by the kernel. The formal derivations are open conditions. See `derived_invariants.rs` (Kernel V8) for the precise statements.
+These four conditions are jointly necessary for any self-organizing, evolving, observable system to exist within D. That is a framework-level observation stated here in plain language. It is not a mathematical result already established by the kernel. The formal derivations are open conditions. See `derived_invariants.rs` (Kernel V9) for the precise statements.
 
 ## What remains with the reader
 
@@ -271,9 +273,11 @@ Those determinations remain with whoever declared the domain.
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. Kernel V8.*
+*Metatron Dynamics, Inc. Kernel V9.*
 
 ---
+
+**Kernel V8 → Kernel V9 changes (2026-10-25):** Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). The Kernel V9 foundational-primitive statement is added at the head of this document. Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.
 
 **V8.2 → Kernel V8 changes (2026-09-26):** *(a) Declarations of 2026-09-23 not previously written into this document (reconstructed from operators_notation_and_constraint.md and derived_invariants.rs):* "The three Primary Region quantities" section (rank-based quantities and the ρ_P ratio) replaced by "When B is evaluated — the full-operator admissibility condition"; Superposition restated as relational distinguishability of the Δ output (no longer suspended); Tunneling restated in framework-native terms (ε[e] > 0 at declared transition edges); Primary Region phenomena restated with scale-conditional observational status in place of "not directly observable"; joint necessity I-S component declared. *(b) Kernel V8 declarations:* values from M described as numerical projections; the declared-information rule stated in plain language; Phase 2 evaluated from the second declared observation — cold start removed from "Before anything is measured" and from A; A_persistence = 0 described as a calculated result; B "not evaluated" replacing "absent", with the full-operator condition replacing "persistence confirmed"; R and ρ: coupling and ρ scale values declared by M with no kernel values (V7.1); "largest gradient" corrected to "largest directed difference" (the term "gradient" was retired in notation V10). Not changed: Entanglement wording on 𝟙[e] = 0 and ε[e] = 0 (Part II audit, separate). Kernel release numbering (Origin declaration): this document's own numbering ends at V8.2.
 

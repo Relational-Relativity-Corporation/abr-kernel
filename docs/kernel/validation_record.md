@@ -1,7 +1,7 @@
-# Validation Record — Kernel V8
+# Validation Record — Kernel V9
 ## Observational Grounding for Derived Invariants
 
-**Metatron Dynamics, Inc.** Kernel V8.
+**Metatron Dynamics, Inc.** Kernel V9.
 Bounded over D. No claim beyond D.
 Sources: PDG 2024 (Navas et al., Phys. Rev. D 110, 030001)
          NIST ASD v5.12 (Kramida et al., 2024)
@@ -11,7 +11,7 @@ Sources: PDG 2024 (Navas et al., Phys. Rev. D 110, 030001)
 
 ## Purpose and Scope
 
-This document is the observational validation record for `derived_invariants.rs` (Kernel V8).
+This document is the observational validation record for `derived_invariants.rs` (Kernel V9).
 It is a companion to the mathematical file, not a replacement for it.
 
 The mathematical file states what the operators produce and what form each
@@ -541,9 +541,11 @@ regions, 78-decade confirmation, VR-Φ-01).
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. Kernel V8.*
+*Metatron Dynamics, Inc. Kernel V9.*
 
 ---
+
+**Kernel V8 → Kernel V9 changes (2026-10-25):** Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.
 
 **V6 → Kernel V8 changes (2026-09-26):** *(a) Declarations of 2026-09-23 not previously written into this document (reconstructed from operators_notation_and_constraint.md, derived_invariants.rs, and the repository README):* VR-S-01 redeclared with the relational distinguishability condition (no longer suspended); OC-S-1 closed, OC-S-2 and OC-S-3 restated; VR-T-01 restated in framework-native terms (ε[e] > 0 at declared transition edges; "quantum boundary component", "finite barrier", and "classically suppressed" removed from the operative statement); VR-T-01 and VR-E-01 observable provenance restated scale-conditionally in place of "not directly observable"; support classification protocol extended with scale-conditional Observed subcategories and the downstream projection label; the δι log-log fit labeled a downstream projection. *(b) Correction carried forward:* the correlation statistic (0.726) at the deviation-from-additivity entry is removed. A 2026-07-28 Verifier pass (finding F6) removed it because correlation is inadmissible absent an ensemble declared by Origin through M, and no ensemble was declared at that entry; that correction was recorded in a separate local copy of this document and was not published until this revision. *(c) Kernel V8 declarations:* values from M described as numerical projections into D; comparisons described as correspondence between observations and calculated results. Held: `are_proportional` implementation (noted at VR-S-01). Not changed: VR-E-01 decoherence wording on 𝟙[e] = 0 (Part II audit, separate). Companion references updated to derived_invariants.rs (Kernel V8). Kernel release numbering (Origin declaration): this document's own numbering ends at V6.
 
