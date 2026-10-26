@@ -39,8 +39,8 @@
 //!     Renamed to state their outcomes (Origin correction 2026-10-25: absence
 //!     is OPEN; only an established contradiction is REJECTED).
 //!
-//! All [V8-BASELINE] and [RPPI-GAP] tests must pass on the `kernel-v9` branch
-//! before any V9 implementation milestone is submitted for Verifier review.
+//! All tests must pass on `main` before any V9 implementation milestone is
+//! submitted for Verifier review.
 
 mod common;
 
@@ -577,9 +577,9 @@ fn irrs_integration_gap_abr_tracing_requires_external_rel() {
 /// does not enforce it.
 ///
 /// V9 enforcement (see `rppi_missing_provenance_not_admitted` below):
-/// the V9 admission interface must reject when `ObservableRelationDeclaration`
-/// is absent for any edge. V8 constructors remain frozen (Req-5;
-/// v9_specification.md Correction 2).
+/// the V9 admission interface does not admit a result when an
+/// `ObservableRelationDeclaration` is absent for any edge (OPEN). V8 constructors
+/// remain frozen (Req-5; v9_specification.md Correction 2).
 #[test]
 fn rppi_missing_observable_source_gap() {
     // EdgeProvenance::Continuation — a class label, not a declaration.
@@ -592,7 +592,7 @@ fn rppi_missing_observable_source_gap() {
         )
     });
     // RPPI-GAP: accepted without observable identity.
-    // V9 enforcement: must be rejected when ObservableRelationDeclaration is absent.
+    // V9 enforcement: not admitted (OPEN) when ObservableRelationDeclaration is absent.
     assert!(
         result.is_ok(),
         "RPPI-GAP: class-only provenance currently accepted — no observable_source enforced yet"
@@ -752,8 +752,8 @@ fn rppi_fabricated_provenance_rejected() {
 /// §3 and §7. All current operator outputs are disconnected in this sense.
 ///
 /// V9 enforcement (see `rppi_disconnected_derivation_rejected` below):
-/// IRRS must reject any result that does not carry a continuous derivation path
-/// through `ProvenancedOutput<T>`.
+/// a result without a calculation record is not admitted; a calculation record
+/// that contradicts the independent reconstruction is REJECTED.
 #[test]
 fn rppi_disconnected_provenance_gap() {
     let rel = rel_three_node_chain();
@@ -861,7 +861,7 @@ fn rppi_disconnected_derivation_rejected() {
 ///
 /// V9 enforcement (see `rppi_misattributed_provenance_rejected` below):
 /// `ProvenancedOutput<T>` carries a binding reference. IRRS verifies the binding
-/// during admission. A result presented with a substituted declaration must panic.
+/// during admission. A result presented with a substituted declaration is REJECTED.
 #[test]
 fn rppi_misattributed_provenance_gap() {
     let rel_a = rel_single_edge(); // edge (0→1), Continuation

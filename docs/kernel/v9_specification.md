@@ -21,8 +21,11 @@ This document is the governing specification for Kernel V9 development.
   Interface design OPEN — Rust types, admission outcomes, and conformance tests are
   the next deliverable. No operator modifications.
 
-Work proceeds on the `kernel-v9` branch. No change is merged to `main` without
-Verifier review.
+- **Bounded first implementation (2026-10-25):** V9 admission interface, calculation
+  records, and executable `[V9-REQUIRED]` tests for the supported scope. See §12.
+
+`main` is the sole internal development branch of the canonical kernel. No change is
+made to `main` without Verifier review and Origin authorization.
 
 ---
 
@@ -349,9 +352,24 @@ Verifier review before implementation.
 
 ## 6. RPPI Failure Modes
 
-Four failure modes violate the RPPI. Each requires detection and rejection (Req-7).
-The V8 boundary is preserved: these are structural enforcement additions,
-not new operator mathematics (Req-5).
+Four failure modes violate the RPPI. Each requires detection, and no result exhibiting
+any of them is admitted (Req-7). The V8 boundary is preserved: these are structural
+enforcement additions, not new operator mathematics (Req-5).
+
+**Outcome rule (Origin correction, 2026-10-25 — absolute observational traceability).**
+Every M and every provenance chain must terminate in declared observables.
+
+- **OPEN** — a required declaration record, observational basis, external observable
+  record, or calculation record is absent or cannot be verified. The result is not
+  evaluated and not admitted. Absence is never treated as evidence of fabrication,
+  disconnection, or misattribution.
+- **REJECTED** — a specific contradiction is established: between a claimed
+  declaration and the authoritative declaration, or between a calculation record and
+  the independent reconstruction from declaration records. Both sides are recorded as
+  evidence.
+
+Neither outcome admits the result. M and provenance connect calculations to
+observables; they are not sources of mathematical authority.
 
 ### 6.1 Missing Provenance
 
@@ -359,27 +377,36 @@ A relation or variable has no declaration record. The provenance identity is abs
 
 - **Current state (V8):** `EdgeProvenance::Continuation` is accepted without an
   `ObservableRelationDeclaration`. The relation carries a label but not a record.
-- **V9 enforcement (Req-1, Req-2, Req-7):** The V9 admission interface must
-  reject any admitted relation that lacks an `ObservableRelationDeclaration` for
-  any edge. V8 constructors are frozen (Req-5); this enforcement belongs to the
-  separate V9 admission interface, not to `from_edges_with_provenance`. A label
-  alone is insufficient.
+- **V9 enforcement (Req-1, Req-2, Req-7):** The V9 admission interface does not
+  admit any result to which a relation or value contributes without a complete
+  declaration record — an `ObservableRelationDeclaration` for every edge and a
+  declaration record for every contributing value — terminating in declared
+  observables. The outcome is **OPEN**: not evaluated, not admitted. V8 constructors
+  are frozen (Req-5); this enforcement belongs to the separate V9 admission
+  interface, not to `from_edges_with_provenance`. A label alone is insufficient.
 - **Conformance:** `rppi_missing_observable_source_gap` (`[RPPI-GAP]`);
-  `rppi_missing_observable_source_rejected` (`[V9-REQUIRED]`, `#[ignore]`).
+  `rppi_missing_provenance_not_admitted` (`[V9-REQUIRED]`, asserts OPEN).
 
 ### 6.2 Fabricated Provenance
 
-A relation carries an `ObservableRelationDeclaration` whose `observable_source`
-or `m_mapping_ref` cannot be verified against Origin's declarations. The identity
-is asserted, not traced.
+A relation or value carries a declaration claim — `observable_source`,
+`m_mapping_ref`, reported value, or parameter — that Origin's declarations do not
+support. The identity is asserted, not traced. Two cases are distinct:
+
+- **Fabricated:** the claim contradicts the authoritative declaration with the same
+  identity. A contradiction is established → **REJECTED**.
+- **Unverifiable:** the claim cites a declaration that is not available. Nothing is
+  contradicted; the claim cannot be verified → **OPEN**.
 
 - **Current state (V8):** No M-mapping verification exists. Any class label is accepted.
-- **V9 enforcement (Req-2, Req-6, Req-7):** The V9 admission interface must
-  verify `m_mapping_ref` against Origin's declared M mappings. V8 constructors
-  are frozen (Req-5); this enforcement belongs to the separate V9 admission
-  interface. An unverifiable source must be rejected.
+- **V9 enforcement (Req-2, Req-6, Req-7):** The V9 admission interface verifies
+  each claimed `observable_source`, `m_mapping_ref`, reported value, and parameter
+  against Origin's declarations. A demonstrated contradiction is rejected; an
+  unverifiable reference remains OPEN. Neither is admitted. V8 constructors are
+  frozen (Req-5); this enforcement belongs to the separate V9 admission interface.
 - **Conformance:** `rppi_fabricated_provenance_gap` (`[RPPI-GAP]`);
-  `rppi_fabricated_observable_source_rejected` (`[V9-REQUIRED]`, `#[ignore]`).
+  `rppi_fabricated_provenance_rejected` (`[V9-REQUIRED]`, asserts REJECTED for
+  contradictions and OPEN for an unverifiable reference).
 
 ### 6.3 Disconnected Provenance
 
@@ -394,10 +421,15 @@ not be admitted.
 
 - **Current state (V8):** All operator outputs are disconnected. `PrimaryEdgeField`
   and `EdgeField` carry no calculation record.
-- **V9 enforcement (Req-4, Req-5, Req-6):** IRRS must reject any result not wrapped
-  in `ProvenancedOutput<T>` with a complete calculation record.
+- **V9 enforcement (Req-4, Req-5, Req-6):** A result without a calculation record
+  is not admitted: it cannot be submitted to the admission interface (in the
+  implementation, a bare operator output does not type-check as a submission). A
+  calculation record whose recorded inputs, traversals, or outputs contradict the
+  independent reconstruction from the declaration records is **REJECTED** at the
+  located link — even if the record is internally consistent.
 - **Conformance:** `rppi_disconnected_provenance_gap` (`[RPPI-GAP]`);
-  `rppi_disconnected_provenance_rejected_by_irrs` (`[V9-REQUIRED]`, `#[ignore]`).
+  `rppi_disconnected_derivation_rejected` (`[V9-REQUIRED]`, asserts REJECTED at the
+  located link).
 
 ### 6.4 Misattributed Provenance
 
@@ -409,9 +441,10 @@ internally consistent, and wrong.
   because attribution cannot occur. The structural gap precedes the attribution gap.
 - **V9 enforcement (Req-4, Req-6):** `ProvenancedOutput<T>` carries a binding to the
   `DeclaredRelations` that produced it. IRRS verifies the binding. A substituted
-  declaration must be rejected.
+  declaration is a demonstrated contradiction and is **REJECTED**, including where
+  the numerical output is identical.
 - **Conformance:** `rppi_misattributed_provenance_gap` (`[RPPI-GAP]`);
-  `rppi_misattributed_provenance_rejected_by_irrs` (`[V9-REQUIRED]`, `#[ignore]`).
+  `rppi_misattributed_provenance_rejected` (`[V9-REQUIRED]`, asserts REJECTED).
 
 ---
 
@@ -431,10 +464,10 @@ They must be preserved in V9 (Req-5):
 
 | Failure mode | Enforcement point | Req | Enforcement action |
 |---|---|---|---|
-| Missing (§6.1) | V9 admission interface | Req-1, 2, 7 | Reject when `ObservableRelationDeclaration` absent for any edge |
-| Fabricated (§6.2) | V9 admission interface | Req-2, 6, 7 | Reject when `m_mapping_ref` unverifiable against declared M |
-| Disconnected (§6.3) | V9 admission interface | Req-4, 5, 6 | Reject any result not wrapped in `ProvenancedOutput<T>` |
-| Misattributed (§6.4) | V9 admission interface | Req-4, 6 | Reject `ProvenancedOutput<T>` whose calculation record binding does not match the producing `DeclaredRelations` |
+| Missing (§6.1) | V9 admission interface | Req-1, 2, 7 | OPEN (not admitted) when a declaration record or observational basis is absent for any contributing edge or value |
+| Fabricated (§6.2) | V9 admission interface | Req-2, 6, 7 | REJECTED when a claim contradicts the authoritative declaration; OPEN (not admitted) when the cited declaration is unavailable |
+| Disconnected (§6.3) | V9 admission interface | Req-4, 5, 6 | Not admitted without a calculation record; REJECTED when the record contradicts the independent reconstruction |
+| Misattributed (§6.4) | V9 admission interface | Req-4, 6 | REJECTED when the calculation record's binding does not match the producing `DeclaredRelations` |
 
 ---
 
@@ -481,18 +514,20 @@ The test suite in `tests/v9_conformance.rs` must demonstrate:
 | V8 continuity | `[V8-BASELINE]` | Full Δ→Σ and A→B→R chains produce finite output on valid declarations. |
 | IRRS tracing gap | `[GAP]` | Tracing from operator output requires externally retaining `DeclaredRelations`. |
 | RPPI — missing provenance | `[RPPI-GAP]` | Class-only provenance accepted without declaration record (Req-1, 2). |
-| RPPI — missing provenance | `[V9-REQUIRED]` | Construction without `ObservableRelationDeclaration` must be rejected. `#[ignore]`. |
+| RPPI — missing provenance | `[V9-REQUIRED]` | Absent declaration, observational basis, or external record: OPEN, not admitted (`rppi_missing_provenance_not_admitted`). |
 | RPPI — fabricated provenance | `[RPPI-GAP]` | Asserted class accepted without M-mapping verification (Req-6). |
-| RPPI — fabricated provenance | `[V9-REQUIRED]` | Unverifiable `m_mapping_ref` must be rejected. `#[ignore]`. |
+| RPPI — fabricated provenance | `[V9-REQUIRED]` | Contradicting claim: REJECTED; unverifiable reference: OPEN (`rppi_fabricated_provenance_rejected`). |
 | RPPI — disconnected provenance | `[RPPI-GAP]` | Operator result is finite; carries no calculation record (Req-4). |
-| RPPI — disconnected provenance | `[V9-REQUIRED]` | V9 admission interface rejects results without calculation record. `#[ignore]`. |
+| RPPI — disconnected provenance | `[V9-REQUIRED]` | Record contradicting the independent reconstruction: REJECTED at the located link (`rppi_disconnected_derivation_rejected`). |
 | RPPI — misattributed provenance | `[RPPI-GAP]` | No calculation record exists; substituting one relation's output for another's is undetectable. |
-| RPPI — misattributed provenance | `[V9-REQUIRED]` | V9 admission interface rejects wrong derivation binding. `#[ignore]`. |
+| RPPI — misattributed provenance | `[V9-REQUIRED]` | Wrong derivation binding: REJECTED, also at identical numerical output (`rppi_misattributed_provenance_rejected`). |
 
 **Test counts:**
 - 27 existing tests (`[V8-BASELINE]` and `[GAP]`) — all must pass.
-- 4 new `[RPPI-GAP]` tests — must pass.
-- 4 new `[V9-REQUIRED]` tests — `#[ignore]` until implementing milestones are verified.
+- 4 `[RPPI-GAP]` tests — must pass (the frozen V8 constructors are unchanged).
+- 4 `[V9-REQUIRED]` tests — executable against the V9 admission interface; must pass.
+  None is ignored and none has a placeholder body.
+- `tests/v9_admission.rs` — admissible calculations and OPEN scope cases.
 
 ---
 
@@ -532,15 +567,24 @@ execution. A calculation record is evidence to be verified against declaration r
 — matching names and references is not sufficient to establish that the recorded
 calculation occurred.
 
-**IRRS rejection requirement:**
+**IRRS admission requirement:**
 
-The V9 admission interface must reject any result where (Req-7):
-- A declaration record is absent or unverifiable (§6.1 missing, §6.2 fabricated).
-- A calculation record is absent (§6.3 disconnected).
+The V9 admission interface does not admit any result where (Req-7) — **OPEN**, not
+evaluated, not admitted:
+- A declaration record, observational basis, or external observable record is absent
+  or unverifiable (§6.1 missing; §6.2 unverifiable).
+- A calculation record is absent (§6.3).
+- The calculation cannot be independently reconstructed from the declaration records
+  — a required parameter is not declared through M, or the calculation is outside
+  the implemented scope.
+
+The V9 admission interface rejects any result where a contradiction is established —
+**REJECTED**, with both sides recorded:
+- A claimed declaration contradicts the authoritative declaration (§6.2 fabricated).
 - A calculation record's binding does not match the producing `DeclaredRelations`
   (§6.4 misattributed).
-- A calculation record cannot be independently recomputed or verified against
-  declaration records — even if internally consistent.
+- A calculation record contradicts the independent reconstruction from declaration
+  records — even if internally consistent (§6.3 disconnected).
 
 The IRRS does not admit results based on numerical correctness, structural validity,
 or provenance labels alone. Derivation must terminate in declared observable relations,
@@ -550,15 +594,15 @@ and the derivation structure must survive independent verification.
 
 ## 11. Development Constraints
 
-- All V9 work is on the `kernel-v9` branch.
-- No V9 addition merges to `main` without Verifier review.
+- `main` is the sole internal development branch. No V9 addition is made to `main`
+  without Verifier review and Origin authorization.
 - V8 operator forms are not changed (Req-5).
 - OPEN conditions are not closed by the Generator; they require Origin declaration.
 - Working names (`ObservableRelationDeclaration`, `ProvenancedOutput`, `calculation_record`,
   `observable_source`, `direction_basis`, `m_mapping_ref`, `declared_domain`) are subject
   to Verifier confirmation before implementation.
-- `[V9-REQUIRED]` tests are `#[ignore]` until the implementing milestone is verified.
-  Remove `#[ignore]` and confirm all 35 tests pass after each V9 enforcement milestone.
+- `[V9-REQUIRED]` tests are executable. No test is marked ignored and no placeholder
+  body stands in for enforcement; all 35 conformance tests must pass.
 - The order of milestones:
     1. (Milestone 1, commit `1a54d08`) Specification + conformance test suite.
     2. (Milestone 2, commit `ee46735`) RPPI established; four failure modes defined;
@@ -573,8 +617,9 @@ and the derivation structure must survive independent verification.
        - NodeField declaration record
        - `ProvenancedOutput<T>` and `calculation_record` type
        - V9 admission interface (separate from V8 constructors)
-    4. Implementation of `ObservableRelationDeclaration` enforcement at construction
-       (closes RPPI failure modes: missing §6.1, fabricated §6.2).
+    4. Implementation of `ObservableRelationDeclaration` enforcement in the V9
+       admission interface — V8 constructors unchanged (Correction 2) (closes RPPI
+       failure modes: missing §6.1, fabricated §6.2).
     5. Implementation of `ProvenancedOutput<T>` with full `calculation_record`
        (closes RPPI failure modes: disconnected §6.3, misattributed §6.4).
     6. Implementation of V9 admission interface with independent verification.
@@ -582,13 +627,13 @@ and the derivation structure must survive independent verification.
 
 ---
 
-## 12. Bounded First Implementation Record (2026-10-25, `kernel-v9-rppi`)
+## 12. Bounded First Implementation Record (2026-10-25)
 
 Recorded for Verifier review; not a milestone acceptance.
 
 **Origin correction — absolute observational traceability (2026-10-25)** governs the
-implementation and takes precedence over the rejection wording of §6.1, §6.2, §7, and §10
-where they differ: every M and provenance chain must terminate in declared observables;
+implementation and is reconciled into §6, §7, §9, and §10 of this document: every M
+and provenance chain must terminate in declared observables;
 where the observable basis is absent or unverifiable the result is OPEN — not evaluated
 and not admitted (rule 6); a provenance claim is REJECTED only when a specific
 contradiction is established (rule 7). Req-7 is satisfied: OPEN results are not admitted

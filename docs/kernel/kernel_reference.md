@@ -1061,7 +1061,7 @@ verification only. Synthetic test provenance is not empirical provenance.
 
 **Kernel V9 RPPI enforcement — bounded first implementation** (`v9_specification.md`
 §6–§10; `src/provenance.rs`, `src/provenanced_exec.rs`, `src/admission.rs`). Subject to
-Verifier review and Origin authorization; not yet merged to `main`.
+Verifier review and Origin authorization.
 
 Every M, input, parameter, direction, classification, and kernel-selection claim must
 terminate in a declared observable naming an external record. Absent or unverifiable

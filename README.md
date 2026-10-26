@@ -89,9 +89,9 @@ H-alpha photon edge reconstruction described below.
 
 `cargo test` also runs the V9 conformance suite in `tests/v9_conformance.rs`
 (35 tests, none ignored) and the V9 admission suite in `tests/v9_admission.rs`
-(12 tests), plus one `compile_fail` doctest in `src/admission.rs`. On the
-`kernel-v9-rppi` branch the four `[V9-REQUIRED]` tests exercise the bounded V9
-admission interface (see Kernel V9 Development Status below).
+(12 tests), plus one `compile_fail` doctest in `src/admission.rs`. The four
+`[V9-REQUIRED]` tests exercise the bounded V9 admission interface (see Kernel V9
+Development Status below).
 
 ---
 
@@ -249,6 +249,10 @@ reported, regardless of what is being verified.
 
 ## Contribution discipline
 
+**Development branch.** `main` is the sole internal development branch of the
+canonical kernel. No change is made to `main` without Verifier review and Origin
+authorization (`docs/process/repository_protocol_v1.md`).
+
 This is a living document. Contributions are welcome provided they
 satisfy the declared admissibility condition:
 
@@ -340,7 +344,7 @@ architecture are specified in `docs/kernel/v9_specification.md`.
 V8 constructors and operators are unchanged (Req-5). All `[V8-BASELINE]` tests
 pass without modification to operator code.
 
-**Bounded first implementation (`kernel-v9-rppi`, subject to Verifier review).**
+**Bounded first implementation (subject to Verifier review).**
 `src/provenance.rs` (declaration and calculation records), `src/provenanced_exec.rs`
 (Generator execution through the frozen functions), `src/admission.rs` (independent
 reconstruction and admission). The four RPPI failure modes are enforced within the
