@@ -12,7 +12,12 @@ of a relation, or a computation over relations. A numerical value is not
 itself a primitive; it is the projection of an observed relational distinction
 through a declared measurement mapping M.
 
-This repository is the canonical declaration of the ABR/ABRCE kernel:
+**Canonical release: Kernel V9.** V9 is the governing documentation of the
+observable relational primitive, operator constraints, provenance requirements,
+and admission discipline. Earlier version identifiers describe historical
+implementations and records, not competing mathematical authorities.
+
+This repository is the sole canonical declaration of the ABR/ABRCE kernel:
 operator constraints, role separation protocol, reference implementation,
 derived invariants, observational validation record, observable variable
 sets, and cross-region energy expression.
@@ -90,9 +95,12 @@ milestones (see Kernel V9 Development Status below).
 
 ## Contents
 
-Every file in this repository carries the kernel release number,
-**Kernel V8**. Each document's own earlier revision numbers are kept in its
-history section, labeled as document-local.
+**Kernel V9 is the canonical documentation release.** Historical V8 and V7
+identifiers remain only where needed to describe prior implementations,
+release history, or explicitly frozen source. Document-local revision numbers
+are historical identifiers, not alternate canonical kernel versions.
+The Rust package still reports `8.0.0` until its release metadata and
+compatibility are migrated; this does not supersede the V9 documentation.
 
 ### `docs/kernel/` — what the kernel is
 
@@ -287,10 +295,12 @@ declared source.
 
 ---
 
-## Kernel V9 — Development Status
+## Kernel V9 — Canonical Documentation and Enforcement Status
 
-V9 enforcement of the Relational Primitive Provenance Invariant is under
-development on the `kernel-v9` branch. The RPPI and its enforcement
+Kernel V9 is the canonical documentation of the relational primitive and its
+mathematical requirements. Enforcement of the Relational Primitive Provenance
+Invariant remains under development; canonical status does not imply that
+all V9 admission interfaces are implemented. The RPPI and its enforcement
 architecture are specified in `docs/kernel/v9_specification.md`.
 
 **Completed milestones:**
@@ -328,9 +338,15 @@ passes all V8 tests without modification to operator code.
 
 ---
 
-## Version
+## Version and historical implementation record
 
-### Kernel V8 (2026-09-26)
+**Current canonical documentation: Kernel V9.** The historical notes below
+preserve the provenance of earlier implementations; they do not designate
+V8 as the current canonical mathematical reference. The frozen V8 operator
+implementation is an implementation baseline within the V9 development
+record, not a second source of mathematical authority.
+
+### Historical Kernel V8 implementation (2026-09-26)
 
 Kernel V8 is one release across every file: code, kernel documents, process
 documents, and this README. The package is `abr-kernel` (library crate `abr_kernel`), package
