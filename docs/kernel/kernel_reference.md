@@ -1059,23 +1059,42 @@ verification only. Synthetic test provenance is not empirical provenance.
 | OC-ι-2 | Relational inertia ratios (ι[μ]/ι[e], ι[τ]/ι[e]) — no declared relational origin | OPEN |
 | OC-ι-3 | δι ~ ι^0.5 scaling — connection to ρ saturation not derived | OPEN |
 
-**Kernel V9 RPPI enforcement — specified, not implemented** (`v9_specification.md` §6–§10).
-Kernel V9 is canonical; canonical status does not mean these admission requirements are
-enforced. Each is held OPEN and tracked by an `#[ignore]` `[V9-REQUIRED]` test in
-`tests/v9_conformance.rs`. Results are not admitted as established on the basis of these
-requirements until the implementing milestone is verified.
+**Kernel V9 RPPI enforcement — bounded first implementation** (`v9_specification.md`
+§6–§10; `src/provenance.rs`, `src/provenanced_exec.rs`, `src/admission.rs`). Subject to
+Verifier review and Origin authorization; not yet merged to `main`.
 
-| RPPI failure mode | Required V9 enforcement (admission interface, not V8 constructors) | Tracking test | Status |
+Every M, input, parameter, direction, classification, and kernel-selection claim must
+terminate in a declared observable naming an external record. Absent or unverifiable
+basis → OPEN (not evaluated, not admitted). Only an established contradiction →
+REJECTED. Admission is a provenance-conformance statement, not a correspondence claim;
+results whose termini are synthetic or simulated are admitted only as such.
+
+| RPPI failure mode | Enforcement (V9 admission interface, `src/admission.rs`; V8 constructors unchanged) | Test | Status |
 |---|---|---|---|
-| Missing provenance (§6.1) | Reject any relation without an `ObservableRelationDeclaration` | `rppi_missing_observable_source_rejected` | NOT IMPLEMENTED |
-| Fabricated provenance (§6.2) | Reject an `m_mapping_ref` unverifiable against Origin's declared M | `rppi_fabricated_observable_source_rejected` | NOT IMPLEMENTED |
-| Disconnected provenance (§6.3) | Reject any result not carried in `ProvenancedOutput<T>` with a calculation record | `rppi_disconnected_provenance_rejected_by_irrs` | NOT IMPLEMENTED |
-| Misattributed provenance (§6.4) | Reject a calculation-record binding that does not match the producing `DeclaredRelations` | `rppi_misattributed_provenance_rejected_by_irrs` | NOT IMPLEMENTED |
+| Missing provenance (§6.1) | Any absent declaration, observational basis, external record, or measurement conditions → **OPEN**, not admitted (Origin correction 2026-10-25, rule 6) | `rppi_missing_provenance_not_admitted` | ENFORCED — bounded scope |
+| Fabricated provenance (§6.2) | Claimed declaration content contradicting the authoritative declaration → **REJECTED**; a cited declaration that is not available → **OPEN** (rule 7) | `rppi_fabricated_provenance_rejected` | ENFORCED — bounded scope |
+| Disconnected provenance (§6.3) | Recorded input binding, traversal, or output derivation contradicting the independent reconstruction → **REJECTED** at the located link; a bare operator output cannot be submitted (compile-time) | `rppi_disconnected_derivation_rejected` | ENFORCED — bounded scope |
+| Misattributed provenance (§6.4) | Attribution to a declared relation other than the reconstructed producing relation → **REJECTED**, also at identical numerical output | `rppi_misattributed_provenance_rejected` | ENFORCED — bounded scope |
 
-Also OPEN (Origin field definition, `v9_specification.md` §8): `observable_source`,
-`direction_basis`, `m_mapping_ref`, `declared_domain`; NodeField declaration record;
-`calculation_record` type; the V9 admission interface with independent IRRS
-reconstruction (Req-6).
+**Supported scope:** Primary-kernel Δ over one declared observation (Phase 1); Primary Σ
+only where ρ_base and χ₀ are declared through M; one declared edge M projection through
+a kernel-declared function (ε[e] = hc/λ); M kinds Identity, DeclaredUnitScale,
+KernelDeclaredFunction (a supported subset, not the canonical M vocabulary).
+
+**Still OPEN (separate completion requirements):** ABR A → B → R, component pairs and cc;
+persistence (Phase 2); other Layer 3 quantities; other M kinds; independent IRRS
+verification from a distinct frame (milestone 7) — `admission.rs` reconstructs within
+the kernel crate and shares its operator code; a record forged consistently in every
+field over two declarations with identical computation is not distinguishable by
+reconstruction alone. Field value types remain a bounded first implementation of the
+definitions held for Origin in `v9_specification.md` §8.
+
+**H-alpha photon edge (canonical declarations): OPEN.** With exactly the declarations the
+repository holds, admission reports: measurement conditions not declared for λ
+(including air or vacuum wavelength), H_PLANCK, and C_DECLARED; no declared domain
+extent for photon-edge ε[e]; no declared EdgeProvenance class or class basis for the
+photon edge. VR-γ-01 refers to a V4 table not held in this repository. These are
+returned to Origin; none is supplied.
 
 ---
 

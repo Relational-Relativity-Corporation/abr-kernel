@@ -582,6 +582,35 @@ and the derivation structure must survive independent verification.
 
 ---
 
+## 12. Bounded First Implementation Record (2026-10-25, `kernel-v9-rppi`)
+
+Recorded for Verifier review; not a milestone acceptance.
+
+**Origin correction — absolute observational traceability (2026-10-25)** governs the
+implementation and takes precedence over the rejection wording of §6.1, §6.2, §7, and §10
+where they differ: every M and provenance chain must terminate in declared observables;
+where the observable basis is absent or unverifiable the result is OPEN — not evaluated
+and not admitted (rule 6); a provenance claim is REJECTED only when a specific
+contradiction is established (rule 7). Req-7 is satisfied: OPEN results are not admitted
+as established. M and provenance connect calculations to observables; they are not
+sources of mathematical authority.
+
+**Comparison rule.** Exact f64 bit equality is used only where the reconstruction executes
+the same declared calculation, through the same frozen function, in the same order, on
+bit-identical declared inputs. Numerical agreement is necessary for admission and never
+sufficient; identity and observational termination are established first.
+
+**Status by milestone item (§11):** 3 — interface design implemented in bounded form
+(working names unchanged, pending Verifier confirmation); 4 — declaration-record
+enforcement in the admission interface (V8 constructors unchanged, Correction 2);
+5 — calculation records (`ProvenancedOutput`, closed output type in place of `<T>`) for
+the supported scope; 6 — admission with reconstruction within the kernel crate;
+7 — OPEN: independent IRRS verification from a distinct frame.
+
+Supported scope and remaining OPEN conditions: `kernel_reference.md` §18.
+
+---
+
 *The operators hold no agency. Responsibility stays with Origin.*  
 *Bounded over D. No claim beyond D.*  
 **Metatron Dynamics, Inc. Kernel V9 — Third Milestone Specification.**

@@ -87,9 +87,11 @@ cargo run --bin provenance_demo
 `provenance_demo` tests. `cargo run --bin provenance_demo` prints the
 H-alpha photon edge reconstruction described below.
 
-`cargo test` also runs the V9 conformance suite in `tests/v9_conformance.rs`:
-31 active tests pass; 4 tests are `#[ignore]` pending V9 enforcement
-milestones (see Kernel V9 Development Status below).
+`cargo test` also runs the V9 conformance suite in `tests/v9_conformance.rs`
+(35 tests, none ignored) and the V9 admission suite in `tests/v9_admission.rs`
+(12 tests), plus one `compile_fail` doctest in `src/admission.rs`. On the
+`kernel-v9-rppi` branch the four `[V9-REQUIRED]` tests exercise the bounded V9
+admission interface (see Kernel V9 Development Status below).
 
 ---
 
@@ -335,10 +337,17 @@ architecture are specified in `docs/kernel/v9_specification.md`.
 - V9 admission interface: separate from V8 constructors; independently
   recomputes or verifies calculation records against declaration records.
 
-V8 constructors and operators are unchanged (Req-5). `main` passes all
-`[V8-BASELINE]` tests without modification to operator code. The four V9
-enforcement requirements above are not implemented; each is tracked by an
-`#[ignore]` `[V9-REQUIRED]` test in `tests/v9_conformance.rs`.
+V8 constructors and operators are unchanged (Req-5). All `[V8-BASELINE]` tests
+pass without modification to operator code.
+
+**Bounded first implementation (`kernel-v9-rppi`, subject to Verifier review).**
+`src/provenance.rs` (declaration and calculation records), `src/provenanced_exec.rs`
+(Generator execution through the frozen functions), `src/admission.rs` (independent
+reconstruction and admission). The four RPPI failure modes are enforced within the
+supported scope stated in `kernel_reference.md` §18: absent or unverifiable
+observational basis → OPEN; established contradiction → REJECTED. ABR, persistence,
+other Layer 3 quantities, other M kinds, and independent IRRS verification from a
+distinct frame remain OPEN.
 
 ---
 
