@@ -71,10 +71,17 @@
 // A calculated result may be mapped to an observable prediction and
 // compared with observation; it remains a calculated result.
 //
-// M-declared operator parameters (V7.1):
-//   No operator runs until M has declared every value it uses. The kernel
-//   states forms only. It holds no numerical value for any operator
-//   parameter and supplies no defaults. The values M must declare:
+// M-declared operator parameters (V7.1; Origin general values, 2026-11-07):
+//   Origin establishes general reference values rho_base = 0.5 and chi_0 = 1.
+//   These are the standard values to record in M when their numerical scale
+//   is appropriate. If a mathematical relation or ratio exhibits a numerical
+//   disparity requiring a different scale, Origin may explicitly declare
+//   different values through M, with the reason and units recorded.
+//   chi_0 = 1 is one unit of the declared chi measurement, not a universal
+//   physical unit (for a pixel-domain chi, this is 1 pixel).
+//   No operator runs until M identifies the values used for that evaluation.
+//   The kernel does not silently substitute general values for missing M.
+//   The values M must declare:
 //     ρ_base — dimensionless ceiling on the weight given to the directed
 //              imbalance of adjacent relations, relative to a relation's
 //              own directed difference. Required wherever ρ is computed.
@@ -1014,6 +1021,10 @@ pub fn operator_b(g: &EdgeField, rel: &DeclaredRelations) -> EdgeField {
 
 // ── ρ (ABR) ───────────────────────────────────────────────────────────────
 //
+// Origin general values: rho_base = 0.5, chi_0 = 1 in the units of χ.
+// They may be explicitly changed in M where numerical disparity in a
+// mathematical relation or ratio requires a different scale; record why.
+// These general values do not authorize an undeclared M or alter the formula.
 // ρ[i] = rho_base × χ[i] / (χ₀ + χ[i]),  ρ_base and χ₀ M-supplied
 // χ[i] = selection over declared asymmetries incident on i.
 // Selection, not statistical reduction — no ensemble declared or required.
