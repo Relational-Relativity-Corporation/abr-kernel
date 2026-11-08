@@ -93,6 +93,10 @@ H-alpha photon edge reconstruction described below.
 `[V9-REQUIRED]` tests exercise the bounded V9 admission interface (see Kernel V9
 Development Status below).
 
+`cargo test` also runs the diagnostic execution suite in `tests/diagnostic_exec.rs`
+(13 implementation tests over synthetic fixtures) and one `compile_fail` doctest in
+`src/diagnostic_exec.rs` (a persistence prior cannot be assembled by hand).
+
 ---
 
 ## Contents
@@ -154,9 +158,19 @@ Origin obligations, and the publication gate.
 
 **`src/operators.rs`**
 Reference implementation in Rust. Primary kernel (Δ → Σ) and ABR kernel
-(A → B → R). Declared relations only. No ring, no torus, no undeclared
-topology. Operator parameters (ρ_base, χ₀, cc) are supplied by M with no
-kernel defaults.
+(A → B → R). Declared relations only. No ring, no torus (relational evolution
+never wraps onto itself), no undeclared topology. Operator parameters (ρ_base,
+χ₀, cc) are identified by M for each evaluation; Origin general values are
+ρ_base = 0.5 and χ₀ = 1 unit of χ, never silently substituted.
+
+**`src/diagnostic_exec.rs`**
+Thin execution wrapper for experimental relational fields (Origin directive,
+2026-11-07). Runs A → B → R and persistence through the unchanged operators,
+independent of the admission interface. Edge provenance is mandatory and keeps
+observed and proposed relations distinct; experimental uncertainty is returned as
+warnings with the results; only conditions that prevent numerical evaluation are
+errors. Persistence pairs only consecutive declared process steps.
+See `kernel_reference.md` §11.7.
 
 **`src/derived_invariants.rs`**
 Canonical implementation of Layer 3 derived quantities: ε[e], τ[v],

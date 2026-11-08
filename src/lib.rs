@@ -59,3 +59,9 @@ pub mod derived_invariants;
 pub mod provenance;
 pub mod provenanced_exec;
 pub mod admission;
+
+// Diagnostic execution of the ABR operators over experimental relational
+// fields (Origin directive, 2026-11-07). Thin wrapper: calls the unchanged
+// operators.rs functions; mandatory edge provenance; non-blocking warnings,
+// blocking errors. Independent of admission.rs.
+pub mod diagnostic_exec;

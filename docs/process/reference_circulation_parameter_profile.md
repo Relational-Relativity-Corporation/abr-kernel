@@ -2,6 +2,18 @@
 
 **Status:** proposed reference profile for Origin/Verifier review; does not alter the frozen Kernel V9 operators, existing admission requirements, or kernel defaults.
 
+## Origin disposition (2026-11-07)
+
+Origin has established the general reference values (`operators.rs` header, `77c65ae`; `kernel_reference.md` §9):
+
+| Parameter | General value | Condition |
+| --- | --- | --- |
+| `rho_base` | **`0.5`** | Dimensionless; the standard value to record in M when its numerical scale is appropriate |
+| `χ₀` | **`1`** in the declared unit of χ | One unit of the declared χ measurement, not a universal physical unit (for a pixel-domain χ, 1 pixel) |
+| `cc[p]` | No general value | Required only when a component pair is declared; specified by M |
+
+Where a mathematical relation or ratio exhibits a numerical disparity requiring a different scale, Origin may explicitly declare different values through M, with the reason and units recorded. The general values are never substituted for a missing M. This disposition supersedes the candidate `rho_base = 0.3` below as the general value; the sections below are retained as the historical proposal and its verification guidance.
+
 ## Historical basis and intended use
 
 The V5 reference implementation used the saturation form `ρ = rho_base × m/(1+m)`, and its tests repeatedly exercised `rho_base = 0.3`. The denominator's fixed `1` was subsequently replaced by explicit `χ₀` to avoid an undeclared unit choice (V7.1). The historical numerical use of 0.3 is documented; its adequacy across applications is not established by those tests alone.

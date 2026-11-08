@@ -322,6 +322,14 @@ own relational predecessor. Any ring, torus, `np.roll`, or periodic-index
 operation is a DRIFT SIGNAL. Refuse it and require declared relations with
 provenance.
 
+*Clarification (Origin, 2026-11-07).* Ring and torus inadmissibility concerns
+relational evolution: an observation sequence or process step that closes onto
+itself (wraparound, periodic indices, `np.roll`, a successor declared as its own
+predecessor in the sequence of observations). It does not concern a ring-shaped
+arrangement of declared relationships. A cyclic set of independently declared
+relations — for example a feedback loop between declared loci — is a declared
+relationship, admissible with provenance like any other.
+
 **Before Δ / Before A.** No transformation that alters pairwise differences
 precedes A or Δ unless declared within M. Admissible: uniform shift, declared
 unit scale. All else requires declaration with preserved and discarded
@@ -363,15 +371,22 @@ O: observables. M : O → D, declared by Origin before any operator acts.
 A value in D is the numerical projection of an observable through M. The
 kernel acts on M(o) only. Operator outputs are calculated results.
 
-**M-declared operator parameters (V7.1).** No operator runs until M has
-declared every value it uses. The kernel states forms only. It holds no
-numerical value for any operator parameter and supplies no defaults.
+**M-declared operator parameters (V7.1; Origin general values, 2026-11-07).**
+Origin establishes general reference values **ρ_base = 0.5** and **χ₀ = 1**. These
+are the standard values to record in M when their numerical scale is appropriate.
+χ₀ = 1 is one unit of the declared χ measurement, not a universal physical unit
+(for a pixel-domain χ, 1 pixel). Where a mathematical relation or ratio exhibits a
+numerical disparity requiring a different scale, Origin may explicitly declare
+different values through M, with the reason and units recorded. No operator runs
+until M identifies the values used for that evaluation. The kernel does not
+silently substitute the general values for a missing M; the operator functions
+hold no parameter values. (Source: `operators.rs` header, `77c65ae`.)
 
 | Parameter | Meaning | Status |
 |---|---|---|
-| ρ_base | Dimensionless ceiling on the weight given to directed imbalance of adjacent relations relative to a relation's own directed difference. Required wherever ρ is computed. | M-supplied (V7.1) |
-| χ₀ | Reference in the saturating map ρ = ρ_base · χ / (χ₀ + χ). Carries the dimension of χ as declared through M. Required wherever ρ is computed. Must be finite and positive (χ₀ = 0 is not evaluable). | M-supplied (V7.1); OPEN — saturating form requires Origin declaration |
-| cc[p] | Cross-topology coupling for each declared component pair p in R. Required when component pairs are declared; one value per pair. | M-supplied (V7.1) |
+| ρ_base | Dimensionless ceiling on the weight given to directed imbalance of adjacent relations relative to a relation's own directed difference. Required wherever ρ is computed. | M-supplied (V7.1); Origin general value 0.5 |
+| χ₀ | Reference in the saturating map ρ = ρ_base · χ / (χ₀ + χ). Carries the dimension of χ as declared through M. Required wherever ρ is computed. Must be finite and positive (χ₀ = 0 is not evaluable). | M-supplied (V7.1); Origin general value 1 unit of χ; OPEN — saturating form requires Origin declaration |
+| cc[p] | Cross-topology coupling for each declared component pair p in R. Required when component pairs are declared; one value per pair. | M-supplied (V7.1); no general value |
 
 Where these values are not declared by M, the operator is not evaluated and
 there is no operator result. The kernel does not choose, bound, or substitute
@@ -397,6 +412,14 @@ kernel does not compute it from `DeclaredRelations`. This replaces the retired
 **R is not optional.** Once the full-operator admissibility condition is satisfied, R must be applied. R must not be removed, bypassed, replaced, or withheld because its output is difficult to interpret, unexpected, zero, or nonzero, because antisymmetric expression appears, because the Generator expects another result, because the Verifier questions whether the result is physically familiar, or because legacy mathematics describes the system differently. Kernel selection occurs from the declared structural condition, not from the desired or expected numerical result. Preserve the result exactly and compare it with observation. Zero and nonzero antisymmetric expression are both admissible mathematical outcomes (see section 11.4).
 
 **Primary Region clarification (Origin, 2026-09-29).** The Primary Region is the exceptional observational condition in which there is insufficient relational information to instantiate the full A→B→R path. Do not infer additional Primary Region mathematics from this statement. The Primary Δ→Σ implementation and its declared admissibility conditions are preserved exactly.
+
+**Experimental fields (Origin directive, 2026-11-07).** Kernel selection remains as
+stated above and is unchanged for declared applications. For an experimental
+field executed through `diagnostic_exec` (§11.7), the A → B → R path is evaluated
+as requested; where the declared topology contains no interior locus, the result
+carries an `UnresolvedCondition` warning citing this section. The kernel does not
+reject an otherwise computable field because its topology is provisional; the
+correspondence of the result with observation is determined outside the kernel.
 
 ---
 
@@ -485,6 +508,62 @@ let (e2, persistence) = operator_e_v5(&x2, &rel, &pairs, &cc, &prior, rho_base, 
 
 `PersistenceState::from_prior` requires actual observation output — not a
 model, parameter value, or static configuration.
+
+### 11.7 Diagnostic Execution — Experimental Fields (`diagnostic_exec.rs`)
+
+Origin directive, 2026-11-07: *Provenance is mandatory. Experimental uncertainty
+is observable information, not a reason to prohibit mathematically valid
+computation.* `src/diagnostic_exec.rs` is a thin execution wrapper. It calls the
+unchanged functions of §11.1 (`operator_a`, `compute_rho`, `operator_b`,
+`operator_r`; `operator_a_persistence`, `compute_rho_persistence`,
+`operator_b_persistence`, `operator_r_persistence`) and is independent of the
+admission interface. It introduces no operator form and no acceptance threshold.
+
+| Entry point | Use |
+|---|---|
+| `execute_spatial(&ExperimentalField)` | First declared observation: A → ρ → B → R. Returns every operator output, the per-edge provenance, the parameters used, and warnings. |
+| `execute_with_prior(&ExperimentalField, &SpatialExecution)` | Subsequent observation: the spatial kernel, then A_p → ρ_p → B_p → R_p against the prior's R. |
+
+**Provenance.** Each edge carries an `EdgeProvenanceRecord`: the existing
+`EdgeProvenance` class (mandatory), its observational `support` (`Observed` or
+`Proposed`), and its basis. A proposed relation remains proposed in every output.
+A provenance record's existence is not observational certainty.
+
+**Parameters.** The field identifies the ρ values used: the Origin general values
+(§9) with the unit of χ stated, or explicitly declared values with the reason.
+No selection is an error; nothing is substituted.
+
+**Observation succession.** Each field declares its observation identity and the
+system's own declared process step (§8). A `SpatialExecution` can be produced only
+by execution, never assembled. Persistence pairs an observation only with the
+actual output at the **immediately preceding declared process step** of the same
+field, with identical declared nodes, edges, components, and component pairs.
+Reversal, repetition, gaps, and wraparound of the observation sequence are errors.
+
+**Warnings — execution continues; carried with the results:**
+
+| Class | Raised for |
+|---|---|
+| `ProposedTopology` | a relation whose support is `Proposed` |
+| `IncompleteObservationalSupport` | an edge with no stated basis; a node with no stated measurement relationship; a declared ρ adjustment with no stated reason |
+| `UncertainMeasurement` | a node whose measurement relationship is declared uncertain |
+| `ExperimentalArrangement` | an experimental variable arrangement declared for the field |
+| `UnresolvedCondition` | conditions declared by the field; no interior locus (§10); an empty succ/pred sum evaluated as 0.0 (A-3, §18); ρ parameters or edge provenance differing from the prior |
+
+**Errors — no operator is evaluated; every error found is listed:**
+
+| Class | Raised for |
+|---|---|
+| `InvalidNodeReference` | an edge endpoint that is not a declared node |
+| `DuplicateIdentifier` | a node or edge identifier declared twice |
+| `IncompatibleDimensions` | value count ≠ component count; component pair outside the components; no nodes or no relations; class `Persistence` on a spatial edge (§8) |
+| `NonFiniteInput` | a non-finite node value, cc, ρ_base, or χ₀ |
+| `UndefinedOperation` | χ₀ ≤ 0; a non-finite operator output; a kernel assertion |
+| `MissingNumericalInput` | no ρ parameter selection; a node value not supplied; cc not supplied for a declared pair; the unit of χ not stated |
+| `IncompatiblePrior` | a prior that is not the immediately preceding declared step of the same field and structure |
+
+Results are calculated results. Their correspondence with observation is
+determined by the surrounding experimental system, not by the kernel.
 
 ---
 
@@ -1028,7 +1107,7 @@ verification only. Synthetic test provenance is not empirical provenance.
 
 | Item | Where | Status |
 |---|---|---|
-| A-3 — empty adjacency in Σ, R, R_persistence | `operators.rs` | OPEN — not classified |
+| A-3 — empty adjacency in Σ, R, R_persistence | `operators.rs` | OPEN — not classified. Operators unchanged; `diagnostic_exec` reports each affected edge as an `UnresolvedCondition` warning (§11.7) |
 | 𝟙[e] interpretation audit; ε[e] downstream | `derived_invariants.rs` | HOLD |
 | A-11 — ι at photon locus not declared through M | `derived_invariants.rs` | CLOSED — legacy import (SF-PR-16); declared-information rule applies |
 | `are_proportional` edge-order dependence and two-unit tolerance | `derived_invariants.rs` | HOLD |
@@ -1172,6 +1251,7 @@ Generator output.
 | Operational discipline (2026-09-29) | Sections 2, 4, 7, 16 added (Origin declaration): observational order and governing constants; task scope and frozen-kernel rule; observable record vs. legacy interpretation; experimental execution discipline. Section 5 (Workflow Step 2) revised: declaration-completeness vs. correspondence distinction added; execute-or-stop-exactly rule added. Section 10 (Kernel Selection) revised: R-is-not-optional rule added; Primary Region clarification added. No operator form, invariant form, Rust function, or source file content changed. |
 | Kernel V9 synchronization (2026-10-25) | Kernel V9 established as the sole canonical release across all files (Origin directive, README `e54fcec`). Release designations updated; foundational-primitive statement added to the crate root, `operators.rs`, and governing kernel documents; RPPI enforcement status register added to §18. No operator form, invariant form, Rust function, or test expectation changed. |
 | Kernel V9 (2026-10-24) | Foundational primitive established as Section 1 preamble: "a directed relation declared from observable information" — a primitive not previously existing in mathematics. Three roots stated: complexity, change as the only observable constant, bounded domain of analysis. Operator dependence on the primitive stated explicitly: operators exist because of the primitive and cannot be applied to anything not declared through M. Section 2 updated to reference Section 1 for the full account. No operator form, invariant form, Rust function, or source file content changed. |
+| Kernel V9 diagnostic execution (2026-11-07) | Origin directive. `src/diagnostic_exec.rs` added (§11.7): thin A → B → R and persistence execution wrapper over the unchanged operators for experimental fields; mandatory edge provenance with observed/proposed support; non-blocking warnings and blocking errors; observation succession by declared process step. §8 ring/torus clarification (relational evolution, not cyclic relationships); §9 synchronized with the Origin general values ρ_base = 0.5, χ₀ = 1 (`operators.rs` header, `77c65ae`); §10 experimental-field note; §18 A-3 row annotated. No operator form, parameter handling inside an operator, or existing test expectation changed. |
 
 ---
 
