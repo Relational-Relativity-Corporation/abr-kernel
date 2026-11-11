@@ -62,6 +62,31 @@ Where that interior cannot be established through M — where M can declare the 
 
 *Constraint:* no continuation, predecessor, successor, boundary closure, or operator result may be supplied by the mathematics itself. Every element of the admissible interior must be traceable to an observable through M.
 
+**Observer-relative regional establishment (PROPOSED, Origin, 2026-11-11).**
+
+*Regional establishment.* D and M are established relative to the human observer frame (AP-8, `observable_variable_sets.md`) through the observing process. Before topology is declared, identify:
+
+- the observed system and its boundary;
+- the observing relationships through which its distinctions are resolved;
+- the observational extent and resolution.
+
+M states what each numerical projection preserves, discards or leaves unresolved. The declaration of the observing chain is part of Regional M establishment.
+
+*Bounded declaration.* The observing process is declared only to the extent needed to establish three things: the distinctions used in the current exploration, their provenance, and the applicable operator path. Exhaustive reconstruction is not required. Unresolved aspects are recorded. They limit only the calculations that depend on them, and they do not prevent independent exploration elsewhere in the declared problem space. Provisional declarations may be explored. Operators are evaluated only where the declarations they require are complete.
+
+1. **Provenance and topology are held distinct.** Declaring observational provenance does not place the apparatus in the operator topology. An apparatus component becomes a locus or edge only through explicit declaration. Example: hydrogen 2S–6P. The observing chain is frequency comb → laser frequency, laser → atoms, atoms → fluorescence → detector, and detector → counts → record. Recorded values are numerical projections through M. Their attribution to hydrogen is established through the declared observing chain.
+2. **Measurement reductions.** A reduction may enter M when it is explicitly declared within M, with its provenance and with what it preserves and discards stated (see Before A / Before Δ, and Domain). Independent comparison treatments are kept distinct from declared reductions and are not part of M.
+3. **Interior locus.** After Regional M establishment, the interior structure of the observing process can support A → B → R for the declared region. This applies where the locus at which the observed system meets the observing process has an incoming and a continuing relation with independent provenance through M (full-operator admissibility condition). It does not by itself establish internal atomic circulation, and it does not resolve OC-OBS-2.
+4. **Correspondence and completeness.** An observed distinction required by the declared scope and comparison criteria, but not preserved by M, is a located incompleteness or misdeclaration. A divergence in operator output is traced before its source is assigned. Completeness is bounded by the declared observational record and its resolution.
+5. **Negative statements.** Within D, the only admissible negative statement about an observable is *not observed under the declared relations*. Statements of existence or non-existence are not made (see Domain).
+
+*Open conditions:*
+
+- **OC-OBS-1.** Whether the human end of the observing chain is declared as a locus in M or held only as the invariant reference frame (AP-8, `observable_variable_sets.md`). Related: OC-Φ-6.
+- **OC-OBS-2.** Whether an interior locus supplied by the observing process (item 3 above) bears on superposition resolution in the sense of I-S. Not classified.
+- **OC-OBS-3.** A common footing for observing chains whose relations carry heterogeneous units (for example Hz, counts, µs).
+- **OC-OBS-4.** Whether the grounding of a recorded datum in its observing chain is a property of the provenance class or a further declared relation. This is not an information-theoretic quantity.
+
 **Primary Region invariants — retired quantities.** The previous Primary Region invariants entry declared: rank(Im Δ), rank(Im Σ), ρ_P. These are retired (Origin declaration, 2026-09-23). The Origin question of what observable relational condition rank(Im Δ) was intended to distinguish is answered: relational distinguishability of the Δ output (see I-S below) is the condition, read from the Δ output without matrix construction. rank(Im Δ), rank(Im Σ), and ρ_P were representation layers over that condition and are not reinstated. The full-operator admissibility condition above is the kernel boundary criterion. The implementation constraint carries forward: a nonzero-entry count is not a rank and is not a substitute for any retired quantity.
 
 **Classical and quantum as resolving-power conditions on M.** The framework derives a unification result from the observational resolution principle and the full-operator admissibility condition.
@@ -93,6 +118,8 @@ There are no transitions that are forbidden by the declared relational structure
 *The notation says what the operators are; the constraints say what may not be added. The admissibility condition says what every quantity must be traceable to. The relational direction condition says that every declared relation has exactly one admissible direction. Bounded over D. No claim beyond D.*
 
 ---
+
+**Kernel V9 amendment, proposed (2026-11-11):** Structural upgrade to observer-relative regional establishment and admissibility. New entry: Observer-relative regional establishment. It establishes D and M relative to the human observer frame through the observing process, with the observing chain declared as part of Regional M. It bounds that declaration to what the current exploration requires. It holds observational provenance distinct from operator topology. It retains declared measurement reductions within M, kept distinct from comparison treatments. It qualifies the observing-process interior locus as supporting A → B → R after Regional M establishment, without establishing internal circulation. Observed distinctions required by the declared scope but omitted or unpreserved are located incompleteness or misdeclaration, bounded by the observational record. It restricts negative statements to *not observed under the declared relations*. Opens OC-OBS-1 to OC-OBS-4. No operator formula, source, test or configuration is changed.
 
 **Kernel V8 → Kernel V9 changes (2026-10-25):** Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). The Kernel V9 foundational-primitive statement is added at the head of this document. Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.
 

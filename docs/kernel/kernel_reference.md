@@ -271,6 +271,7 @@ outstanding refinement on the record.
 | directed difference | "gradient" |
 | correspondence with observables | "truth" / "true" as a claim of the calculation |
 | declared relations with provenance | rings, tori, periodic indices, wraparound |
+| not observed under the declared relations | "does not exist"; "exists" as a claim beyond observation |
 
 **DRIFT SIGNAL:** legacy mathematics inserted into or before the operators,
 or otherwise undeclared.
@@ -420,6 +421,8 @@ as requested; where the declared topology contains no interior locus, the result
 carries an `UnresolvedCondition` warning citing this section. The kernel does not
 reject an otherwise computable field because its topology is provisional; the
 correspondence of the result with observation is determined outside the kernel.
+
+**Observer-relative regional establishment (PROPOSED, Origin, 2026-11-11).** D and M are established relative to the human observer frame through the observing process. The observing chain is declared as part of Regional M, bounded to what the current exploration requires (see `operators_notation_and_constraint.md`). After Regional M establishment, interior structure of the observing process can supply the interior locus for the declared region where its incoming and continuing relations have independent provenance through M. It does not by itself establish internal atomic circulation. This paragraph synthesizes the source declaration and introduces nothing of its own.
 
 ---
 
@@ -1137,6 +1140,10 @@ verification only. Synthetic test provenance is not empirical provenance.
 | OC-ι-1 | ι_unit structurally fundamental or instrumentally bounded | OPEN |
 | OC-ι-2 | Relational inertia ratios (ι[μ]/ι[e], ι[τ]/ι[e]) — no declared relational origin | OPEN |
 | OC-ι-3 | δι ~ ι^0.5 scaling — connection to ρ saturation not derived | OPEN |
+| OC-OBS-1 | Human end of the observing chain: declared locus or invariant frame | OPEN |
+| OC-OBS-2 | Observing-process interior locus and I-S resolution | OPEN |
+| OC-OBS-3 | Common footing for heterogeneous observing chains | OPEN |
+| OC-OBS-4 | Grounding of a recorded datum in its observing chain | OPEN |
 
 **Kernel V9 RPPI enforcement — bounded first implementation** (`v9_specification.md`
 §6–§10; `src/provenance.rs`, `src/provenanced_exec.rs`, `src/admission.rs`). Subject to
