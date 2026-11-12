@@ -141,6 +141,8 @@ The framework begins with human observation within a bounded domain.
 
 **Change is the observable constant. Relation is primitive within the bounded declared domain.**
 
+**Ground of relational science (PROPOSED, Origin declaration, 2026-11-12; pending independent Verifier review).** Within the human reference frame H, change is the only constant, relation is the primitive, and energy, connection and freedom are present in every relation (I-T, I-E, I-S). These are observational constants, not axioms: present in what is observed, not assumed. The research measures their degree at declared resolution relative to H. Within D, no reference frame other than H is available. A → B → R functions throughout H wherever M establishes an interior locus; Δ → Σ is its form where resolution is limited (Primary Region). See `operators_notation_and_constraint.md`, "Ground of relational science" and "Reference frame and observational resolution". Synthesis only.
+
 These are not hypotheses the kernel tests. They are the ground the kernel stands on. They cannot be argued with from within the framework, because the framework is built on them. The full account of why these are the correct governing constants — tracing through complexity, change as the only observable constant, and bounded domain — is in Section 1.
 
 The governing order is:
@@ -424,6 +426,8 @@ correspondence of the result with observation is determined outside the kernel.
 
 **Observer-relative regional establishment (PROPOSED, Origin, 2026-11-11).** D and M are established relative to the human observer frame through the observing process. The observing chain is declared as part of Regional M, bounded to what the current exploration requires (see `operators_notation_and_constraint.md`). After Regional M establishment, interior structure of the observing process can supply the interior locus for the declared region where its incoming and continuing relations have independent provenance through M. It does not by itself establish internal atomic circulation. The observing process also participates: registration is an exchange with the observed system, declared in M with its recorded extent, and values extrapolated to zero participation are comparison quantities only. This paragraph synthesizes the source declaration and introduces nothing of its own.
 
+**Reference frame and observational resolution (PROPOSED, Origin, 2026-11-12).** H is held as the invariant reference frame. Values are registered or projected. Observational resolution δ is declared in M (δ_N, δ_M; δ_C is the implementation-only tol), with scale-to-resolution ratio σ. Graded forms read freedom, energy and connection at δ and reduce to I-S, I-T and I-E at δ_C. There is no cold start: first observations and sequence starts are record boundaries. Regional M includes a record ledger. This paragraph synthesizes the source declaration and introduces nothing of its own.
+
 ---
 
 ## 11. Operators
@@ -492,7 +496,7 @@ neither outcome is imposed by the mathematics.
 
 **Tolerances.** Every `tol` argument is an IMPLEMENTATION-ONLY NUMERICAL
 TOLERANCE guarding finite-precision arithmetic. It is not a property of the
-observed system and is never reported as one.
+observed system and is never reported as one. (PROPOSED 2026-11-12: `tol` is the code-layer resolution δ_C; the observational resolutions δ_N and δ_M are declared in M and are held distinct from it.)
 
 ### 11.6 Persistence — Usage Pattern
 
@@ -922,6 +926,8 @@ I-T, I-S, and I-E are jointly necessary conditions for any self-organizing,
 evolving, observable system to exist within D. This is a framework-level
 necessity argument, not a mathematical consequence already established by the
 kernel.
+
+*(PROPOSED, Origin declaration, 2026-11-12: under the ground of relational science, energy, connection and freedom are observational constants within H, and joint necessity is restated as a consequence of the ground; OC-T-3, OC-S-3 and OC-E-3 are dissolved on adoption. See §2.)*
 
 These conditions are observable at every scale where M operates. What changes
 across scales is not whether the phenomena are observable but what M can resolve
