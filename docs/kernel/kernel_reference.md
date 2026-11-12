@@ -452,6 +452,7 @@ correspondence of the result with observation is determined outside the kernel.
 - χ[i] = max selection: **OPEN** — Origin declaration required for the max
   selection rule itself.
 - Saturating form χ/(χ₀+χ): **OPEN** — Origin declaration required.
+- Shared ρ across components (Origin declaration, 2026-11-11; pending independent Verifier review before merge): under the current max-selection rule, components declared at a common locus share ρ[i] and can influence one another's R outputs and 𝟙[e] without a declared component pair. This does not alone establish physical coupling (see `operators_notation_and_constraint.md`, ρ entry). Synthesis only.
 
 ### 11.3 M-Declaration Enforcement
 
