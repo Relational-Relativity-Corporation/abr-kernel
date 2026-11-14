@@ -428,6 +428,8 @@ correspondence of the result with observation is determined outside the kernel.
 
 **Reference frame and observational resolution (PROPOSED, Origin, 2026-11-12; amended 2026-11-13).** H is held as the invariant reference frame, and is part of the operator topology as observed: the observer's forward relational evolution enters as declared edges, with observer circulation always present and reported separately. Values are registered or projected. Observational resolution δ is declared in M (δ_N, δ_M; δ_C is the implementation-only tol), with scale-to-resolution ratio σ. Graded forms read freedom, energy and connection at δ and reduce to I-S, I-T and I-E at δ_C. There is no cold start: first observations and sequence starts are record boundaries. Regional M includes a record ledger. This paragraph synthesizes the source declaration and introduces nothing of its own.
 
+**Grounding declaration (PROPOSED, Origin, 2026-11-14; pending independent Verifier review).** Documents, mathematical descriptions, implementations and verification reports are governed by `docs/process/grounding_declaration.md`. It requires a bidirectional observable-to-operator trace, and an identification of relation, energy, connection, freedom and antisymmetric circulation in the mathematics; an undeclared correspondence is stated as not evaluated or unresolved. It adds antisymmetric circulation as a fourth observational constant, and it does not relax §20. This paragraph synthesizes the source declaration and introduces nothing of its own.
+
 ---
 
 ## 11. Operators
