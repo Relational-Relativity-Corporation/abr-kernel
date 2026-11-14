@@ -453,8 +453,9 @@ correspondence of the result with observation is determined outside the kernel.
 ### 11.2 ρ Status
 
 - ρ_base, χ₀: **M-supplied (V7.1)** — no kernel value.
-- χ[i] = max selection: **OPEN** — Origin declaration required for the max
-  selection rule itself.
+- χ[i] = max selection: **DECLARED (Origin, 2026-11-14; PROPOSED, pending Verifier
+  review)** — χ[i] = max |A| over all declared components on edges incident to i;
+  ρ[i] is shared by the components at i as a declared dependency.
 - Saturating form χ/(χ₀+χ): **OPEN** — Origin declaration required.
 - Shared ρ across components (Origin declaration, 2026-11-11; pending independent Verifier review before merge): under the current max-selection rule, components declared at a common locus share ρ[i] and can influence one another's R outputs and 𝟙[e] without a declared component pair. This does not alone establish physical coupling (see `operators_notation_and_constraint.md`, ρ entry). Synthesis only.
 
@@ -725,7 +726,7 @@ HOLD (since Kernel V8): depends on the 𝟙[e] audit (A-3 open condition). No ch
 ### 13.4 𝟙[e] — Detection Indicator
 
 ```
-𝟙[e] = 1  iff  R(A(x))[e]_antisymmetric ≠ 0
+𝟙[e] = 1  iff  R(B(A(x)))[e]_antisymmetric ≠ 0   (wording corrected 2026-11-14, PROPOSED: E = R(B(A(x))))
 𝟙[e] = 0  otherwise
 ```
 
@@ -886,7 +887,7 @@ pub fn r_output_states(n_declared_edges_at_v: usize) -> f64 { 2.0 * j_v(n_declar
 | Quantity | Form | Rust |
 |---|---|---|
 | ε[e] relational energy contrast | \|Δ(ι)[e]\| · 𝟙[e] | `epsilon_e(delta_iota_e, indicator)` |
-| 𝟙[e] detection indicator | 1 iff R(A(x))[e] antisymmetric term ≠ 0 | `detection_indicator(r_anti, tol)` |
+| 𝟙[e] detection indicator | 1 iff R(B(A(x)))[e] antisymmetric term ≠ 0 | `detection_indicator(r_anti, tol)` |
 | ε[e] at photon edges | hc/λ (part of M at Atomic Region; ι not declared at photon locus) | `epsilon_photon_edge(lambda_m)` |
 | τ[v] at photon edges | ℏ / ε[e] | `tau_photon_edge(lambda_m)` |
 | N[v] at photon-emitting loci | τ_stability · ε[e] / ℏ | `n_relational_cycles(tau_stability_s, lambda_m)` |
@@ -1121,7 +1122,7 @@ verification only. Synthetic test provenance is not empirical provenance.
 | 𝟙[e] interpretation audit; ε[e] downstream | `derived_invariants.rs` | HOLD |
 | A-11 — ι at photon locus not declared through M | `derived_invariants.rs` | CLOSED — legacy import (SF-PR-16); declared-information rule applies |
 | `are_proportional` edge-order dependence and two-unit tolerance | `derived_invariants.rs` | HOLD |
-| ρ max-selection rule | `operators.rs` | OPEN — Origin declaration required |
+| ρ max-selection rule | `operators.rs` | DECLARED (Origin 2026-11-14; PROPOSED): max over all components on incident edges |
 | ρ saturating form | `operators.rs` | OPEN — Origin declaration required |
 | Part II "absence" wording | I-E, joint necessity, photon J[v] | Separate audit |
 | R² = 0.527 at the δι fit | `observable_variable_sets.md` | HOLD |
@@ -1147,7 +1148,7 @@ verification only. Synthetic test provenance is not empirical provenance.
 | OC-ι-1 | ι_unit structurally fundamental or instrumentally bounded | OPEN |
 | OC-ι-2 | Relational inertia ratios (ι[μ]/ι[e], ι[τ]/ι[e]) — no declared relational origin | OPEN |
 | OC-ι-3 | δι ~ ι^0.5 scaling — connection to ρ saturation not derived | OPEN |
-| OC-OBS-1 | Human end of the observing chain: declared locus or invariant frame | OPEN |
+| OC-OBS-1 | Human end of the observing chain: declared locus or invariant frame | PROPOSED resolution (2026-11-12, amended 2026-11-13): invariant frame and, as observed, part of the topology |
 | OC-OBS-2 | Observing-process interior locus and I-S resolution | OPEN |
 | OC-OBS-3 | Common footing for heterogeneous observing chains | OPEN |
 | OC-OBS-4 | Grounding of a recorded datum in its observing chain | OPEN |
