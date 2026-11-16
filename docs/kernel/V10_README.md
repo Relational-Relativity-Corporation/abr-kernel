@@ -1,4 +1,4 @@
-> **Synchronized copy.** Source: `abr-relational-chemistry` `KERNEL_V10_README.md`, branch `claude/tender-galileo-gcquso`, commit `b2d6348`. Paths beginning `sessions/` refer to that repository. The Foundation Declaration (spine) is `sessions/2026-11-14/FOUNDATION_DECLARATION_DRAFT.md` there. Edit the source and refresh this copy; do not edit this copy alone.
+> **Synchronized copy.** Source: `abr-relational-chemistry` `KERNEL_V10_README.md`, branch `claude/tender-galileo-gcquso`, commit `4fbd2e3`. Paths beginning `sessions/` refer to that repository. The Foundation Declaration (spine) is `sessions/2026-11-14/FOUNDATION_DECLARATION_DRAFT.md` there. Edit the source and refresh this copy; do not edit this copy alone.
 
 # Kernel V10: proposed edits and updates (reference)
 
@@ -176,6 +176,7 @@ The full register is `sessions/2026-11-14/VARIABLE_REGISTER_DRAFT.md` (DRAFT, Ge
 | **W9** | **Classification of structure:** *system structure* closes across chains at every mapping order; *chain structure* is a divergence that persists across mapping orders; *mapping structure* is a divergence that moves with mapping order | Proposed (drafted Nov 15; to be declared as a reading rule) *(merged into FD 2026-11-16)* |
 | **W10** | **Relational invariant:** a structure that holds across independent observing chains (W4), at every mapping order where it can be formed, and across consecutive cycles (R10). Persistence across a mapping order only by construction (a factor that cancels) is not a test at that order | Proposed (Nov 16 handoff) *(merged into FD 2026-11-16)* |
 | **W11** | **Rule of inclusion:** each declared variable is read for each system; where one is not declared, the missing declaration is named | Origin, 2026-11-15 (`PRIMAL_COMPARISON_DRAFT.md`); PC-a Open *(merged into FD 2026-11-16)* |
+| **W12** | **Reference frame of comparison.** Results are stated as observed within H, bounded within D. The standard frame of comparison is abstract, not observed; a relational result is not judged against it, and no outside-validation statement is made. Legacy mathematics is not discarded: it enters as declared mappings (the ladder) and its values as Projected or Provider-declared comparison quantities | Declared (Origin, 2026-11-16) |
 
 ### Method (carried from the handoffs)
 
@@ -367,6 +368,7 @@ The trap readings (one component, observer-built connections) and the ⁴He read
 | 2026-11-16 (3rd) | Encompass consecutive observations; do not blur | Df3 operator clause; consecutive K2, K4 |
 | 2026-11-16 | EN-a faster → slower; EN-a to EN-g approved; K7 adopted | EN-a, K7 |
 | 2026-11-16 (4th) | One direction of evolution; any direction of analysis; structure figure | Df2, Df2a, T2, K4, K5, W8; kernel `757262a` |
+| 2026-11-16 | W12: the reference frame of comparison is abstract in the standard frame; results stated as observed within D; legacy mathematics as declared mappings | W12 |
 | 2026-11-16 (5th) | Domain of the relational system, established through energy, connection and freedom; participation in the domain (intervention bounds degree, never presence or direction) | R9a; R6, Df4, R5, G4, W11, Part XI |
 | 2026-11-16 | Synchronization (Origin: "merge and synchronize"): decided and proposed items from other documents merged into the FD; this README aligned | FD G1, G4, G4a, R3, T2, T3, T7, K3, V1–V3b, P1, V6, V7, W7–W11, Parts IX–XII |
 
