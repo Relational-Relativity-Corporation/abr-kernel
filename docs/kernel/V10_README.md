@@ -1,4 +1,4 @@
-> **Synchronized copy.** Source: `abr-relational-chemistry` `KERNEL_V10_README.md`, branch `claude/tender-galileo-gcquso`, commit `e5087d6`. Paths beginning `sessions/` refer to that repository. The Foundation Declaration (spine) is `sessions/2026-11-14/FOUNDATION_DECLARATION_DRAFT.md` there. Edit the source and refresh this copy; do not edit this copy alone.
+> **Synchronized copy.** Source: `abr-relational-chemistry` `KERNEL_V10_README.md`, branch `claude/tender-galileo-gcquso`, commit `2dbf6c8`. Paths beginning `sessions/` refer to that repository. The Foundation Declaration (spine) is `sessions/2026-11-14/FOUNDATION_DECLARATION_DRAFT.md` there. Edit the source and refresh this copy; do not edit this copy alone.
 
 # Kernel V10: proposed edits and updates (reference)
 
@@ -82,6 +82,8 @@ These are the variables every analysis reads. Each is present by ground (G1, G2,
 | **Freedom**: how many independent ways it varies | **Superposition, I-S** | at least two edges with non-proportional Δ vectors across components; `superposition_condition`; `superposition_resolved` = interior present | F_δ (V2); proposed d(e,f) (IV-2) |
 | **Circulation**: imbalance between what follows and what precedes | (R − B) | (R − B)[e] = ρ[src]·(Σ_succ B − Σ_pred B) | sign is connection; magnitude only once ρ choices are declared (V4) |
 
+**Each is declared per domain (R9a).** What energy, connection and freedom are depends on the relational system analysed, and is stated in its domain declaration before any operator acts. That declaration establishes D.
+
 **Reading rule for all four:** a calculated zero, or a reading not resolved at δ, is a statement about the declared relations and their resolution, never a statement of absence (W2). The kernel's boolean forms use the implementation tolerance δ_C; the finding is the graded form at δ (G3, and 2026-11-16 finding A-2: the I-S boolean depends on tol).
 
 ## 1.3 Registration and measurement
@@ -97,6 +99,7 @@ These are the variables every analysis reads. Each is present by ground (G1, G2,
 | **R7** | Value classes: Registered; Registered with declared offset; Projected (model; comparison only); Withheld; Provider-declared. Letters to be renamed so "D" is not the domain | Proposed |
 | **R8** | Record ledger: each quantity with its class, extent, δ, σ and role. Outside the ledger is not observed under the declared relations | Proposed |
 | **R9** | Regional M: system and boundary, chain, primitive variables, references, δ layers, window, participation, ledger, operator parameters. Apparatus becomes a locus or edge only by explicit declaration | Proposed |
+| **R9a** | **Domain declaration.** The domain is the full scope of the relational system under analysis; D is its mathematical establishment. Before any operator acts, the domain declaration states what each ground variable is **in that system**: **energy** (what carries change; unit, mapping, δ_ε), **connection** (which relations carry continuation; loci and direction traced to an observable; δ for the sign of R − B), **freedom** (which components vary independently over common loci; why one field; δ for proportionality). It sets D's structure: loci and relations (connection), components with n = loci × components (freedom), what each value carries (energy). Meaning depends on the system, not only the region (two atomic systems: H/D level network carries energy in hν; the 2S–6P count field has no energy carrier). The Generator drafts it from the evidence; Origin declares it; committed before execution. An undeclared variable is *not evaluated* and named; one that cannot be formed is *not formable in this domain* | Declared (Origin, 2026-11-16, fifth amendment) — **new** |
 | **R10** | **Cycle of analysis:** the observer's declared intersection with the ongoing field, chosen for comprehensibility (resolvable at δ, carryable σ), declared before execution. Its output is the next cycle's prior. A result describes the field *as intersected in its cycle*. Modes: **tracking** (cycles advance with arriving registrations) and **record analysis** (a past record; no claim of present alignment) | Declared (Origin, 2026-11-16) — **new** |
 
 ## 1.4 Variable register
@@ -105,7 +108,7 @@ The full register is `sessions/2026-11-14/VARIABLE_REGISTER_DRAFT.md` (DRAFT, Ge
 
 | Group | Rows (mark) |
 | --- | --- |
-| **A. Frame and domain** | A1 H ◐ · A2 Observables ✖ · A3 Registration ✖ (in kernel) · A4 M ◐ · A5 D ◐ · A6 Value class ⚠ · A7 Ledger ✔ · A8 Record boundary ✔ · A9 Region ◐ · A10 ℛ_M, 𝓜_M ✔ · A11 Participation ◐ · A12 Environment ✖ · A13 Descriptor ✖ |
+| **A. Frame and domain** | A1 H ◐ · A2 Observables ✖ · A3 Registration ✖ (in kernel) · A4 M ◐ · A5 D ◐ (structure of n addressed by R9a) · A6 Value class ⚠ · A7 Ledger ✔ · A8 Record boundary ✔ · A9 Region ◐ · A10 ℛ_M, 𝓜_M ✔ · A11 Participation ◐ · A12 Environment ✖ · A13 Descriptor ✖ |
 | **B. Topology** | B1 Locus ◐ · B2 Edge ✔ · B3 Direction ✔ · B4 Provenance class ✔ · B5 Support ✔ (*superseded by T3 amended*) · B6 succ/pred/adj ◐ (A-3) · B7 Interior ✔ · B8 Component ✖ · B9 Component pair ◐ · B10 Process step ✔ · B11 Observation/field ◐ |
 | **C. Operator parameters** | C1 ρ ◐ · C2 χ ⚠ (code adds component-pair asymmetries; text does not) · C3 ρ_base ◐ · C4 χ₀ ◐ · C5 cc[p] ◐ · C6 tol = δ_C ✔ |
 | **D. Operators and outputs** | D1 A, Δ ✔ · D2 B ⚠ (called a vector in OVS; scalar in kernel and code) · D3 R ✔ · D4 Σ ✔ · D5 E ✔ · D6 A_p, B_p, R_p ✔ · D7 (R − B) ✔ · D8 C projection ⚠ (σ² in examples) |
@@ -326,6 +329,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 
 - One meaning each for **E** (operator, E[v], E_δ, E_prior), **D** (domain, value class, delay loci), **σ** (ratio, deviation), **C** (projection, C_δ, component pairs), **R** (operator, value class, runs), **ρ** (strength, Spearman), **Σ** (operator, sum).
 - Registration descriptor symbol ⟦a : b⟧ (R3) to be chosen.
+- **Domain and D** are related, not colliding: *domain* is the full scope of the relational system; *D* is its mathematical establishment (R6, R9a). "D" as a value-class letter and as delay-locus labels still collides.
 - Value-class letters R, R+, P, W, D to be renamed (R7).
 - Variable register IDs to be prefixed (§6, conflict 7).
 
@@ -344,6 +348,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 | 2026-11-16 (3rd) | Encompass consecutive observations; do not blur | Df3 operator clause; consecutive K2, K4 |
 | 2026-11-16 | EN-a faster → slower; EN-a to EN-g approved; K7 adopted | EN-a, K7 |
 | 2026-11-16 (4th) | One direction of evolution; any direction of analysis; structure figure | Df2, Df2a, T2, K4, K5, W8; kernel `757262a` |
+| 2026-11-16 (5th) | Domain of the relational system, established through energy, connection and freedom | R9a; R6, G4, W11, Part XI |
 | 2026-11-16 | Synchronization (Origin: "merge and synchronize"): decided and proposed items from other documents merged into the FD; this README aligned | FD G1, G4, G4a, R3, T2, T3, T7, K3, V1–V3b, P1, V6, V7, W7–W11, Parts IX–XII |
 
 ---
