@@ -1,4 +1,4 @@
-> **Synchronized copy.** Source: `abr-relational-chemistry` `KERNEL_V10_README.md`, branch `claude/tender-galileo-gcquso`, commit `3998f28`. Paths beginning `sessions/` refer to that repository. The Foundation Declaration (spine) is `sessions/2026-11-14/FOUNDATION_DECLARATION_DRAFT.md` there. Edit the source and refresh this copy; do not edit this copy alone.
+> **Synchronized copy.** Source: `abr-relational-chemistry` `KERNEL_V10_README.md`, branch `claude/tender-galileo-gcquso`, commit `b2d6348`. Paths beginning `sessions/` refer to that repository. The Foundation Declaration (spine) is `sessions/2026-11-14/FOUNDATION_DECLARATION_DRAFT.md` there. Edit the source and refresh this copy; do not edit this copy alone.
 
 # Kernel V10: proposed edits and updates (reference)
 
@@ -283,6 +283,13 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 - Trap network E vs N; ⁴He diamond consecutive signs (+ on f1–f3, − on f4–f5).
 - Three-variable re-read (2026-11-16): superposition resolved between {2S→1S} and {2S→n} on the H/D field at 239–517 δ, across chains (candidate invariant; mapping order and cycles untested); first tunneling reading (⁴He diamond); connection not formable on the ³He and t relations (scope, not direction).
 
+**Read under R9a (notes added 2026-11-16, after the fact; numbers unchanged).** Every analysis so far ran before R9a and had no domain declaration. Each findings record now opens with a note stating its domain and the observer's participation:
+- **prepared and probed:** hydrogen 2S–6P, trap closures, trap network, H/D level network;
+- **mixed domains:** the ⁴He diamond (retroactive domain declaration: `sessions/2026-11-16/HE4_DIAMOND_DOMAIN_DECLARATION_RETRO.md`), the isotope ladder (atomic and trap domains joined by the rung-1 mapping), and the n → d step;
+- **no observing relation:** the earlier chemistry tests (synthetic or provider data), where R9a cannot be met.
+
+The trap readings (one component, observer-built connections) and the ⁴He readings (a composition, not a formation process) are statements about prepared domains. The candidate H/D invariant has held across three preparations but not yet across participation (W10). Its domain is drafted for Origin in `sessions/2026-11-16/HD_LEVEL_NETWORK_DOMAIN_DECLARATION.md`, to be declared before IV-4.
+
 **Withdrawn or lapsed:**
 - Whole-range B and R (1st amendment of 2026-11-16), with OC-K-2, EN-g's second form, EN-F4, HD-F1, HD-F2, HD-F5, HV-a, HV-d. Their readings are kept as labelled "whole-range (withdrawn)".
 - G4b ("registered through successor").
@@ -322,12 +329,14 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 - **P-a to P-f** relational inertia P1.1–P1.4, the OVS inference, ratio-registration direction (answered by Tr-d, open).
 - **Tr-a to Tr-f** trap observing chain in Regional M; five-class split; reference locus; two kinds of inertia registration; invariance theorem as a mapping.
 - **IV-1** H and D as components or as loci with isotope edges. **IV-2** d(e,f) as the graded freedom form. **IV-3** 𝟙 = 0 by topology reported as decoherence or "connection not formable".
+- **DD-1** whether a composition across domains with different participation is one field, or a declared comparison between domains.
 - **W9** declare the system / chain / mapping classification. **W10** the relational-invariant definition.
 - **Boundary audit** layout approval (next steps 1–5); the five inconsistencies.
 - **Symbols** (§8); RS open list (rate variable, RS-3a, Κ criterion, RD fields and symbol, participation kinds, RS-1–6 approval, RS-4 for Σ); RMC 5.6, 5.7.
 
 **Application and data (do not change the kernel):**
 - Complex-system area: water rovibrational network or AME input network (atomic-region alternative: H/D/He line networks).
+- **DH-1 to DH-5** the H/D level network's domain declaration (energy, connection, freedom; the 2S identification as a mapping; components or isotope edges; rung-1 trap inputs as a cross-domain mapping; a received-only domain as the W10 test). To be declared before IV-4.
 - **IV-4** ladder rungs 2–4 per edge on the H/D field (the test of the candidate invariant). **IV-5** CODATA correlations. **IV-6** registered relation at ³He⁺. **IV-7** second cycle.
 - **FL-T1 to T6** ladder rungs 2–4. **IL-a to d**. **TC-a to g** (TC-d, TC-g: trap cycle-data request). **HD-F3, HD-F4** (capture-photon and Q-value registrations; IAEA hosts). **EN-F1, EN-F2** (to record).
 - **ED-a to g** electron–deuteron (ED-a isotope edge; ED-b bound electron as observing relation, for OC-V-4).
