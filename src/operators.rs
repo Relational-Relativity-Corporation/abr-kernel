@@ -122,6 +122,23 @@
 //   property of the process that establishes which observation is prior
 //   and which is current.
 //
+// Direction of evolution vs direction of analysis (V10, Origin, 2026-11-16):
+//   EVOLUTION has one direction and never stops. No relation evolves in
+//   reverse. Nothing in this crate may compute, fit or interpret a quantity
+//   on the assumption that relational evolution can run both ways:
+//     - (s,t) and (t,s) are never one relation evolving both ways;
+//     - a later output is never the prior of an earlier one;
+//     - a later registration is never read as an earlier state restored;
+//     - a direction is never declared from index order or convenience.
+//   ANALYSIS may read in any direction. Looking back is admissible:
+//     - pred(e) / adj_minus: the relations arriving at e's source, read
+//       backward by R and Σ, each keeping its declared direction;
+//     - reading e from its target end (gives −A(x)[e], same relation);
+//     - past records, earlier cycles, reverse traceability, any iteration
+//       order that does not change the result.
+//   Not re-accumulating what a prior output already carries is a SCOPE
+//   rule (do not count the same evolution twice), not a direction rule.
+//
 // ── Relational Direction ─────────────────────────────────────────────────
 //
 // Every declared relation has exactly one admissible direction — the
@@ -487,7 +504,8 @@ pub enum EdgeProvenance {
 //   out[i] = edge indices leaving node i     — used by ABR B and R operators
 //   inc[i] = edge indices entering node i    — used by ABR B and R operators
 //   succ(e) = out[edges[e].1]               — forward continuation of edge e
-//   pred(e) = inc[edges[e].0]               — backward continuation of edge e
+//   pred(e) = inc[edges[e].0]               — arriving relations of e (read backward;
+//                                             they do not evolve backward)
 //
 // Edge-indexed adjacency (adj_plus / adj_minus):
 //   adj_plus[e]  = edges f where source(f) = target(e)  — used by primary Σ
@@ -562,8 +580,10 @@ impl DeclaredRelations {
     /// Used by ABR B and R operators. Equivalent to adj_plus[e].
     #[inline] pub fn succ(&self, e: usize) -> &[usize] { &self.out[self.edges[e].1] }
 
-    /// Backward continuation of edge e — edges ending where e starts.
-    /// Used by ABR R operator. Equivalent to adj_minus[e].
+    /// Arriving relations of edge e — edges ending where e starts.
+    /// The analysis reads them backward (direction of analysis); each keeps
+    /// its declared direction of evolution and arrives where e begins.
+    /// Nothing evolves backward. Used by ABR R. Equivalent to adj_minus[e].
     #[inline] pub fn pred(&self, e: usize) -> &[usize] { &self.inc[self.edges[e].0] }
 }
 
@@ -1079,6 +1099,8 @@ pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f6
     let mut spatial: Vec<Vec<f64>> = (0..k).map(|c| {
         (0..rel.n_edges()).map(|e| {
             let fwd: f64 = rel.succ(e).iter().map(|&f| bg.spatial[c][f]).sum();
+            // Backward READING of the arriving relations (direction of analysis).
+            // Each pred edge keeps its declared direction of evolution.
             let bwd: f64 = rel.pred(e).iter().map(|&p| bg.spatial[c][p]).sum();
             bg.spatial[c][e] + rho_e[e] * (fwd - bwd)
         }).collect()
@@ -1131,6 +1153,9 @@ pub fn operator_e(
 // Directed difference between current and prior kernel output.
 // Direction is fixed: E_current − E_prior.
 // The reverse direction is not traceable to an observable through M.
+// The prior is always the earlier output: pairing a later output as the
+// prior of an earlier one assumes reverse evolution and is inadmissible.
+// Re-reading or comparing earlier outputs is analysis and is admissible.
 //
 // Evaluated only over a declared pair (E_prior, E_current), both kernel
 // outputs of declared observations through M. Not evaluated at the first
@@ -1430,6 +1455,38 @@ mod tests {
         let d_rev = operator_delta(&x, &rel_rev);
         assert!((d_fwd.field[0][0] + d_rev.field[0][0]).abs() < 1e-12,
             "forward and reverse must be exact negations — direction is structural");
+    }
+
+    // [V10 DIRECTION] Looking back is analysis, not reverse evolution.
+    // On the chain 0 → 1 → 2, R reads e1's arriving relation e0 backward
+    // (the −ρ·Σ_pred term), and e0 keeps its declared direction: it arrives
+    // where e1 begins. Reading is backward; evolution is not.
+    #[test]
+    fn r_reads_arriving_relations_backward_without_reversing_them() {
+        let rel = test_rel_from_edges(3, vec![(0,1), (1,2)]);
+        assert_eq!(rel.pred(1), &[0]);
+        assert_eq!(rel.edges[0].1, rel.edges[1].0, "the arriving relation keeps its declared direction");
+        assert!(rel.succ(1).is_empty() && rel.pred(0).is_empty());
+        let g = EdgeField { spatial: vec![vec![2.0, 5.0]], comp: vec![], comp_pairs: vec![], k: 1 };
+        let rho = vec![0.5, 0.25, 0.0];
+        let r = operator_r(&g, &rel, &rho, &[]);
+        // e1: no successors; its arriving relation e0 is read backward.
+        assert!((r.spatial[0][1] - (5.0 + 0.25 * (0.0 - 2.0))).abs() < 1e-12);
+        // e0: reads its successor e1 forward; nothing arrives at node 0.
+        assert!((r.spatial[0][0] - (2.0 + 0.5 * (5.0 - 0.0))).abs() < 1e-12);
+    }
+
+    // [V10 DIRECTION] Reading a relation from its other end is the same
+    // relation read backward (−A), and a declared reverse is a different
+    // relation with its own provenance: neither makes evolution two-way.
+    // B accumulates in the declared direction only: an arriving relation is
+    // never added into a relation's accumulation.
+    #[test]
+    fn b_accumulates_only_in_the_declared_direction() {
+        let rel = test_rel_from_edges(3, vec![(0,1), (1,2)]);
+        let g = EdgeField { spatial: vec![vec![2.0, 5.0]], comp: vec![], comp_pairs: vec![], k: 1 };
+        let b = operator_b(&g, &rel);
+        assert_eq!(b.spatial[0], vec![7.0, 5.0], "e1 does not take in its arriving relation e0");
     }
 
     // [MATH] For an isolated edge (no adjacency), Σ = Δ exactly.
