@@ -1,4 +1,4 @@
-> **Synchronized copy.** Source: `abr-relational-chemistry` `KERNEL_V10_README.md`, branch `claude/tender-galileo-gcquso`, commit `4fbd2e3`. Paths beginning `sessions/` refer to that repository. The Foundation Declaration (spine) is `sessions/2026-11-14/FOUNDATION_DECLARATION_DRAFT.md` there. Edit the source and refresh this copy; do not edit this copy alone.
+> **Synchronized copy.** Source: `abr-relational-chemistry` `KERNEL_V10_README.md`, branch `claude/tender-galileo-gcquso`, commit `0058d30`. Paths beginning `sessions/` refer to that repository. The Foundation Declaration (spine) is `sessions/2026-11-14/FOUNDATION_DECLARATION_DRAFT.md` there. Edit the source and refresh this copy; do not edit this copy alone.
 
 # Kernel V10: proposed edits and updates (reference)
 
@@ -203,7 +203,7 @@ Operators record how they are grounded: **forced** (no alternative), **motivated
 | **K4 R** | R(g)[e] = g[e] + ρ[src(e)] · (Σ_{succ(e)} g − Σ_{pred(e)} g), g = B(A(x)). Component pairs p = (a, b): the asymmetry g_comp[p][dst(e)] − g_comp[p][src(e)], scaled by ρ[src(e)]·cc[p], is added to a and subtracted from b; comp[p][i] + ρ[i]·(Σ_{out(i)} g_a − Σ_{out(i)} g_b). Σ = R on Δ(x) without B. **Σ_pred is the operator reading backward** (Df2a); every pred edge keeps its direction | Motivated (G2) | One pass; consecutive. **Withdrawn:** whole-range Σ_down, Σ_up |
 | **K5 E** | E(x) = R(B(A(x)), ρ(A(x))). Persistence A_p → B_p → R_p, spatial component only, ρ_p from A_p. **One-step pairing:** each cycle pairs only with the immediately preceding cycle's actual output; never a later output as an earlier prior. Within a cycle, consecutive and encompassing | Declared | One-step pairing Declared (2026-11-16); OC-K-4 closed |
 | **K6 C** | Declared projection: a reduction of operator output to fewer numbers (share, bound, variance), declared before use, stating what it keeps and drops. Not a kernel operator | Declared | Variance under C (Origin, 2026-11-14) |
-| **K7** | **Route accumulation and closure.** Route π = (e₁, …, e_m), a directed sequence within the cycle's field. B_π(g) = Σ_{e ∈ π} g[e]. For two routes with the same source and target: A_π(π₁, π₂) = B_π₁(g) − B_π₂(g). Parallel edges are routes of length one. Holds at δ when the interval of A_π contains 0. On node-derived fields (g = A(x)) closure is 0 **by identity**. Needed because R − B is blind to route disagreement | Declared (Origin, 2026-11-16) | **New.** Direction OC-K-3a Open |
+| **K7** | **Route accumulation and closure.** Route π = (e₁, …, e_m), a directed sequence within the cycle's field. B_π(g) = Σ_{e ∈ π} g[e]. For two routes with the same source and target: A_π(π₁, π₂) = B_π₁(g) − B_π₂(g). Parallel edges are routes of length one. Holds at δ when the interval of A_π contains 0. On node-derived fields (g = A(x)) closure is 0 **by identity**. Needed because R − B is blind to route disagreement | Declared (Origin, 2026-11-16) | **New.** Direction OC-K-3a Open. **Cycle closure (HB-1, Origin 2026-11-17):** for any cycle, A_cyc = Σ s_e g[e] (s_e = +1 along, −1 against the declared direction; traversal is an order of analysis, Df2a); holds at δ when its interval contains 0; independent set = a cycle basis from a stated spanning tree; two-route K7 is the one-source, one-sink case |
 
 ## 2.2 Kernel invariant functions (unchanged; `derived_invariants.rs`)
 
@@ -368,6 +368,7 @@ The trap readings (one component, observer-built connections) and the ⁴He read
 | 2026-11-16 (3rd) | Encompass consecutive observations; do not blur | Df3 operator clause; consecutive K2, K4 |
 | 2026-11-16 | EN-a faster → slower; EN-a to EN-g approved; K7 adopted | EN-a, K7 |
 | 2026-11-16 (4th) | One direction of evolution; any direction of analysis; structure figure | Df2, Df2a, T2, K4, K5, W8; kernel `757262a` |
+| 2026-11-17 | HB-1: cycle closure, the signed sum around any cycle, adopted as K7's general form | K7 |
 | 2026-11-16 | W12: the reference frame of comparison is abstract in the standard frame; results stated as observed within D; legacy mathematics as declared mappings | W12 |
 | 2026-11-16 (5th) | Domain of the relational system, established through energy, connection and freedom; participation in the domain (intervention bounds degree, never presence or direction) | R9a; R6, Df4, R5, G4, W11, Part XI |
 | 2026-11-16 | Synchronization (Origin: "merge and synchronize"): decided and proposed items from other documents merged into the FD; this README aligned | FD G1, G4, G4a, R3, T2, T3, T7, K3, V1–V3b, P1, V6, V7, W7–W11, Parts IX–XII |
