@@ -188,7 +188,7 @@ R7.
 | 3 | B3, OC-T-1 | **Done (12th):** restated on V3, no mechanism posited; first statement kept |
 | 4 | B4, "Confirmed" via Bell bound and spin numbers | **Done (12th):** cited intersections; registered quantities named (coincidence counts; resolved Zeeman components) |
 | 5 | C1, §13.1 provenance | **Done (12th):** class column added beside the original (defined / fitted); same classes in code comments |
-| 6 | C2, database source classes | **Kernel part done (12th):** classing required before citing (migration guide step 3; VR-γ-01, VR-Φ-01 notes). **Open:** the per-value check in the application repositories |
+| 6 | C2, database source classes | **Kernel part done (12th):** classing required before citing (migration guide step 3; VR-γ-01, VR-Φ-01 notes). **Per-value check done for `abr-relational-chemistry`** (`SOURCE_CLASS_REGISTER.md`, 2026-11-21). **Open:** `validation_record_v4.md`, which holds the full tables behind VR-γ-01, VR-Φ-01, VR-J-01, VR-ε-01 and VR-τ-01, is not in either repository or its history, so those values cannot be classed until it is recovered |
 | 7 | A, unification claim and superseded entanglement text | **Done (12th):** read as a bounded intersection; amendment pointer added |
 
 ---
