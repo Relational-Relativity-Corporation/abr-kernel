@@ -17,6 +17,7 @@
 
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{DeclaredRelations, EdgeProvenance, NodeField};
+use abr_kernel::persistence_change::Shares;
 use abr_kernel::relational_field::RelationalField;
 
 fn reg(c0: Vec<f64>, c1: Vec<f64>, d: f64) -> Registration {
@@ -57,11 +58,21 @@ fn main() {
     println!("κ_δ per registration: {:?}", h.kappa);
 
     let g = &f.ground;
-    let fr = g.freedom.as_ref().unwrap();
-    println!("freedom: F_δ = {:.3} ({} of {} pairs)", fr.f_delta, fr.free_pairs.len(), fr.evaluated_pairs);
+    // Freedom is change permitted (PC1–PC3); structure is persistence.
+    let pc = g.freedom.as_ref().unwrap();
+    println!("freedom (PC1): F_δ = {:.3}, structure S_δ = {:.3}",
+        pc.f_delta().unwrap(), pc.relation_shares(None).s_delta().unwrap());
+    if let Ok(c) = &pc.across_steps {
+        println!("  coupling across steps (PC2b): {:?}", Shares::of(c.readings.iter().map(|x| &x.reading)));
+    }
+    if let Ok(a) = &pc.arrangement {
+        println!("  arrangement (PC3): {:?}", Shares::of(a.iter().map(|x| &x.reading)));
+    }
+    let v2 = g.v2_held_arrangement.as_ref().unwrap();
+    println!("  declared comparison, first V2 form (held arrangement): {:.3}", v2.f_delta);
     let c = g.connection.as_ref().unwrap();
-    println!("connection: identity {:?} | proportional {:?} | reorganizing pairs {:?}",
-        c.identity, c.proportional, c.reorganizing_pairs);
+    println!("connection: identity {:?} | proportional {:?} | coupled change {:?} | reorganizing pairs {:?}",
+        c.identity, c.proportional, c.coupled_change, c.reorganizing_pairs);
     match &c.sustained {
         Ok(s) => println!("  sustained: held {:?}, reorganizing {:?}, share {:.2}", s.held_edges, s.reorganizing_edges, s.share_held),
         Err(e) => println!("  sustained: {:?}", e),

@@ -249,3 +249,41 @@ fn pc_d5_declaration_gaps() {
     assert!(arrangement_steps(&two).is_ok());
     assert_eq!(relation_changes(&two).len(), 2 * 3);
 }
+
+// ── Energy as a component (Declared 2026-11-21, 7th) ───────────────────────
+
+#[test]
+fn energy_carrier_as_a_component_reads_through_the_same_forms() {
+    // Loci 0 → 1 → 2. Component 0: a structural quantity. Component 1: the
+    // energy carrier registered at the same loci (T5). Over the first steps
+    // the carrier's exchange changes in proportion to the structural change
+    // (locked); at the last step the structure holds while energy still flows.
+    let r = rel(3, vec![(0, 1), (1, 2)]);
+    let structural = [0.0, 1.0, 2.0, 2.0];
+    let carrier = [0.0, 3.0, 6.0, 8.0];
+    let seq: Vec<Registration> = (0..4).map(|t| reg(vec![
+        vec![4.0, 2.0 + structural[t], 0.0],
+        vec![9.0, 5.0 + carrier[t], 1.0],
+    ], 0.01)).collect();
+    let s = EdgeSeries::from_registrations(&seq, &r).unwrap();
+    let pc = PersistenceChange::new(&s);
+    let at = |step, c, e| pc.relations.iter()
+        .find(|x| x.step == step && x.component == c && x.edge == e).unwrap().reading;
+    // PC1 on the carrier: the exchange changes at every step.
+    assert!((0..3).all(|st| at(st, 1, 0) == Reading::Freedom));
+    // PC1 on the structure: change at steps 0 and 1, persistence at step 2.
+    assert_eq!(at(1, 0, 0), Reading::Freedom);
+    assert_eq!(at(2, 0, 0), Reading::Structure);
+    // PC2(a) between the carrier and the structural component: at each step
+    // both edges change by (u, −u) in both components, so their change is
+    // locked: structure; the coupling is read, not assumed.
+    let c = pc.across_components.as_ref().unwrap();
+    assert!(c.readings.iter().filter(|x| matches!(x.over, ReadingPair::Components { step: 0, .. }))
+        .all(|x| x.reading == Reading::Structure));
+    // The exchange itself is still read as V3 energy on the carrier.
+    let carriers: Vec<_> = seq.iter().map(|g| abr_kernel::ground_variables::EnergyCarrier {
+        name: "carrier".into(), unit: "J".into(), values: g.x.data[1].clone(), delta: vec![0.01; 3],
+    }).collect();
+    let e = abr_kernel::ground_variables::energy(Some(&carriers), 4, &r).unwrap();
+    assert!(e.share_resolved > 0.0);
+}

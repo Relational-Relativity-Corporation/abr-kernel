@@ -1658,6 +1658,13 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //   I-SC-1   Condensate-to-plasma axis. Along registrations of one declared
 //            system ordered by increasing held energy, κ_δ (resolved minors
 //            / evaluated minors) does not decrease across phase boundaries.
+//            AMENDED (Origin, 2026-11-21, 7th): structure is persistence,
+//            change is freedom; κ_δ measures how distinct an arrangement is,
+//            not freedom. Restated: along registrations of one declared
+//            system ordered by increasing held energy, F_δ of PC1 (change
+//            resolved at δ; persistence_change.rs) does not decrease across
+//            phase boundaries: the condensate end constrained, the plasma
+//            end free. The first statement is kept above for the record.
 //   I-SC-2   Neither end is reached. At no registered state with at least
 //            two declared components is κ_δ exactly 0 or 1 (G1).
 //   I-SC-3   Identity-grade persistence. Relations registered independently
@@ -1670,7 +1677,11 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //          and I-SC-2.
 // OC-SC-2  Register lattice relations of one material independently at two
 //          sites across temperature to its melting point, to test I-SC-3.
-// OC-SC-3  Declare the mapping from carrier exchange ε = |A(c)| to the
+// OC-SC-3  [Stated in the declared mathematics 2026-11-21 (7th): the carrier
+//          registered at the same loci enters as a component; PC1 on it and
+//          PC2(a) against a structural component read the coupling. Awaits
+//          registered data.] First statement:
+//          Declare the mapping from carrier exchange ε = |A(c)| to the
 //          persistence difference A_p of the declared field (how energy
 //          drives Δm).
 // OC-SC-4  Relation between the minor pattern (held connection) and the

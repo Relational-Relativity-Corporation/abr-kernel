@@ -2,8 +2,10 @@
 // Structure and freedom as persistence and change (PC1–PC4).
 // Bounded over D. No claim beyond D.
 //
-// STATUS: PROPOSED (Generator draft, 2026-11-21), awaiting Origin. Nothing in
-// this module is declared until Origin records it in V10_README.md Part 9.
+// STATUS: DECLARED (Origin, 2026-11-21, 7th; V10_README Part 9). Drafted by
+// the Generator the same day as a Proposed item (commit dffee32); adopted with
+// ER-1, the restatement of V2/V8/I-SC-1 (conflict 10), the single statement of
+// connection, and energy as a component.
 //
 // ── The principle (Origin, 2026-11-21, as stated) ─────────────────────────
 //
@@ -75,14 +77,24 @@
 //   PC-D5  Minimum information. PC1 and PC3 need n ≥ 2; PC2(a) needs k ≥ 2;
 //          PC2(b) needs n ≥ 3. Below that the result is a declaration gap.
 //
-// ── Relation to the declared forms ────────────────────────────────────────
+// ── The three ground variables on this object (Declared 2026-11-21) ───────
 //
-// V1's three grades (identity, proportional, sustained) are each a reading
-// held over the sequence: structure under this principle. Consistent.
-// V2 reads a minor *held resolved* as freedom. Under this principle a held
-// state is persistence, so structure. This is the one point where V2 and
-// the principle disagree (V10_README Part 6, conflict 10). The V2 and V8
-// functions in ground_variables.rs are unchanged until Origin decides.
+//   Superposition (freedom, I-S): change permitted, read at PC1–PC3. This
+//     restates V2 (conflict 10). The first V2 form, a minor held resolved,
+//     reads a persistent arrangement: structure. It is kept unchanged in
+//     ground_variables.rs as `freedom` for declared comparison (C).
+//   Entanglement (connection, I-E): shared structure, relations held together
+//     by a constraint, in their state (V1 grades: identity, proportional,
+//     sustained) or in their change (PC2: the coupled-change grade). The
+//     grades are read beside each other, never merged.
+//   Tunneling (energy, I-T): what is exchanged across a relation,
+//     ε[e] = |A(c)[e]| (V3), floor resolved when ε > δ_ε. Where the carrier
+//     is registered at the same loci (T5) it enters the series as a component,
+//     and its change is read by the same forms: PC1 on the carrier (does the
+//     exchange persist or change?) and PC2(a) between the carrier and a
+//     structural component (is change of exchange locked to structural change
+//     or independent of it?). This states OC-SC-3 in the declared mathematics;
+//     the answer comes from registered data.
 
 use crate::ground_variables::{product_half_width, sign_at_delta, AtDelta, DeclarationGap, Registration};
 use crate::operators::{operator_a, DeclaredRelations};
@@ -105,7 +117,7 @@ fn read(value: f64, half_width: f64) -> Reading {
 pub enum EdgeOrigin {
     /// A[e] = x[s] − x[t] from node-valued registrations.
     NodeDerived,
-    /// A registered value per declared edge (R3, ratio form). PROPOSED entry.
+    /// A registered value per declared edge (R3, ratio form; ER-1).
     EdgeRegistered,
 }
 
@@ -143,7 +155,8 @@ impl EdgeSeries {
     }
 
     /// From a registered value per declared edge and component, with δ per
-    /// edge. PROPOSED entry (edge-valued registration, awaiting Origin).
+    /// edge: the edge-valued registration (ER-1, Declared 2026-11-21). The
+    /// relation enters as registered; no node value is constructed.
     pub fn from_edge_values(a: Vec<Vec<Vec<f64>>>, da: Vec<Vec<Vec<f64>>>) -> Result<Self, DeclarationGap> {
         if a.len() < 2 { return Err(DeclarationGap::NoProcessSequence); }
         assert_eq!(a.len(), da.len(), "δ must be declared for every registration");
@@ -391,8 +404,49 @@ impl PersistenceChange {
         }
     }
 
+    /// F_δ of PC1 over every relation, component and step: the summary of
+    /// superposition (freedom) for the sequence. A declared summary (C).
+    pub fn f_delta(&self) -> Option<f64> {
+        self.relation_shares(None).f_delta()
+    }
+
+    /// Every gap among the levels that could not be formed, without repeats.
+    pub fn gaps(&self) -> Vec<DeclarationGap> {
+        let mut out: Vec<DeclarationGap> = Vec::new();
+        let errs = [self.across_components.as_ref().err(), self.across_steps.as_ref().err(),
+                    self.arrangement.as_ref().err()];
+        for g in errs.into_iter().flatten() {
+            if !out.contains(g) { out.push(g.clone()); }
+        }
+        out
+    }
+
     /// PC1 shares at step s, or over all steps when `None`.
     pub fn relation_shares(&self, step: Option<usize>) -> Shares {
         Shares::of(self.relations.iter().filter(|r| step.map_or(true, |s| r.step == s)).map(|r| &r.reading))
     }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Connection in change — the coupled-change grade
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Pairs whose change is locked in proportion at every reading pair where the
+/// pair is evaluated (PC2, either family), and evaluated at least once: shared
+/// structure in change. Pairs fixed by the declaration are excluded (PC-D4).
+/// A gap only when neither family can be formed.
+pub fn coupled_change_pairs(pc: &PersistenceChange) -> Result<Vec<(usize, usize)>, DeclarationGap> {
+    let families: Vec<&Couplings> =
+        [&pc.across_components, &pc.across_steps].into_iter().filter_map(|f| f.as_ref().ok()).collect();
+    if families.is_empty() {
+        return Err(pc.across_components.as_ref().err().cloned().unwrap_or(DeclarationGap::SingleComponent));
+    }
+    let mut pairs: Vec<(usize, usize)> =
+        families.iter().flat_map(|f| f.readings.iter().map(|x| (x.e, x.f))).collect();
+    pairs.sort();
+    pairs.dedup();
+    Ok(pairs.into_iter().filter(|&(e, f)| families.iter()
+        .flat_map(|c| c.readings.iter())
+        .filter(|x| (x.e, x.f) == (e, f))
+        .all(|x| x.reading == Reading::Structure)).collect())
 }

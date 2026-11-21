@@ -139,7 +139,13 @@ fn proportional_grade_holds_while_values_change() {
     let c = connection(&seq, &chain()).unwrap();
     assert_eq!(c.proportional.unwrap(), vec![(0, 1)]);
     let r = ground_reading(&seq, &chain(), None);
-    assert!(r.findings().contains(&Finding {
+    // Amended 2026-11-21 (7th). The first V2 form reads the held proportional
+    // arrangement as zero freedom (declared comparison). Under PC the
+    // relations changed, so freedom is read: proportional in state
+    // (structure) while changing (freedom), side by side.
+    assert_eq!(r.v2_held_arrangement.as_ref().unwrap().f_delta, 0.0);
+    assert!(r.freedom.as_ref().unwrap().f_delta().unwrap() > 0.0);
+    assert!(!r.findings().contains(&Finding {
         variable: GroundVariable::Freedom, grade: None, kind: FindingKind::NotResolvedAtDelta, gap: None,
     }));
 }
@@ -168,12 +174,21 @@ fn at_the_primary_region_only_sustained_connection_is_a_gap() {
     let c = vec![carrier(vec![5.0, 2.0, 1.0, 1.5], 0.0), carrier(vec![5.1, 2.0, 1.0, 1.5], 0.0)];
     let r = ground_reading(&seq, &rel, Some(&c));
     assert!(r.energy.is_ok());
-    assert_eq!(r.freedom.as_ref().unwrap().f_delta, 1.0);
+    // Declared comparison (C): the first V2 form reads a held arrangement.
+    assert_eq!(r.v2_held_arrangement.as_ref().unwrap().f_delta, 1.0);
+    // Freedom (PC): both relations change over the step.
+    assert!(r.freedom.as_ref().unwrap().f_delta().unwrap() > 0.0);
     assert!(r.connection.is_ok());
-    // The only gap is the sustained grade. The two relations vary
-    // independently here, so connection's degree is zero at δ: a finding of
-    // the same kind (W2), not absence.
+    // Gaps: coupling across steps needs a third registration; the sustained
+    // grade needs an interior. The two relations change independently, so
+    // connection's degree is zero at δ: a finding (W2), not absence.
     assert_eq!(r.findings(), vec![
+        Finding {
+            variable: GroundVariable::Freedom,
+            grade: None,
+            kind: FindingKind::DomainNotFullyDeclared,
+            gap: Some(DeclarationGap::NoProcessSequence),
+        },
         Finding {
             variable: GroundVariable::Connection,
             grade: Some(ConnectionGrade::Sustained),
@@ -266,8 +281,15 @@ fn ground_reading_complete_over_a_sequence() {
     let seq = vec![
         reg(vec![vec![3.0, 1.0, 2.0], vec![0.0, 0.0, 5.0]], 0.0),
         reg(vec![vec![3.1, 1.0, 2.0], vec![0.0, 0.0, 5.2]], 0.0),
+        // Third registration (2026-11-21, 7th): coupling across steps needs
+        // three; with two it is a finding about the declaration.
+        reg(vec![vec![3.3, 1.0, 2.0], vec![0.0, 0.0, 5.3]], 0.0),
     ];
-    let cs = vec![carrier(vec![5.0, 2.0, 2.5], 0.0), carrier(vec![5.5, 2.0, 2.5], 0.0)];
+    let cs = vec![carrier(vec![5.0, 2.0, 2.5], 0.0), carrier(vec![5.5, 2.0, 2.5], 0.0),
+                  carrier(vec![5.8, 2.0, 2.5], 0.0)];
     let r = ground_reading(&seq, &chain(), Some(&cs));
     assert!(r.complete(), "{:?}", r.findings());
+    let two = ground_reading(&seq[..2], &chain(), Some(&cs[..2]));
+    assert_eq!(two.findings().len(), 1);
+    assert_eq!(two.findings()[0].gap, Some(DeclarationGap::NoProcessSequence));
 }

@@ -1044,6 +1044,12 @@ with at least two components is κ_δ exactly 0 or 1 (G1); I-SC-3, identity-grad
 connection persists across levels of combination until a reorganization is
 registered.
 
+*Amended (Origin, 2026-11-21, 7th):* structure is persistence; change is
+freedom (§21.6). I-SC-1 is restated on F_δ of PC1: along registrations ordered
+by increasing held energy, the share of relations whose change is resolved at δ
+does not decrease across phase boundaries. κ_δ measures how distinct an
+arrangement is, not freedom. The first statement is kept above.
+
 Open conditions: OC-SC-1 to OC-SC-4 (`derived_invariants.rs` Part II).
 
 ---
@@ -1365,6 +1371,30 @@ with the Cargo feature `v9`, off by default. A V10 call to one does not
 compile; V9 work opts in visibly with `features = ["v9"]`. Redoing a repository:
 `docs/kernel/v10_migration.md`; template: `examples/v10_relational_field.rs`.
 
+### 21.6 Structure is persistence; change is freedom (Origin, 2026-11-21, 7th)
+
+Restates `V10_README.md` §2.0 and §2.5; where they differ, that file governs.
+
+Change is read between consecutive registrations, Δ = A_later − A_earlier
+(A_p). Change not resolved at δ is **structure** (persistence: change held by
+constraint); change resolved is **freedom** (change permitted). Three levels:
+the relation (PC1), the coupling of change between two relations (PC2: locked
+in proportion → shared structure; independent → freedom), and the arrangement
+of two relations (PC3). Shares F_δ + S_δ = 1 at each level.
+
+- **Superposition (freedom):** change permitted, PC1–PC3. This restates V2;
+  the first V2 form (a minor held resolved) reads a persistent arrangement,
+  structure, and is kept as a declared comparison.
+- **Entanglement (connection):** shared structure held by a constraint, in
+  state (identity, proportional, sustained) or in change (coupled change).
+- **Tunneling (energy):** what is exchanged across a relation, ε = |A(c)|; a
+  carrier registered at the same loci is a component, read by PC1 and PC2(a).
+- **Edge-valued registration (ER-1):** a relation registered as a relation
+  enters as its value; node values only where the record registers states.
+
+The full chain from observable to reported number: `V10_README.md` §2.0.
+Code: `src/persistence_change.rs`.
+
 ---
 
 ## 22. Version History (Summary)
@@ -1392,6 +1422,7 @@ compile; V9 work opts in visibly with `features = ["v9"]`. Redoing a repository:
 | Kernel V10 Df6 (2026-11-21) | Origin declaration: all operators and ground variables occur simultaneously; composition order and registration sequence are orders of analysis; no phases. A relational field needs at least two consecutive registrations; one registration is insufficient information. `src/relational_field.rs` added (§11.6 note). §5, §8, §11.1 wording amended with the V9 text retained. No operator form or existing test expectation changed. |
 | Kernel V10 release (2026-11-21) | Package `abr-kernel` `9.0.0` → `10.0.0` (Origin decision). Title and release designation updated. §1 Df1 restatement; §15.6 I-SC; §18 `are_proportional` and ρ max-selection rows updated; §21 added (ground variables, minor pattern, relational field). `src/ground_variables.rs`, `src/relational_field.rs`. No operator formula, V9 function signature or existing test expectation changed. |
 | Kernel V10 ρ retirement (2026-11-21) | Origin declaration: ρ, χ, ρ_base, χ₀, the max selection, the saturating form and cc[p] retired from V10 readings; OC-K-1 dissolved. Parameter-free circulation Ξ added (`operator_circulation`). `RelationalField::new` takes no operator parameters. V9 ρ-weighted functions unchanged. |
+| Kernel V10 PC (2026-11-21, 7th) | Origin declaration: structure is persistence, change is freedom (PC1–PC4); V2 restated, V8 re-read, I-SC-1 restated; coupled-change grade of connection; energy as a component; edge-valued registration ER-1; provenance chain (V10_README §2.0). `src/persistence_change.rs`. First V2 form kept as declared comparison |
 | Kernel V10.1 V9 fence (2026-11-21) | Origin declaration W13: V10 work uses only V10 forms. Cargo feature `v9`, off by default, gates the retired and superseded V9 elements (§21.5). Package `10.1.0`. Migration guide and end-to-end template added. No code removed. |
 
 ---
