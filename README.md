@@ -108,23 +108,23 @@ off by default. V10 work cannot use them by accident: a call does not compile.
 V9 work opts in visibly with `features = ["v9"]`. The code stays where it was,
 with its history. See `docs/kernel/v10_migration.md`.
 
-`cargo test` (V10 only) runs 117 tests:
+`cargo test` (V10 only) runs 118 tests:
 - 35 library;
 - 3 `provenance_demo`;
 - 18 ground variables;
-- 17 persistence and change (PC);
+- 18 persistence and change (PC);
 - 22 property tests (`tests/v10_properties.rs`, 2000 seeded random fields each);
 - 5 relational field;
 - 17 structural consistency (I-SC-D3 to I-SC-D13).
 
 Building without the `v9` feature is itself a check that no V10 module depends on a fenced element.
 
-`cargo test --features v9` runs all 209 tests:
+`cargo test --features v9` runs all 210 tests:
 - 63 library;
 - 3 `provenance_demo`;
 - 13 diagnostic execution (`tests/diagnostic_exec.rs`);
 - 19 ground variables;
-- 17 persistence and change;
+- 18 persistence and change;
 - 22 property tests;
 - 6 relational field;
 - 17 structural consistency;

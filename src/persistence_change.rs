@@ -546,3 +546,46 @@ pub fn cycle_change_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle:
     let (d, dd) = series.change(s);
     is_closed_walk(rel, cycle).then(|| closure_of(&d, &dd, cycle, c))
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Step profile (2026-11-21): the readings along the declared order
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// For each step of the declared sequence, the structure and freedom counts at
+// every level formed at that step. Read along an energy order, this is where
+// phase changes are expected to show (persistence on a plateau,
+// reorganization at its ends). A declared summary (C), not the object; it
+// adds no reading. PC2(b) readings pair steps s and s+1 and are counted at s.
+
+/// Structure and freedom at one step.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct StepProfile {
+    pub step: usize,
+    /// PC1: relations and components over this step.
+    pub relations: Shares,
+    /// PC2(a): change coupling across components at this step.
+    pub across_components: Option<Shares>,
+    /// PC2(b): change coupling across steps (this step, the next).
+    pub across_steps: Option<Shares>,
+    /// PC3: arrangement held or changed over this step.
+    pub arrangement: Option<Shares>,
+}
+
+impl PersistenceChange {
+    /// The step profile. A level that cannot be formed is `None` at every step
+    /// (its gap is in `gaps()`).
+    pub fn step_profile(&self) -> Vec<StepProfile> {
+        let steps = self.relations.iter().map(|r| r.step + 1).max().unwrap_or(0);
+        let at = |c: &Couplings, s: usize| Shares::of(c.readings.iter().filter(|x| match x.over {
+            ReadingPair::Components { step, .. } | ReadingPair::Steps { step, .. } => step == s,
+        }).map(|x| &x.reading));
+        (0..steps).map(|s| StepProfile {
+            step: s,
+            relations: self.relation_shares(Some(s)),
+            across_components: self.across_components.as_ref().ok().map(|c| at(c, s)),
+            across_steps: self.across_steps.as_ref().ok().map(|c| at(c, s)),
+            arrangement: self.arrangement.as_ref().ok()
+                .map(|a| Shares::of(a.iter().filter(|x| x.step == s).map(|x| &x.reading))),
+        }).collect()
+    }
+}

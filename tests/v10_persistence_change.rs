@@ -349,3 +349,20 @@ fn photon_carrier_wavenumber_and_hc_over_lambda_read_identically() {
     // Not vacuous: both structure and freedom occur.
     assert!(readings(&k).contains(&Reading::Freedom) && readings(&k).contains(&Reading::Structure));
 }
+
+// ── Step profile (2026-11-21) ───────────────────────────────────────────────
+
+#[test]
+fn step_profile_partitions_every_level_by_step() {
+    let (r, seq) = chain_series(0.01);
+    let pc = PersistenceChange::new(&EdgeSeries::from_registrations(&seq, &r).unwrap());
+    let prof = pc.step_profile();
+    assert_eq!(prof.len(), 3);
+    let sum = |f: &dyn Fn(&StepProfile) -> Option<Shares>| prof.iter().filter_map(|p| f(p))
+        .fold((0, 0), |(a, b), s| (a + s.structure, b + s.freedom));
+    let total = |r: &[Reading]| (r.iter().filter(|x| **x == Reading::Structure).count(), r.iter().filter(|x| **x == Reading::Freedom).count());
+    assert_eq!(sum(&|p| Some(p.relations)), total(&pc.relations.iter().map(|x| x.reading).collect::<Vec<_>>()));
+    assert_eq!(sum(&|p| p.across_components), total(&pc.across_components.as_ref().unwrap().readings.iter().map(|x| x.reading).collect::<Vec<_>>()));
+    assert_eq!(sum(&|p| p.across_steps), total(&pc.across_steps.as_ref().unwrap().readings.iter().map(|x| x.reading).collect::<Vec<_>>()));
+    assert_eq!(sum(&|p| p.arrangement), total(&pc.arrangement.as_ref().unwrap().iter().map(|x| x.reading).collect::<Vec<_>>()));
+}
