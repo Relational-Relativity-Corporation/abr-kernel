@@ -1,6 +1,6 @@
 [package]
 name = "abr-kernel"
-version = "10.0.0"
+version = "10.1.0"
 edition = "2021"
 description = "ABR relational kernel, Kernel V10 — Primary (Delta -> Sigma) and ABR (A -> B -> R). Bounded over D. No claim beyond D."
 
@@ -11,6 +11,25 @@ path = "src/lib.rs"
 [[bin]]
 name = "provenance_demo"
 path = "bin/provenance_demo.rs"
+
+[features]
+# V9 fence (Origin, 2026-11-21). Off by default: retired and superseded V9
+# elements (the ρ-weighted operators, the superseded readers, and the V9
+# execution paths) compile only when a V9 consumer opts in visibly.
+default = []
+v9 = []
+
+[[test]]
+name = "v9_conformance"
+required-features = ["v9"]
+
+[[test]]
+name = "v9_admission"
+required-features = ["v9"]
+
+[[test]]
+name = "diagnostic_exec"
+required-features = ["v9"]
 
 [dependencies]
 # No external dependencies. nalgebra removed — SVD and matrix machinery

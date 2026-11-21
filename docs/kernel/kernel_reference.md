@@ -1352,8 +1352,18 @@ identity and proportional grades are readable at every region, Primary
 included. A zero forced by the declaration is an identity, not a reading.
 
 The V9 readers (`epsilon_e`, `superposition_condition`, `entanglement_condition`,
-`tunneling_floor_holds`) are unchanged and remain available to existing callers;
-V10 readings use the forms above.
+`tunneling_floor_holds`) are unchanged and are behind the V9 fence; V10 readings
+use the forms above.
+
+### 21.5 V10 admissibility and the V9 fence (W13)
+
+V10 work uses only V10 forms. A retired or superseded element enters a V10
+result only as a declared historical comparison (C), never as an input. The
+retired and superseded V9 elements (the ρ-weighted operators, the superseded
+readers, and `diagnostic_exec`, `provenanced_exec`, `admission`) compile only
+with the Cargo feature `v9`, off by default. A V10 call to one does not
+compile; V9 work opts in visibly with `features = ["v9"]`. Redoing a repository:
+`docs/kernel/v10_migration.md`; template: `examples/v10_relational_field.rs`.
 
 ---
 
@@ -1382,6 +1392,7 @@ V10 readings use the forms above.
 | Kernel V10 Df6 (2026-11-21) | Origin declaration: all operators and ground variables occur simultaneously; composition order and registration sequence are orders of analysis; no phases. A relational field needs at least two consecutive registrations; one registration is insufficient information. `src/relational_field.rs` added (§11.6 note). §5, §8, §11.1 wording amended with the V9 text retained. No operator form or existing test expectation changed. |
 | Kernel V10 release (2026-11-21) | Package `abr-kernel` `9.0.0` → `10.0.0` (Origin decision). Title and release designation updated. §1 Df1 restatement; §15.6 I-SC; §18 `are_proportional` and ρ max-selection rows updated; §21 added (ground variables, minor pattern, relational field). `src/ground_variables.rs`, `src/relational_field.rs`. No operator formula, V9 function signature or existing test expectation changed. |
 | Kernel V10 ρ retirement (2026-11-21) | Origin declaration: ρ, χ, ρ_base, χ₀, the max selection, the saturating form and cc[p] retired from V10 readings; OC-K-1 dissolved. Parameter-free circulation Ξ added (`operator_circulation`). `RelationalField::new` takes no operator parameters. V9 ρ-weighted functions unchanged. |
+| Kernel V10.1 V9 fence (2026-11-21) | Origin declaration W13: V10 work uses only V10 forms. Cargo feature `v9`, off by default, gates the retired and superseded V9 elements (§21.5). Package `10.1.0`. Migration guide and end-to-end template added. No code removed. |
 
 ---
 
