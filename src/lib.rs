@@ -73,3 +73,11 @@ pub mod diagnostic_exec;
 // that cannot be calculated is a finding about the declaration (Primary
 // Region, or domain not fully declared), never a statement of absence.
 pub mod ground_variables;
+
+// Kernel V10 Df6, simultaneity (Origin, 2026-11-21): all operators and all
+// ground variables occur simultaneously; the composition order and the
+// sequence of registrations are orders of analysis. A relational field is
+// formed from at least two consecutive registrations and evaluates the
+// spatial operators, persistence and the ground variables together. One
+// registration is insufficient information. No phases.
+pub mod relational_field;

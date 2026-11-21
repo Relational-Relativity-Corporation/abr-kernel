@@ -228,10 +228,10 @@ Only Origin may intentionally escalate an application task into a Kernel audit.
   not declared.
 - If no declaration is admissible, stop — the operators are undefined, not
   approximate.
-- **Before Phase 2:** declare the sequence of actual observations
+- **Before forming a relational field** (V9: "before Phase 2"): declare the sequence of actual observations
   {M(o₁), …, M(oₙ)}, what one relational step is (the system's own process
   step), and whether the sequence is measured or from a declared model.
-- **Before Phase 2:** declare the direction of relational evolution from an
+- **Before forming a relational field** (V9: "before Phase 2"): declare the direction of relational evolution from an
   observable property of the process. Index order is not a direction
   declaration.
 - **For every analysis:** M declares the operator parameters ρ_base and χ₀
@@ -358,6 +358,8 @@ first declared observation, only the spatial kernel is evaluated. A
 completed declared observation (`PersistenceState::from_prior`). No prior
 value is supplied where no prior observation was declared.
 
+**Kernel V10 amendment — Df6, simultaneity (Origin, 2026-11-21).** All operators and all ground variables occur simultaneously throughout relational evolution; A → B → R, the persistence forms and energy, freedom and connection are aspects of one ongoing relational evolution, not stages. The composition order and the sequence of registrations are orders of analysis (Df2a). There are no phases. A **relational field** is formed from a declared sequence of at least two consecutive registrations of the same declared relations; the spatial and persistence operators are both evaluated on it, at every registration and every consecutive step, together with the ground variables (`src/relational_field.rs`, `RelationalField::new`). One registration is insufficient information: the operators still compute on it, and their outputs are calculated results, but they are building blocks, not a relational field, and are not cited as a relational reading. The only limit on a reading is declared information. Operator formulas are unchanged. The Phase 1 / Phase 2 text above is retained as the V9 record. See `V10_README.md` Df6.
+
 ---
 
 ## 9. Domain and Measurement
@@ -435,11 +437,11 @@ correspondence of the result with observation is determined outside the kernel.
 | A | A(x)[e] = x[s] − x[t] (formula identical to Δ); component pairs (a,b): x[a][i] − x[b][i] | `operator_a(f, rel, pairs)` |
 | B | B(g)[e] = g[e] + Σ_{f ∈ succ(e)} g[f]; immediate successors only; terminal edges accumulate nothing | `operator_b(g, rel)` |
 | R | R(g)[e] = g[e] + ρ[src(e)]·(Σ_{succ(e)} g − Σ_{pred(e)} g); cross-topology term scaled by cc[p] | `operator_r(bg, rel, rho, cc)` |
-| E (Phase 1) | R(B(A(x)), ρ(A(x))) | `operator_e(f, rel, pairs, cc, rho_base, chi_0)` |
+| E (spatial; V9 "Phase 1") | R(B(A(x)), ρ(A(x))) | `operator_e(f, rel, pairs, cc, rho_base, chi_0)` |
 | A_persistence | E_current[e] − E_prior[e]; direction fixed | `operator_a_persistence(e_current, e_prior)` |
 | B_persistence | B form over A_persistence | `operator_b_persistence(a_persistence, rel)` |
 | R_persistence | R form over B_persistence; spatial component only | `operator_r_persistence(b_persistence, rel, rho_persistence)` |
-| E (Phases 1+2) | Phase 1, then A_p → B_p → R_p | `operator_e_v5(f, rel, pairs, cc, persistence_state, rho_base, chi_0)` |
+| E (spatial and persistence; V9 "Phases 1+2") | spatial, with A_p → B_p → R_p over each consecutive step; evaluated together in a relational field (Df6) | `operator_e_v5(f, rel, pairs, cc, persistence_state, rho_base, chi_0)` |
 | ρ | ρ[i] = ρ_base · χ[i] / (χ₀ + χ[i]); χ[i] = max \|A(x)[e]\| or \|Δ(x)[e]\| over edges incident to i; edge form ρ[e] = ρ[source(e)] | `compute_rho`, `compute_rho_primary`, `compute_rho_persistence` |
 | C | Declared projection: state what it preserves and discards. Not a kernel operator. | — |
 
@@ -508,6 +510,8 @@ let (e2, persistence) = operator_e_v5(&x2, &rel, &pairs, &cc, &prior, rho_base, 
 
 `PersistenceState::from_prior` requires actual observation output — not a
 model, parameter value, or static configuration.
+
+**Kernel V10 (Df6).** Use `RelationalField::new(&rel, registrations, &params, carriers)` to form a relational field: it calls `operator_e` at the first registration and `operator_e_v5` with the earlier actual output as prior at each later one, and reads the ground variables over the whole sequence, in one call. Fewer than two registrations returns `DeclarationGap::NoProcessSequence` (insufficient information). The pattern above remains the building block it calls.
 
 ### 11.7 Diagnostic Execution — Experimental Fields (`diagnostic_exec.rs`)
 
@@ -1252,6 +1256,7 @@ Generator output.
 | Kernel V9 synchronization (2026-10-25) | Kernel V9 established as the sole canonical release across all files (Origin directive, README `e54fcec`). Release designations updated; foundational-primitive statement added to the crate root, `operators.rs`, and governing kernel documents; RPPI enforcement status register added to §18. No operator form, invariant form, Rust function, or test expectation changed. |
 | Kernel V9 (2026-10-24) | Foundational primitive established as Section 1 preamble: "a directed relation declared from observable information" — a primitive not previously existing in mathematics. Three roots stated: complexity, change as the only observable constant, bounded domain of analysis. Operator dependence on the primitive stated explicitly: operators exist because of the primitive and cannot be applied to anything not declared through M. Section 2 updated to reference Section 1 for the full account. No operator form, invariant form, Rust function, or source file content changed. |
 | Kernel V9 diagnostic execution (2026-11-07) | Origin directive. `src/diagnostic_exec.rs` added (§11.7): thin A → B → R and persistence execution wrapper over the unchanged operators for experimental fields; mandatory edge provenance with observed/proposed support; non-blocking warnings and blocking errors; observation succession by declared process step. §8 ring/torus clarification (relational evolution, not cyclic relationships); §9 synchronized with the Origin general values ρ_base = 0.5, χ₀ = 1 (`operators.rs` header, `77c65ae`); §10 experimental-field note; §18 A-3 row annotated. No operator form, parameter handling inside an operator, or existing test expectation changed. |
+| Kernel V10 Df6 (2026-11-21) | Origin declaration: all operators and ground variables occur simultaneously; composition order and registration sequence are orders of analysis; no phases. A relational field needs at least two consecutive registrations; one registration is insufficient information. `src/relational_field.rs` added (§11.6 note). §5, §8, §11.1 wording amended with the V9 text retained. No operator form or existing test expectation changed. |
 
 ---
 

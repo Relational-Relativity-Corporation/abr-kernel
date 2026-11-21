@@ -134,8 +134,9 @@ pub enum ConnectionGrade {
 /// Each gap is a statement about the declaration, not about the system.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DeclarationGap {
-    /// Fewer than two consecutive registrations are declared. A frozen frame
-    /// is not a relational system (O1, Df3).
+    /// Insufficient information: fewer than two consecutive registrations are
+    /// declared. A single registration is not a relational field; a frozen
+    /// frame is not a relational system (O1, Df3, Df6).
     NoProcessSequence,
     /// No interior locus is declared (T7). Applies to the sustained grade only.
     PrimaryRegion,
@@ -166,8 +167,9 @@ impl DeclarationGap {
     pub fn remedy(&self) -> &'static str {
         match self {
             DeclarationGap::NoProcessSequence =>
-                "declare a sequence of consecutive registrations of the same relations, \
-                 ordered by an observable property of the process (T6)",
+                "insufficient information: declare a sequence of at least two consecutive \
+                 registrations of the same relations, ordered by an observable property of \
+                 the process (T6, Df6)",
             DeclarationGap::PrimaryRegion =>
                 "no interior locus declared: read sustained connection at finer δ, \
                  or read the identity and proportional grades, which need no interior",
