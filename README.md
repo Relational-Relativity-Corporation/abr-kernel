@@ -119,6 +119,17 @@ Enforcement Status below).
 fixtures. In total, `cargo test` runs 153 tests: 63 library, 3 `provenance_demo`,
 13 diagnostic execution, 19 ground variables, 6 relational field, 12 admission,
 35 conformance and 2 doctests.
+
+**Verification (2026-11-21).** A clean-room build of the release commit (fresh
+clone, no cache) compiles with no warnings and passes all 153 tests. An
+end-to-end run through the public API alone (a synthetic four-locus field with
+two interior loci, two components and five registrations) formed the relational
+field with no operator parameters, classified every minor as held or
+reorganizing, read all three ground variables, and returned the expected
+declaration findings for a single registration and for the Primary Region. The
+first registration was checked by hand. These are synthetic fixtures: they
+confirm that the forms compute as declared and establish no empirical validity.
+The invariant tests against registered data (I-SC, OC-SC-1 to OC-SC-4) are next.
 ---
 
 ## Contents

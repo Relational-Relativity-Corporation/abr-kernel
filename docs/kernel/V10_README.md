@@ -280,7 +280,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 
 # Part 4. Kernel code scope (`abr-kernel`)
 
-**Applied so far:** `abr-kernel` branch `claude/tender-galileo-gcquso`, on `833ffb3`: commit `757262a`, direction of evolution vs direction of analysis, with the structure figure (doc and comments only, two new tests); commit `2c3ed29`, the three ground variables (`src/ground_variables.rs`), reworked in the next commit around minor histories over a declared sequence, with the I-SC Part II entries in `derived_invariants.rs` (comments only); commit `b7c5860` for that rework; then `src/relational_field.rs` for Df6. 152 tests pass. **Not merged to `main`.** V10 code work continues on this branch (conflict 8, resolved 2026-11-21).
+**Applied so far:** `abr-kernel` branch `claude/tender-galileo-gcquso`, on `833ffb3`: commit `757262a`, direction of evolution vs direction of analysis, with the structure figure (doc and comments only, two new tests); commit `2c3ed29`, the three ground variables (`src/ground_variables.rs`), reworked in the next commit around minor histories over a declared sequence, with the I-SC Part II entries in `derived_invariants.rs` (comments only); commit `b7c5860` for that rework; then `src/relational_field.rs` for Df6 (`22816b4`); the V10 release, package `10.0.0` (`0d0b38d`); ρ and χ retired with the parameter-free circulation Ξ (`a8a3fec`). 153 tests pass. **Merged to `main` through PR #3 (2026-11-21)**, with every commit kept so each transition remains traceable.
 
 | Item | V9 (`833ffb3`) | V10 | State |
 | --- | --- | --- | --- |
