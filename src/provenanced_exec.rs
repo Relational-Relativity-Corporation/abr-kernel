@@ -1,4 +1,4 @@
-// provenanced_exec.rs — Metatron Dynamics, Inc. Kernel V9.
+// provenanced_exec.rs — Metatron Dynamics, Inc. Kernel V10.
 // Generator execution path: executes a declared calculation through the frozen
 // Kernel V8 constructors and functions and authors its calculation record
 // (v9_specification.md §3: "Generated at computation time ... The Generator is

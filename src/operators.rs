@@ -1,7 +1,7 @@
-// operators.rs — Metatron Dynamics, Inc. Kernel V9.
+// operators.rs — Metatron Dynamics, Inc. Kernel V10.
 // Unified Relational Kernel: Primary (Δ → Σ) and ABR (A → B → R).
 //
-// Grounding documents (Kernel V9, docs/kernel/):
+// Grounding documents (Kernel V10, docs/kernel/):
 //   operators_notation_and_constraint.md
 //   abr_operators_plain.md
 //   role_separation_and_operator_application.md
@@ -461,6 +461,8 @@
 //      documents. Kernel release numbering (Origin declaration): every file
 //      in the repository carries the kernel release number, Kernel V8.
 //
+// Kernel V10 synchronization (2026-11-21): release designation updated to
+//   Kernel V10. Comment-only change in this file; no function changed.
 // Kernel V9 synchronization (2026-10-25, Origin directive) — Kernel V9 is the
 //      sole canonical release. Release designation updated; foundational-
 //      primitive statement added to Foundation. Comment-only change: no
@@ -469,7 +471,7 @@
 //      record, dated declarations, or the frozen V8 implementation baseline.
 //
 // Bounded over D. No claim beyond D.
-// Metatron Dynamics, Inc. Kernel V9.
+// Metatron Dynamics, Inc. Kernel V10.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── SHARED FOUNDATION ──────────────────────────────────────────────────────

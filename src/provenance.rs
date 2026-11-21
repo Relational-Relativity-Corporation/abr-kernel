@@ -1,4 +1,4 @@
-// provenance.rs — Metatron Dynamics, Inc. Kernel V9.
+// provenance.rs — Metatron Dynamics, Inc. Kernel V10.
 // RPPI record types: Origin declaration records and Generator calculation
 // records (v9_specification.md §3–§5, Req-1 through Req-7).
 // Bounded over D. No claim beyond D.

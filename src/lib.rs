@@ -1,4 +1,4 @@
-// lib.rs — Metatron Dynamics, Inc. Kernel V9.
+// lib.rs — Metatron Dynamics, Inc. Kernel V10.
 // Crate root for the ABR relational kernel.
 // Bounded over D. No claim beyond D.
 //
@@ -22,6 +22,8 @@
 //   docs/process/kernel_self_consistency_test.md
 //   docs/process/Verification_pass_protocol.md
 //
+// Kernel V10 synchronization (2026-11-21): release designation updated to
+//   Kernel V10. Comment-only change in this file; no function changed.
 // Kernel V9 synchronization (2026-10-25): release designation updated; no code changed.
 
 // Operator requirement (V7.1, 2026-09-23):

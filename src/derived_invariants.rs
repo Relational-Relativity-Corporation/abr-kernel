@@ -1,7 +1,7 @@
-// derived_invariants.rs — Metatron Dynamics, Inc. Kernel V9.
-// Derived Invariants: canonical mathematical expressions from Kernel V9.
+// derived_invariants.rs — Metatron Dynamics, Inc. Kernel V10.
+// Derived Invariants: canonical mathematical expressions from Kernel V10.
 //
-// Grounding documents (Kernel V9):
+// Grounding documents (Kernel V10):
 //   operators.rs
 //   docs/kernel/observable_variable_sets.md
 //   docs/kernel/abr_operators_plain.md
@@ -348,12 +348,14 @@
 //      organization now matches the epistemic classification the file already
 //      stated in prose.
 //
+// Kernel V10 synchronization (2026-11-21): release designation updated to
+//   Kernel V10. Comment-only change in this file; no function changed.
 // Kernel V9 synchronization (2026-10-25, Origin directive): release designation
 //   updated to Kernel V9. Comment-only change; no function, constant, invariant
 //   form, or test expectation changed.
 //
 // Bounded over D. No claim beyond D.
-// Metatron Dynamics, Inc. Kernel V9.
+// Metatron Dynamics, Inc. Kernel V10.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── CONSTANTS AND PHYSICAL REFERENCES ─────────────────────────────────────

@@ -1,6 +1,6 @@
 # Triad Constraint Methods
 
-**Metatron Dynamics, Inc.** Kernel V9.
+**Metatron Dynamics, Inc.** Kernel V10.
 Verification methods for high-velocity artifact production.
 
 Derived from a verification session of 2026-07-27 in which six findings were
@@ -500,10 +500,12 @@ close enough to be dangerous.
 
 ---
 
-**Metatron Dynamics, Inc.** Kernel V9.
+**Metatron Dynamics, Inc.** Kernel V10.
 *Bounded over D. No claim beyond D.*
 
 ---
+
+**Kernel V9 → Kernel V10 changes (2026-11-21):** Release designation updated to Kernel V10, the canonical release (Origin directive). Kernel V10 is stated in `docs/kernel/V10_README.md`; `kernel_reference.md` restates it. V10 adds Df6 (simultaneity), the ground variables (energy, freedom, connection) and the relational field, and amends the Phase 1 / Phase 2 rule. No operator formula changed. Historical V9, V8 and V7 identifiers remain where they describe prior releases.
 
 **Kernel V8 → Kernel V9 changes (2026-10-25):** Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.
 

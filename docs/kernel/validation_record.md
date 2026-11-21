@@ -1,7 +1,7 @@
-# Validation Record — Kernel V9
+# Validation Record — Kernel V10
 ## Observational Grounding for Derived Invariants
 
-**Metatron Dynamics, Inc.** Kernel V9.
+**Metatron Dynamics, Inc.** Kernel V10.
 Bounded over D. No claim beyond D.
 Sources: PDG 2024 (Navas et al., Phys. Rev. D 110, 030001)
          NIST ASD v5.12 (Kramida et al., 2024)
@@ -11,7 +11,7 @@ Sources: PDG 2024 (Navas et al., Phys. Rev. D 110, 030001)
 
 ## Purpose and Scope
 
-This document is the observational validation record for `derived_invariants.rs` (Kernel V9).
+This document is the observational validation record for `derived_invariants.rs` (Kernel V10).
 It is a companion to the mathematical file, not a replacement for it.
 
 The mathematical file states what the operators produce and what form each
@@ -541,9 +541,11 @@ regions, 78-decade confirmation, VR-Φ-01).
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. Kernel V9.*
+*Metatron Dynamics, Inc. Kernel V10.*
 
 ---
+
+**Kernel V9 → Kernel V10 changes (2026-11-21):** Release designation updated to Kernel V10, the canonical release (Origin directive). Kernel V10 is stated in `docs/kernel/V10_README.md`; `kernel_reference.md` restates it. V10 adds Df6 (simultaneity), the ground variables (energy, freedom, connection) and the relational field, and amends the Phase 1 / Phase 2 rule. No operator formula changed. Historical V9, V8 and V7 identifiers remain where they describe prior releases.
 
 **Kernel V8 → Kernel V9 changes (2026-10-25):** Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.
 

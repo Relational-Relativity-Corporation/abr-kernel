@@ -1,7 +1,7 @@
 # Kernel V10: the canonical reference
 
 **Metatron Dynamics, Inc.** Bounded over D. No claim beyond D.
-Baseline: **Kernel V9, `abr-kernel` `833ffb3`**. Last revised 2026-11-21.
+Release: **Kernel V10**, package `abr-kernel` `10.0.0`. Baseline: **Kernel V9, `abr-kernel` `833ffb3`**. Last revised 2026-11-21.
 
 This is the document we refer to from now on. It is the canonical statement of Kernel V10 and is maintained here, in `abr-kernel`. It lists every V10 item from top to bottom: first the relational declaration of variables and conditions, then the formal mathematics, then traceability, code scope, what stands, conflicts and open decisions.
 
@@ -380,6 +380,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 | 2026-11-21 | **The three ground variables.** Observable fact vs calculated variable: a variable that cannot be calculated is a finding about the declaration (Primary Region, or domain not fully declared). Freedom: minor form. Connection: 𝟙_δ from the B bracket; IV-3 declared; C_δ stays open. Energy: carrier form. This README made canonical in `abr-kernel` and self-contained | §1.2, V1, V2, V3; conflicts 1, 8; OC-V-2, OC-V-3, E1–E4, IV-2, IV-3; `2c3ed29` |
 | 2026-11-21 (2nd) | **Connection as shared relational structure persisting through evolution**, graded identity / proportional / sustained. Three distinct variables on one relational object (P(F)); complementary per minor at δ; energy moves minors across zero. Readings formed only over a declared sequence (a frozen frame is not a relational system). Only the sustained grade needs an interior. Structural consistency I-SC entered in Part II | §1.2, V1, V2, V8; OC-V-1 closed; OC-SC-1 to 4 |
 | 2026-11-21 (3rd) | **Df6, simultaneity**: all operators and ground variables occur together; composition order and registration sequence are orders of analysis; no phases; a relational field needs at least two consecutive registrations. Amendment paragraphs added to `kernel_reference.md`, `operators_notation_and_constraint.md`, `role_separation_and_operator_application.md`, `abr_operators_plain.md` | Df6, K5; Phase 1 conflict resolved |
+| 2026-11-21 (4th) | **Kernel V10 release**: package `abr-kernel` `10.0.0`; release designation synchronized across code comments and documents; `kernel_reference.md` restates V10 (§1 Df1, §15.6 I-SC, §21) | Release |
 
 ---
 

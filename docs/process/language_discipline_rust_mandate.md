@@ -1,6 +1,6 @@
 # Language Discipline — Rust Mandate
 
-**Metatron Dynamics, Inc.** Kernel V9.
+**Metatron Dynamics, Inc.** Kernel V10.
 Kernel doctrine. Bounded over D. No claim beyond D.
 Declared by Origin, 2026-07-30.
 
@@ -234,6 +234,10 @@ declared content.
 **Scope of vocabulary.** "Failure" in this document refers to implementation-level errors in software: silent `NaN`s, unhandled parse errors, test-harness failures. Kernel V8's vocabulary for operator results does not apply to these; it governs how operator results and declarations are described. Neither this vocabulary nor the rule itself changed.
 
 **Kernel crate.** The kernel crate is `metatron_kernel_v8` from Kernel V8. It remains Rust only, with no external dependencies.
+
+## Kernel V10 synchronization (2026-11-21)
+
+Release designation updated to Kernel V10, the canonical release (Origin directive). Kernel V10 is stated in `docs/kernel/V10_README.md`; `kernel_reference.md` restates it. V10 adds Df6 (simultaneity), the ground variables (energy, freedom, connection) and the relational field, and amends the Phase 1 / Phase 2 rule. No operator formula changed. Historical V9, V8 and V7 identifiers remain where they describe prior releases.
 
 ## Kernel V9 synchronization (2026-10-25)
 

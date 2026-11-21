@@ -1,13 +1,15 @@
-# Kernel V9 — Complete Reference
+# Kernel V10 — Complete Reference
 
 **Metatron Dynamics, Inc.**  
+Kernel V10 (2026-11-21). Ground variables, simultaneity and the relational field.  
 Kernel V9 (2026-10-24). Foundational primitive established.  
 Bounded over D. No claim beyond D.
 
 This document is the single reference for any reader — human or AI — who needs
 to apply, generate against, or verify work built on the kernel. It synthesizes
-`lib.rs`, `operators.rs`, `derived_invariants.rs`, and `kernel_reference.md`
-into one place. It introduces no declaration, operator, quantity, or
+`lib.rs`, `operators.rs`, `derived_invariants.rs`, `ground_variables.rs`,
+`relational_field.rs`, and the kernel documents into one place. The canonical
+statement of every Kernel V10 item, by ID, is `V10_README.md`. It introduces no declaration, operator, quantity, or
 admissibility rule of its own. Where this document and a source file differ,
 the source file governs, and the difference is a finding to be returned to
 Origin.
@@ -36,7 +38,8 @@ Origin.
 18. Open conditions (held since Kernel V8; RPPI enforcement status)
 19. Suspended quantities (record only)
 20. Legacy mathematical intrusion — classes and rule
-21. Version history (summary)
+21. Kernel V10 — ground variables and the relational field
+22. Version history (summary)
 
 ---
 
@@ -54,6 +57,14 @@ framework exists because of this primitive and cannot be used without it.
 
 The primitive is not derived. It is the starting point. It arises from the
 distillation of human experience into three irreducible characteristics:
+
+> **Kernel V10 restatement (Df1).** V10 states the same primitive as *derived
+> from observation*: relational evolution has not been observed to stop (O1),
+> and no registration stands alone (O2); hence relation is the primitive, and
+> objects are read from relations, not the reverse. "Not derived" above means
+> not derived from any prior mathematical object; V10 makes explicit that it
+> is derived from what is observed. The three characteristics below are those
+> observations. See `V10_README.md` §1.1 and §21 below.
 
 **1. COMPLEXITY**  
 Observable systems are complex. They are not reducible to a single governing
@@ -195,8 +206,8 @@ Before beginning work, classify the active task. These scopes must not be silent
 | Scope | What it may examine |
 |---|---|
 | **Kernel audit** | Operator derivation; invariant derivation; kernel declarations; implementation correspondence; internal kernel consistency; OPEN/HOLD conditions; source-level contradictions. |
-| **Application construction** | Declaring and executing the kernel over a particular observable system. Treats established Kernel V9 content as governing. |
-| **Application verification** | Whether the application conforms to Kernel V9, the application's Origin declarations, its declared M, its declared topology, and its observable comparison criteria. Does NOT recursively re-audit Kernel V9. |
+| **Application construction** | Declaring and executing the kernel over a particular observable system. Treats established Kernel V10 content as governing. |
+| **Application verification** | Whether the application conforms to Kernel V10, the application's Origin declarations, its declared M, its declared topology, and its observable comparison criteria. Does NOT recursively re-audit Kernel V10. |
 
 **Frozen-kernel rule (application construction and verification).** During application construction or application verification, do NOT reopen, rederive, independently justify, replace, reinterpret, or demand new observational proof for:
 
@@ -207,7 +218,7 @@ Before beginning work, classify the active task. These scopes must not be silent
 - established admissibility rules
 - established implementation behavior
 - admitted measurement references
-- or other Kernel V9 content explicitly classified as established
+- or other Kernel V10 content explicitly classified as established
 
 Only Origin may intentionally escalate an application task into a Kernel audit.
 
@@ -249,7 +260,7 @@ Declaration completeness is checked before execution. Declaration correspondence
 
 **Step 3 — Verify (Verifier)**
 
-Return located findings against the declared criteria (section 17). Once Verifier establishes that (1) the required application declaration exists, (2) it enters through the declared M, (3) the applicable established kernel operation was selected, (4) implementation matches that operation, and (5) no undeclared quantity entered — the mathematical provenance inquiry for that operation is complete. Proceed to observable comparison. Do not recursively investigate established Kernel V9 mathematics unless Origin explicitly requests a Kernel audit.
+Return located findings against the declared criteria (section 17). Once Verifier establishes that (1) the required application declaration exists, (2) it enters through the declared M, (3) the applicable established kernel operation was selected, (4) implementation matches that operation, and (5) no undeclared quantity entered — the mathematical provenance inquiry for that operation is complete. Proceed to observable comparison. Do not recursively investigate established Kernel V10 mathematics unless Origin explicitly requests a Kernel audit.
 
 **Step 4 — Revise (Origin)**
 
@@ -300,7 +311,7 @@ An observable record is not rendered inadmissible merely because the publication
 
 Observable quantities that may enter the framework through the declared M include: temperature, wavelength, frequency, charge, voltage, timing, occupation, position, energy transition, instrument response, and any other directly reported quantity.
 
-The source's legacy mathematical interpretation does NOT thereby enter Kernel V9. Do not import a Hamiltonian, probability distribution, statistical estimator, conventional force law, information-theoretic quantity, or other legacy construct merely because it appears beside the observational record.
+The source's legacy mathematical interpretation does NOT thereby enter Kernel V10. Do not import a Hamiltonian, probability distribution, statistical estimator, conventional force law, information-theoretic quantity, or other legacy construct merely because it appears beside the observational record.
 
 Likewise, do not reject usable observational data solely because such mathematics appears in its source.
 
@@ -1012,6 +1023,20 @@ structure is downstream accumulation of Primary Region relational evolution.
 
 Open condition: OC-RE-1.
 
+### 15.6 I-SC — Structural Consistency (Kernel V10)
+
+Object: the minor pattern P(F) over a declared sequence (§21.3). Derived:
+I-SC-D1, a minor cannot change sign over a step whose change bound is smaller
+than its magnitude (|Δm_ij| < |m_ij|); I-SC-D2, per minor at δ freedom and
+connection are complementary. Proposed: I-SC-1, along registrations of one
+declared system ordered by increasing held energy, κ_δ does not decrease across
+phase boundaries (the condensate-to-plasma axis); I-SC-2, at no registered state
+with at least two components is κ_δ exactly 0 or 1 (G1); I-SC-3, identity-grade
+connection persists across levels of combination until a reorganization is
+registered.
+
+Open conditions: OC-SC-1 to OC-SC-4 (`derived_invariants.rs` Part II).
+
 ---
 
 ## 16. Experimental Execution Discipline
@@ -1114,8 +1139,8 @@ verification only. Synthetic test provenance is not empirical provenance.
 | A-3 — empty adjacency in Σ, R, R_persistence | `operators.rs` | OPEN — not classified. Operators unchanged; `diagnostic_exec` reports each affected edge as an `UnresolvedCondition` warning (§11.7) |
 | 𝟙[e] interpretation audit; ε[e] downstream | `derived_invariants.rs` | HOLD |
 | A-11 — ι at photon locus not declared through M | `derived_invariants.rs` | CLOSED — legacy import (SF-PR-16); declared-information rule applies |
-| `are_proportional` edge-order dependence and two-unit tolerance | `derived_invariants.rs` | HOLD |
-| ρ max-selection rule | `operators.rs` | OPEN — Origin declaration required |
+| `are_proportional` edge-order dependence and two-unit tolerance | `derived_invariants.rs` | HOLD for the V9 function, which is unchanged. **Not reached by V10 readings:** V2 uses the minor form, symmetric in edge order with one resolution in one unit (§21.4) |
+| ρ max-selection rule | `operators.rs` | DECLARED (Origin, 2026-11-14; V10 K3) |
 | ρ saturating form | `operators.rs` | OPEN — Origin declaration required |
 | Part II "absence" wording | I-E, joint necessity, photon J[v] | Separate audit |
 | R² = 0.527 at the δι fit | `observable_variable_sets.md` | HOLD |
@@ -1234,7 +1259,93 @@ Generator output.
 
 ---
 
-## 21. Version History (Summary)
+## 21. Kernel V10 — Ground Variables and the Relational Field
+
+This section restates `V10_README.md` (§1.1, §1.2, V1–V3, V8, Df6) and
+`ground_variables.rs` / `relational_field.rs`. Where they differ, those govern.
+
+### 21.1 Simultaneity (Df6)
+
+All operators and all ground variables occur simultaneously throughout
+relational evolution. A → B → R, the persistence forms, and energy, freedom and
+connection are aspects of one ongoing relational evolution, not stages. The
+composition order and the sequence of registrations are orders of analysis
+(Df2a). There are no phases. The only limit on a reading is declared
+information.
+
+A **relational field** is formed from a declared sequence of at least two
+consecutive registrations of the same declared relations, ordered by an
+observable property of the process. `RelationalField::new` evaluates, in one
+call, `operator_e` at each registration, `operator_e_v5` with the earlier actual
+output as prior at each step, and the ground variables over the whole sequence.
+One registration is insufficient information (`DeclarationGap::NoProcessSequence`):
+its operator outputs are calculated results and building blocks, not a
+relational field. Two registrations are the minimum information, not a
+guarantee of enough.
+
+### 21.2 Observable fact and calculated variable
+
+Energy, connection and freedom are present in every registration (G1, G4);
+absence is not an available observation, and no calculation tests it. The
+calculated variable is the degree the operators yield over a declared topology
+and sequence at declared δ. A reading that cannot be calculated is a finding
+about the declaration, never about the system:
+
+| Finding | When |
+|---|---|
+| **Primary Region** | No interior locus is declared (T7). Applies only to the sustained grade of connection |
+| **Domain not fully declared** | A carrier, component, relation, registration, process sequence or finer δ is missing (R9a) |
+| **Not resolved at δ** | Calculated, with degree zero at δ (W2) |
+
+The remedy is to return to the declaration (G4a, W5); a declared edge is never
+reversed to obtain a reading (W8), and no substitute value is introduced.
+
+### 21.3 One relational object: the minor pattern P(F)
+
+For declared edges e, f and components i < j:
+
+```
+m_ij(e, f) = A[i][e]·A[j][f] − A[j][e]·A[i][f]
+```
+
+with half-width |A[i][e]|·δ_A[j][f] + |A[j][f]|·δ_A[i][e] + δ_A[i][e]·δ_A[j][f]
+plus the same bound for the second product, δ_A[e] = δ[s] + δ[t]. A[e] and A[f]
+are proportional exactly when every m_ij is zero. Over the declared sequence
+each minor does one of three things:
+
+| m_ij(e, f) over the sequence | Reading |
+|---|---|
+| stays not resolved | connection: shared structure persisting |
+| stays resolved with one sign | freedom: independent variation persisting |
+| does neither | reorganization: the structure changes |
+
+κ_δ = resolved / evaluated minors is a declared summary (C), not the object.
+The pattern is unchanged by edge order, positive component rescaling and
+offsets; it depends on the components declared through M.
+
+### 21.4 The three ground variables
+
+| Variable | Invariant | What it reads | Form, held over the sequence | Function |
+|---|---|---|---|---|
+| **Energy** | I-T | how much a relation changes | ε[e] = \|A(c)[e]\| of the declared carrier c; δ_ε[e] = δ_c[s] + δ_c[t]; floor resolved when ε > δ_ε; degree ε/δ_ε | `energy`, `energy_exchange` |
+| **Freedom** | I-S | how many independent ways relations vary | a pair is free when at least one minor is resolved with one sign throughout; F_δ = free / evaluated pairs | `freedom` |
+| **Connection** | I-E | what holds together through evolution | **identity**: A[e] − A[f] not resolved throughout; **proportional**: every minor not resolved throughout; **sustained**: sign of (R − B)[e] = ρ[src]·(Σ_succ B − Σ_pred B) resolved and the same throughout | `connection` |
+
+Energy has its own carrier, flows whether or not anything reorganizes, and is
+not multiplied by connection; the connected exchange (V3b) reads ε at edges
+with held circulation and a resolved floor. Freedom and connection are
+complementary per minor at δ; energy moves minors toward or across zero. Only
+the sustained grade of connection needs an interior; energy, freedom and the
+identity and proportional grades are readable at every region, Primary
+included. A zero forced by the declaration is an identity, not a reading.
+
+The V9 readers (`epsilon_e`, `superposition_condition`, `entanglement_condition`,
+`tunneling_floor_holds`) are unchanged and remain available to existing callers;
+V10 readings use the forms above.
+
+---
+
+## 22. Version History (Summary)
 
 | Version | Key change |
 |---|---|
@@ -1257,9 +1368,10 @@ Generator output.
 | Kernel V9 (2026-10-24) | Foundational primitive established as Section 1 preamble: "a directed relation declared from observable information" — a primitive not previously existing in mathematics. Three roots stated: complexity, change as the only observable constant, bounded domain of analysis. Operator dependence on the primitive stated explicitly: operators exist because of the primitive and cannot be applied to anything not declared through M. Section 2 updated to reference Section 1 for the full account. No operator form, invariant form, Rust function, or source file content changed. |
 | Kernel V9 diagnostic execution (2026-11-07) | Origin directive. `src/diagnostic_exec.rs` added (§11.7): thin A → B → R and persistence execution wrapper over the unchanged operators for experimental fields; mandatory edge provenance with observed/proposed support; non-blocking warnings and blocking errors; observation succession by declared process step. §8 ring/torus clarification (relational evolution, not cyclic relationships); §9 synchronized with the Origin general values ρ_base = 0.5, χ₀ = 1 (`operators.rs` header, `77c65ae`); §10 experimental-field note; §18 A-3 row annotated. No operator form, parameter handling inside an operator, or existing test expectation changed. |
 | Kernel V10 Df6 (2026-11-21) | Origin declaration: all operators and ground variables occur simultaneously; composition order and registration sequence are orders of analysis; no phases. A relational field needs at least two consecutive registrations; one registration is insufficient information. `src/relational_field.rs` added (§11.6 note). §5, §8, §11.1 wording amended with the V9 text retained. No operator form or existing test expectation changed. |
+| Kernel V10 release (2026-11-21) | Package `abr-kernel` `9.0.0` → `10.0.0` (Origin decision). Title and release designation updated. §1 Df1 restatement; §15.6 I-SC; §18 `are_proportional` and ρ max-selection rows updated; §21 added (ground variables, minor pattern, relational field). `src/ground_variables.rs`, `src/relational_field.rs`. No operator formula, V9 function signature or existing test expectation changed. |
 
 ---
 
 *The operators hold no agency. Responsibility stays with Origin.*  
 *Bounded over D. No claim beyond D.*  
-**Metatron Dynamics, Inc. Kernel V9.**
+**Metatron Dynamics, Inc. Kernel V10.**
