@@ -695,13 +695,13 @@ Nothing in Part I depends on any statement in Part II.
 retired from V10 and behind the V9 fence. The provenance column is under W14
 audit C1 (several values are defined or fitted, not measured).
 
-| Constant | Value | Observable provenance |
-|---|---|---|
-| `HBAR` | 1.054_571_817e-34 J·s | Spectroscopic frequency-energy measurement |
-| `E_UNIT` | 1.602_176_634e-19 C | Millikan oil-drop and subsequent direct measurements |
-| `I_UNIT_ELECTRON` | 9.109_383_701_5e-31 kg | Penning trap oscillation frequency under declared non-acceleration |
-| `H_PLANCK` | 6.626_070_15e-34 J·s | Spectroscopic frequency-energy measurement; enters D only inside M mapping hc/λ → ε[e] at Atomic Region photon edges |
-| `C_DECLARED` | 2.997_924_58e8 m/s | BIPM 2019 interferometric measurement; enters D only inside M mapping hc/λ → ε[e] at Atomic Region photon edges; not a named framework variable |
+| Constant | Value | Observable provenance | Class (W14, 2026-11-21) |
+|---|---|---|---|
+| `HBAR` | 1.054_571_817e-34 J·s | Spectroscopic frequency-energy measurement | Defined by convention: h/2π, with h exact in the SI since 2019. Retired from V10 (9th) |
+| `E_UNIT` | 1.602_176_634e-19 C | Millikan oil-drop and subsequent direct measurements | Defined by convention: exact in the SI since 2019 |
+| `I_UNIT_ELECTRON` | 9.109_383_701_5e-31 kg | Penning trap oscillation frequency under declared non-acceleration | Fitted: the CODATA 2018 least-squares adjusted value (Provider-declared), not one registration |
+| `H_PLANCK` | 6.626_070_15e-34 J·s | Spectroscopic frequency-energy measurement; enters D only inside M mapping hc/λ → ε[e] at Atomic Region photon edges | Defined by convention: exact in the SI since 2019. Its mapping output is Projected |
+| `C_DECLARED` | 2.997_924_58e8 m/s | BIPM 2019 interferometric measurement; enters D only inside M mapping hc/λ → ε[e] at Atomic Region photon edges; not a named framework variable | Defined by convention: exact since 1983 (it defines the metre). Its mapping output is Projected |
 
 `H_PLANCK` and `C_DECLARED` do not appear in any operator formula. Do not
 introduce `C_DECLARED` into operator expressions or kernel output.
@@ -1016,6 +1016,7 @@ Disrupting the edge removes the correlation.
 
 Observable basis: EPR-type measurement correlations; molecular bond
 directionality (confirmed across 22 transition edges, validation_record_v4.md).
+*Amended (W14, 2026-11-21):* the EPR-type entry is a cited intersection: the registered quantity is the coincidence counts between detectors at s and t over declared settings. A Bell "violation" compares a combination of those counts with a bound derived from a model; it is a cited intersection (C), not a confirmation.
 
 Open conditions: OC-E-1, OC-E-2, OC-E-3.
 
@@ -1171,7 +1172,7 @@ verification only. Synthetic test provenance is not empirical provenance.
 | Part II "absence" wording | I-E, joint necessity, photon J[v] | Separate audit |
 | R² = 0.527 at the δι fit | `observable_variable_sets.md` | HOLD |
 | J[v] wording on what M observes | `derived_invariants.rs` | Origin wording decision |
-| OC-T-1 | Tunneling floor magnitude: formal expression not yet derived | OPEN |
+| OC-T-1 | Tunneling floor magnitude: formal expression not yet derived. *Restated (W14, 2026-11-21):* where, and at what δ, the exchange floor ε > δ_ε is resolved over a registered carrier (V3); read from registered data, no mechanism posited | OPEN |
 | OC-T-2 | Tunneling at scale: confirm beyond Primary and Atomic regions | OPEN |
 | OC-T-3 | Tunneling necessity: formally derive that absence precludes energy transfer | OPEN |
 | OC-S-1 | Kernel boundary criterion | CLOSED (2026-09-23: structural interior locus criterion) |
@@ -1434,6 +1435,7 @@ Code: `src/persistence_change.rs`.
 | Kernel V10 release (2026-11-21) | Package `abr-kernel` `9.0.0` → `10.0.0` (Origin decision). Title and release designation updated. §1 Df1 restatement; §15.6 I-SC; §18 `are_proportional` and ρ max-selection rows updated; §21 added (ground variables, minor pattern, relational field). `src/ground_variables.rs`, `src/relational_field.rs`. No operator formula, V9 function signature or existing test expectation changed. |
 | Kernel V10 ρ retirement (2026-11-21) | Origin declaration: ρ, χ, ρ_base, χ₀, the max selection, the saturating form and cc[p] retired from V10 readings; OC-K-1 dissolved. Parameter-free circulation Ξ added (`operator_circulation`). `RelationalField::new` takes no operator parameters. V9 ρ-weighted functions unchanged. |
 | Kernel V10 PC (2026-11-21, 7th) | Origin declaration: structure is persistence, change is freedom (PC1–PC4); V2 restated, V8 re-read, I-SC-1 restated; coupled-change grade of connection; energy as a component; edge-valued registration ER-1; provenance chain (V10_README §2.0). `src/persistence_change.rs`. First V2 form kept as declared comparison |
+| Kernel V10 W14 audit applied (2026-11-21, 12th) | hc/λ output Projected, wavenumber carrier; OC-T-1 restated; Bell and J[v] matches as cited intersections; §13.1 classes column; database source classing required; classical/quantum passage bounded; entanglement pointer. Original text kept |
 | Kernel V10 W15 (2026-11-21, 11th) | Origin: time is never primitive; a registered time may enter as a declared intersection, described as such. Φ restored as a declared intersection (out of the V9 fence); τ = ħ/ε stays retired; the 10th's "no time" wording corrected |
 | Kernel V10 no time (2026-11-21, 10th) | Φ = ι·τ retired from V10 (`phi_v`, `phi_v_log10`, `phi_s`, `accumulation_condition` behind the V9 fence); V5 restated as counted steps (`evolution_counts`); R4 window restated as a count of registrations; I-RE basis withdrawn |
 | Kernel V10 τ retirement (2026-11-21, 9th) | Origin declaration: the τ = ħ/ε family is retired from V10 (time is a downstream projection, not a variable; no registration relates energy to an interval of evolution). `HBAR`, `tau_photon_edge`, `n_relational_cycles`, `tau_v`, `tau_v_isolated`, `tunneling_tau_bounded` behind the V9 fence. Φ_relational and κ[region] retired as identities. §13 text kept as record |

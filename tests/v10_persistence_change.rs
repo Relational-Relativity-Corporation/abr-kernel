@@ -308,3 +308,44 @@ fn v5_rate_is_counted_steps_never_time() {
     let total: usize = c.iter().map(|x| x.changed_steps).sum();
     assert_eq!(total, pc.relation_shares(None).freedom);
 }
+
+// ── W14: the photon-edge carrier (2026-11-21, 12th) ────────────────────────
+
+#[test]
+fn photon_carrier_wavenumber_and_hc_over_lambda_read_identically() {
+    use abr_kernel::derived_invariants::{C_DECLARED, H_PLANCK};
+    use abr_kernel::ground_variables::{energy_exchange, mapped_half_width, EnergyCarrier};
+    // Registered wavelengths (m) at three loci over four registrations, with
+    // δ_λ. hc/λ is a construct mapping; the wavenumber 1/λ is the registered
+    // quantity in another unit. Every V10 reading must agree.
+    let r = rel(3, vec![(0, 1), (1, 2)]);
+    let lam = [[121.6e-9, 102.6e-9, 97.3e-9], [121.6e-9, 102.0e-9, 97.3e-9],
+               [121.5e-9, 101.0e-9, 97.0e-9], [121.5e-9, 101.0e-9, 96.0e-9]];
+    let d_lam = 0.05e-9;
+    let hc = H_PLANCK * C_DECLARED;
+    let carrier = |scale: f64, t: usize| EnergyCarrier {
+        name: "photon edge".into(), unit: if scale == 1.0 { "1/m".into() } else { "J (Projected)".into() },
+        values: lam[t].iter().map(|l| scale / l).collect(),
+        delta: lam[t].iter().map(|&l| mapped_half_width(|x| scale / x, l, d_lam)).collect(),
+    };
+    for t in 0..4 {
+        let (k, e) = (energy_exchange(&carrier(1.0, t), &r), energy_exchange(&carrier(hc, t), &r));
+        for (a, b) in k.iter().zip(&e) {
+            assert_eq!(a.floor_resolved, b.floor_resolved);
+            assert!((a.degree().unwrap() - b.degree().unwrap()).abs() < 1e-9 * a.degree().unwrap());
+        }
+    }
+    // The carrier as a component: PC readings agree.
+    let series = |scale: f64| {
+        let seq: Vec<Registration> = (0..4).map(|t| {
+            let c = carrier(scale, t);
+            Registration::new(NodeField::new(vec![c.values.clone()]), vec![c.delta.clone()])
+        }).collect();
+        PersistenceChange::new(&EdgeSeries::from_registrations(&seq, &r).unwrap())
+    };
+    let (k, e) = (series(1.0), series(hc));
+    let readings = |p: &PersistenceChange| p.relations.iter().map(|x| x.reading).collect::<Vec<_>>();
+    assert_eq!(readings(&k), readings(&e));
+    // Not vacuous: both structure and freedom occur.
+    assert!(readings(&k).contains(&Reading::Freedom) && readings(&k).contains(&Reading::Structure));
+}

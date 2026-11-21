@@ -960,6 +960,9 @@ of declared edges at v, halved — a structural property of the
 declaration, readable after the operators act.
 
 **Confirmed 29 of 52 cases from NIST ASD v5.12 and PDG 2024.**
+*Amended (W14, 2026-11-21):* the J values compared against are construct-assigned
+spin quantum numbers, so these are cited intersections, not confirmations; the
+registered quantity is the count of resolved Zeeman components.
 Full confirmation table: see validation_record.md VR-J-01.
 Remaining 23 fine structure cases pending NIST ASD transcription.
 
@@ -1126,6 +1129,9 @@ He I, Cs I, Rb I, Hg I series. ε[e] range: 2.221e−19 J to 2.091e−18 J.
 𝟙[e] = 1 at all 14 edges. Zero violations of declared admissibility
 conditions. No symmetric edge-image detected at any declared photon edge.
 Observable source: NIST ASD v5.12. See VR-γ-01, validation_record.md.
+*Amended (W14, 2026-11-21):* "[Observed]" applies to λ only. ε = hc/λ is a
+mapping through a construct; its values are Projected and cited as an
+intersection. V10 readings use the registered wavenumber 1/λ as the carrier.
 
 **EF-15:** [Derived] τ[v] = ℏ/ε[e] confirmed at 12 declared photon edges
 (isolated-locus case, OC-13 resolved). τ[v] range: 5.04e−17 s to

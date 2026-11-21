@@ -68,23 +68,31 @@ evolution is `PersistenceChange::evolution_counts`, counted in steps.)*
    link cannot be completed from the record, stop and report the finding.
    Where the record registers relations (an exchange between two states, a
    transition), enter them as edge values (ER-1); construct no node values.
-3. **Declare the domain (R9a).** For the system analysed, state what carries
+3. **Class every database value by how it was obtained (W14).** Before a
+   value from a database or compilation enters, state whether it was
+   registered, defined by convention or fitted. In particular: NIST ASD
+   wavelengths *Observed* vs *Ritz* (calculated from fitted levels, not a
+   registration); measured lifetimes vs lifetimes converted from widths
+   through ħ/Γ (computed, excluded); PDG and CODATA averages and adjustments
+   (fitted, Provider-declared). A value that is not registered enters only as
+   a cited intersection.
+4. **Declare the domain (R9a).** For the system analysed, state what carries
    energy (the carrier, its unit, mapping and δ_c), which relations carry
    connection, and which components vary independently (freedom). State the
    observer's participation.
-4. **Declare the sequence.** At least two consecutive registrations of the same
+5. **Declare the sequence.** At least two consecutive registrations of the same
    relations, ordered by an observable property of the process, each with δ.
    A single snapshot is insufficient information.
-5. **Remove `features = ["v9"]`** and replace each fenced call using the table
+6. **Remove `features = ["v9"]`** and replace each fenced call using the table
    above. The compiler lists every remaining one.
-6. **Form the relational field** with `RelationalField::new` and read
+7. **Form the relational field** with `RelationalField::new` and read
    `ground` (energy, freedom, connection). `examples/v10_relational_field.rs`
    is a template.
-7. **Report findings, not absences.** Every entry of `GroundReading::findings`
+8. **Report findings, not absences.** Every entry of `GroundReading::findings`
    is a statement about the declaration (Primary Region, or domain not fully
    declared). Return to the declaration; never reverse an edge or substitute a
    value.
-8. **Compare and record.** Place the V10 result beside the V9 result as a
+9. **Compare and record.** Place the V10 result beside the V9 result as a
    declared comparison (C): what changed and why. Never overwrite the V9
    result; the transition is part of the repository's provenance.
 

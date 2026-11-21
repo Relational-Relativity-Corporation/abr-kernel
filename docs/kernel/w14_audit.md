@@ -184,12 +184,12 @@ R7.
 | # | Item | Recommendation |
 |---|---|---|
 | 1 | B1, τ = ħ/ε family | **Done 2026-11-21 (9th):** retired entirely from V10 under the time prohibition; fenced behind `v9`; Φ_relational and κ[region] retired as identities |
-| 2 | B2, hc/λ | Registered wavenumber as the carrier; hc/λ only as a declared mapping with Projected outputs; relabel EF-14 and the `[OBS]` fixtures |
-| 3 | B3, OC-T-1 | Restate on V3 or withdraw |
-| 4 | B4, "Confirmed" via Bell bound and spin numbers | Relabel as cited intersections; name the registered quantity |
-| 5 | C1, §13.1 provenance | Correct to defined / fitted (R7) |
-| 6 | C2, database source classes | Check per value in the application repositories |
-| 7 | A, unification claim and superseded entanglement text | Restate bounded over D; add amendment pointer |
+| 2 | B2, hc/λ | **Done (12th):** wavenumber carrier; hc/λ a declared mapping, output Projected, cited as intersection; readings shown identical by test; EF-14, VR-γ-01, `[OBS]` fixtures relabelled |
+| 3 | B3, OC-T-1 | **Done (12th):** restated on V3, no mechanism posited; first statement kept |
+| 4 | B4, "Confirmed" via Bell bound and spin numbers | **Done (12th):** cited intersections; registered quantities named (coincidence counts; resolved Zeeman components) |
+| 5 | C1, §13.1 provenance | **Done (12th):** class column added beside the original (defined / fitted); same classes in code comments |
+| 6 | C2, database source classes | **Kernel part done (12th):** classing required before citing (migration guide step 3; VR-γ-01, VR-Φ-01 notes). **Open:** the per-value check in the application repositories |
+| 7 | A, unification claim and superseded entanglement text | **Done (12th):** read as a bounded intersection; amendment pointer added |
 
 ---
 
