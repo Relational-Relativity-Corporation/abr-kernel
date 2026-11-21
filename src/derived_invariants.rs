@@ -1616,6 +1616,50 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //          precludes collective organization within D. Currently a
 //          framework-level necessity statement.
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ── PART II (V10, Origin 2026-11-21) — STRUCTURAL CONSISTENCY, I-SC ─────────
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// EPISTEMIC STATUS: OPEN DERIVATION, as for the rest of Part II. No support
+// classification until a validation record entry exists. The forms are
+// computed in `ground_variables.rs`; computing them is not derivation.
+//
+// Object. The minor pattern P(F): for declared edges e, f and components
+// i < j, m_ij(e,f) = A[i][e]·A[j][f] − A[j][e]·A[i][f], read at δ over a
+// declared sequence of registrations. Over the sequence each minor is held
+// unresolved (shared structure: connection), held resolved with one sign
+// (independent variation: freedom), or reorganizing (the structure changes;
+// where energy exchange becomes visible in the pattern).
+//
+// Derived (mathematical, not observational):
+//   I-SC-D1  Persistence condition. A minor cannot change sign over a step
+//            whose change bound |Δm_ij| is smaller than |m_ij|, because a
+//            sign changes only by passing through zero
+//            (`minor_change_bound`, `step_preserves_sign`).
+//   I-SC-D2  Per minor at δ, freedom and connection are complementary.
+//
+// Proposed (framework-level, awaiting observation):
+//   I-SC-1   Condensate-to-plasma axis. Along registrations of one declared
+//            system ordered by increasing held energy, κ_δ (resolved minors
+//            / evaluated minors) does not decrease across phase boundaries.
+//   I-SC-2   Neither end is reached. At no registered state with at least
+//            two declared components is κ_δ exactly 0 or 1 (G1).
+//   I-SC-3   Identity-grade persistence. Relations registered independently
+//            as the same relation at different loci (A[e] − A[f] not
+//            resolved) remain so across levels of combination until a
+//            reorganization is registered.
+//
+// OC-SC-1  Register a sequence of one declared system across at least one
+//          phase change, with its energy carrier declared, to test I-SC-1
+//          and I-SC-2.
+// OC-SC-2  Register lattice relations of one material independently at two
+//          sites across temperature to its melting point, to test I-SC-3.
+// OC-SC-3  Declare the mapping from carrier exchange ε = |A(c)| to the
+//          persistence difference A_p of the declared field (how energy
+//          drives Δm).
+// OC-SC-4  Relation between the minor pattern (held connection) and the
+//          persistent (R − B) circulation sign (sustained connection).
+
 // V3 → V4: Four new invariants added.
 // I-T (Tunneling): quantum boundary component of Δ(ι)[e] is nonzero at
 //   every finite barrier edge. ε[e] has a nonzero floor; τ[v] is bounded

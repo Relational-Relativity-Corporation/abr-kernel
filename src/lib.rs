@@ -66,9 +66,10 @@ pub mod admission;
 // blocking errors. Independent of admission.rs.
 pub mod diagnostic_exec;
 
-// Kernel V10 ground variables (Origin, 2026-11-21): freedom (superposition),
-// connection (entanglement) and energy (tunneling) read at declared
-// resolution δ through the unchanged operators. A variable that cannot be
-// calculated is a finding about the declaration (Primary Region, or domain
-// not fully declared), never a statement of absence.
+// Kernel V10 ground variables (Origin, 2026-11-21): energy (tunneling),
+// freedom (superposition) and connection (entanglement): three distinct
+// variables read from one relational object over a declared sequence of
+// registrations at declared δ, through the unchanged operators. A reading
+// that cannot be calculated is a finding about the declaration (Primary
+// Region, or domain not fully declared), never a statement of absence.
 pub mod ground_variables;

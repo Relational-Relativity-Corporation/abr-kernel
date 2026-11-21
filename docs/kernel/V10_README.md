@@ -82,19 +82,36 @@ Every V10 item furthers these three, and none may contradict them:
 
 These are the variables every analysis reads. Each is present by ground (G1, G2, G4). What is measured is its **degree at δ**.
 
-**Observable fact and calculated variable (Origin, 2026-11-21).** Two things are held distinct. The *observable fact* is that energy, connection and freedom are present in every registration; absence is not an available observation, and no calculation tests it. The *calculated variable* is the degree the operators yield for each, over a declared topology at declared δ. When a declared topology does not let one of the three be calculated, the result is a finding about the declaration, never about the system. It is one of two:
+**Three distinct variables, one relational object (Origin, 2026-11-21).** Energy, freedom and connection are distinct; none reduces to another. They are read from the same declared relations, through one structural object, the minor pattern P(F) (§2.4, V8), and are related as follows:
 
-- **Primary Region**: no interior locus is declared (T7); Δ → Σ applies and the full path A → B → R is not formable at this δ; or
-- **Domain not fully declared**: the domain declaration (R9a) lacks a carrier, a component, a relation, a registration or a finer δ.
+- **per minor at δ, freedom and connection are complementary**: a minor is resolved (independent variation) or not resolved (shared structure);
+- **energy moves minors toward or across zero**; a crossing is where energy exchange becomes visible in the structure. Energy also has its own carrier and flows whether or not anything reorganizes;
+- **all three are held over relational evolution.**
 
-Either way the analysis returns to the declaration (G4a, W5): finer δ or a wider record boundary, never a reversed edge (W8) and never a substitute value. A calculated degree of zero at δ is returned unchanged and read under W2 as a finding of the same kind. Implemented in `src/ground_variables.rs` (`DeclarationGap`, `FindingKind`, `GroundReading::findings`); the mathematics is in Part 2 (V1–V3, K4). The V9 readers in `src/derived_invariants.rs` are unchanged.
+**Readings are formed over a declared sequence (Origin, 2026-11-21).** A frozen frame is not a relational system (O1, Df3). Every ground-variable reading is formed over a declared sequence of at least two consecutive registrations of the same declared relations, ordered by an observable property of the process (T6). Over the sequence each minor does one of three things:
 
-| Ground variable | Kernel invariant | Kernel reading | Graded reading at δ |
+| Over the sequence, m_ij(e,f)… | Reading |
+| --- | --- |
+| stays not resolved | **connection**: shared structure persisting |
+| stays resolved with one sign | **freedom**: independent variation persisting |
+| does neither (it crosses, or changes state) | **reorganization**: the structure changes |
+
+A single registration is a declaration finding (*domain not fully declared: no process sequence*). The operators A, B, R are still evaluated per registration as building blocks; this amends what counts as a ground-variable reading, not the operators.
+
+**Observable fact and calculated variable (Origin, 2026-11-21).** The *observable fact* is that energy, connection and freedom are present in every registration; absence is not an available observation, and no calculation tests it. The *calculated variable* is the degree the operators yield, over a declared topology and sequence at declared δ. When a reading cannot be calculated, the result is a finding about the declaration, never about the system:
+
+- **Primary Region**: no interior locus is declared (T7). **Only the sustained grade of connection needs an interior.** Energy, freedom, and the identity and proportional grades of connection are readable at every region, Primary included, wherever two components and a sequence are declared; or
+- **Domain not fully declared**: the domain declaration (R9a) lacks a carrier, a component, a relation, a registration, a process sequence or a finer δ.
+
+Either way the analysis returns to the declaration (G4a, W5): finer δ or a wider record boundary, never a reversed edge (W8) and never a substitute value. A calculated degree of zero at δ is returned unchanged and read under W2. Implemented in `src/ground_variables.rs` (`DeclarationGap`, `FindingKind`, `GroundReading::findings`); the mathematics is in Part 2 (V1–V3, V8). The V9 readers in `src/derived_invariants.rs` are unchanged.
+
+| Ground variable | Kernel invariant | What it reads | Its own object, held over the sequence |
 | --- | --- | --- | --- |
-| **Energy**: how much a relation changes | **Tunneling, I-T** | ε[e] = \|A(c)[e]\|, carrier c declared in M (at photon edges hc/λ); floor ε > δ_ε; τ = ħ/ε finite | ε / δ_ε, δ_ε[e] = δ_c[s] + δ_c[t] (V3, Declared 2026-11-21) |
-| **Connection**: how much holds together as it changes | **Entanglement, I-E** | 𝟙_δ[e] = 1 iff the sign of (R − B)[e] over B(A(x)) is resolved at δ; not formable where e has no neighbour in the field (IV-3) | share of formable edges with 𝟙_δ = 1; C_δ form Open (V1) |
-| **Freedom**: how many independent ways it varies | **Superposition, I-S** | edges e, f distinguishable when some 2×2 minor A[i][e]·A[j][f] − A[j][e]·A[i][f] has its sign resolved at δ | F_δ = share of distinguishable pairs (V2, Declared 2026-11-21) |
-| **Circulation**: imbalance between what follows and what precedes | (R − B) | (R − B)[e] = ρ[src]·(Σ_succ B − Σ_pred B) | sign is connection; magnitude only once ρ choices are declared (V4) |
+| **Energy** | **Tunneling, I-T** | how much a relation changes | ε[e] = \|A(c)[e]\| of the declared carrier c; floor ε > δ_ε, δ_ε[e] = δ_c[s] + δ_c[t] (V3) |
+| **Freedom** | **Superposition, I-S** | how many independent ways relations vary | pairs with at least one minor held resolved; F_δ = share of such pairs (V2) |
+| **Connection** | **Entanglement, I-E** | what holds together through evolution | graded: identity, proportional, sustained (V1) |
+| **Circulation** | (R − B) | imbalance between what follows and what precedes | (R − B)[e] = ρ[src]·(Σ_succ B − Σ_pred B); its held sign is the sustained grade of connection (V4) |
+
 
 **Each is declared per domain (R9a).** What energy, connection and freedom are depends on the relational system analysed, and is stated in its domain declaration before any operator acts. That declaration establishes D.
 
@@ -127,7 +144,7 @@ The V10 variable register (DRAFT, Generator, 2026-11-14). Marks: ✔ defined, �
 | **C. Operator parameters** | C1 ρ ◐ · C2 χ ⚠ (code adds component-pair asymmetries; text does not) · C3 ρ_base ◐ · C4 χ₀ ◐ · C5 cc[p] ◐ · C6 tol = δ_C ✔ |
 | **D. Operators and outputs** | D1 A, Δ ✔ · D2 B ⚠ (called a vector in OVS; scalar in kernel and code) · D3 R ✔ · D4 Σ ✔ · D5 E ✔ · D6 A_p, B_p, R_p ✔ · D7 (R − B) ✔ · D8 C projection ⚠ (σ² in examples) |
 | **E. Resolution and window** | E1 δ_N, δ_M, δ_C ◐ · E2 σ ◐ · E3 E_δ ✔ · E4 W ✖ (in kernel) |
-| **F. Graded degrees** | F1 𝟙 ✔ · F2 𝟙_δ ✔ · F3 C_δ ✖ (three readings) · F4 F_δ ◐ (> 2 components) · F5 ε/δ_ε ✖ · F6 observer circulation ◐ |
+| **F. Graded degrees** | F1 𝟙 ✔ · F2 𝟙_δ ✔ · F3 C_δ ✔ (V1 grades, 2026-11-21) · F4 F_δ ✔ (minor form, 2026-11-21) · F5 ε/δ_ε ✖ · F6 observer circulation ◐ |
 | **G. Derived invariants** | G1 ι ◐ · G2 q ✔ · G3 variable 3 ✖ · G4 ε ✔ (HOLD on A-3) · G5 τ ◐ · G6 τ_stability, N ◐ · G7 θ, θ̂ ⚠ (m_e, Z_eff, electronegativity not declared through M) · G8 Φ ✔ · G9 J ✔ · G10 E[v] = ι·κ ◐ (EF-17) · **G11 I-T, I-S, I-E ✔** · G12 I-RE ✖ (OC-RE-1) |
 | **H. Candidates** | H1 Γ_W, Λ_W, Λ̂_W ◐ · H2 Κ ◐ (OC-RS-4) · H3 ΔQ ◐ |
 
@@ -236,15 +253,16 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 
 | ID | Variable | Mathematics | Status |
 | --- | --- | --- | --- |
-| **V1** | **Connection (entanglement)** | **g = B(A(x)).** (R − B)[e] = ρ[src(e)]·(Σ_succ(e) g − Σ_pred(e) g). Since ρ > 0, its sign is the sign of the bracket and does not depend on the open ρ choices (OC-K-1). Half-width of the bracket: Σ_succ δ_B + Σ_pred δ_B, with δ_B = B(δ_A) and δ_A[e] = δ[s] + δ[t]. **𝟙_δ[e] = 1** when the sign is resolved at δ in at least one component; at δ_C this is 𝟙[e]. Degree: share of formable edges with 𝟙_δ = 1. **Formability (IV-3, Declared 2026-11-21):** an edge with no successor and no arriving relation in the field has R − B = 0 by topology alone; it is reported as *connection not formable in this field* (domain not fully declared), never as decoherence. If no edge has a successor, no interior is declared: *Primary Region*. Scope: the spatial term; the cross-component term in cc[p] is not part of V1. C_δ[e] (preservation over a process sequence): Open | 𝟙_δ and IV-3 Declared (2026-11-21); C_δ Open (OC-V-1). `connection_at_edge`, `connection_degree` |
-| **V2** | **Freedom (superposition)** | **Minor form (Declared 2026-11-21).** For components i < j: m_ij(e, f) = A[i][e]·A[j][f] − A[j][e]·A[i][f]. A[e] and A[f] are proportional exactly when every m_ij = 0. The pair is **distinguishable at δ** when the sign of at least one m_ij is resolved at δ, with half-width \|A[i][e]\|·δ_A[j][f] + \|A[j][f]\|·δ_A[i][e] + δ_A[i][e]·δ_A[j][f] plus the same bound for the second product. With two components there is one minor (the earlier V2 contrast). Edges whose A vector is not resolved at δ in any component are reported separately and enter no pair. **F_δ = distinguishable pairs / evaluated pairs.** Pairwise only, no rank. Symmetric in e and f. Fewer than two components: *domain not fully declared* (T5) | Declared (2026-11-21); closes OC-V-2; IV-2 (d(e,f)) not adopted. `freedom_pair`, `freedom_degree` |
-| **V3** | **Energy (tunneling)** | **Carrier form (ENERGY_V3, Declared 2026-11-21).** A carrier c is declared in M for the domain (what carries change, its unit, mapping and δ_c). Held E[v] = c[v]; exchanged **ε[e] = \|A(c)[e]\| = \|c[s] − c[t]\|**, in the carrier's unit; at photon edges hc/λ in Regional M. **δ_ε[e] = δ_c[s] + δ_c[t]**; for a mapped carrier f, the larger half-width of f over [c ± δ_c], with f monotone over the interval (E4). I-T graded: the tunneling floor holds at δ when ε > δ_ε; degree ε/δ_ε. 𝟙 is **not** a factor of ε: energy and connection are read beside each other, and their joint reading is the connected exchange ε·𝟙_δ (V3b), formed only when both are resolved. Where no carrier is declared, energy is not evaluated (*domain not fully declared*). The V9 form ε = \|Δι\|·𝟙 (KR §13.3, `epsilon_e`) is kept unchanged for existing callers and is not used for V10 readings | Declared (2026-11-21); resolves conflict 1; closes OC-V-3. `energy_exchange`, `energy_degree`, `connected_exchange`, `mapped_half_width` |
+| **V1** | **Connection (entanglement)** | **Connection is shared relational structure persisting throughout relational evolution** (Origin, 2026-11-21). It is graded, strongest first, each held over the declared sequence: **Identity**: A[e] − A[f] not resolved in any component at every registration (half-width δ_A[e] + δ_A[f]): the same relation at different loci; needs one component and no interior. **Proportional**: every minor m_ij(e,f) not resolved at every registration: the relations vary together; needs two components and no interior. **Sustained**: the sign of (R − B)[e] = ρ[src(e)]·(Σ_succ g − Σ_pred g), g = B(A(x)), resolved and the same at every registration: persistent circulation. Since ρ > 0, its sign is that of the bracket, independent of the open ρ choices (OC-K-1); half-width Σ_succ δ_B + Σ_pred δ_B with δ_B = B(δ_A). Needs an interior; an edge with no neighbour is *not formable* (IV-3), never decoherence. Scope: the spatial term. The grades are read beside each other, not merged. **Shared structure has observational content only between independently registered relations:** a zero forced by the declaration is an identity, not a reading (Method; W10) | Declared (2026-11-21); C_δ given by the grades (closes OC-V-1). `connection` |
+| **V2** | **Freedom (superposition)** | **Minor form (Declared 2026-11-21).** For components i < j: m_ij(e, f) = A[i][e]·A[j][f] − A[j][e]·A[i][f]; half-width \|A[i][e]\|·δ_A[j][f] + \|A[j][f]\|·δ_A[i][e] + δ_A[i][e]·δ_A[j][f] plus the same bound for the second product. A pair is **free** over the sequence when at least one minor is resolved with the same sign at every registration. **F_δ = free pairs / evaluated pairs.** Edges not resolved at δ at any registration are reported separately and enter no pair. Pairwise only, no rank; symmetric in e and f. Fewer than two components: *domain not fully declared* (T5). Per minor at δ, complementary to V1's proportional grade | Declared (2026-11-21); closes OC-V-2; IV-2 not adopted. `freedom` |
+| **V3** | **Energy (tunneling)** | **Carrier form (ENERGY_V3, Declared 2026-11-21).** A carrier c is declared in M for the domain (what carries change, its unit, mapping and δ_c). Held E[v] = c[v]; exchanged **ε[e] = \|A(c)[e]\| = \|c[s] − c[t]\|**, in the carrier's unit; at photon edges hc/λ in Regional M. **δ_ε[e] = δ_c[s] + δ_c[t]**; for a mapped carrier f, the larger half-width of f over [c ± δ_c], with f monotone over the interval (E4). I-T graded: the tunneling floor holds at δ when ε > δ_ε; degree ε/δ_ε. 𝟙 is **not** a factor of ε: energy and connection are read beside each other, and their joint reading is the connected exchange (V3b): ε at edges whose circulation is held (sustained grade) and whose floor is resolved at every registration. Energy is read over the declared sequence. Where no carrier is declared, energy is not evaluated (*domain not fully declared*). The V9 form ε = \|Δι\|·𝟙 (KR §13.3, `epsilon_e`) is kept unchanged for existing callers and is not used for V10 readings | Declared (2026-11-21); resolves conflict 1; closes OC-V-3. `energy_exchange`, `energy_degree`, `connected_exchange`, `mapped_half_width` |
 | **V3a** | Energy declaration fields | Eight M fields and a carrier register in Regional M | Proposed (E2) |
 | **V3b** | Energy variables | B(A(c)) carried exchange; (R − B)(A(c)) energy circulation; ε·𝟙_δ connected exchange; F_δ over components of A(c); A_p(ε); Φ; ΔΚ/ΔQ and the other ratios. Energy circulation is a route to an observable correspondence for ρ (OC-K-1) | Proposed (E3) |
 | **V4** | **Circulation** | Degree read from (R − B)[e]; its resolved sign is connection. Magnitude reported only once ρ_base, χ₀, max-selection and saturating form are declared. Reported on two sides: system side, and observer side (forward evolution at the observer's pace, from registered observer steps) | Proposed; observer measure Open (OC-V-4) |
 | **V5** | **Rate of relational evolution** (candidate) | Γ_W[S] = T_W / τ[S]; Λ_W = Γ_W / T_W; Λ̂_W = Γ_W / σ_W, 0 ≤ Γ_W ≤ σ_W. τ from ħ/ε where ε is declared, else from steps with A_p resolved at δ_W | Proposed (RS-2a); OC-RE-1 |
 | **V6** | **Κ, connected relations per locus** (candidate) | Κ_ℓ counted independently of ι; read beside C_δ, F_δ and supplied energy ΔQ, conjoined only as ratios ΔΚ/ΔQ, ΔC_δ/ΔQ, ΔF_δ/ΔQ, ΔF_δ/ΔC_δ. No energy partition assumed | Proposed (RS-3a); name **"connection density"** to confirm (E7); criterion Open (OC-RS-4) |
 | **V7** | **Φ, coherence density** | Φ[v] = ι[v] · τ[v]; Φ_stability = ι·τ_stability; collective Φ[S] = ι[S]·τ[S], ι[S] = Σ ι[vᵢ]; accumulation condition Φ[S] > Σ Φ[vᵢ] (KR §13.10). Φ_relational = ħ/κ[region] goes to Regional M (name E8) | Name Declared (Origin, 2026-11-14); Φ_stability Observed (29 loci); |
+| **V8** | **Minor pattern P(F)** | For a registration: { sign_δ m_ij(e,f) ∈ {+, −, not resolved} } over edge pairs e < f resolved at δ and component pairs i < j. Over a sequence each minor is held not resolved, held resolved, or reorganizing (§1.2). Consistent by construction: edge order (swapping e, f negates every minor together), positive component rescaling (signs unchanged), any non-zero rescaling (zeros unchanged), offsets (cancel in A); depends on the components declared through M (R9a). **κ_δ** = resolved / evaluated minors: a declared summary (C), not the object. **Persistence condition (Derived):** a minor cannot change sign over a step whose change bound \|Δm_ij\| < \|m_ij\|, because a sign changes only through zero; \|Δm_ij\| ≤ \|A[i][e]·A_p[j][f]\| + \|A_p[i][e]·A[j][f]\| + \|A_p[i][e]·A_p[j][f]\| plus the same bound for the second product. Open derivations in `derived_invariants.rs` Part II, I-SC | Declared (2026-11-21); I-SC-D1, I-SC-D2 Derived; I-SC-1 to 3 Proposed (OC-SC-1 to 4). `minor_pattern`, `minor_histories`, `minor_change_bound`, `step_preserves_sign` |
 
 ---
 
@@ -260,7 +278,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 
 # Part 4. Kernel code scope (`abr-kernel`)
 
-**Applied so far:** `abr-kernel` branch `claude/tender-galileo-gcquso`, on `833ffb3`: commit `757262a`, direction of evolution vs direction of analysis, with the structure figure (doc and comments only, two new tests); commit `2c3ed29`, the three ground variables (`src/ground_variables.rs`, 18 new tests). 146 tests pass. **Not merged to `main`.** V10 code work continues on this branch (conflict 8, resolved 2026-11-21).
+**Applied so far:** `abr-kernel` branch `claude/tender-galileo-gcquso`, on `833ffb3`: commit `757262a`, direction of evolution vs direction of analysis, with the structure figure (doc and comments only, two new tests); commit `2c3ed29`, the three ground variables (`src/ground_variables.rs`), reworked in the next commit around minor histories over a declared sequence, with the I-SC Part II entries in `derived_invariants.rs` (comments only). 147 tests pass. **Not merged to `main`.** V10 code work continues on this branch (conflict 8, resolved 2026-11-21).
 
 | Item | V9 (`833ffb3`) | V10 | State |
 | --- | --- | --- | --- |
@@ -269,7 +287,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 | `DeclaredRelations` | out, inc, adj_plus, adj_minus | Acyclicity check (refuse if violated); route enumeration for K7 | To do |
 | **New `operator_route_closure` (K7)** | — | Routes between loci joined by two or more routes; B_π, A_π per pair with route order recorded; node-derived inputs flagged | To do |
 | `compute_rho*`, `derived_invariants.rs` readers | — | Unchanged | — |
-| **New `ground_variables.rs` (V1–V3)** | — | Freedom (minor form), connection (𝟙_δ, IV-3), energy (carrier form) at declared δ through the unchanged `operator_a` and `operator_b`; declaration findings (Primary Region / domain not fully declared) | **Done (`2c3ed29`)** |
+| **New `ground_variables.rs` (V1–V3, V8)** | — | Minor pattern and histories over a declared sequence; energy (carrier form), freedom (minor form), connection (identity, proportional, sustained grades); declaration findings (Primary Region applies to the sustained grade only; no process sequence) through the unchanged `operator_a` and `operator_b` | **Done** |
 | `admission.rs` adjacency use | — | Review for one-pass, no-split execution | To do |
 | Tests | Consecutive | Kept; add K7 tests and a no-split test | Direction tests added (`757262a`) |
 | Kernel text: direction of evolution vs analysis | One direction only | Paragraph, figure, comments at pred(e), Σ_pred, A_persistence; B wording | **Done (`757262a`)** |
@@ -315,7 +333,8 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 - **OC-D-1** whether a backward reading's direction is recorded per output or per run.
 - **OC-K-1** observable correspondence of ρ, ρ_base, χ₀, cc; saturating form.
 - **A-3** empty-sum semantics.
-- **OC-V-1** C_δ form (also RMC 5.2). **OC-V-4** observer circulation measure. *(OC-V-2 and OC-V-3 closed 2026-11-21: V2, V3.)*
+- **OC-V-4** observer circulation measure. *(OC-V-1, OC-V-2 and OC-V-3 closed 2026-11-21: V1, V2, V3.)*
+- **OC-SC-1 to OC-SC-4** structural consistency (V8; `derived_invariants.rs` Part II, I-SC): a registered sequence across a phase change; independent lattice registrations to melting; the mapping from carrier exchange to A_p; the relation between held and sustained connection.
 - **OC-Z-1** "extent" in σ; rename σ. **OC-F-1** H as a shared frame.
 - **OC-RS-1 to 5**, **OC-RE-1**, **OC-E-1**, **OC-OBS-3**, **OC-RES-1 to 4**, **OC-RD-1, 2**, **OC-T-1**.
 - **E5–E8** F1 re-read, W7 renames, Κ name, Φ_relational name. *(E1–E4 decided 2026-11-21: V3.)*
@@ -357,6 +376,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 | 2026-11-16 (5th) | Domain of the relational system, established through energy, connection and freedom; participation in the domain (intervention bounds degree, never presence or direction) | R9a; R6, Df4, R5, G4, W11 |
 | 2026-11-16 | Synchronization: decided and proposed items gathered into one statement | G1, G4, G4a, R3, T2, T3, T7, K3, V1–V3b, P1, V6, V7, W7–W11 |
 | 2026-11-21 | **The three ground variables.** Observable fact vs calculated variable: a variable that cannot be calculated is a finding about the declaration (Primary Region, or domain not fully declared). Freedom: minor form. Connection: 𝟙_δ from the B bracket; IV-3 declared; C_δ stays open. Energy: carrier form. This README made canonical in `abr-kernel` and self-contained | §1.2, V1, V2, V3; conflicts 1, 8; OC-V-2, OC-V-3, E1–E4, IV-2, IV-3; `2c3ed29` |
+| 2026-11-21 (2nd) | **Connection as shared relational structure persisting through evolution**, graded identity / proportional / sustained. Three distinct variables on one relational object (P(F)); complementary per minor at δ; energy moves minors across zero. Readings formed only over a declared sequence (a frozen frame is not a relational system). Only the sustained grade needs an interior. Structural consistency I-SC entered in Part II | §1.2, V1, V2, V8; OC-V-1 closed; OC-SC-1 to 4 |
 
 ---
 
@@ -366,5 +386,5 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 | --- | --- |
 | `abr-kernel` `833ffb3`: `docs/kernel/kernel_reference.md`, `docs/kernel/operators_notation_and_constraint.md`, `src/operators.rs`, `src/derived_invariants.rs` | V9 baseline |
 | `abr-kernel` `757262a` | Direction of evolution vs direction of analysis |
-| `abr-kernel` `2c3ed29`: `src/ground_variables.rs`, `tests/v10_ground_variables.rs` | V1–V3 graded forms and declaration findings |
+| `abr-kernel` `2c3ed29` and its successor on this branch: `src/ground_variables.rs`, `tests/v10_ground_variables.rs`, `src/derived_invariants.rs` Part II (I-SC) | V1–V3, V8 and declaration findings |
 | This document | Every other V10 item, by ID, with its status and date |
