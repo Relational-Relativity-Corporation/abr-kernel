@@ -1799,6 +1799,32 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            hw_s + hw_{s+1}. Changes small against the arrangement's
 //            declared resolution never produce a crossing.
 //
+//   I-SC-D9  Coupled change is transitive exactly, not at δ. Over one reading
+//            pair, μ(e,f) = 0 exactly when the 2-vectors of change are
+//            parallel; PC2 admits only relations whose change is resolved in
+//            a reading, so a middle relation is non-zero and e ∥ f, f ∥ g give
+//            e ∥ g. At δ two unresolved minors can chain to a resolved one:
+//            connection read at δ does not partition relations into sets.
+//   I-SC-D10 Closure on change. For a signed closed walk, Σ s_e·Δ[e] =
+//            A_cyc(s+1) − A_cyc(s), half-width Σ δΔ[e]. Closure at δ at both
+//            registrations implies closure on the change; not conversely: an
+//            inconsistency fixed over the step cancels. On node-derived
+//            values the closure is 0 by identity (`cycle_closure`,
+//            `cycle_change_closure`, `is_closed_walk`).
+//   I-SC-D11 Total circulation. For any edge field g,
+//            Σ_e Ξ(g)[e] = Σ_f g[f]·(indeg(src f) − outdeg(tgt f)); zero for
+//            every field exactly when every weight is zero
+//            (`relational_field::circulation_weights`).
+//   I-SC-D12 Readings are local to their components. Dropping a component
+//            changes no PC1, PC2 or PC3 reading that does not involve it;
+//            only PC3's evaluated set can shrink. Shares can move either way:
+//            declaring components is not neutral (T5).
+//   I-SC-D13 The counted rate under omitted registrations. A group of
+//            consecutive steps all resolved with one sign merges into a
+//            resolved step (D7(a) by induction:
+//            |ΣΔ| = Σ|Δ| > Σ δΔ ≥ δ_first + δ_last). For any coarsening into
+//            G groups, #(one-sign groups) ≤ Γ_coarse ≤ G.
+//
 // OC-SC-4 (held pattern vs sustained circulation), partly derived: I-SC-D5
 // gives the sustained grade its own persistence condition; I-SC-D6 gives a
 // common sufficient condition (uniform positive rescaling) under which both

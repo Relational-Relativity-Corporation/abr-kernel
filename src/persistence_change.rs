@@ -490,3 +490,59 @@ pub fn coupled_change_pairs(pc: &PersistenceChange) -> Result<Vec<(usize, usize)
         .filter(|x| (x.e, x.f) == (e, f))
         .all(|x| x.reading == Reading::Structure)).collect())
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Closure around a cycle (K7 / HB-1 on the series; I-SC-D10)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// A cycle is a closed walk over declared edges, each with a sign: +1 when
+// traversed along its declared direction, −1 against it. Traversal is an
+// order of analysis (Df2a); no edge is reversed. The closure at registration
+// t is A_cyc = Σ s_e·A_t[c][e], half-width Σ δA_t[c][e]; it holds at δ when
+// |A_cyc| ≤ its half-width. On a node-derived series it is 0 by identity
+// (PC-D4); only edge-registered values make it a test.
+//
+// I-SC-D10 (Derived): the closure of the change Σ s_e·Δ_s[c][e] equals
+// A_cyc(s+1) − A_cyc(s), with half-width Σ δΔ_s[c][e]. If closure holds at δ
+// at both registrations, it holds on the change. The converse fails: an
+// inconsistency fixed over the step (a calibration offset around the cycle)
+// cancels in the change. Persistent chain structure (W9) is read in state;
+// change closure reads only what changed.
+
+/// True when `cycle` (edge, sign) is a closed walk over the declared edges.
+pub fn is_closed_walk(rel: &DeclaredRelations, cycle: &[(usize, i8)]) -> bool {
+    if cycle.is_empty() { return false; }
+    let ends = |&(e, sg): &(usize, i8)| {
+        let (s, t) = rel.edges[e];
+        if sg >= 0 { (s, t) } else { (t, s) }
+    };
+    if cycle.iter().any(|&(e, sg)| e >= rel.n_edges() || (sg != 1 && sg != -1)) { return false; }
+    let start = ends(&cycle[0]).0;
+    let mut at = start;
+    for step in cycle {
+        let (from, to) = ends(step);
+        if from != at { return false; }
+        at = to;
+    }
+    at == start
+}
+
+/// Closure value and half-width of `cycle` in component c of field (a, da).
+fn closure_of(a: &[Vec<f64>], da: &[Vec<f64>], cycle: &[(usize, i8)], c: usize) -> (f64, f64) {
+    cycle.iter().fold((0.0, 0.0), |(v, h), &(e, sg)| (v + sg as f64 * a[c][e], h + da[c][e]))
+}
+
+/// Closure at registration t. `None` when `cycle` is not a closed walk.
+pub fn cycle_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], t: usize, c: usize)
+    -> Option<(f64, f64)>
+{
+    is_closed_walk(rel, cycle).then(|| closure_of(&series.a[t], &series.da[t], cycle, c))
+}
+
+/// Closure of the change over step s. `None` when `cycle` is not a closed walk.
+pub fn cycle_change_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], s: usize, c: usize)
+    -> Option<(f64, f64)>
+{
+    let (d, dd) = series.change(s);
+    is_closed_walk(rel, cycle).then(|| closure_of(&d, &dd, cycle, c))
+}

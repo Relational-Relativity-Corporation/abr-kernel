@@ -468,3 +468,163 @@ fn prop_energy_readings_invariant_under_carrier_rescaling() {
         }
     });
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// I-SC-D9 to I-SC-D13
+// ═══════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn prop_isc_d9_coupled_change_is_transitive_exactly() {
+    static N: AtomicUsize = AtomicUsize::new(0);
+    for_all("I-SC-D9", |r| {
+        // f arbitrary and non-zero in change; e = α·f, g = β·f in change.
+        let (al, be) = (r.eighth(-3.0, 3.0), r.eighth(-3.0, 3.0));
+        let regs = r.usize(3, 5);
+        let mut f = r.eighth(-4.0, 4.0);
+        let mut a = Vec::new();
+        for _ in 0..regs {
+            a.push(vec![vec![al * f, f, be * f]]);
+            f += r.eighth(-2.0, 2.0);
+        }
+        let s = EdgeSeries::from_edge_values(a.clone(), a.iter().map(|t| vec![vec![0.0; 3]; t.len()]).collect()).unwrap();
+        for x in coupling_across_steps(&s).unwrap().readings {
+            assert_eq!(x.minor, 0.0);
+            if (x.e, x.f) == (0, 2) { hit(&N); }
+        }
+    });
+    exercised(&N, "I-SC-D9 e–g pair evaluated");
+}
+
+/// A random closed walk v0 → v1 → … → v0 over L ≥ 3 distinct loci, each step
+/// declared as an edge in either direction.
+fn random_cycle(r: &mut Rng) -> (DeclaredRelations, Vec<(usize, i8)>) {
+    let l = r.usize(3, 6);
+    let mut edges = Vec::new();
+    let mut cycle = Vec::new();
+    for i in 0..l {
+        let (u, v) = (i, (i + 1) % l);
+        if r.chance(4) { edges.push((u, v)); cycle.push((i, 1)); } else { edges.push((v, u)); cycle.push((i, -1)); }
+    }
+    let m = edges.len();
+    (DeclaredRelations::from_edges_with_provenance(l, edges, vec![EdgeProvenance::Continuation; m]), cycle)
+}
+
+#[test]
+fn prop_isc_d10_closure_on_change() {
+    static N: AtomicUsize = AtomicUsize::new(0);
+    for_all("I-SC-D10", |r| {
+        let (rel, cycle) = random_cycle(r);
+        assert!(is_closed_walk(&rel, &cycle));
+        let s = random_edges(r, (rel.n_edges(), rel.n_edges()), (1, 1), (2, 4), 0.5);
+        for st in 0..s.n_steps() {
+            let (c0, h0) = cycle_closure(&s, &rel, &cycle, st, 0).unwrap();
+            let (c1, h1) = cycle_closure(&s, &rel, &cycle, st + 1, 0).unwrap();
+            let (dc, dh) = cycle_change_closure(&s, &rel, &cycle, st, 0).unwrap();
+            assert_eq!(dc, c1 - c0);
+            assert_eq!(dh, h0 + h1);
+            if c0.abs() <= h0 && c1.abs() <= h1 { assert!(dc.abs() <= dh); hit(&N); }
+        }
+        // Node-derived: 0 by identity.
+        let seq = random_seq(r, rel.n_nodes, (1, 1), (2, 3), 0.5);
+        let n = EdgeSeries::from_registrations(&seq, &rel).unwrap();
+        for t in 0..n.n_registrations() { assert_eq!(cycle_closure(&n, &rel, &cycle, t, 0).unwrap().0, 0.0); }
+    });
+    exercised(&N, "I-SC-D10 closure held at both registrations");
+}
+
+#[test]
+fn prop_isc_d11_total_circulation_is_the_weighted_sum() {
+    use abr_kernel::operators::operator_circulation;
+    use abr_kernel::relational_field::circulation_weights;
+    for_all("I-SC-D11", |r| {
+        let rel = random_rel(r, true);
+        let w = circulation_weights(&rel);
+        let k = r.usize(1, 3);
+        let g: Vec<Vec<f64>> = (0..k).map(|_| (0..rel.n_edges()).map(|_| r.eighth(-4.0, 4.0)).collect()).collect();
+        let xi = operator_circulation(&g, &rel);
+        for c in 0..k {
+            let total: f64 = xi[c].iter().sum();
+            let weighted: f64 = g[c].iter().zip(&w).map(|(v, &wi)| v * wi as f64).sum();
+            assert_eq!(total, weighted);
+        }
+    });
+}
+
+#[test]
+fn prop_isc_d12_readings_are_local_to_their_components() {
+    for_all("I-SC-D12", |r| {
+        let rel = random_rel(r, false);
+        let seq = random_seq(r, rel.n_nodes, (2, 3), (3, 5), 0.5);
+        let k = seq[0].x.k;
+        let drop = r.usize(0, k - 1);
+        let kept: Vec<usize> = (0..k).filter(|&c| c != drop).collect();
+        let reduced_seq: Vec<Registration> = seq.iter().map(|g| Registration::new(
+            NodeField::new(kept.iter().map(|&c| g.x.data[c].clone()).collect()),
+            kept.iter().map(|&c| g.delta[c].clone()).collect())).collect();
+        let full = PersistenceChange::new(&EdgeSeries::from_registrations(&seq, &rel).unwrap());
+        let red = PersistenceChange::new(&EdgeSeries::from_registrations(&reduced_seq, &rel).unwrap());
+        // PC1: identical for kept components.
+        for x in &red.relations {
+            let y = full.relations.iter().find(|y| y.step == x.step && y.edge == x.edge && y.component == kept[x.component]).unwrap();
+            assert_eq!(x.reading, y.reading);
+        }
+        // PC2(b): identical per kept component.
+        if let (Ok(fr), Ok(rr)) = (&full.across_steps, &red.across_steps) {
+            for x in &rr.readings {
+                if let ReadingPair::Steps { component, step } = x.over {
+                    let over = ReadingPair::Steps { component: kept[component], step };
+                    let y = fr.readings.iter().find(|y| (y.e, y.f) == (x.e, x.f) && y.over == over).unwrap();
+                    assert_eq!(x.reading, y.reading);
+                }
+            }
+        }
+        // PC2(a): identical per kept component pair.
+        if let (Ok(fr), Ok(rr)) = (&full.across_components, &red.across_components) {
+            for x in &rr.readings {
+                if let ReadingPair::Components { step, i, j } = x.over {
+                    let over = ReadingPair::Components { step, i: kept[i], j: kept[j] };
+                    let y = fr.readings.iter().find(|y| (y.e, y.f) == (x.e, x.f) && y.over == over).unwrap();
+                    assert_eq!((x.minor, x.reading), (y.minor, y.reading));
+                }
+            }
+        }
+        // PC3: every reduced reading is a full reading, unchanged; the set can only shrink.
+        if let (Ok(fa), Ok(ra)) = (&full.arrangement, &red.arrangement) {
+            for x in ra {
+                let y = fa.iter().find(|y| (y.step, y.e, y.f, y.i, y.j) == (x.step, x.e, x.f, kept[x.i], kept[x.j])).unwrap();
+                assert_eq!(x.reading, y.reading);
+            }
+        }
+    });
+}
+
+#[test]
+fn prop_isc_d13_gamma_under_coarsening_is_bounded() {
+    static N: AtomicUsize = AtomicUsize::new(0);
+    for_all("I-SC-D13", |r| {
+        let s = random_edges(r, (1, 3), (1, 2), (3, 7), 0.5);
+        let n = s.n_registrations();
+        // Keep the first and last registration and a random subset between.
+        let mut idx = vec![0];
+        for t in 1..n - 1 { if r.chance(4) { idx.push(t); } }
+        idx.push(n - 1);
+        let sub = EdgeSeries::from_edge_values(idx.iter().map(|&t| s.a[t].clone()).collect(),
+                                               idx.iter().map(|&t| s.da[t].clone()).collect()).unwrap();
+        let fine = relation_changes(&s);
+        let coarse = PersistenceChange::new(&sub).evolution_counts();
+        for x in &coarse {
+            let groups = idx.windows(2).map(|w| (w[0], w[1]));
+            let mut one_sign = 0;
+            for (lo, hi) in groups {
+                let steps: Vec<&RelationChange> = fine.iter()
+                    .filter(|y| y.edge == x.edge && y.component == x.component && y.step >= lo && y.step < hi).collect();
+                let all_pos = steps.iter().all(|y| y.reading == Reading::Freedom && y.change > 0.0);
+                let all_neg = steps.iter().all(|y| y.reading == Reading::Freedom && y.change < 0.0);
+                if all_pos || all_neg { one_sign += 1; }
+                if (all_pos || all_neg) && hi - lo > 1 { hit(&N); }
+            }
+            assert!(one_sign <= x.changed_steps && x.changed_steps <= idx.len() - 1);
+        }
+    });
+    exercised(&N, "I-SC-D13 merged one-sign group");
+}

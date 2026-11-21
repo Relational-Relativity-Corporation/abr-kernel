@@ -323,9 +323,9 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 
 Code: `src/persistence_change.rs` (`EdgeSeries`, `relation_changes`, `coupling_across_components`, `coupling_across_steps`, `arrangement_steps`, `PersistenceChange`, `coupled_change_pairs`); `GroundReading::freedom` is the PC reading. Drafted as Proposed in `dffee32`; **Declared (Origin, 2026-11-21, 7th).**
 
-## 2.6 Derived structural consistency (I-SC-D3 to I-SC-D8)
+## 2.6 Derived structural consistency (I-SC-D3 to I-SC-D13)
 
-Mathematical results on the V10 forms (Derived, Generator 2026-11-21; for Verifier review). Each is checked in `tests/v10_structural_consistency.rs` and stated in `derived_invariants.rs` Part II. They establish how the forms relate, nothing empirical.
+Mathematical results on the V10 forms (Derived, Generator 2026-11-21; for Verifier review). Each is checked by a worked example in `tests/v10_structural_consistency.rs` and by a property test over 2000 random fields in `tests/v10_properties.rs`, and stated in `derived_invariants.rs` Part II. They establish how the forms relate, nothing empirical.
 
 | ID | Result | What it says |
 | --- | --- | --- |
@@ -335,6 +335,11 @@ Mathematical results on the V10 forms (Derived, Generator 2026-11-21; for Verifi
 | **I-SC-D6** | A_{s+1} = κ·A_s, κ > 0 ⇒ minors scale by κ², circulations by κ | Change without reorganization: every relation changes (PC1) while arrangement (PC3) and sustained grade hold |
 | **I-SC-D7** | δΔ_1 + δΔ_2 = δΔ_whole + 2·δA_{s+1}: same-sign resolved halves resolve the whole; the whole can be resolved while no half is; opposite halves can cancel | F_δ is not monotone under omitting registrations: which registrations are declared is part of the reading (T6, Df6) |
 | **I-SC-D8** | A crossing at PC3 ⇒ `minor_change_bound` > hw_s + hw_{s+1} | Changes small against the arrangement's resolution never reorganize it |
+| **I-SC-D9** | Over one reading pair, μ = 0 exactly when the changes are parallel; PC2's middle relation is non-zero, so exact coupling is transitive. At δ, two unresolved minors can chain to a resolved one | Connection read at δ does not partition relations into clean sets; coupled-change pairs are reported as pairs |
+| **I-SC-D10** | Σ s_e·Δ[e] = A_cyc(s+1) − A_cyc(s), half-width Σ δΔ[e]; closure at δ at both registrations ⇒ closure on the change, not conversely; 0 by identity on node-derived values | Change closure reads what changed; a fixed inconsistency around a cycle (persistent chain structure, W9) is read in state. `cycle_closure`, `cycle_change_closure` |
+| **I-SC-D11** | Σ_e Ξ(g)[e] = Σ_f g[f]·(indeg(src f) − outdeg(tgt f)) for any edge field g | A whole-field check on any computed Ξ; the total is zero for every field exactly when every weight is zero. `circulation_weights` |
+| **I-SC-D12** | Dropping a component changes no PC1, PC2 or PC3 reading not involving it; only PC3's evaluated set can shrink | Readings are local; shares are not, so the declared components are part of the reading (T5) |
+| **I-SC-D13** | For any coarsening into G groups, #(groups resolved with one sign throughout) ≤ Γ_coarse ≤ G | The counted rate of relational evolution is bounded, not fixed, under omitted registrations |
 
 **OC-SC-4**, the relation between held minor pattern and sustained circulation, is partly derived: D5 gives the sustained grade its own persistence condition, and D6 a common sufficient condition under which both hold. A general relation remains open.
 
@@ -359,7 +364,7 @@ Mathematical results on the V10 forms (Derived, Generator 2026-11-21; for Verifi
 | `operator_b`, `operator_r`, `operator_sigma`, `antisymmetric_term`, persistence forms | Consecutive | Unchanged in form; comments cite Df3 | To do |
 | Execution wrappers (`diagnostic_exec.rs`) | One field, one prior | One pass over the whole intersected field, no splitting; each execution states its cycle of analysis (R10) and its prior | To do |
 | `DeclaredRelations` | out, inc, adj_plus, adj_minus | Acyclicity check (refuse if violated); route enumeration for K7 | To do |
-| **New `operator_route_closure` (K7)** | — | Routes between loci joined by two or more routes; B_π, A_π per pair with route order recorded; node-derived inputs flagged | To do |
+| **New `operator_route_closure` (K7)** | — | Routes between loci joined by two or more routes; B_π, A_π per pair with route order recorded; node-derived inputs flagged | To do *Partly done (2026-11-21, 15th):* cycle closure in state and on change for any signed closed walk (HB-1 general form) on an `EdgeSeries` (`cycle_closure`, `cycle_change_closure`, `is_closed_walk`). Route enumeration and cycle basis still to do |
 | `compute_rho*`, `derived_invariants.rs` readers | — | Unchanged | — |
 | **New `ground_variables.rs` (V1–V3, V8)** | — | Minor pattern and histories over a declared sequence; energy (carrier form), freedom (minor form), connection (identity, proportional, sustained grades); declaration findings (Primary Region applies to the sustained grade only; no process sequence) through the unchanged `operator_a` and `operator_b` | **Done** |
 | **New `relational_field.rs` (Df6)** | Phase 1, then Phase 2 from the second observation | `RelationalField::new(&rel, registrations, carriers)`: at least two registrations; A, B, Ξ at each registration and A_p, B_p, Ξ_p over each step, with the ground variables over the sequence, in one call. **No operator parameters.** One registration: `NoProcessSequence` (insufficient information) | **Done** |
@@ -469,6 +474,7 @@ Mathematical results on the V10 forms (Derived, Generator 2026-11-21; for Verifi
 | 2026-11-21 (12th) | **W14 audit items 2–7 applied** (Origin). (2) hc/λ: a declared mapping through a construct, its output Projected and cited as an intersection; the photon-edge carrier is the registered wavenumber 1/λ; readings shown identical by test; EF-14, VR-γ-01 and the `[OBS]` fixtures relabelled. (3) OC-T-1 restated on V3, no mechanism posited. (4) Bell "violations" and the J[v] 29/52 matches relabelled as cited intersections, with the registered quantity named (coincidence counts; resolved Zeeman components). (5) §13.1 constants classed: h, ħ, c, e defined by convention; the electron value fitted (CODATA 2018). (6) Source classing of database values required before citing (Observed vs Ritz; measured vs ħ/Γ-converted lifetimes; migration guide step 3); the per-value check is application work. (7) The classical/quantum passage read as a bounded intersection; the V9 entanglement definition given an amendment pointer. Default build 78 tests, with `v9` 170. All original text kept | W14 audit closed at kernel level; V3, R9a, OC-T-1, I-E, J[v], §13.1 |
 | 2026-11-21 (13th) | **Derived structural consistency I-SC-D3 to I-SC-D8** (Generator; mathematical, for Verifier review): fixed-ratio and offset coupling of change, additive circulation and its persistence condition, change without reorganization under uniform rescaling, dependence of readings on the declared registrations, and the change needed for a crossing. Ten tests. OC-SC-4 partly derived. No declaration changed. Default build 88 tests, with `v9` 180 | §2.6; OC-SC-4 |
 | 2026-11-21 (14th) | **Property tests** for PC-D1 to PC-D5, I-SC-D1 to I-SC-D8 and carrier rescaling: 16 tests, 2000 seeded random fields each, exact dyadic arithmetic, every conditional property checked for exercise. **PC-D2 corrected:** monotonicity in δ holds for PC1 and PC2 but not PC3 (counterexample); for PC3 only crossings are monotone. No declaration changed. Default build 104 tests, with `v9` 196 | PC-D2; `tests/v10_properties.rs` |
+| 2026-11-21 (15th) | **Derived I-SC-D9 to I-SC-D13** (Generator; mathematical, for Verifier review): exact but not δ-transitivity of coupled change; closure on change around a cycle; total circulation as a degree-weighted sum; locality of readings to components; bounds on the counted rate under omitted registrations. Code: cycle closure on a series, circulation weights. Each with a worked example and a property test. No declaration changed. Default build 115 tests, with `v9` 207 | §2.6; K7 partly; Part 4 |
 
 ---
 

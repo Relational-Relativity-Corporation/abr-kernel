@@ -114,3 +114,14 @@ impl RelationalField {
         self.persistence.len()
     }
 }
+
+/// Whole-field circulation weights (I-SC-D11, Derived 2026-11-21): for every
+/// declared edge f, w[f] = indeg(src f) − outdeg(tgt f). For any edge field g,
+/// Σ_e Ξ(g)[e] = Σ_f w[f]·g[f], because f is a successor of every edge ending
+/// at src f and a predecessor of every edge starting at tgt f. The total is
+/// zero for every field exactly when every weight is zero.
+pub fn circulation_weights(rel: &DeclaredRelations) -> Vec<i64> {
+    let indeg = |v: usize| rel.edges.iter().filter(|e| e.1 == v).count() as i64;
+    let outdeg = |v: usize| rel.edges.iter().filter(|e| e.0 == v).count() as i64;
+    rel.edges.iter().map(|&(s, t)| indeg(s) - outdeg(t)).collect()
+}

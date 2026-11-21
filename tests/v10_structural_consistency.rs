@@ -251,3 +251,109 @@ fn sc_d8_a_crossing_needs_change_larger_than_both_resolutions() {
     }
     assert!(crossings > 0, "the fixture must contain a crossing");
 }
+
+// ── I-SC-D9: coupled change is transitive exactly, not at δ ────────────────
+//
+// Over one reading pair each relation's change is a 2-vector, and μ(e,f) = 0
+// exactly when the vectors are parallel. PC2 admits only relations whose
+// change is resolved in at least one reading, so a middle relation's change
+// is non-zero: e ∥ f and f ∥ g give e ∥ g. At δ two unresolved minors can
+// chain to a resolved one, so connection read at δ is not transitive and
+// coupled-change pairs do not partition relations into clean sets.
+
+#[test]
+fn sc_d9_coupled_change_is_not_transitive_at_delta() {
+    // One component, three relations, three registrations: changes over the
+    // two steps are e (4, 0), f (4, 1), g (4, 2).
+    let a = vec![vec![vec![0.0, 0.0, 0.0]], vec![vec![4.0, 4.0, 4.0]], vec![vec![4.0, 5.0, 6.0]]];
+    let c = coupling_across_steps(&edges(a, 0.25)).unwrap().readings;
+    let at = |e, f| c.iter().find(|x| (x.e, x.f) == (e, f)).unwrap();
+    assert_eq!(at(0, 1).reading, Reading::Structure); // μ = 4, within its half-width
+    assert_eq!(at(1, 2).reading, Reading::Structure); // μ = 4
+    assert_eq!(at(0, 2).reading, Reading::Freedom);   // μ = 8, resolved
+}
+
+#[test]
+fn sc_d9_coupled_change_is_transitive_exactly() {
+    // e = 2·f and g = −3·f in change: every pair locked exactly.
+    let f = [1.0, 2.0, 4.0, 3.0];
+    let a: Vec<Vec<Vec<f64>>> = f.iter().map(|&v| vec![vec![2.0 * v, v, -3.0 * v]]).collect();
+    for x in coupling_across_steps(&edges(a, 0.0)).unwrap().readings {
+        assert_eq!(x.minor, 0.0);
+    }
+}
+
+// ── I-SC-D10: closure on change ─────────────────────────────────────────────
+
+#[test]
+fn sc_d10_change_closure_reads_what_changed_not_a_fixed_inconsistency() {
+    // Triangle a → b → c with a → c; cycle a→b, b→c, then a→c against its
+    // direction. Edge-registered values carry a fixed offset of 0.6 on a→c:
+    // state closure fails at δ, change closure holds.
+    let r = rel(3, vec![(0, 1), (1, 2), (0, 2)]);
+    let cycle = [(0, 1), (1, 1), (2, -1)];
+    let x = [[3.0, 1.0, 0.0], [3.5, 1.25, 0.5]];
+    let a: Vec<Vec<Vec<f64>>> = x.iter().map(|v| vec![vec![v[0] - v[1], v[1] - v[2], v[0] - v[2] + 0.6]]).collect();
+    let s = edges(a, 0.1);
+    for t in 0..2 {
+        let (v, h) = cycle_closure(&s, &r, &cycle, t, 0).unwrap();
+        assert!(v.abs() > h, "state closure fails by the fixed offset");
+    }
+    let (v, h) = cycle_change_closure(&s, &r, &cycle, 0, 0).unwrap();
+    assert!(v.abs() <= h, "the offset cancels in the change");
+    // Node-derived: closure is 0 by identity at every registration.
+    let seq: Vec<Registration> = x.iter().map(|v| reg(vec![v.to_vec()], 0.1)).collect();
+    let n = EdgeSeries::from_registrations(&seq, &r).unwrap();
+    for t in 0..2 { assert_eq!(cycle_closure(&n, &r, &cycle, t, 0).unwrap().0, 0.0); }
+    // Not a closed walk: refused.
+    assert!(cycle_closure(&s, &r, &[(0, 1), (2, 1)], 0, 0).is_none());
+}
+
+// ── I-SC-D11: total circulation ─────────────────────────────────────────────
+
+#[test]
+fn sc_d11_total_circulation_is_the_weighted_sum() {
+    use abr_kernel::operators::operator_circulation;
+    use abr_kernel::relational_field::circulation_weights;
+    // Chain a → b → c: Ξ[ab] = g[bc], Ξ[bc] = −g[ab], total g[bc] − g[ab];
+    // weights: w[ab] = indeg(a) − outdeg(b) = −1, w[bc] = indeg(b) − outdeg(c) = 1.
+    let r = rel(3, vec![(0, 1), (1, 2)]);
+    assert_eq!(circulation_weights(&r), vec![-1, 1]);
+    let g = vec![vec![2.0, 5.0]];
+    let xi = operator_circulation(&g, &r);
+    assert_eq!(xi[0].iter().sum::<f64>(), 3.0);
+}
+
+// ── I-SC-D12: readings are local to their components ───────────────────────
+
+#[test]
+fn sc_d12_dropping_a_component_changes_no_remaining_reading() {
+    let f = evolving_field();
+    let r = rel(4, vec![(0, 1), (1, 2), (2, 3), (1, 3)]);
+    let one: Vec<Registration> = f.registrations.iter().map(|g| {
+        Registration::new(NodeField::new(vec![g.x.data[0].clone()]), vec![g.delta[0].clone()])
+    }).collect();
+    let full = PersistenceChange::new(&EdgeSeries::from_registrations(&f.registrations, &r).unwrap());
+    let reduced = PersistenceChange::new(&EdgeSeries::from_registrations(&one, &r).unwrap());
+    let keep: Vec<_> = full.relations.iter().filter(|x| x.component == 0).collect();
+    assert_eq!(keep.len(), reduced.relations.len());
+    for (p, q) in keep.iter().zip(&reduced.relations) { assert_eq!(p.reading, q.reading); }
+}
+
+// ── I-SC-D13: the counted rate under omitted registrations ─────────────────
+//
+// Merging a group of consecutive steps into one: if every step in the group
+// is resolved with one sign, the merged step is resolved (|ΣΔ| = Σ|Δ| >
+// Σ δΔ ≥ δ_first + δ_last). So for any coarsening into G groups,
+// #(groups resolved with one sign throughout) ≤ Γ_coarse ≤ G.
+
+#[test]
+fn sc_d13_gamma_under_coarsening_is_bounded() {
+    let v = [0.0, 1.0, 2.0, 2.0, 1.0, 1.0, 4.0];
+    let series = |idx: &[usize]| edges(idx.iter().map(|&i| vec![vec![v[i]]]).collect(), 0.25);
+    let gamma = |idx: &[usize]| PersistenceChange::new(&series(idx)).evolution_counts()[0].changed_steps;
+    assert_eq!(gamma(&[0, 1, 2, 3, 4, 5, 6]), 4);
+    // Groups {0→2}, {2→4}, {4→6}: the first is resolved with one sign throughout.
+    let g = gamma(&[0, 2, 4, 6]);
+    assert!((1..=3).contains(&g));
+}
