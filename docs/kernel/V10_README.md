@@ -239,7 +239,7 @@ Every V10 reading traces through these links, in this order, from observation to
 
 **How the three shape structure and freedom.** Relation is the primitive (links 3–4). What persists across the sequence is structure; what changes is freedom (link 7). Superposition and entanglement are the two sides of that one reading at δ: each relation, coupling or arrangement is held by a constraint or permitted to change (PC-D1). Tunneling is what is exchanged across the relations while this happens. It is read beside the other two, never as a factor of them, and its own change and its coupling to structural change are read by the same forms (link 10). Whether supplied energy shifts the balance from structure toward freedom is an observational question for a registered sequence (OC-SC-3, I-SC-1), not a model.
 
-**Names.** Superposition, entanglement and tunneling are the kernel's names for freedom, connection and energy (G1-K). Each is defined only by its form in this chain, read over registered data. The names carry no meaning beyond that form: no unobserved quantity, model or fitted abstraction enters through them (W6, W12).
+**Names.** Superposition, entanglement and tunneling are the kernel's names for freedom, connection and energy (G1-K), defined only by their forms in this chain over registered data. Where these names intersect the same terms in quantum mechanics, the intersection may be cited as a declared comparison (C). No form, input or reading here is based on that construct (W6, W12).
 
 ## 2.1 Operators
 
