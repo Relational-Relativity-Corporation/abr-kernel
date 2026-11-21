@@ -1062,6 +1062,11 @@ by increasing held energy, the share of relations whose change is resolved at δ
 does not decrease across phase boundaries. κ_δ measures how distinct an
 arrangement is, not freedom. The first statement is kept above.
 
+Derived (2026-11-21, Generator): I-SC-D3 to I-SC-D8, relating proportional
+state, coupled change, circulation and the declared sequence
+(`V10_README.md` §2.6, `tests/v10_structural_consistency.rs`). OC-SC-4 partly
+derived.
+
 Open conditions: OC-SC-1 to OC-SC-4 (`derived_invariants.rs` Part II).
 
 ---

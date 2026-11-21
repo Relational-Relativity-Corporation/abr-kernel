@@ -323,6 +323,21 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 
 Code: `src/persistence_change.rs` (`EdgeSeries`, `relation_changes`, `coupling_across_components`, `coupling_across_steps`, `arrangement_steps`, `PersistenceChange`, `coupled_change_pairs`); `GroundReading::freedom` is the PC reading. Drafted as Proposed in `dffee32`; **Declared (Origin, 2026-11-21, 7th).**
 
+## 2.6 Derived structural consistency (I-SC-D3 to I-SC-D8)
+
+Mathematical results on the V10 forms (Derived, Generator 2026-11-21; for Verifier review). Each is checked in `tests/v10_structural_consistency.rs` and stated in `derived_invariants.rs` Part II. They establish how the forms relate, nothing empirical.
+
+| ID | Result | What it says |
+| --- | --- | --- |
+| **I-SC-D3** | A[f] = λ·A[e] at s and s+1 ⇒ Δ[f] = λ·Δ[e]: every change minor vanishes. If λ moves to λ′, the change minor is (λ′ − λ)·(Δ_i[e]·A_j[e] − Δ_j[e]·A_i[e]) | Proportional state with a fixed ratio implies coupled change. A moving ratio is connected in state and free in change |
+| **I-SC-D4** | A[f] = λ·A[e] + c, c fixed ⇒ change minors vanish; state minor A_i[e]·c_j − A_j[e]·c_i | Coupled change (PC2) reads a connection the proportional grade (V1) misses; the converse of D3 fails |
+| **I-SC-D5** | Ξ_{s+1} = Ξ_s + Ξ(B(Δ_s)) exactly; the sign of Ξ is held over a step where \|Ξ(B(Δ))\| < \|Ξ_s\| | The sustained grade has its own persistence condition, the counterpart of I-SC-D1 |
+| **I-SC-D6** | A_{s+1} = κ·A_s, κ > 0 ⇒ minors scale by κ², circulations by κ | Change without reorganization: every relation changes (PC1) while arrangement (PC3) and sustained grade hold |
+| **I-SC-D7** | δΔ_1 + δΔ_2 = δΔ_whole + 2·δA_{s+1}: same-sign resolved halves resolve the whole; the whole can be resolved while no half is; opposite halves can cancel | F_δ is not monotone under omitting registrations: which registrations are declared is part of the reading (T6, Df6) |
+| **I-SC-D8** | A crossing at PC3 ⇒ `minor_change_bound` > hw_s + hw_{s+1} | Changes small against the arrangement's resolution never reorganize it |
+
+**OC-SC-4**, the relation between held minor pattern and sustained circulation, is partly derived: D5 gives the sustained grade its own persistence condition, and D6 a common sufficient condition under which both hold. A general relation remains open.
+
 ---
 
 # Part 3. Traceability
@@ -399,7 +414,7 @@ Code: `src/persistence_change.rs` (`EdgeSeries`, `relation_changes`, `coupling_a
 - **RPPI-V10** RPPI admission for the V10 forms (A, B, Ξ, the ground variables). The V9 admission path is behind the V9 fence.
 - **OC-V-4** observer circulation measure. *(OC-V-1, OC-V-2 and OC-V-3 closed 2026-11-21: V1, V2, V3.)*
 - ~~**TIME**~~ resolved 2026-11-21 (10th): Φ retired; V5 and R4 restated over counted steps (Part 9).
-- **OC-SC-1 to OC-SC-4** structural consistency (OC-SC-3 now stated in the declared mathematics, §2.0 link 10; it awaits registered data) (V8; `derived_invariants.rs` Part II, I-SC): a registered sequence across a phase change; independent lattice registrations to melting; the mapping from carrier exchange to A_p; the relation between held and sustained connection.
+- **OC-SC-1 to OC-SC-4** structural consistency (OC-SC-3 now stated in the declared mathematics, §2.0 link 10; it awaits registered data. OC-SC-4 partly derived, §2.6) (V8; `derived_invariants.rs` Part II, I-SC): a registered sequence across a phase change; independent lattice registrations to melting; the mapping from carrier exchange to A_p; the relation between held and sustained connection.
 - **OC-Z-1** "extent" in σ; rename σ. **OC-F-1** H as a shared frame.
 - **OC-RS-1 to 5**, **OC-RE-1**, **OC-E-1**, **OC-OBS-3**, **OC-RES-1 to 4**, **OC-RD-1, 2**, **OC-T-1**.
 - **E5–E8** F1 re-read, W7 renames, Κ name, Φ_relational name. *(E1–E4 decided 2026-11-21: V3.)*
@@ -452,6 +467,7 @@ Code: `src/persistence_change.rs` (`EdgeSeries`, `relation_changes`, `coupling_a
 | 2026-11-21 (10th) | **No time in V10.** The rule of the 9th applied to every remaining time-bearing quantity: restated over counted steps of relational evolution where the record allows, retired otherwise. **Φ retired** (Φ_stability = ι·τ_stability takes a lifetime as input and no registered sequence of the locus exists to count from): `phi_v`, `phi_v_log10`, `phi_s`, `accumulation_condition` and five tests behind the V9 fence; VR-Φ-01, VR-ΦS-01 historical comparison; I-RE's stated observable basis withdrawn, OC-RE-1 open. **V5 restated:** Γ[e,c] = steps with change resolved (PC1), Λ̂ = Γ/steps; `evolution_counts`. **R4 restated:** window = count of consecutive registrations, δ per value; T_W withdrawn. Default build 72 tests, with `v9` 169 | R4, V5, V7, I-RE; Part 7 TIME resolved |
 | 2026-11-21 (11th) | **W15, time is never primitive** (Origin): a registered time may enter as a declared intersection, described as such, never as an input to a kernel form, an ordering of a sequence, or a basis. The 9th and 10th amendments' wording "time is not a variable" and "no time in V10" overstated the rule and is corrected here; both texts are kept. **τ = ħ/ε stays retired** (computed through a construct, not registered). **Φ restored** as a declared intersection (C) and out of the V9 fence; I-RE's basis stays withdrawn; ħ/Γ-converted lifetimes excluded. V5 and R4: the count is the reading; a clock duration may be cited beside it. Default build 77 tests, with `v9` 169 | W15; R4, V5, V7; 9th and 10th wording |
 | 2026-11-21 (12th) | **W14 audit items 2–7 applied** (Origin). (2) hc/λ: a declared mapping through a construct, its output Projected and cited as an intersection; the photon-edge carrier is the registered wavenumber 1/λ; readings shown identical by test; EF-14, VR-γ-01 and the `[OBS]` fixtures relabelled. (3) OC-T-1 restated on V3, no mechanism posited. (4) Bell "violations" and the J[v] 29/52 matches relabelled as cited intersections, with the registered quantity named (coincidence counts; resolved Zeeman components). (5) §13.1 constants classed: h, ħ, c, e defined by convention; the electron value fitted (CODATA 2018). (6) Source classing of database values required before citing (Observed vs Ritz; measured vs ħ/Γ-converted lifetimes; migration guide step 3); the per-value check is application work. (7) The classical/quantum passage read as a bounded intersection; the V9 entanglement definition given an amendment pointer. Default build 78 tests, with `v9` 170. All original text kept | W14 audit closed at kernel level; V3, R9a, OC-T-1, I-E, J[v], §13.1 |
+| 2026-11-21 (13th) | **Derived structural consistency I-SC-D3 to I-SC-D8** (Generator; mathematical, for Verifier review): fixed-ratio and offset coupling of change, additive circulation and its persistence condition, change without reorganization under uniform rescaling, dependence of readings on the declared registrations, and the change needed for a crossing. Ten tests. OC-SC-4 partly derived. No declaration changed. Default build 88 tests, with `v9` 180 | §2.6; OC-SC-4 |
 
 ---
 

@@ -1762,6 +1762,48 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            (`minor_change_bound`, `step_preserves_sign`).
 //   I-SC-D2  Per minor at δ, freedom and connection are complementary.
 //
+// Derived (Generator, 2026-11-21; tests/v10_structural_consistency.rs):
+//   I-SC-D3  Fixed ratio locks change. If A[f] = λ·A[e] in every component at
+//            s and s+1, then Δ[f] = λ·Δ[e] and every change minor of (e, f)
+//            vanishes in both PC2 families: proportional state with a fixed
+//            ratio implies coupled change. Corollary: if the ratio moves
+//            (λ → λ'), the pair stays proportional in state at each
+//            registration while its change minor is
+//            (λ' − λ)·(Δ_i[e]·A_j[e] − Δ_j[e]·A_i[e]): connected in state,
+//            free in change.
+//   I-SC-D4  Offset locks change without proportional state. If
+//            A[f] = λ·A[e] + c with c fixed over the step, Δ[f] = λ·Δ[e], so
+//            the change minors vanish, while the state minor is
+//            A_i[e]·c_j − A_j[e]·c_i, generally resolved. The coupled-change
+//            grade (PC2) reads a connection the proportional grade (V1) does
+//            not. The converse of I-SC-D3 fails.
+//   I-SC-D5  Circulation is additive over a step. Ξ and B are linear, so
+//            Ξ_{s+1} = Ξ_s + Ξ(B(Δ_s)) exactly. Persistence condition for the
+//            sustained grade: the sign of Ξ cannot change over a step where
+//            |Ξ(B(Δ))| < |Ξ_s|, because a sign changes only through zero
+//            (the circulation counterpart of I-SC-D1; `step_preserves_sign`).
+//   I-SC-D6  Uniform positive rescaling holds every sign. If A_{s+1} = κ·A_s,
+//            κ > 0, every minor scales by κ² and every circulation by κ: the
+//            arrangement (PC3) and the sustained grade are held while every
+//            non-zero relation changes (PC1). Change without reorganization.
+//   I-SC-D7  The declared sequence is part of the reading. Comparing a record
+//            declared with registrations (s, s+1, s+2) and the same record
+//            with s+1 omitted, δΔ_1 + δΔ_2 = δΔ_whole + 2·δA_{s+1}. (a) Halves
+//            resolved with the same sign resolve the whole with that sign.
+//            (b) The whole can be resolved while neither half is. (c) Halves
+//            resolved with opposite signs can cancel to an unresolved whole.
+//            F_δ is therefore not monotone under omitting registrations.
+//   I-SC-D8  A crossing needs change larger than both resolutions. A minor
+//            resolved with opposite signs at s and s+1 has
+//            |Δm| > hw_s + hw_{s+1}, so `minor_change_bound` exceeds
+//            hw_s + hw_{s+1}. Changes small against the arrangement's
+//            declared resolution never produce a crossing.
+//
+// OC-SC-4 (held pattern vs sustained circulation), partly derived: I-SC-D5
+// gives the sustained grade its own persistence condition; I-SC-D6 gives a
+// common sufficient condition (uniform positive rescaling) under which both
+// hold. A general relation between the two is still open.
+//
 // Proposed (framework-level, awaiting observation):
 //   I-SC-1   Condensate-to-plasma axis. Along registrations of one declared
 //            system ordered by increasing held energy, κ_δ (resolved minors
