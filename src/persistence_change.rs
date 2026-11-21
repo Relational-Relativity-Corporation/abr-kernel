@@ -589,3 +589,68 @@ impl PersistenceChange {
         }).collect()
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Relation transitions (Origin, 2026-11-21)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// "The readings locate a transition when the degree of freedom becomes
+// evident, or the persistent structure conversely." Per relation and
+// component, along the declared order:
+//   - freedom becomes evident: the PC1 reading turns to freedom (change
+//     resolved at δ) after a held run of structure;
+//   - persistent structure becomes evident: the reading turns to structure
+//     after a held run of freedom.
+// A state is held when it lasts at least `min_hold` consecutive steps (a
+// declared parameter: a one-step fluctuation is not persistence). Each new
+// held state is compared with the last held state, so a fluctuation that
+// returns to the earlier state is not a transition. No threshold on any
+// share is involved: the reading is per relation, at its own δ.
+
+/// One relation's reading turns and holds.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RelationTransition {
+    pub edge: usize,
+    pub component: usize,
+    /// The first step of the new held state.
+    pub step: usize,
+    /// Freedom: freedom becomes evident. Structure: persistent structure
+    /// becomes evident.
+    pub to: Reading,
+    /// How many steps the new state holds.
+    pub held_for: usize,
+}
+
+impl PersistenceChange {
+    /// Every relation transition, ordered by step.
+    pub fn relation_transitions(&self, min_hold: usize) -> Vec<RelationTransition> {
+        assert!(min_hold >= 1, "a held state lasts at least one step");
+        let mut keys: Vec<(usize, usize)> = self.relations.iter().map(|r| (r.edge, r.component)).collect();
+        keys.sort();
+        keys.dedup();
+        let mut out = Vec::new();
+        for (edge, component) in keys {
+            let mut seq: Vec<&RelationChange> =
+                self.relations.iter().filter(|r| r.edge == edge && r.component == component).collect();
+            seq.sort_by_key(|r| r.step);
+            // Runs of one reading: (first step, reading, length).
+            let mut runs: Vec<(usize, Reading, usize)> = Vec::new();
+            for r in seq {
+                match runs.last_mut() {
+                    Some(last) if last.1 == r.reading => last.2 += 1,
+                    _ => runs.push((r.step, r.reading, 1)),
+                }
+            }
+            let mut held: Option<Reading> = None;
+            for (step, reading, len) in runs {
+                if len < min_hold { continue; }
+                if let Some(h) = held {
+                    if h != reading { out.push(RelationTransition { edge, component, step, to: reading, held_for: len }); }
+                }
+                held = Some(reading);
+            }
+        }
+        out.sort_by_key(|t| (t.step, t.edge, t.component));
+        out
+    }
+}

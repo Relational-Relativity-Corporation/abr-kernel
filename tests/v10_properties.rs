@@ -673,3 +673,28 @@ fn prop_isc_d6_resolution_conditions_under_rescaling() {
     exercised(&UP, "I-SC-D6 unresolved state resolves under κ > 1, fixed δ");
     exercised(&DOWN, "I-SC-D6 resolved state unresolves under κ < 1, fixed δ");
 }
+
+// ── Relation transitions (Origin, 2026-11-21) ──────────────────────────────
+// Per relation: transitions alternate direction; each new state holds at
+// least min_hold steps; with min_hold = 1 they are exactly the reading changes.
+
+#[test]
+fn prop_relation_transitions_alternate_and_hold() {
+    static N: AtomicUsize = AtomicUsize::new(0);
+    for_all("relation transitions", |r| {
+        let s = random_edges(r, (1, 4), (1, 2), (3, 9), 0.5);
+        let pc = PersistenceChange::new(&s);
+        let hold = r.usize(1, 3);
+        let t = pc.relation_transitions(hold);
+        for e in 0..s.n_edges() { for c in 0..s.k() {
+            let mine: Vec<_> = t.iter().filter(|x| x.edge == e && x.component == c).collect();
+            for w in mine.windows(2) { assert_ne!(w[0].to, w[1].to); assert!(w[0].step < w[1].step); }
+            assert!(mine.iter().all(|x| x.held_for >= hold));
+            if !mine.is_empty() { hit(&N); }
+            let readings: Vec<Reading> = pc.relations.iter().filter(|x| x.edge == e && x.component == c).map(|x| x.reading).collect();
+            let changes = readings.windows(2).filter(|w| w[0] != w[1]).count();
+            assert_eq!(pc.relation_transitions(1).iter().filter(|x| x.edge == e && x.component == c).count(), changes);
+        }}
+    });
+    exercised(&N, "relation transitions found");
+}

@@ -161,3 +161,4 @@ Both packages stay in review, per the Verifier, until these dispositions are che
 | Commit | Item | Tests |
 |---|---|---|
 | `f811e6d` | `PersistenceChange::step_profile`: structure and freedom counts per step at every level, a declared summary (C) for following readings along an energy order (Part 9 entry 18) | `step_profile_partitions_every_level_by_step`. Default build 118 tests, with `v9` 210 |
+| `(this commit)` | `PersistenceChange::relation_transitions` (Origin's criterion: freedom becomes evident, or persistent structure becomes evident, per relation; `min_hold` declared; compared with the last held state). Part 9 entry 19 | 2 fixtures and `prop_relation_transitions_alternate_and_hold`. Default build 121 tests, with `v9` 213 |

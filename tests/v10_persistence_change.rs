@@ -366,3 +366,32 @@ fn step_profile_partitions_every_level_by_step() {
     assert_eq!(sum(&|p| p.across_steps), total(&pc.across_steps.as_ref().unwrap().readings.iter().map(|x| x.reading).collect::<Vec<_>>()));
     assert_eq!(sum(&|p| p.arrangement), total(&pc.arrangement.as_ref().unwrap().iter().map(|x| x.reading).collect::<Vec<_>>()));
 }
+
+// ── Relation transitions (Origin, 2026-11-21) ──────────────────────────────
+
+#[test]
+fn transitions_are_turns_of_a_held_reading_in_either_direction() {
+    // One relation: held structure, then held freedom, a one-step
+    // fluctuation, then held structure again.
+    //   values: 0 0 0 0 1 2 3 4 4 5 5 5 5
+    //   PC1:     S S S F F F F S F S S S      (δ small)
+    let v = [0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0, 4.0, 5.0, 5.0, 5.0, 5.0];
+    let a: Vec<Vec<Vec<f64>>> = v.iter().map(|&x| vec![vec![x]]).collect();
+    let pc = PersistenceChange::new(&edge_series(a, 0.01));
+    let t = pc.relation_transitions(3);
+    assert_eq!(t.len(), 2);
+    assert_eq!((t[0].step, t[0].to), (3, Reading::Freedom));   // freedom becomes evident
+    assert_eq!((t[1].step, t[1].to), (9, Reading::Structure)); // persistent structure becomes evident
+    // The one-step structure at step 7 and the freedom at step 8 are not transitions at min_hold 3.
+    assert_eq!(pc.relation_transitions(1).len(), 4);
+}
+
+#[test]
+fn a_fluctuation_back_to_the_held_state_is_not_a_transition() {
+    // S S S F S S S: the single freedom does not hold, and the structure after
+    // it is the same held state as before.
+    let v = [0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0];
+    let a: Vec<Vec<Vec<f64>>> = v.iter().map(|&x| vec![vec![x]]).collect();
+    let pc = PersistenceChange::new(&edge_series(a, 0.01));
+    assert!(pc.relation_transitions(2).is_empty());
+}
