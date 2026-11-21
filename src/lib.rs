@@ -99,3 +99,5 @@ pub mod ground_variables;
 // operator parameters (ρ, χ and cc[p] retired from V10). One registration is
 // insufficient information. No phases.
 pub mod relational_field;
+
+pub mod persistence_change;

@@ -267,6 +267,35 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 | **V7** | **Φ, coherence density** | Φ[v] = ι[v] · τ[v]; Φ_stability = ι·τ_stability; collective Φ[S] = ι[S]·τ[S], ι[S] = Σ ι[vᵢ]; accumulation condition Φ[S] > Σ Φ[vᵢ] (KR §13.10). Φ_relational = ħ/κ[region] goes to Regional M (name E8) | Name Declared (Origin, 2026-11-14); Φ_stability Observed (29 loci); |
 | **V8** | **Minor pattern P(F)** | For a registration: { sign_δ m_ij(e,f) ∈ {+, −, not resolved} } over edge pairs e < f resolved at δ and component pairs i < j. Over a sequence each minor is held not resolved, held resolved, or reorganizing (§1.2). Consistent by construction: edge order (swapping e, f negates every minor together), positive component rescaling (signs unchanged), any non-zero rescaling (zeros unchanged), offsets (cancel in A); depends on the components declared through M (R9a). **κ_δ** = resolved / evaluated minors: a declared summary (C), not the object. **Persistence condition (Derived):** a minor cannot change sign over a step whose change bound \|Δm_ij\| < \|m_ij\|, because a sign changes only through zero; \|Δm_ij\| ≤ \|A[i][e]·A_p[j][f]\| + \|A_p[i][e]·A[j][f]\| + \|A_p[i][e]·A_p[j][f]\| plus the same bound for the second product. Open derivations in `derived_invariants.rs` Part II, I-SC | Declared (2026-11-21); I-SC-D1, I-SC-D2 Derived; I-SC-1 to 3 Proposed (OC-SC-1 to 4). `minor_pattern`, `minor_histories`, `minor_change_bound`, `step_preserves_sign` |
 
+## 2.5 Structure and freedom as persistence and change (PC) — Proposed
+
+**Principle (Origin, 2026-11-21, as stated).** Where relations permit change, freedom increases. Where constraints limit change, structure increases. **Structure is persistence; change is freedom.** Connection is shared structure: relations held together by a constraint.
+
+**Object.** Declared edges e, components c, registrations t = 0..n−1 ordered by an observable property of the process (T6), with edge field A_t[c][e] and half-width δA_t[c][e]. Change is read only between consecutive registrations (Df3), the prior always the earlier (Df2): Δ_s[c][e] = A_{s+1}[c][e] − A_s[c][e] (A_p, K5), δΔ_s = δA_s + δA_{s+1}. The edge field may be node-derived (A = x[s] − x[t]) or registered per edge (R3 ratio form; entry Proposed).
+
+**One rule at every level:** change resolved at δ → **freedom**; change not resolved → **structure** (change held below δ: persistence).
+
+| ID | Level | Mathematics | Needs |
+| --- | --- | --- | --- |
+| **PC1** | Relation | \|Δ_s[c][e]\| > δΔ_s[c][e] → freedom; else structure | n ≥ 2 |
+| **PC2** | Coupling of change | Change minor over two consecutive readings r, r′: μ(e,f) = Δ_r[e]·Δ_r′[f] − Δ_r′[e]·Δ_r[f], half-width by the product bound. Not resolved → the two changes are locked in proportion: one constraint holds them (shared structure, connection). Resolved → independent change (freedom). Reading pairs: **(a)** components i < j at one step; **(b)** one component at steps s, s+1. Relations that persist at PC1 enter no pair | (a) k ≥ 2; (b) n ≥ 3 |
+| **PC3** | Arrangement | The minor on A, m_ij(e,f) (V8), at registrations s and s+1: same state at δ → structure; different state → freedom | k ≥ 2, n ≥ 2 |
+| **PC4** | Shares | At each level, over one evaluated set: F_δ = freedom / evaluated, S_δ = structure / evaluated. A declared summary (C), not the object. Levels are read beside each other, not merged | — |
+
+**Derived (mathematical; each checked in `tests/v10_persistence_change.rs`):**
+
+| ID | Statement |
+| --- | --- |
+| **PC-D1** | Complementarity: at each level every evaluated reading is exactly one of structure or freedom at δ; S_δ + F_δ = 1 |
+| **PC-D2** | Resolution: every half-width is non-decreasing in δ, so freedom at δ′ is freedom at every δ ≤ δ′; over a fixed evaluated set F_δ is non-increasing in δ. Structure at a coarse δ is change held below that δ, never "nothing changed" (O1, W2) |
+| **PC-D3** | Invariance: offsets cancel in A and Δ; rescaling a component by λ ≠ 0 (values and δ together) changes no reading; swapping e and f negates every minor and changes no reading |
+| **PC-D4** | Forced constraint: in a node-derived field, edges with the same endpoints have identical A, so their coupling is fixed by the declaration: an identity, not a reading (V1); excluded and listed. Every cycle of a node-derived field satisfies Σ ±Δ[e] = 0 identically (K7); only edge-registered values make it a test |
+| **PC-D5** | Minimum information: below the "Needs" column the result is a declaration gap, never a reading |
+
+**Consistency with the declared forms.** V1's grades (identity, proportional, sustained) are each read *held* over the sequence: structure under PC. Consistent. **V2 reads a minor held resolved as freedom; under PC a held state is persistence, so structure** (Part 6, conflict 10). PC2(b) reads freedom with one component, so freedom no longer requires a second component when n ≥ 3. Energy's role: what is exchanged when relations change; constraint limits change under supplied energy. The mapping from ε to Δ remains OC-SC-3.
+
+Code: `src/persistence_change.rs` (`EdgeSeries`, `relation_changes`, `coupling_across_components`, `coupling_across_steps`, `arrangement_steps`, `PersistenceChange`). Status: **Proposed (Generator draft, 2026-11-21)**; V2 and V8 code unchanged until Origin decides.
+
 ---
 
 # Part 3. Traceability
@@ -293,6 +322,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 | **New `ground_variables.rs` (V1–V3, V8)** | — | Minor pattern and histories over a declared sequence; energy (carrier form), freedom (minor form), connection (identity, proportional, sustained grades); declaration findings (Primary Region applies to the sustained grade only; no process sequence) through the unchanged `operator_a` and `operator_b` | **Done** |
 | **New `relational_field.rs` (Df6)** | Phase 1, then Phase 2 from the second observation | `RelationalField::new(&rel, registrations, carriers)`: at least two registrations; A, B, Ξ at each registration and A_p, B_p, Ξ_p over each step, with the ground variables over the sequence, in one call. **No operator parameters.** One registration: `NoProcessSequence` (insufficient information) | **Done** |
 | **V9 fence (W13)** | All V9 elements available by default | Cargo feature `v9`, off by default, gates the ρ-weighted operators, the superseded readers and `diagnostic_exec`, `provenanced_exec`, `admission`. Default build: 68 tests; with `v9`: 153. Package `10.1.0`. `examples/v10_relational_field.rs` template; `docs/kernel/v10_migration.md` | **Done** |
+| **New `persistence_change.rs` (PC, Proposed)** | — | Structure and freedom as persistence and change at three levels (relation, coupling of change, arrangement), on node-derived or edge-registered edge fields; derived properties PC-D1 to PC-D5 tested (14 tests) | **Drafted; awaiting Origin** |
 | `admission.rs` adjacency use | — | Review for one-pass, no-split execution | To do |
 | Tests | Consecutive | Kept; add K7 tests and a no-split test | Direction tests added (`757262a`) |
 | Kernel text: direction of evolution vs analysis | One direction only | Paragraph, figure, comments at pred(e), Σ_pred, A_persistence; B wording | **Done (`757262a`)** |
@@ -328,6 +358,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 | 7 | **ID collisions.** VR G1–G12, E1–E4, D1–D8 collide with G1–G4 and E1–E8 | VR | Renumber VR with a prefix (e.g. VR-A1) |
 | 8 | ~~Kernel branch~~ | Part 4 | **Resolved 2026-11-21:** V10 code work is on `claude/tender-galileo-gcquso` |
 | 9 | ~~χ component-pair term~~ | K3 | **Dissolved 2026-11-21:** χ retired from V10 |
+| 10 | **Freedom read from persistence.** V2 and V8 read a minor *held resolved* over the sequence as freedom. Under PC (§2.5) a held state is persistence, hence structure; freedom is change. κ_δ (resolved minors on A) then measures how distinct an arrangement is, not freedom, which bears on how I-SC-1 is stated | V2, V8, I-SC-1; §2.5 | Proposed: restate V2 as PC1–PC3 (freedom = change resolved at δ); restate the V8 table (held → structure, reorganizing → freedom); restate I-SC-1 on F_δ of PC1 (the condensate end constrained, the plasma end free). Origin decides; the alternative is to keep V2 and read PC beside it |
 
 ---
 
@@ -338,6 +369,8 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 - **OC-D-1** whether a backward reading's direction is recorded per output or per run.
 *(OC-K-1, ρ correspondence and saturating form, dissolved 2026-11-21: ρ, χ and cc retired from V10, K3.)*
 - **A-3** empty-sum semantics.
+- **PC** structure and freedom as persistence and change (§2.5; Part 6, conflict 10): adopt PC1–PC4, and whether V2, V8 and I-SC-1 are restated on it.
+- **ER-1** edge-valued registration: a registered value per declared edge and component with δ, entering `EdgeSeries::from_edge_values` (R3 ratio form). Needed wherever the observation is the relation, not the state.
 - **RPPI-V10** RPPI admission for the V10 forms (A, B, Ξ, the ground variables). The V9 admission path is behind the V9 fence.
 - **OC-V-4** observer circulation measure. *(OC-V-1, OC-V-2 and OC-V-3 closed 2026-11-21: V1, V2, V3.)*
 - **OC-SC-1 to OC-SC-4** structural consistency (V8; `derived_invariants.rs` Part II, I-SC): a registered sequence across a phase change; independent lattice registrations to melting; the mapping from carrier exchange to A_p; the relation between held and sustained connection.
