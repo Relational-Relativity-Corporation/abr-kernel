@@ -7,8 +7,7 @@
 
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{
-    compute_rho, operator_a, operator_b, operator_circulation, operator_r, DeclaredRelations,
-    EdgeProvenance, NodeField,
+    operator_a, operator_b, operator_circulation, DeclaredRelations, EdgeProvenance, NodeField,
 };
 use abr_kernel::relational_field::*;
 
@@ -80,8 +79,11 @@ fn persistence_is_the_difference_of_each_form_because_the_forms_are_linear() {
     }
 }
 
+// Declared historical comparison with V9 (runs with `--features v9`).
+#[cfg(feature = "v9")]
 #[test]
 fn circulation_sign_equals_the_v9_r_minus_b_sign() {
+    use abr_kernel::operators::{compute_rho, operator_r};
     // V9's R − B is ρ[src]·Ξ on the spatial term; ρ > 0 here, so the signs agree.
     let rel = chain();
     let x = NodeField::new(vec![vec![3.0, 1.0, 2.0]]);

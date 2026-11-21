@@ -51,6 +51,18 @@
 //   No numerical result is itself an observable. D holds projections
 //   admitted through M. Bounded over D. No claim beyond D.
 
+// ── V9 fence (Origin, 2026-11-21) ────────────────────────────────────────
+// Retired and superseded V9 elements compile only with the `v9` feature,
+// which is off by default: the ρ-weighted operators (compute_rho*,
+// operator_sigma, antisymmetric_term, operator_e_primary, operator_r,
+// operator_e, operator_r_persistence, operator_e_v5, require_rho_declaration,
+// require_cc_declaration), the superseded readers (epsilon_e,
+// detection_indicator, superposition_condition, superposition_resolved,
+// entanglement_condition, decoherence_condition, tunneling_floor_holds), and
+// the V9 execution paths built on them (diagnostic_exec, provenanced_exec,
+// admission). V10 work cannot use them by accident: a call does not compile.
+// V9 work opts in visibly with `features = ["v9"]`. The code stays where it
+// was, with its history. See docs/kernel/v10_migration.md.
 pub mod operators;
 pub mod derived_invariants;
 
@@ -59,13 +71,16 @@ pub mod derived_invariants;
 // unchanged (Req-5). Bounded first implementation — supported scope is stated
 // in admission.rs.
 pub mod provenance;
+#[cfg(feature = "v9")]
 pub mod provenanced_exec;
+#[cfg(feature = "v9")]
 pub mod admission;
 
 // Diagnostic execution of the ABR operators over experimental relational
 // fields (Origin directive, 2026-11-07). Thin wrapper: calls the unchanged
 // operators.rs functions; mandatory edge provenance; non-blocking warnings,
 // blocking errors. Independent of admission.rs.
+#[cfg(feature = "v9")]
 pub mod diagnostic_exec;
 
 // Kernel V10 ground variables (Origin, 2026-11-21): energy (tunneling),

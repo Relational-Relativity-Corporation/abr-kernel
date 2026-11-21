@@ -455,6 +455,7 @@ pub const C_DECLARED: f64 = 2.997_924_58e8;
 ///
 /// # Returns
 /// ε[e] in the same units as ι[v] (kg at Primary Region, declared per region).
+#[cfg(feature = "v9")]
 pub fn epsilon_e(delta_iota_e: f64, indicator: f64) -> f64 {
     debug_assert!(
         indicator == 0.0 || indicator == 1.0,
@@ -491,6 +492,7 @@ pub fn epsilon_e(delta_iota_e: f64, indicator: f64) -> f64 {
 ///
 /// # Returns
 /// 1.0 if antisymmetric term is non-zero, 0.0 otherwise.
+#[cfg(feature = "v9")]
 pub fn detection_indicator(r_antisymmetric_e: f64, tol: f64) -> f64 {
     if r_antisymmetric_e.abs() > tol { 1.0 } else { 0.0 }
 }
@@ -808,27 +810,32 @@ mod tests {
 
     // ── ε[e] and 𝟙[e] ────────────────────────────────────────────────────
 
+    #[cfg(feature = "v9")]
     #[test]
     fn epsilon_e_active_edge() {
         assert!((epsilon_e(2.0, 1.0) - 2.0).abs() < TOL);
         assert!((epsilon_e(-2.0, 1.0) - 2.0).abs() < TOL);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn epsilon_e_inactive_edge() {
         assert!((epsilon_e(5.0, 0.0)).abs() < TOL);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn detection_indicator_nonzero_antisymmetric() {
         assert!((detection_indicator(0.5, TOL) - 1.0).abs() < TOL);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn detection_indicator_zero_antisymmetric() {
         assert!((detection_indicator(0.0, TOL) - 0.0).abs() < TOL);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn detection_indicator_at_tolerance_boundary() {
         assert!((detection_indicator(TOL, TOL) - 0.0).abs() < 1e-15);
@@ -986,6 +993,7 @@ mod tests {
 
     // ── Cross-invariant consistency ───────────────────────────────────────
 
+    #[cfg(feature = "v9")]
     #[test]
     fn epsilon_zero_when_indicator_zero() {
         let large_delta_iota = 1e10;
@@ -1268,6 +1276,7 @@ mod tests {
 ///
 /// # Returns
 /// true when ε[e] > tol — transition edge carries nonzero relational energy contrast.
+#[cfg(feature = "v9")]
 pub fn tunneling_floor_holds(epsilon_e: f64, tol: f64) -> bool {
     epsilon_e.abs() > tol
 }
@@ -1404,6 +1413,7 @@ pub fn tunneling_tau_bounded(tau_v: f64) -> bool {
 /// k = vf/ve. `tol` is used both as an absolute value in Δ units and as a
 /// relative ratio tolerance. A Δ result of 0.0 is not filtered here.
 /// No code change authorized.
+#[cfg(feature = "v9")]
 pub fn superposition_condition(delta_field: &[Vec<f64>], tol: f64) -> bool {
     let n_edges = if delta_field.is_empty() { return false; } else { delta_field[0].len() };
     let n_components = delta_field.len();
@@ -1420,6 +1430,7 @@ pub fn superposition_condition(delta_field: &[Vec<f64>], tol: f64) -> bool {
     false // all pairs proportional — field is one-dimensional
 }
 
+#[cfg(feature = "v9")]
 fn are_proportional(delta_field: &[Vec<f64>], e: usize, f: usize, n_components: usize, tol: f64) -> bool {
     // Find the first nonzero component of edge e to establish the ratio k.
     let mut k: Option<f64> = None;
@@ -1471,6 +1482,7 @@ fn are_proportional(delta_field: &[Vec<f64>], e: usize, f: usize, n_components: 
 /// # Returns
 /// true when the structure has moved beyond the superposition condition —
 /// when B has an observable continuation to accumulate.
+#[cfg(feature = "v9")]
 pub fn superposition_resolved(has_interior: bool) -> bool {
     has_interior
 }
@@ -1543,6 +1555,7 @@ pub fn superposition_resolved(has_interior: bool) -> bool {
 ///
 /// # Returns
 /// true if entanglement condition holds at edge e.
+#[cfg(feature = "v9")]
 pub fn entanglement_condition(indicator: f64) -> bool {
     indicator == 1.0
 }
@@ -1557,6 +1570,7 @@ pub fn entanglement_condition(indicator: f64) -> bool {
 ///
 /// # Returns
 /// true if decoherence condition holds (𝟙[e] = 0 and ε[e] ≈ 0).
+#[cfg(feature = "v9")]
 pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
     indicator == 0.0 && epsilon_e.abs() <= tol
 }

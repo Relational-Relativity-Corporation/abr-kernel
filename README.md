@@ -95,30 +95,33 @@ Requires a Rust toolchain (`cargo`). No external dependencies.
 ```
 git clone https://github.com/Relational-Relativity-Corporation/abr-kernel.git
 cd abr-kernel
-cargo test
+cargo test                                  # Kernel V10 only (V9 fenced)
+cargo test --features v9                    # V10 and the V9 record
+cargo run --example v10_relational_field    # V10 end-to-end template
 cargo run --bin provenance_demo
 ```
 
-`cargo test` runs 63 library tests (`abr_kernel`) and 3
-`provenance_demo` tests. `cargo run --bin provenance_demo` prints the
-H-alpha photon edge reconstruction described below.
+**The V9 fence.** Retired and superseded V9 elements (the ρ-weighted
+operators, the superseded readers, and the V9 execution paths `diagnostic_exec`,
+`provenanced_exec` and `admission`) compile only with the `v9` feature, which is
+off by default. V10 work cannot use them by accident: a call does not compile.
+V9 work opts in visibly with `features = ["v9"]`. The code stays where it was,
+with its history. See `docs/kernel/v10_migration.md`.
 
-`cargo test` also runs the V9 conformance suite in `tests/v9_conformance.rs`
-(35 tests, none ignored) and the V9 admission suite in `tests/v9_admission.rs`
-(12 tests), plus one `compile_fail` doctest in `src/admission.rs`. The four
-`[V9-REQUIRED]` tests exercise the bounded V9 admission interface (see Kernel V9 — RPPI
-Enforcement Status below).
+`cargo test` (V10 only) runs 68 tests: 42 library, 3 `provenance_demo`, 18
+ground variables and 5 relational field. Building without the `v9` feature is
+itself a check that no V10 module depends on a fenced element.
 
-`cargo test` also runs the diagnostic execution suite in `tests/diagnostic_exec.rs`
-(13 implementation tests over synthetic fixtures) and one `compile_fail` doctest in
-`src/diagnostic_exec.rs` (a persistence prior cannot be assembled by hand).
+`cargo test --features v9` runs all 153 tests: 63 library, 3 `provenance_demo`,
+13 diagnostic execution (`tests/diagnostic_exec.rs`), 19 ground variables, 6
+relational field, 12 V9 admission (`tests/v9_admission.rs`), 35 V9 conformance
+(`tests/v9_conformance.rs`) and 2 `compile_fail` doctests. The four
+`[V9-REQUIRED]` conformance tests exercise the bounded V9 admission interface
+(see Kernel V9 — RPPI Enforcement Status below). The two V10 tests that compare
+against V9 forms run only here, as declared historical comparisons.
 
-
-`cargo test` also runs the Kernel V10 suites: `tests/v10_ground_variables.rs`
-(19 tests) and `tests/v10_relational_field.rs` (6 tests), over synthetic
-fixtures. In total, `cargo test` runs 153 tests: 63 library, 3 `provenance_demo`,
-13 diagnostic execution, 19 ground variables, 6 relational field, 12 admission,
-35 conformance and 2 doctests.
+`cargo run --bin provenance_demo` prints the H-alpha photon edge reconstruction
+described below.
 
 **Verification (2026-11-21).** A clean-room build of the release commit (fresh
 clone, no cache) compiles with no warnings and passes all 153 tests. An
@@ -144,6 +147,10 @@ frozen V8 implementation (`8.0.0`); V10 adds the `ground_variables` and
 `relational_field` modules.
 
 ### `docs/kernel/` — what the kernel is
+
+**`v10_migration.md`** — redoing a repository in Kernel V10
+The V10 admissibility rule (W13), the V9 fence, a V9 → V10 mapping of every
+fenced element, the steps for one repository, and what not to carry over.
 
 **`V10_README.md`** — the canonical statement of Kernel V10
 Every V10 item by ID, from the relational declaration of variables and
@@ -203,6 +210,11 @@ resolved (freedom) or reorganizing. Connection is graded identity,
 proportional and sustained. A reading that cannot be calculated is a finding
 about the declaration (Primary Region, or domain not fully declared), never a
 statement of absence. See `kernel_reference.md` §21.
+
+**`examples/v10_relational_field.rs`** (Kernel V10)
+End-to-end template using only the public V10 API: declare relations, a
+sequence of registrations with δ and an energy carrier; form the relational
+field; read the three ground variables and their findings.
 
 **`src/relational_field.rs`** (Kernel V10, Df6)
 `RelationalField::new` forms a relational field from at least two consecutive
@@ -440,6 +452,19 @@ preserve the provenance of earlier implementations; they do not designate
 V9 or V8 as the current canonical mathematical reference. The frozen V8
 operator implementation is an implementation baseline within the V9 and V10
 development record, not a second source of mathematical authority.
+
+### Kernel V10.1 package release: the V9 fence (2026-11-21)
+
+- Package `abr-kernel` `10.0.0` → `10.1.0`. Cargo feature `v9`, off by
+  default, now gates the retired and superseded V9 elements. **Breaking for
+  V9 consumers:** a repository that calls a fenced element must add
+  `features = ["v9"]` or be redone in V10 (`docs/kernel/v10_migration.md`).
+- V10 admissibility rule declared (W13): V10 work uses only V10 forms; a
+  retired element enters a V10 result only as a declared historical
+  comparison.
+- `examples/v10_relational_field.rs` added (end-to-end template).
+- No code removed and no V9 formula changed; all 153 tests pass with
+  `--features v9`, and 68 pass without it.
 
 ### Kernel V10 package release (2026-11-21)
 

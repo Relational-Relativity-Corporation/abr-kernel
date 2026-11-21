@@ -747,6 +747,7 @@ pub fn operator_delta(x: &NodeField, rel: &DeclaredRelations) -> PrimaryEdgeFiel
 //   χ₀ > 0: at χ₀ = 0 the map is 0/0 wherever χ = 0; at χ₀ < 0 it is
 //   singular at χ = −χ₀. Neither is evaluable.
 
+#[cfg(feature = "v9")]
 pub fn require_rho_declaration(rho_base: f64, chi_0: f64) {
     assert!(rho_base.is_finite(),
         "ρ_base must be declared by M as a finite value");
@@ -754,6 +755,7 @@ pub fn require_rho_declaration(rho_base: f64, chi_0: f64) {
         "χ₀ must be declared by M as a finite positive value in the dimension of χ");
 }
 
+#[cfg(feature = "v9")]
 pub fn require_cc_declaration(cc: &[f64], pairs: &[(usize, usize)]) {
     assert_eq!(cc.len(), pairs.len(),
         "cc must be declared by M for every declared component pair");
@@ -761,6 +763,7 @@ pub fn require_cc_declaration(cc: &[f64], pairs: &[(usize, usize)]) {
         "cc values declared by M must be finite");
 }
 
+#[cfg(feature = "v9")]
 pub fn compute_rho_primary(
     delta_field: &PrimaryEdgeField,
     rel: &DeclaredRelations,
@@ -820,6 +823,7 @@ pub fn compute_rho_primary(
 //     contributes nothing, is to be established from the operator
 //     declaration. Status: OPEN — not classified. No change.
 
+#[cfg(feature = "v9")]
 pub fn operator_sigma(
     delta_field: &PrimaryEdgeField,
     rel: &DeclaredRelations,
@@ -856,6 +860,7 @@ pub fn operator_sigma(
 //
 // AUDIT (§22): Status: DECLARED — PRESERVE (formula); OPEN (ρ component).
 
+#[cfg(feature = "v9")]
 pub fn antisymmetric_term(
     delta_field: &PrimaryEdgeField,
     rel: &DeclaredRelations,
@@ -883,6 +888,7 @@ pub fn antisymmetric_term(
 //
 // AUDIT (§22): Status: DECLARED — PRESERVE (composition of Δ and Σ).
 
+#[cfg(feature = "v9")]
 pub fn operator_e_primary(
     x: &NodeField,
     rel: &DeclaredRelations,
@@ -1064,6 +1070,7 @@ pub fn operator_b(g: &EdgeField, rel: &DeclaredRelations) -> EdgeField {
 // AUDIT (§22): ρ_base, χ₀: M-SUPPLIED. Max selection, saturating form:
 //   OPEN — ORIGIN DECLARATION REQUIRED.
 
+#[cfg(feature = "v9")]
 pub fn compute_rho(a: &EdgeField, rel: &DeclaredRelations, rho_base: f64, chi_0: f64) -> Vec<f64> {
     require_rho_declaration(rho_base, chi_0);
     (0..rel.n_nodes).map(|i| {
@@ -1097,6 +1104,7 @@ pub fn compute_rho(a: &EdgeField, rel: &DeclaredRelations, rho_base: f64, chi_0:
 //   Empty adjacency (audit A-3, open since Kernel V8): as for Σ. Status: OPEN — not
 //     classified. No change. Applies also to operator_r_persistence.
 
+#[cfg(feature = "v9")]
 pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f64]) -> EdgeField {
     let k = bg.k;
     let pairs = &bg.comp_pairs;
@@ -1182,6 +1190,7 @@ pub fn circulation_half_width(dg: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<V
 //
 // AUDIT (§22): Status: DECLARED — PRESERVE (composition).
 
+#[cfg(feature = "v9")]
 pub fn operator_e(
     f: &NodeField,
     rel: &DeclaredRelations,
@@ -1241,6 +1250,7 @@ pub fn operator_a_persistence(
 // ρ_base and χ₀ M-supplied (V7.1). Max selection and saturating form OPEN
 // (inherits from ρ audit).
 
+#[cfg(feature = "v9")]
 pub fn compute_rho_persistence(
     a_persistence: &[Vec<f64>],
     rel: &DeclaredRelations,
@@ -1283,6 +1293,7 @@ pub fn operator_b_persistence(
 //
 // AUDIT (§22): Status: DECLARED — PRESERVE (formula); OPEN (ρ component).
 
+#[cfg(feature = "v9")]
 pub fn operator_r_persistence(
     b_persistence: &[Vec<f64>],
     rel: &DeclaredRelations,
@@ -1311,6 +1322,7 @@ pub fn operator_r_persistence(
 //
 // AUDIT (§22): Status: DECLARED — PRESERVE (composition).
 
+#[cfg(feature = "v9")]
 pub fn operator_e_v5(
     f: &NodeField,
     rel: &DeclaredRelations,
@@ -1372,6 +1384,7 @@ mod tests {
     // Fixture declaration of χ₀ for synthetic tests. It reproduces the
     // pre-V7.1 behavior of these fixtures so their expected values carry
     // over unchanged. It is a test-fixture declaration, not a kernel value.
+    #[cfg(feature = "v9")]
     const FIXTURE_CHI_0: f64 = 1.0;
 
     fn test_rel_from_edges(n_nodes: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
@@ -1391,11 +1404,15 @@ mod tests {
         test_rel_from_edges(n, edges)
     }
 
+    #[cfg(feature = "v9")]
+
     fn open_chain(n: usize) -> DeclaredRelations { directed_chain(n) }
 
     fn gradient_field(n: usize) -> NodeField {
         NodeField::new(vec![(0..n).map(|i| (n - 1 - i) as f64).collect()])
     }
+
+    #[cfg(feature = "v9")]
 
     fn uniform_field(n: usize, v: f64) -> NodeField {
         NodeField::new(vec![vec![v; n]])
@@ -1511,6 +1528,7 @@ mod tests {
     // On the chain 0 → 1 → 2, R reads e1's arriving relation e0 backward
     // (the −ρ·Σ_pred term), and e0 keeps its declared direction: it arrives
     // where e1 begins. Reading is backward; evolution is not.
+    #[cfg(feature = "v9")]
     #[test]
     fn r_reads_arriving_relations_backward_without_reversing_them() {
         let rel = test_rel_from_edges(3, vec![(0,1), (1,2)]);
@@ -1540,6 +1558,7 @@ mod tests {
     }
 
     // [MATH] For an isolated edge (no adjacency), Σ = Δ exactly.
+    #[cfg(feature = "v9")]
     #[test]
     fn primary_sigma_equals_delta_for_isolated_edge() {
         let rel = test_rel_from_edges(2, vec![(0,1)]);
@@ -1551,6 +1570,7 @@ mod tests {
 
     // [MATH] B is not evaluated in the primary kernel. Single edge: adj⁺ = adj⁻ = ∅.
     // relational_isolation() = true. Σ = Δ.
+    #[cfg(feature = "v9")]
     #[test]
     fn primary_b_absent_no_accumulation() {
         let rel = test_rel_from_edges(2, vec![(0,1)]);
@@ -1565,6 +1585,7 @@ mod tests {
     // The antisymmetric expression is zero as a field effect, not a structural one.
     // The 0.0 results are returned unchanged. On declared relations, they are
     // compared with the observed distinctions per Declaration Correspondence.
+    #[cfg(feature = "v9")]
     #[test]
     fn primary_delta_zero_on_uniform_field() {
         let rel = open_dag();
@@ -1575,6 +1596,7 @@ mod tests {
     }
 
     // [MATH] Non-uniform field: Δ is not uniformly zero.
+    #[cfg(feature = "v9")]
     #[test]
     fn primary_delta_nonzero_on_gradient_field() {
         let rel = open_dag();
@@ -1658,6 +1680,7 @@ mod tests {
     // [IMPL] E V4 produces finite output on declared DAG.
     // Note: the cross-topology block executes only when component pairs are
     // declared, with cc[p] supplied by M. With empty pairs it does not execute.
+    #[cfg(feature = "v9")]
     #[test]
     fn abr_e_v4_finite() {
         let rel = open_dag();
@@ -1668,6 +1691,7 @@ mod tests {
     }
 
     // [MATH] Stable field: A_persistence = 0. Correct declared result.
+    #[cfg(feature = "v9")]
     #[test]
     fn abr_a_persistence_stable_field_zero() {
         let rel = directed_chain(3);
@@ -1681,6 +1705,7 @@ mod tests {
     // [MATH] V5 spatial phase is identical to V4 E output.
     // Kernel V8: evaluated at a second declared observation; the first declared
     // observation is evaluated by operator_e alone and supplies the prior.
+    #[cfg(feature = "v9")]
     #[test]
     fn abr_e_v5_spatial_matches_v4() {
         let rel = open_dag();
@@ -1697,6 +1722,7 @@ mod tests {
 
     // [MATH] Two-step evolution: A_persistence[step 2] = E_step2 − E_step1.
     // Kernel V8: the first declared observation is evaluated by operator_e alone.
+    #[cfg(feature = "v9")]
     #[test]
     fn abr_two_cycle_evolution() {
         let rel = open_dag();
@@ -1713,6 +1739,7 @@ mod tests {
     }
 
     // [MATH] Terminal persistence edge does not accumulate (no wraparound).
+    #[cfg(feature = "v9")]
     #[test]
     // Kernel V8: evaluated over two declared observations.
     fn abr_b_persistence_open_boundary() {
@@ -1734,6 +1761,7 @@ mod tests {
     // [MATH] Stable field: A_p = 0 → B_p = 0 → R_p = 0.
     // Zero antisymmetric expression here is the correct declared result
     // for a stable observable. It is not a failure.
+    #[cfg(feature = "v9")]
     #[test]
     fn abr_r_persistence_stable_field_zero() {
         let rel = open_dag();
@@ -1767,6 +1795,7 @@ mod tests {
     // Outputs are not expected to be numerically equal — Σ acts on Δ directly;
     // R acts on B(A). No claim about antisymmetric expression is made here.
     // Note: R with empty pairs does not exercise the cc path.
+    #[cfg(feature = "v9")]
     #[test]
     fn sigma_and_r_both_finite_on_declared_relations() {
         let rel = directed_chain(4);
@@ -1940,6 +1969,7 @@ mod tests {
     // ── V7.1 M-declaration requirement ───────────────────────────────────
 
     // [IMPL] χ₀ must be declared by M; zero is not evaluable.
+    #[cfg(feature = "v9")]
     #[test]
     #[should_panic(expected = "χ₀ must be declared by M")]
     fn chi_0_undeclared_zero_is_rejected() {
@@ -1949,6 +1979,7 @@ mod tests {
     }
 
     // [IMPL] cc must be declared by M for every declared component pair.
+    #[cfg(feature = "v9")]
     #[test]
     #[should_panic(expected = "cc must be declared by M")]
     fn cc_missing_for_declared_pair_is_rejected() {
@@ -1960,6 +1991,7 @@ mod tests {
     // [MATH] Unit invariance: expressing the same observation in a different
     // unit (x and χ₀ rescaled together) rescales Σ by the same factor exactly.
     // ρ is unchanged, so no unit choice enters the relational output.
+    #[cfg(feature = "v9")]
     #[test]
     fn sigma_invariant_under_declared_unit_change() {
         let rel = directed_chain(4);

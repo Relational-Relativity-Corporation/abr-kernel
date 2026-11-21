@@ -8,7 +8,7 @@
 
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{
-    compute_rho, operator_a, operator_b, operator_r, DeclaredRelations, EdgeProvenance, NodeField,
+    operator_a, DeclaredRelations, EdgeProvenance, NodeField,
 };
 
 fn rel(n: usize, edges: &[(usize, usize)]) -> DeclaredRelations {
@@ -189,8 +189,11 @@ fn at_the_primary_region_only_sustained_connection_is_a_gap() {
     ]);
 }
 
+// Declared historical comparison with V9 (runs with `--features v9`).
+#[cfg(feature = "v9")]
 #[test]
 fn sustained_sign_matches_r_minus_b_from_the_operators() {
+    use abr_kernel::operators::{compute_rho, operator_b, operator_r};
     let rel = chain();
     let xs = [vec![vec![3.0, 1.0, 2.0]], vec![vec![3.4, 1.2, 2.0]]];
     let seq: Vec<Registration> = xs.iter().map(|x| reg(x.clone(), 0.0)).collect();

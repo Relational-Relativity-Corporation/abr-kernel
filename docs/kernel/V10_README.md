@@ -199,6 +199,7 @@ The V10 variable register (DRAFT, Generator, 2026-11-14). Marks: ✔ defined, �
 | **W10** | **Relational invariant:** a structure that holds across independent observing chains (W4), at every mapping order where it can be formed, and across consecutive cycles (R10). Persistence across a mapping order only by construction (a factor that cancels) is not a test at that order | Proposed (2026-11-16) |
 | **W11** | **Rule of inclusion:** each declared variable is read for each system; where one is not declared, the missing declaration is named | Origin, 2026-11-15 |
 | **W12** | **Reference frame of comparison.** Results are stated as observed within H, bounded within D. The standard frame of comparison is abstract, not observed; a relational result is not judged against it, and no outside-validation statement is made. Legacy mathematics is not discarded: it enters as declared mappings (the ladder) and its values as Projected or Provider-declared comparison quantities | Declared (Origin, 2026-11-16) |
+| **W13** | **V10 admissibility.** V10 work uses only V10 forms. A retired or superseded element enters a V10 result only as a declared historical comparison (C), never as an input. Enforced by the **V9 fence**: retired and superseded V9 elements compile only with the Cargo feature `v9`, off by default, so a V10 call to one does not compile; V9 work opts in visibly. The code and its history stay in place. Redone repositories keep their V9 result beside the V10 result as a declared comparison (`docs/kernel/v10_migration.md`) | Declared (Origin, 2026-11-21) |
 
 ### Method
 
@@ -291,6 +292,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 | `compute_rho*`, `derived_invariants.rs` readers | — | Unchanged | — |
 | **New `ground_variables.rs` (V1–V3, V8)** | — | Minor pattern and histories over a declared sequence; energy (carrier form), freedom (minor form), connection (identity, proportional, sustained grades); declaration findings (Primary Region applies to the sustained grade only; no process sequence) through the unchanged `operator_a` and `operator_b` | **Done** |
 | **New `relational_field.rs` (Df6)** | Phase 1, then Phase 2 from the second observation | `RelationalField::new(&rel, registrations, carriers)`: at least two registrations; A, B, Ξ at each registration and A_p, B_p, Ξ_p over each step, with the ground variables over the sequence, in one call. **No operator parameters.** One registration: `NoProcessSequence` (insufficient information) | **Done** |
+| **V9 fence (W13)** | All V9 elements available by default | Cargo feature `v9`, off by default, gates the ρ-weighted operators, the superseded readers and `diagnostic_exec`, `provenanced_exec`, `admission`. Default build: 68 tests; with `v9`: 153. Package `10.1.0`. `examples/v10_relational_field.rs` template; `docs/kernel/v10_migration.md` | **Done** |
 | `admission.rs` adjacency use | — | Review for one-pass, no-split execution | To do |
 | Tests | Consecutive | Kept; add K7 tests and a no-split test | Direction tests added (`757262a`) |
 | Kernel text: direction of evolution vs analysis | One direction only | Paragraph, figure, comments at pred(e), Σ_pred, A_persistence; B wording | **Done (`757262a`)** |
@@ -336,6 +338,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 - **OC-D-1** whether a backward reading's direction is recorded per output or per run.
 *(OC-K-1, ρ correspondence and saturating form, dissolved 2026-11-21: ρ, χ and cc retired from V10, K3.)*
 - **A-3** empty-sum semantics.
+- **RPPI-V10** RPPI admission for the V10 forms (A, B, Ξ, the ground variables). The V9 admission path is behind the V9 fence.
 - **OC-V-4** observer circulation measure. *(OC-V-1, OC-V-2 and OC-V-3 closed 2026-11-21: V1, V2, V3.)*
 - **OC-SC-1 to OC-SC-4** structural consistency (V8; `derived_invariants.rs` Part II, I-SC): a registered sequence across a phase change; independent lattice registrations to melting; the mapping from carrier exchange to A_p; the relation between held and sustained connection.
 - **OC-Z-1** "extent" in σ; rename σ. **OC-F-1** H as a shared frame.
@@ -383,6 +386,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 | 2026-11-21 (3rd) | **Df6, simultaneity**: all operators and ground variables occur together; composition order and registration sequence are orders of analysis; no phases; a relational field needs at least two consecutive registrations. Amendment paragraphs added to `kernel_reference.md`, `operators_notation_and_constraint.md`, `role_separation_and_operator_application.md`, `abr_operators_plain.md` | Df6, K5; Phase 1 conflict resolved |
 | 2026-11-21 (4th) | **Kernel V10 release**: package `abr-kernel` `10.0.0`; release designation synchronized across code comments and documents; `kernel_reference.md` restates V10 (§1 Df1, §15.6 I-SC, §21) | Release |
 | 2026-11-21 (5th) | **ρ and χ retired from V10**, with ρ_base, χ₀, the max selection, the saturating form and cc[p]: an undeclared model of energy's effect on circulation, superseded by V3 and V8. Parameter-free circulation Ξ added (K8). Relational field formed without operator parameters. V9 functions unchanged | K3, K4, K5, K8, V1, V4; OC-K-1 and conflict 9 dissolved |
+| 2026-11-21 (6th) | **V10 admissibility (W13) and the V9 fence**: retired and superseded V9 elements behind the `v9` feature, off by default; migration guide; end-to-end template; package `10.1.0`. RPPI admission for V10 forms opened as a new item | W13; Part 4; Part 7 |
 
 ---
 
