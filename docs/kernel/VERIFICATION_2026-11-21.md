@@ -155,3 +155,9 @@ whether its text survives in the added lines:
 | The chemistry ingest accepts inputs that can change readings without a finding | Handled in the `abr-relational-chemistry` package |
 
 Both packages stay in review, per the Verifier, until these dispositions are checked.
+
+## 10. Added after the review began (not yet reviewed)
+
+| Commit | Item | Tests |
+|---|---|---|
+| `f811e6d` | `PersistenceChange::step_profile`: structure and freedom counts per step at every level, a declared summary (C) for following readings along an energy order (Part 9 entry 18) | `step_profile_partitions_every_level_by_step`. Default build 118 tests, with `v9` 210 |
