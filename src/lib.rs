@@ -65,3 +65,10 @@ pub mod admission;
 // operators.rs functions; mandatory edge provenance; non-blocking warnings,
 // blocking errors. Independent of admission.rs.
 pub mod diagnostic_exec;
+
+// Kernel V10 ground variables (Origin, 2026-11-21): freedom (superposition),
+// connection (entanglement) and energy (tunneling) read at declared
+// resolution δ through the unchanged operators. A variable that cannot be
+// calculated is a finding about the declaration (Primary Region, or domain
+// not fully declared), never a statement of absence.
+pub mod ground_variables;
