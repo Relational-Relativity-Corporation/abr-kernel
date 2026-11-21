@@ -369,6 +369,12 @@
 /// ℏ — reduced Planck constant (J·s).
 /// Observable provenance: spectroscopic frequency-energy measurement.
 /// Used in τ[v] expression as the declared action scale.
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
+// that labels steps of relational evolution, not a variable (abr_operators_plain
+// §'Temporal ordering is not the primitive'). No registration relates energy to
+// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
+// V9 fence; numbers it produced are kept only as declared historical comparison.
 pub const HBAR: f64 = 1.054_571_817e-34;
 
 /// e_unit — elementary charge unit (C).
@@ -573,6 +579,12 @@ pub fn epsilon_photon_edge(lambda_m: f64) -> f64 {
 ///
 /// # Arguments
 /// * `lambda_m` — declared wavelength from M (meters)
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
+// that labels steps of relational evolution, not a variable (abr_operators_plain
+// §'Temporal ordering is not the primitive'). No registration relates energy to
+// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
+// V9 fence; numbers it produced are kept only as declared historical comparison.
 pub fn tau_photon_edge(lambda_m: f64) -> f64 {
     let eps = epsilon_photon_edge(lambda_m);
     HBAR / eps
@@ -602,6 +614,12 @@ pub fn tau_photon_edge(lambda_m: f64) -> f64 {
 /// # Returns
 /// N[v] — dimensionless count of declared relational intervals within
 /// the measured stability interval.
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
+// that labels steps of relational evolution, not a variable (abr_operators_plain
+// §'Temporal ordering is not the primitive'). No registration relates energy to
+// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
+// V9 fence; numbers it produced are kept only as declared historical comparison.
 pub fn n_relational_cycles(tau_stability_s: f64, lambda_m: f64) -> f64 {
     debug_assert!(tau_stability_s > 0.0, "τ_stability must be positive");
     debug_assert!(lambda_m > 0.0, "λ must be positive");
@@ -630,6 +648,12 @@ pub fn n_relational_cycles(tau_stability_s: f64, lambda_m: f64) -> f64 {
 /// # Arguments
 /// * `a_persistence_coupling` — A_persistence[e_coupling]
 /// * `cos_theta` — cos(θ[e_v, e_coupling]): coupling projection.
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
+// that labels steps of relational evolution, not a variable (abr_operators_plain
+// §'Temporal ordering is not the primitive'). No registration relates energy to
+// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
+// V9 fence; numbers it produced are kept only as declared historical comparison.
 pub fn tau_v(a_persistence_coupling: f64, cos_theta: f64) -> f64 {
     let denominator = (a_persistence_coupling * cos_theta).abs();
     debug_assert!(
@@ -640,6 +664,12 @@ pub fn tau_v(a_persistence_coupling: f64, cos_theta: f64) -> f64 {
 }
 
 /// τ[v] for the isolated locus case: τ = ℏ / E[v].
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
+// that labels steps of relational evolution, not a variable (abr_operators_plain
+// §'Temporal ordering is not the primitive'). No registration relates energy to
+// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
+// V9 fence; numbers it produced are kept only as declared historical comparison.
 pub fn tau_v_isolated(e_v: f64) -> f64 {
     debug_assert!(e_v > 0.0, "E[v] must be positive for an active locus");
     HBAR / e_v
@@ -844,12 +874,14 @@ mod tests {
 
     // ── τ[v] ─────────────────────────────────────────────────────────────
 
+    #[cfg(feature = "v9")]
     #[test]
     fn tau_v_isolated_case() {
         let tau = tau_v_isolated(1.0);
         assert!((tau - HBAR).abs() < TOL);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn tau_v_parallel_coupling() {
         let a_p = 2.0e-20;
@@ -858,6 +890,7 @@ mod tests {
         assert!((tau_par - tau_iso).abs() < TOL);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn tau_v_near_perpendicular_structure() {
         let a_p = 1.0e-20_f64;
@@ -870,6 +903,7 @@ mod tests {
         assert!((ratio - 1.0 / cos_near_perp).abs() < 0.01);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn tau_v_increases_as_cos_theta_decreases() {
         let a_p = 1.0e-20;
@@ -1000,6 +1034,7 @@ mod tests {
         assert!((epsilon_e(large_delta_iota, 0.0)).abs() < TOL);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn phi_v_uses_tau_from_unified_expression() {
         let iota_v = 1.673e-27_f64;
@@ -1034,6 +1069,7 @@ mod tests {
             "Hα ε[e] must match NIST ASD within 0.01%: got {:.6} eV", eps_ev);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn photon_edge_tau_isolated_case() {
         // τ[v] = ℏ / ε[e] at photon edge.
@@ -1049,6 +1085,7 @@ mod tests {
             "Hα τ[v] must be ~3.5e-16 s: got {:.4e}", tau_direct);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn photon_edge_n_hydrogen_n3() {
         // H n=3 emitting locus (Hα transition).
@@ -1293,6 +1330,12 @@ pub fn tunneling_floor_holds(epsilon_e: f64, tol: f64) -> bool {
 ///
 /// # Returns
 /// true if τ[v] < ∞ (finite, as required by tunneling invariant).
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
+// that labels steps of relational evolution, not a variable (abr_operators_plain
+// §'Temporal ordering is not the primitive'). No registration relates energy to
+// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
+// V9 fence; numbers it produced are kept only as declared historical comparison.
 pub fn tunneling_tau_bounded(tau_v: f64) -> bool {
     tau_v.is_finite() && tau_v > 0.0
 }

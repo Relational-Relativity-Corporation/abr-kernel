@@ -194,6 +194,8 @@ See V4 for full table. Unchanged from V4.
 
 ## VR-τ-01 — Relational Progression Interval τ[v]
 
+> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. The entry below is kept as the record.
+
 **Quantity:** τ[v] = ℏ / |A_persistence[e_coupling] · cos(θ[e_v, e_coupling])|
 
 **Four special cases confirmed:** See V4 for full table. Unchanged from V4.
@@ -267,6 +269,8 @@ Unchanged from V4.
 
 ## VR-γ-τ-01 — Relational Progression Interval τ[v] at Photon Edges
 
+> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. The entry below is kept as the record.
+
 **12 values confirmed.** See V4 for full table. Unchanged from V4.
 
 **Support classification:** Derived. Observed (ε[e] values from NIST ASD v5.12).
@@ -274,6 +278,8 @@ Unchanged from V4.
 ---
 
 ## VR-γ-N-01 — Relational Cycle Count N[v] at Photon-Emitting Loci
+
+> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. The entry below is kept as the record.
 
 **H n=3 confirmed:** N = 4.58×10⁶, log₁₀ = 6.66. Unchanged from V4.
 

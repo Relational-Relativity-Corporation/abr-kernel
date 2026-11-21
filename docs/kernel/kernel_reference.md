@@ -691,6 +691,10 @@ Nothing in Part I depends on any statement in Part II.
 
 ### 13.1 Declared Measurement References
 
+*Amended (Origin, 2026-11-21, 9th):* `HBAR` and every τ = ħ/ε form below are
+retired from V10 and behind the V9 fence. The provenance column is under W14
+audit C1 (several values are defined or fitted, not measured).
+
 | Constant | Value | Observable provenance |
 |---|---|---|
 | `HBAR` | 1.054_571_817e-34 J·s | Spectroscopic frequency-energy measurement |
@@ -1423,6 +1427,7 @@ Code: `src/persistence_change.rs`.
 | Kernel V10 release (2026-11-21) | Package `abr-kernel` `9.0.0` → `10.0.0` (Origin decision). Title and release designation updated. §1 Df1 restatement; §15.6 I-SC; §18 `are_proportional` and ρ max-selection rows updated; §21 added (ground variables, minor pattern, relational field). `src/ground_variables.rs`, `src/relational_field.rs`. No operator formula, V9 function signature or existing test expectation changed. |
 | Kernel V10 ρ retirement (2026-11-21) | Origin declaration: ρ, χ, ρ_base, χ₀, the max selection, the saturating form and cc[p] retired from V10 readings; OC-K-1 dissolved. Parameter-free circulation Ξ added (`operator_circulation`). `RelationalField::new` takes no operator parameters. V9 ρ-weighted functions unchanged. |
 | Kernel V10 PC (2026-11-21, 7th) | Origin declaration: structure is persistence, change is freedom (PC1–PC4); V2 restated, V8 re-read, I-SC-1 restated; coupled-change grade of connection; energy as a component; edge-valued registration ER-1; provenance chain (V10_README §2.0). `src/persistence_change.rs`. First V2 form kept as declared comparison |
+| Kernel V10 τ retirement (2026-11-21, 9th) | Origin declaration: the τ = ħ/ε family is retired from V10 (time is a downstream projection, not a variable; no registration relates energy to an interval of evolution). `HBAR`, `tau_photon_edge`, `n_relational_cycles`, `tau_v`, `tau_v_isolated`, `tunneling_tau_bounded` behind the V9 fence. Φ_relational and κ[region] retired as identities. §13 text kept as record |
 | Kernel V10.1 V9 fence (2026-11-21) | Origin declaration W13: V10 work uses only V10 forms. Cargo feature `v9`, off by default, gates the retired and superseded V9 elements (§21.5). Package `10.1.0`. Migration guide and end-to-end template added. No code removed. |
 
 ---

@@ -36,6 +36,14 @@ through M.
 
 Bounded over D. No claim beyond D.
 
+> **Amended (Origin, 2026-11-21, 9th).** τ_relational = ℏ/E[v], Φ_relational
+> and κ[region] are retired from V10. Time is not a variable, and no
+> registration relates energy to an interval of relational evolution. On PDG
+> inputs κ[Primary] = E/ι = c² is the unit conversion returning itself, and
+> Φ_relational = ℏ/c² for every locus: identities, not readings. Φ_stability
+> (a measured lifetime) is open under the same rule (V10_README Part 7, TIME).
+> The text below is kept as the record.
+
 ---
 
 ## Two distinct coherence potentials

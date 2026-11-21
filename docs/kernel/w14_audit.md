@@ -183,7 +183,7 @@ R7.
 
 | # | Item | Recommendation |
 |---|---|---|
-| 1 | B1, τ = ħ/ε family | Retire from V10 readings; fence behind `v9`; keep numbers as historical comparison |
+| 1 | B1, τ = ħ/ε family | **Done 2026-11-21 (9th):** retired entirely from V10 under the time prohibition; fenced behind `v9`; Φ_relational and κ[region] retired as identities |
 | 2 | B2, hc/λ | Registered wavenumber as the carrier; hc/λ only as a declared mapping with Projected outputs; relabel EF-14 and the `[OBS]` fixtures |
 | 3 | B3, OC-T-1 | Restate on V3 or withdraw |
 | 4 | B4, "Confirmed" via Bell bound and spin numbers | Relabel as cited intersections; name the registered quantity |
