@@ -115,9 +115,9 @@ Enforcement Status below).
 
 
 `cargo test` also runs the Kernel V10 suites: `tests/v10_ground_variables.rs`
-(19 tests) and `tests/v10_relational_field.rs` (5 tests), over synthetic
-fixtures. In total, `cargo test` runs 152 tests: 63 library, 3 `provenance_demo`,
-13 diagnostic execution, 19 ground variables, 5 relational field, 12 admission,
+(19 tests) and `tests/v10_relational_field.rs` (6 tests), over synthetic
+fixtures. In total, `cargo test` runs 153 tests: 63 library, 3 `provenance_demo`,
+13 diagnostic execution, 19 ground variables, 6 relational field, 12 admission,
 35 conformance and 2 doctests.
 ---
 
@@ -195,8 +195,10 @@ statement of absence. See `kernel_reference.md` §21.
 
 **`src/relational_field.rs`** (Kernel V10, Df6)
 `RelationalField::new` forms a relational field from at least two consecutive
-registrations and evaluates the spatial operators, persistence and the ground
-variables together, in one call.
+registrations and evaluates A, B, the circulation Ξ, their persistence and the
+ground variables together, in one call, with **no operator parameters**. ρ and
+χ (ρ_base, χ₀, the max selection, the saturating form) and cc[p] are retired
+from V10; the ρ-weighted V9 functions in `operators.rs` remain for V9 callers.
 
 **`src/operators.rs`**
 Reference implementation in Rust. Primary kernel (Δ → Σ) and ABR kernel
@@ -440,7 +442,10 @@ development record, not a second source of mathematical authority.
   `role_separation_and_operator_application.md` and `abr_operators_plain.md`,
   with the V9 text retained as record.
 - Release designation synchronized across code comments and documents.
-- Tests: 152 pass (see Building and testing).
+- ρ and χ (with ρ_base, χ₀, the max selection, the saturating form) and
+  cc[p] retired from V10 readings; parameter-free circulation Ξ added
+  (`operator_circulation`). OC-K-1 dissolved.
+- Tests: 153 pass (see Building and testing).
 
 ### Kernel V9 package release (2026-10-25)
 

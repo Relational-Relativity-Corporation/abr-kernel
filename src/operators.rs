@@ -269,6 +269,11 @@
 // Overall ρ status: values M-supplied (V7.1). Two OPEN conditions remain:
 // the max selection (element 2) and the saturating form (element 3).
 //
+// Kernel V10 (Origin, 2026-11-21): ρ and χ are RETIRED from V10 readings; the
+// OPEN conditions above, and OC-K-1, are dissolved for V10. V10 circulation is
+// the parameter-free operator Ξ (`operator_circulation`). The ρ-weighted
+// functions remain for V9 callers and are not used by V10 readings.
+//
 // ── B Activation Condition ───────────────────────────────────────────────
 //
 // B is not evaluated in the primary kernel — not an identity operator.
@@ -1126,6 +1131,49 @@ pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f6
         }
     }
     EdgeField { spatial, comp, comp_pairs: pairs.clone(), k }
+}
+
+// ── Operator Ξ — circulation (Kernel V10, Origin 2026-11-21) ─────────────
+//
+// Ξ(g)[e] = Σ_{f ∈ succ(e)} g[f] − Σ_{p ∈ pred(e)} g[p], per component.
+//
+// The imbalance between what continues from e and what arrives at e, with no
+// weighting. Parameter-free: no ρ, no χ, no cc. Every term traces to declared
+// relations and to g. Linear in g. (Ξ, not C: C is the declared projection, K6.) Empty adjacency evaluates to 0.0 (A-3).
+// pred(e) is read backward (direction of analysis); no edge is reversed.
+//
+// V10 retires ρ and χ (ρ_base, χ₀, the max selection, the saturating form)
+// and the component coupling cc[p] from V10 readings. They imposed a fixed,
+// undeclared model of how local magnitude of change (an energy-like quantity
+// read without a declared carrier) modulates circulation. V10 declares energy
+// with its own carrier and reads its effect on structure from the data. The
+// ρ-weighted functions in this file (compute_rho*, operator_sigma,
+// antisymmetric_term, operator_r, operator_e, operator_e_v5,
+// operator_r_persistence) are unchanged and remain available to V9 callers;
+// they are not used by V10 readings.
+//
+// Applied to g = B(A(x)) this is the V10 circulation of the ABR path; applied
+// to g = Δ(x) it is the circulation of the primary path. V9's R − B equals
+// ρ[src(e)]·Ξ[e] on the spatial term, so the sign of Ξ is the sign V9's
+// indicator read.
+
+pub fn operator_circulation(g: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+    g.iter().map(|c| {
+        (0..rel.n_edges()).map(|e| {
+            let fwd: f64 = rel.succ(e).iter().map(|&f| c[f]).sum();
+            let bwd: f64 = rel.pred(e).iter().map(|&p| c[p]).sum();
+            fwd - bwd
+        }).collect()
+    }).collect()
+}
+
+/// Half-width of Ξ(g) from half-widths dg: Σ_succ dg + Σ_pred dg.
+pub fn circulation_half_width(dg: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+    dg.iter().map(|c| {
+        (0..rel.n_edges()).map(|e| {
+            rel.succ(e).iter().chain(rel.pred(e)).map(|&f| c[f]).sum()
+        }).collect()
+    }).collect()
 }
 
 // ── Operator E (V4 spatial kernel, unchanged) ─────────────────────────────

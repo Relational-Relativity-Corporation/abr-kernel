@@ -79,7 +79,8 @@ pub mod ground_variables;
 // Kernel V10 Df6, simultaneity (Origin, 2026-11-21): all operators and all
 // ground variables occur simultaneously; the composition order and the
 // sequence of registrations are orders of analysis. A relational field is
-// formed from at least two consecutive registrations and evaluates the
-// spatial operators, persistence and the ground variables together. One
-// registration is insufficient information. No phases.
+// formed from at least two consecutive registrations and evaluates A, B, the
+// circulation Ξ, their persistence and the ground variables together, with no
+// operator parameters (ρ, χ and cc[p] retired from V10). One registration is
+// insufficient information. No phases.
 pub mod relational_field;

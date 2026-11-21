@@ -454,9 +454,18 @@ correspondence of the result with observation is determined outside the kernel.
 | R_persistence | R form over B_persistence; spatial component only | `operator_r_persistence(b_persistence, rel, rho_persistence)` |
 | E (spatial and persistence; V9 "Phases 1+2") | spatial, with A_p → B_p → R_p over each consecutive step; evaluated together in a relational field (Df6) | `operator_e_v5(f, rel, pairs, cc, persistence_state, rho_base, chi_0)` |
 | ρ | ρ[i] = ρ_base · χ[i] / (χ₀ + χ[i]); χ[i] = max \|A(x)[e]\| or \|Δ(x)[e]\| over edges incident to i; edge form ρ[e] = ρ[source(e)] | `compute_rho`, `compute_rho_primary`, `compute_rho_persistence` |
+| Ξ (V10) | Ξ(g)[e] = Σ_succ(e) g − Σ_pred(e) g, g = B(A(x)) or Δ(x); parameter-free | `operator_circulation(g, rel)`, `circulation_half_width(dg, rel)` |
 | C | Declared projection: state what it preserves and discards. Not a kernel operator. | — |
 
 ### 11.2 ρ Status
+
+**Kernel V10 (Origin, 2026-11-21): ρ and χ are retired from V10 readings**, with
+ρ_base, χ₀, the max selection, the saturating form and cc[p]. They imposed a
+fixed model of how local magnitude of change (an energy-like quantity read with
+no declared carrier) modulates circulation; V10 declares energy with its own
+carrier and reads its effect on structure from the data (§21). V10 circulation
+is the parameter-free Ξ (§11.1). OC-K-1 is dissolved for V10. The V9 status
+below is retained for V9 callers of the unchanged ρ-weighted functions.
 
 - ρ_base, χ₀: **M-supplied (V7.1)** — no kernel value.
 - χ[i] = max selection: **OPEN** — Origin declaration required for the max
@@ -1140,8 +1149,8 @@ verification only. Synthetic test provenance is not empirical provenance.
 | 𝟙[e] interpretation audit; ε[e] downstream | `derived_invariants.rs` | HOLD |
 | A-11 — ι at photon locus not declared through M | `derived_invariants.rs` | CLOSED — legacy import (SF-PR-16); declared-information rule applies |
 | `are_proportional` edge-order dependence and two-unit tolerance | `derived_invariants.rs` | HOLD for the V9 function, which is unchanged. **Not reached by V10 readings:** V2 uses the minor form, symmetric in edge order with one resolution in one unit (§21.4) |
-| ρ max-selection rule | `operators.rs` | DECLARED (Origin, 2026-11-14; V10 K3) |
-| ρ saturating form | `operators.rs` | OPEN — Origin declaration required |
+| ρ max-selection rule | `operators.rs` | Declared 2026-11-14; **retired from V10 with ρ (2026-11-21)** |
+| ρ saturating form | `operators.rs` | **Dissolved for V10: ρ retired (2026-11-21).** OPEN only for V9 callers |
 | Part II "absence" wording | I-E, joint necessity, photon J[v] | Separate audit |
 | R² = 0.527 at the δι fit | `observable_variable_sets.md` | HOLD |
 | J[v] wording on what M observes | `derived_invariants.rs` | Origin wording decision |
@@ -1276,8 +1285,11 @@ information.
 A **relational field** is formed from a declared sequence of at least two
 consecutive registrations of the same declared relations, ordered by an
 observable property of the process. `RelationalField::new` evaluates, in one
-call, `operator_e` at each registration, `operator_e_v5` with the earlier actual
-output as prior at each step, and the ground variables over the whole sequence.
+call, A, B and the circulation Ξ at each registration, A_p, B_p and Ξ_p over
+each step (prior always the earlier registration), and the ground variables over
+the whole sequence. It takes **no operator parameters**: ρ, χ and cc[p] are
+retired from V10 (§11.2). A, B and Ξ are linear, so B_p and Ξ_p are exactly the
+differences of B and Ξ.
 One registration is insufficient information (`DeclarationGap::NoProcessSequence`):
 its operator outputs are calculated results and building blocks, not a
 relational field. Two registrations are the minimum information, not a
@@ -1329,7 +1341,7 @@ offsets; it depends on the components declared through M.
 |---|---|---|---|---|
 | **Energy** | I-T | how much a relation changes | ε[e] = \|A(c)[e]\| of the declared carrier c; δ_ε[e] = δ_c[s] + δ_c[t]; floor resolved when ε > δ_ε; degree ε/δ_ε | `energy`, `energy_exchange` |
 | **Freedom** | I-S | how many independent ways relations vary | a pair is free when at least one minor is resolved with one sign throughout; F_δ = free / evaluated pairs | `freedom` |
-| **Connection** | I-E | what holds together through evolution | **identity**: A[e] − A[f] not resolved throughout; **proportional**: every minor not resolved throughout; **sustained**: sign of (R − B)[e] = ρ[src]·(Σ_succ B − Σ_pred B) resolved and the same throughout | `connection` |
+| **Connection** | I-E | what holds together through evolution | **identity**: A[e] − A[f] not resolved throughout; **proportional**: every minor not resolved throughout; **sustained**: sign of the circulation Ξ[e] = Σ_succ B − Σ_pred B resolved and the same throughout | `connection` |
 
 Energy has its own carrier, flows whether or not anything reorganizes, and is
 not multiplied by connection; the connected exchange (V3b) reads ε at edges
@@ -1369,6 +1381,7 @@ V10 readings use the forms above.
 | Kernel V9 diagnostic execution (2026-11-07) | Origin directive. `src/diagnostic_exec.rs` added (§11.7): thin A → B → R and persistence execution wrapper over the unchanged operators for experimental fields; mandatory edge provenance with observed/proposed support; non-blocking warnings and blocking errors; observation succession by declared process step. §8 ring/torus clarification (relational evolution, not cyclic relationships); §9 synchronized with the Origin general values ρ_base = 0.5, χ₀ = 1 (`operators.rs` header, `77c65ae`); §10 experimental-field note; §18 A-3 row annotated. No operator form, parameter handling inside an operator, or existing test expectation changed. |
 | Kernel V10 Df6 (2026-11-21) | Origin declaration: all operators and ground variables occur simultaneously; composition order and registration sequence are orders of analysis; no phases. A relational field needs at least two consecutive registrations; one registration is insufficient information. `src/relational_field.rs` added (§11.6 note). §5, §8, §11.1 wording amended with the V9 text retained. No operator form or existing test expectation changed. |
 | Kernel V10 release (2026-11-21) | Package `abr-kernel` `9.0.0` → `10.0.0` (Origin decision). Title and release designation updated. §1 Df1 restatement; §15.6 I-SC; §18 `are_proportional` and ρ max-selection rows updated; §21 added (ground variables, minor pattern, relational field). `src/ground_variables.rs`, `src/relational_field.rs`. No operator formula, V9 function signature or existing test expectation changed. |
+| Kernel V10 ρ retirement (2026-11-21) | Origin declaration: ρ, χ, ρ_base, χ₀, the max selection, the saturating form and cc[p] retired from V10 readings; OC-K-1 dissolved. Parameter-free circulation Ξ added (`operator_circulation`). `RelationalField::new` takes no operator parameters. V9 ρ-weighted functions unchanged. |
 
 ---
 

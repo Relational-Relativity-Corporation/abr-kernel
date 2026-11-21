@@ -48,15 +48,19 @@
 //
 // ── Operators ─────────────────────────────────────────────────────────────
 //
-// Every reading runs through the unchanged operators A (`operator_a`) and B
-// (`operator_b`). No operator formula changes in V10. Resolution is carried as
+// Every reading runs through the operators A (`operator_a`), B (`operator_b`)
+// and the parameter-free circulation Ξ (`operator_circulation`). ρ and χ are
+// retired from V10 readings (Origin, 2026-11-21). No operator formula changes in V10. Resolution is carried as
 // interval half-widths: A and B are linear with coefficients ±1, so
 // δ_A[e] = δ[s] + δ[t] and δ_B = B(δ_A).
 //
 // The frozen V9 readers in `derived_invariants.rs` are unchanged. The forms
 // here supersede them for V10 readings.
 
-use crate::operators::{operator_a, operator_b, DeclaredRelations, EdgeField, NodeField};
+use crate::operators::{
+    circulation_half_width, operator_a, operator_b, operator_circulation, DeclaredRelations,
+    EdgeField, NodeField,
+};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Resolution
@@ -125,8 +129,8 @@ pub enum ConnectionGrade {
     /// Relations that vary together: every minor m_ij(e,f) not resolved,
     /// held through evolution.
     Proportional,
-    /// Persistent circulation: the sign of (R − B)[e] resolved and the same
-    /// through evolution. Needs an interior locus.
+    /// Persistent circulation: the sign of Ξ(B(A(x)))[e] resolved and the
+    /// same through evolution. Needs an interior locus.
     Sustained,
 }
 
@@ -494,11 +498,11 @@ pub fn freedom(seq: &[Registration], rel: &DeclaredRelations) -> Result<Freedom,
 //   PROPORTIONAL  every minor m_ij(e, f) not resolved at every registration:
 //                 the relations vary together. Needs two components; needs no
 //                 interior.
-//   SUSTAINED     sign of (R − B)[e] resolved and the same at every
-//                 registration: persistent circulation. Since ρ > 0 the sign
-//                 is that of Σ_succ B − Σ_pred B, independent of open ρ
-//                 choices (OC-K-1). Needs an interior locus; an edge with no
-//                 neighbour is not formable (IV-3). Scope: the spatial term.
+//   SUSTAINED     sign of the circulation Ξ(B(A(x)))[e] = Σ_succ B − Σ_pred B
+//                 resolved and the same at every registration: persistent
+//                 circulation. Parameter-free (`operator_circulation`); ρ and χ
+//                 are retired from V10 (2026-11-21). Needs an interior locus;
+//                 an edge with no neighbour is not formable (IV-3).
 //
 // The grades are read beside each other and not merged into one number.
 // Shared structure has observational content only between independently
@@ -520,24 +524,19 @@ fn identity_pairs(seq: &[Registration], rel: &DeclaredRelations, held: &[usize])
     out
 }
 
-/// Sustained grade at one registration: bracket sign per component per edge.
+/// Sustained grade at one registration: sign of Ξ(B(A(x)))[e] at δ per
+/// component, through the parameter-free circulation operator. `None` where
+/// the edge has no neighbour in the field (IV-3).
 fn circulation_signs(r: &Registration, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
-    let a = operator_a(&r.x, rel, &[]);
-    let b = operator_b(&a, rel).spatial;
-    let da: Vec<Vec<f64>> = (0..r.x.k)
-        .map(|c| rel.edges.iter().map(|&(s, t)| r.delta[c][s] + r.delta[c][t]).collect())
-        .collect();
-    let db = operator_b(&EdgeField { spatial: da, comp: vec![], comp_pairs: vec![], k: r.x.k }, rel).spatial;
+    let (a, da) = a_with_half_width(r, rel);
+    let k = r.x.k;
+    let b = operator_b(&EdgeField { spatial: a, comp: vec![], comp_pairs: vec![], k }, rel).spatial;
+    let db = operator_b(&EdgeField { spatial: da, comp: vec![], comp_pairs: vec![], k }, rel).spatial;
+    let c = operator_circulation(&b, rel);
+    let dc = circulation_half_width(&db, rel);
     (0..rel.n_edges()).map(|e| {
-        let (succ, pred) = (rel.succ(e), rel.pred(e));
-        if succ.is_empty() && pred.is_empty() { return None; }
-        Some((0..r.x.k).map(|c| {
-            let fwd: f64 = succ.iter().map(|&f| b[c][f]).sum();
-            // Backward READING of arriving relations (Df2a); none is reversed.
-            let bwd: f64 = pred.iter().map(|&p| b[c][p]).sum();
-            let hw: f64 = succ.iter().chain(pred).map(|&f| db[c][f]).sum();
-            sign_at_delta(fwd - bwd, hw)
-        }).collect())
+        if rel.succ(e).is_empty() && rel.pred(e).is_empty() { return None; }
+        Some((0..k).map(|ci| sign_at_delta(c[ci][e], dc[ci][e])).collect())
     }).collect()
 }
 

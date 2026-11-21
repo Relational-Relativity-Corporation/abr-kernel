@@ -4,55 +4,63 @@
 // ── Df6 ───────────────────────────────────────────────────────────────────
 //
 // All operators and all ground variables occur simultaneously throughout
-// relational evolution. A → B → R, the persistence forms A_p → B_p → R_p, and
-// energy, freedom and connection are aspects of one ongoing relational
-// evolution, not stages. The composition order R(B(A(x))) and the sequence of
+// relational evolution. A, B, the circulation Ξ, their persistence
+// differences, and energy, freedom and connection are aspects of one ongoing
+// relational evolution, not stages. The composition order and the sequence of
 // registrations are orders of analysis (Df2a). The observer intersects the
 // system (R10). The only limit on a reading is declared information: too few
 // registrations, too few components, too coarse a δ, or no declared carrier.
 //
 // Consequences in this module:
 //
-//   1. There are no phases. The spatial and persistence operators are both
-//      evaluated on every relational field, at every registration and every
-//      consecutive step.
+//   1. There are no phases. The spatial forms and their persistence are
+//      evaluated together on every relational field, at every registration
+//      and every consecutive step.
 //
 //   2. A relational field is formed from a declared sequence of at least two
 //      consecutive registrations of the same declared relations, ordered by
 //      an observable property of the process (T6). One registration is
 //      insufficient information: nothing about relational evolution can
-//      terminate in one observation. The operators still compute on a single
-//      registration (`operators.rs`), but the result is a building block, not
-//      a relational field.
+//      terminate in one observation.
 //
-//   3. `RelationalField::new` evaluates everything together: the spatial
-//      operators at each registration, persistence over each consecutive step
-//      (the prior is always the earlier actual output, Df2), and energy,
-//      freedom and connection over the whole sequence. None is available
-//      without the others.
+//   3. `RelationalField::new` evaluates everything together, in one call.
+//
+// ── No operator parameters (Origin, 2026-11-21) ───────────────────────────
+//
+// ρ and χ (ρ_base, χ₀, the max selection, the saturating form) and the
+// component coupling cc[p] are retired from V10. A relational field is formed
+// from the declared relations and registrations alone; nothing is weighted by
+// a value without an observable correspondence. At each registration t:
+//
+//     A_t = A(x_t)        B_t = B(A_t)        Ξ_t = Ξ(B_t)
+//
+// and over each consecutive step (prior always the earlier registration, Df2):
+//
+//     A_p = A_{t+1} − A_t      B_p = B(A_p)      Ξ_p = Ξ(B_p)
+//
+// Because A, B and Ξ are linear, B_p = B_{t+1} − B_t and Ξ_p = Ξ_{t+1} − Ξ_t
+// exactly. The V9 nonlinearity came entirely from ρ. Energy's effect on the
+// structure is now read from the data (the minor pattern), not modelled.
 //
 // Two registrations are the minimum information, not a guarantee of enough.
-// Telling reorganization from an unresolved fluctuation may need more
-// registrations or a finer δ; under W2 that remains a statement about the
-// declaration.
-//
-// The operator formulas are unchanged. This module calls `operator_e` and
-// `operator_e_v5` from `operators.rs` and the readers in `ground_variables.rs`.
 
 use crate::ground_variables::{ground_reading, DeclarationGap, EnergyCarrier, GroundReading, Registration};
-use crate::operators::{
-    operator_e, operator_e_v5, DeclaredRelations, EdgeField, PersistenceOutput, PersistenceState,
-};
+use crate::operators::{operator_a, operator_b, operator_circulation, DeclaredRelations, EdgeField};
 
-/// Operator parameters declared by M for this field (no defaults; V7.1).
+/// A, B and Ξ at one registration: spatial[c][e] per component and edge.
 #[derive(Debug, Clone, PartialEq)]
-pub struct OperatorParameters {
-    pub rho_base: f64,
-    pub chi_0: f64,
-    /// Declared component pairs.
-    pub pairs: Vec<(usize, usize)>,
-    /// cc[p], one per declared component pair.
-    pub cc: Vec<f64>,
+pub struct Forms {
+    pub a: Vec<Vec<f64>>,
+    pub b: Vec<Vec<f64>>,
+    /// Ξ, the circulation.
+    pub circulation: Vec<Vec<f64>>,
+}
+
+fn forms_of(a: Vec<Vec<f64>>, rel: &DeclaredRelations) -> Forms {
+    let k = a.len();
+    let b = operator_b(&EdgeField { spatial: a.clone(), comp: vec![], comp_pairs: vec![], k }, rel).spatial;
+    let circulation = operator_circulation(&b, rel);
+    Forms { a, b, circulation }
 }
 
 /// A relational field: one declared intersection with an ongoing relational
@@ -61,11 +69,11 @@ pub struct OperatorParameters {
 pub struct RelationalField {
     /// The declared sequence of registrations.
     pub registrations: Vec<Registration>,
-    /// E = R(B(A(x)), ρ(A(x))) at each registration.
-    pub spatial: Vec<EdgeField>,
-    /// A_p → B_p → R_p over each consecutive step; `persistence[t]` pairs
+    /// A, B, Ξ at each registration.
+    pub spatial: Vec<Forms>,
+    /// A_p, B_p, Ξ_p over each consecutive step; `persistence[t]` pairs
     /// registration t (prior) with registration t + 1 (current).
-    pub persistence: Vec<PersistenceOutput>,
+    pub persistence: Vec<Forms>,
     /// Energy, freedom and connection over the whole sequence.
     pub ground: GroundReading,
 }
@@ -76,7 +84,6 @@ impl RelationalField {
     pub fn new(
         rel: &DeclaredRelations,
         registrations: Vec<Registration>,
-        params: &OperatorParameters,
         carriers: Option<&[EnergyCarrier]>,
     ) -> Result<Self, DeclarationGap> {
         if registrations.len() < 2 {
@@ -88,17 +95,16 @@ impl RelationalField {
         assert!(registrations.iter().all(|r| r.x.n == rel.n_nodes),
             "every registration must cover the declared loci");
 
-        let OperatorParameters { rho_base, chi_0, pairs, cc } = params;
-        let mut spatial: Vec<EdgeField> = Vec::with_capacity(registrations.len());
-        let mut persistence = Vec::with_capacity(registrations.len() - 1);
-        spatial.push(operator_e(&registrations[0].x, rel, pairs, cc, *rho_base, *chi_0));
-        for r in &registrations[1..] {
-            // The prior is the earlier actual output (Df2); never a substitute.
-            let prior = PersistenceState::from_prior(spatial.last().unwrap().clone());
-            let (e, p) = operator_e_v5(&r.x, rel, pairs, cc, &prior, *rho_base, *chi_0);
-            spatial.push(e);
-            persistence.push(p);
-        }
+        let spatial: Vec<Forms> = registrations.iter()
+            .map(|r| forms_of(operator_a(&r.x, rel, &[]).spatial, rel))
+            .collect();
+        let persistence: Vec<Forms> = spatial.windows(2).map(|w| {
+            // The prior is the earlier registration (Df2); never a substitute.
+            let a_p = (0..k).map(|c| {
+                w[1].a[c].iter().zip(&w[0].a[c]).map(|(cur, pri)| cur - pri).collect()
+            }).collect();
+            forms_of(a_p, rel)
+        }).collect();
         let ground = ground_reading(&registrations, rel, carriers);
         Ok(RelationalField { registrations, spatial, persistence, ground })
     }
