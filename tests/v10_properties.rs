@@ -628,3 +628,48 @@ fn prop_isc_d13_gamma_under_coarsening_is_bounded() {
     });
     exercised(&N, "I-SC-D13 merged one-sign group");
 }
+
+// ── I-SC-D6 corrected: resolution conditions under uniform rescaling ───────
+//
+// A_{s+1} = κ·A_s, κ > 0. (i) PC1 freedom iff |κ − 1|·|A| > δA_s + δA_{s+1}.
+// (ii) δ scaled with the values: every PC3 state is held. (iii) δ fixed:
+// κ ≥ 1 holds every resolved state (unresolved may resolve); κ ≤ 1 holds
+// every unresolved state (resolved may unresolve). (iv) Never a crossing.
+
+#[test]
+fn prop_isc_d6_resolution_conditions_under_rescaling() {
+    static UP: AtomicUsize = AtomicUsize::new(0);
+    static DOWN: AtomicUsize = AtomicUsize::new(0);
+    static PC1_STRUCT: AtomicUsize = AtomicUsize::new(0);
+    for_all("I-SC-D6 resolution", |r| {
+        let (m, k) = (r.usize(2, 5), r.usize(2, 3));
+        let a0: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.eighth(-4.0, 4.0)).collect()).collect();
+        let d0: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.delta(0.5)).collect()).collect();
+        let kappa = 2f64.powi(r.int(-2, 2) as i32);
+        let a1: Vec<Vec<f64>> = a0.iter().map(|c| c.iter().map(|v| kappa * v).collect()).collect();
+        let scaled_delta = r.chance(4);
+        let d1: Vec<Vec<f64>> = if scaled_delta {
+            d0.iter().map(|c| c.iter().map(|v| kappa * v).collect()).collect()
+        } else { d0.clone() };
+        let s = EdgeSeries::from_edge_values(vec![a0.clone(), a1], vec![d0.clone(), d1.clone()]).unwrap();
+        // (i)
+        for x in relation_changes(&s) {
+            let cond = (kappa - 1.0).abs() * a0[x.component][x.edge].abs()
+                > d0[x.component][x.edge] + d1[x.component][x.edge];
+            assert_eq!(x.reading == Reading::Freedom, cond);
+            if !cond && a0[x.component][x.edge] != 0.0 && kappa != 1.0 { hit(&PC1_STRUCT); }
+        }
+        // (ii)–(iv)
+        for x in arrangement_steps(&s).unwrap() {
+            if let (AtDelta::Resolved(p), AtDelta::Resolved(q)) = (x.before, x.after) { assert_eq!(p, q); }
+            if scaled_delta { assert_eq!(x.before, x.after); continue; }
+            if kappa >= 1.0 && x.before.is_resolved() { assert_eq!(x.before, x.after); }
+            if kappa <= 1.0 && !x.before.is_resolved() { assert_eq!(x.before, x.after); }
+            if kappa > 1.0 && !x.before.is_resolved() && x.after.is_resolved() { hit(&UP); }
+            if kappa < 1.0 && x.before.is_resolved() && !x.after.is_resolved() { hit(&DOWN); }
+        }
+    });
+    exercised(&PC1_STRUCT, "I-SC-D6 relation changed exactly but unresolved at δ");
+    exercised(&UP, "I-SC-D6 unresolved state resolves under κ > 1, fixed δ");
+    exercised(&DOWN, "I-SC-D6 resolved state unresolves under κ < 1, fixed δ");
+}

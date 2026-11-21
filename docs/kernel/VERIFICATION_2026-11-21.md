@@ -45,6 +45,8 @@ warnings, the example runs, and `bin/provenance_demo` builds with and without `v
 | doctests | 0 | 2 |
 | **Total** | **115** | **207** |
 
+*After Verifier review (17th): two tests added for I-SC-D6, so the totals become 117 and 209 (structural consistency 17, properties 22).*
+
 The library count fell from 42 to 35 because the seven τ = ħ/ε tests moved behind the V9 fence (item 9).
 
 ## 2. Commits
@@ -85,18 +87,19 @@ Verifier. **Correction** = an error found and corrected, original kept.
 | 9 | **τ = ħ/ε retired** from V10: `HBAR`, `tau_photon_edge`, `n_relational_cycles`, `tau_v`, `tau_v_isolated`, `tunneling_tau_bounded` behind the V9 fence | Declared (9th) | `src/derived_invariants.rs` | 7 tests now `v9` only | Code kept in place; records marked historical comparison |
 | 10 | **W15** time is never primitive; **Φ** restored as a declared intersection (C) | Declared (11th) | V10_README W15, V7 | Φ tests run by default again | **The 10th amendment overstated the rule and the 11th corrected it.** Check the final state is consistent: Φ out of the fence, described as an intersection, no invariant based on it, I-RE's basis withdrawn |
 | 11 | **V5 and R4 restated** over counted steps | Declared (10th, 11th) | `PersistenceChange::evolution_counts` | `v5_rate_is_counted_steps_never_time` | ΣΓ equals PC1's freedom count; no clock enters |
-| 12 | **I-SC-D3 to I-SC-D13**: fixed-ratio and offset coupling; additive circulation and its persistence condition; change without reorganization; dependence on the declared registrations; crossing bound; transitivity exactly but not at δ; closure on change; total circulation; locality to components; bounds on Γ | Derived (13th, 15th) | `derived_invariants.rs` Part II; V10_README §2.6 | `v10_structural_consistency.rs` (16); `v10_properties.rs` | The proofs in §5 by hand |
+| 12 | **I-SC-D3 to I-SC-D13** (*I-SC-D6 corrected after Verifier review: resolution conditions stated*): fixed-ratio and offset coupling; additive circulation and its persistence condition; change without reorganization; dependence on the declared registrations; crossing bound; transitivity exactly but not at δ; closure on change; total circulation; locality to components; bounds on Γ | Derived (13th, 15th) | `derived_invariants.rs` Part II; V10_README §2.6 | `v10_structural_consistency.rs` (16); `v10_properties.rs` | The proofs in §5 by hand |
 | 13 | **Property tests**, and the **PC-D2 correction** they found | Derived; Correction (14th) | `tests/v10_properties.rs` | 21 tests, 2000 fields each | That monotonicity in δ is claimed for PC1 and PC2 only; for PC3 only crossings (`pc3_freedom_is_not_monotone_in_delta`) |
 | 14 | **New code for K7 / HB-1** on a series: `is_closed_walk`, `cycle_closure`, `cycle_change_closure`; `circulation_weights` | Derived (15th) | `persistence_change.rs`, `relational_field.rs` | `sc_d10`, `sc_d11`, properties | That traversal is an order of analysis: no edge is reversed |
 
 ## 4. Existing tests whose meaning changed
 
-Each change is stated in the test itself. The Verifier should judge each.
+Each change is stated in the test itself. The Verifier should judge each. *(The first version of this package listed two of the three; corrected after Verifier review.)*
 
 | Test | Before | After | Why |
 |---|---|---|---|
 | `proportional_grade_holds_while_values_change` | Freedom read zero (the first V2 form) | First V2 form still zero, as `v2_held_arrangement`; PC freedom > 0 | Under the 7th amendment the relations *changed*: proportional in state (structure) while changing (freedom) |
 | `ground_reading_complete_over_a_sequence` | Two registrations, complete | Three registrations, complete; with two, one finding (coupling across steps needs three) | PC2(b) needs n ≥ 3; with two registrations that is a declaration finding |
+| `at_the_primary_region_only_sustained_connection_is_a_gap` *(omitted from the first version of this package; added after Verifier review)* | Freedom f_δ = 1.0 (the first V2 form); findings: the sustained-grade gap and connection zero at δ | The first V2 value checked through `v2_held_arrangement`; PC freedom > 0; findings gain `NoProcessSequence` for freedom, before the two previous findings | Two registrations: coupling across steps (PC2(b)) is a declaration finding under the PC rule |
 
 No other assertion was weakened. Tests moved behind the V9 fence (item 9) are unchanged and still run with `v9`.
 
@@ -117,7 +120,9 @@ The Generator checked every line deleted against `main`, mechanically, for
 whether its text survives in the added lines:
 
 - **Kept as amendments.** In the canonical text, amendments are appended to the original row or paragraph.
-- **Lapses found and fixed in this package.** The three §1.2 rows (energy, freedom, connection), the release line and one migration-guide row had been *replaced*. Each original is now restored beside its amendment, taken exactly from `main`.
+- **Lapses found and fixed in this package.** The three §1.2 rows (energy, freedom, connection), the release line and one migration-guide row had been *replaced*.
+  - *As first written here:* "Each original is now restored beside its amendment, taken exactly from `main`."
+  - *Corrected after Verifier review:* that overstates it. The three §1.2 rows and the migration row retain their original substantive cells verbatim, with a label added inside each row. The release line now reads `10.1.0` and records the former `10.0.0` in a note.
 - **Rewritten, not deleted.** The other changed lines were renumbered or reflowed with their text kept: migration steps, open-condition rows, the OC-SC-3 comment.
 - **Code and tests** are recorded by the git history and the commit messages: the `GroundReading` field and the test changes in §4.
 - **`README.md`.** The test counts and package version were updated. The V10.1 counts (68 and 153) are kept as a note.
@@ -129,7 +134,7 @@ whether its text survives in the added lines:
 - **No registered data.** OC-SC-1 to OC-SC-4 (OC-SC-4 partly derived) and the I-SC-1 to I-SC-3 claims await the vessel record. Its declaration is still a draft, in `abr-relational-chemistry`.
 - **`validation_record_v4.md` is missing** from the repository and its history. The tables behind VR-γ-01, VR-Φ-01, VR-J-01, VR-ε-01 and VR-τ-01 cannot be classed or checked until it is recovered.
 - **Still open:** G1-K (pending Verifier); A-3 (empty sums); the acyclicity check (T8); K7 route enumeration and cycle basis; RPPI-V10; and the rest of V10_README Part 7.
-- **Not bumped:** the package version (still `10.1.0`; Origin's decision).
+- **Version:** the manifest is already `10.1.0`. The open decision is whether to bump from there for the merge (Origin's decision).
 - **Stale:** the landing page in `.github` (not attached to this session).
 
 ## 8. For Origin after verification
@@ -139,3 +144,14 @@ whether its text survives in the added lines:
 3. Whether the package version changes for the merge.
 
 *Metatron Dynamics, Inc. Kernel V10.*
+
+## 9. Verifier review (2026-11-21) and disposition
+
+| Finding | Disposition |
+|---|---|
+| I-SC-D6 needs explicit resolution conditions; "every relation changes" fails at δ (example: 0.1 → 0.2 with δ = 0.1 reads structure) | **Accepted.** Corrected beside the original in Part II and §2.6: PC1 freedom iff \|κ − 1\|·\|A\| > δA_s + δA_{s+1}; PC3 states held only under the stated δ conditions; no crossing; circulation claimed for exact signs only. The Verifier's example is now a fixture, and the conditions a property test |
+| A third test changed its expected findings and was missing from §4 | **Accepted.** Added to §4 |
+| The package overstated verbatim restoration; the remaining version decision is whether to bump from `10.1.0` | **Accepted.** §6 and §7 corrected beside the first wording; Part 9 entry 17 |
+| The chemistry ingest accepts inputs that can change readings without a finding | Handled in the `abr-relational-chemistry` package |
+
+Both packages stay in review, per the Verifier, until these dispositions are checked.

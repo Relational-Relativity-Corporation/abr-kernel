@@ -357,3 +357,17 @@ fn sc_d13_gamma_under_coarsening_is_bounded() {
     let g = gamma(&[0, 2, 4, 6]);
     assert!((1..=3).contains(&g));
 }
+
+// ── I-SC-D6 corrected (Verifier, 2026-11-21): resolution conditions ────────
+//
+// The Verifier's example: an edge value rescaled from 0.1 to 0.2 (κ = 2) with
+// a half-width of 0.1 at each registration. The relation changes exactly, but
+// |κ − 1|·|A| = 0.1 is not above δA_s + δA_{s+1} = 0.2, so PC1 reads structure.
+
+#[test]
+fn sc_d6_rescaling_can_leave_a_relation_unresolved_at_delta() {
+    let a = vec![vec![vec![0.1]], vec![vec![0.2]]];
+    let x = relation_changes(&edges(a, 0.1));
+    assert_eq!(x[0].reading, Reading::Structure);
+    assert!((x[0].change - 0.1).abs() < 1e-12 && (x[0].half_width - 0.2).abs() < 1e-12);
+}

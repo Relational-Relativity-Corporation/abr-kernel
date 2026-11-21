@@ -1786,6 +1786,13 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            κ > 0, every minor scales by κ² and every circulation by κ: the
 //            arrangement (PC3) and the sustained grade are held while every
 //            non-zero relation changes (PC1). Change without reorganization.
+//            CORRECTED (Verifier, 2026-11-21; 17th): the exact-sign statement stands, but "every non-zero relation changes (PC1)" holds for exact values only. At δ: (i) PC1 reads freedom iff |κ − 1|·|A_s[e]| > δA_s[e] + δA_{s+1}[e];
+//            (ii) if δ scales with the values, every PC3 state is held;
+//            (iii) with δ fixed, κ ≥ 1 holds every resolved PC3 state (an unresolved one may resolve) and κ ≤ 1 holds every unresolved one (a resolved one may unresolve);
+//            (iv) never a crossing.
+//            For circulation only the exact sign is claimed.
+//            (tests: sc_d6_rescaling_can_leave_a_relation_unresolved_at_delta,
+//            prop_isc_d6_resolution_conditions_under_rescaling)
 //   I-SC-D7  The declared sequence is part of the reading. Comparing a record
 //            declared with registrations (s, s+1, s+2) and the same record
 //            with s+1 omitted, δΔ_1 + δΔ_2 = δΔ_whole + 2·δA_{s+1}. (a) Halves
