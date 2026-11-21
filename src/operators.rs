@@ -1,7 +1,7 @@
-// operators.rs — Metatron Dynamics, Inc. Kernel V9.
+// operators.rs — Metatron Dynamics, Inc. Kernel V10.
 // Unified Relational Kernel: Primary (Δ → Σ) and ABR (A → B → R).
 //
-// Grounding documents (Kernel V9, docs/kernel/):
+// Grounding documents (Kernel V10, docs/kernel/):
 //   operators_notation_and_constraint.md
 //   abr_operators_plain.md
 //   role_separation_and_operator_application.md
@@ -121,6 +121,23 @@
 //   Origin must declare the direction by identifying the observable
 //   property of the process that establishes which observation is prior
 //   and which is current.
+//
+// Direction of evolution vs direction of analysis (V10, Origin, 2026-11-16):
+//   EVOLUTION has one direction and never stops. No relation evolves in
+//   reverse. Nothing in this crate may compute, fit or interpret a quantity
+//   on the assumption that relational evolution can run both ways:
+//     - (s,t) and (t,s) are never one relation evolving both ways;
+//     - a later output is never the prior of an earlier one;
+//     - a later registration is never read as an earlier state restored;
+//     - a direction is never declared from index order or convenience.
+//   ANALYSIS may read in any direction. Looking back is admissible:
+//     - pred(e) / adj_minus: the relations arriving at e's source, read
+//       backward by R and Σ, each keeping its declared direction;
+//     - reading e from its target end (gives −A(x)[e], same relation);
+//     - past records, earlier cycles, reverse traceability, any iteration
+//       order that does not change the result.
+//   Not re-accumulating what a prior output already carries is a SCOPE
+//   rule (do not count the same evolution twice), not a direction rule.
 //
 // ── Relational Direction ─────────────────────────────────────────────────
 //
@@ -251,6 +268,11 @@
 //
 // Overall ρ status: values M-supplied (V7.1). Two OPEN conditions remain:
 // the max selection (element 2) and the saturating form (element 3).
+//
+// Kernel V10 (Origin, 2026-11-21): ρ and χ are RETIRED from V10 readings; the
+// OPEN conditions above, and OC-K-1, are dissolved for V10. V10 circulation is
+// the parameter-free operator Ξ (`operator_circulation`). The ρ-weighted
+// functions remain for V9 callers and are not used by V10 readings.
 //
 // ── B Activation Condition ───────────────────────────────────────────────
 //
@@ -444,6 +466,8 @@
 //      documents. Kernel release numbering (Origin declaration): every file
 //      in the repository carries the kernel release number, Kernel V8.
 //
+// Kernel V10 synchronization (2026-11-21): release designation updated to
+//   Kernel V10. Comment-only change in this file; no function changed.
 // Kernel V9 synchronization (2026-10-25, Origin directive) — Kernel V9 is the
 //      sole canonical release. Release designation updated; foundational-
 //      primitive statement added to Foundation. Comment-only change: no
@@ -452,7 +476,7 @@
 //      record, dated declarations, or the frozen V8 implementation baseline.
 //
 // Bounded over D. No claim beyond D.
-// Metatron Dynamics, Inc. Kernel V9.
+// Metatron Dynamics, Inc. Kernel V10.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── SHARED FOUNDATION ──────────────────────────────────────────────────────
@@ -487,7 +511,8 @@ pub enum EdgeProvenance {
 //   out[i] = edge indices leaving node i     — used by ABR B and R operators
 //   inc[i] = edge indices entering node i    — used by ABR B and R operators
 //   succ(e) = out[edges[e].1]               — forward continuation of edge e
-//   pred(e) = inc[edges[e].0]               — backward continuation of edge e
+//   pred(e) = inc[edges[e].0]               — arriving relations of e (read backward;
+//                                             they do not evolve backward)
 //
 // Edge-indexed adjacency (adj_plus / adj_minus):
 //   adj_plus[e]  = edges f where source(f) = target(e)  — used by primary Σ
@@ -562,8 +587,10 @@ impl DeclaredRelations {
     /// Used by ABR B and R operators. Equivalent to adj_plus[e].
     #[inline] pub fn succ(&self, e: usize) -> &[usize] { &self.out[self.edges[e].1] }
 
-    /// Backward continuation of edge e — edges ending where e starts.
-    /// Used by ABR R operator. Equivalent to adj_minus[e].
+    /// Arriving relations of edge e — edges ending where e starts.
+    /// The analysis reads them backward (direction of analysis); each keeps
+    /// its declared direction of evolution and arrives where e begins.
+    /// Nothing evolves backward. Used by ABR R. Equivalent to adj_minus[e].
     #[inline] pub fn pred(&self, e: usize) -> &[usize] { &self.inc[self.edges[e].0] }
 }
 
@@ -1079,6 +1106,8 @@ pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f6
     let mut spatial: Vec<Vec<f64>> = (0..k).map(|c| {
         (0..rel.n_edges()).map(|e| {
             let fwd: f64 = rel.succ(e).iter().map(|&f| bg.spatial[c][f]).sum();
+            // Backward READING of the arriving relations (direction of analysis).
+            // Each pred edge keeps its declared direction of evolution.
             let bwd: f64 = rel.pred(e).iter().map(|&p| bg.spatial[c][p]).sum();
             bg.spatial[c][e] + rho_e[e] * (fwd - bwd)
         }).collect()
@@ -1102,6 +1131,49 @@ pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f6
         }
     }
     EdgeField { spatial, comp, comp_pairs: pairs.clone(), k }
+}
+
+// ── Operator Ξ — circulation (Kernel V10, Origin 2026-11-21) ─────────────
+//
+// Ξ(g)[e] = Σ_{f ∈ succ(e)} g[f] − Σ_{p ∈ pred(e)} g[p], per component.
+//
+// The imbalance between what continues from e and what arrives at e, with no
+// weighting. Parameter-free: no ρ, no χ, no cc. Every term traces to declared
+// relations and to g. Linear in g. (Ξ, not C: C is the declared projection, K6.) Empty adjacency evaluates to 0.0 (A-3).
+// pred(e) is read backward (direction of analysis); no edge is reversed.
+//
+// V10 retires ρ and χ (ρ_base, χ₀, the max selection, the saturating form)
+// and the component coupling cc[p] from V10 readings. They imposed a fixed,
+// undeclared model of how local magnitude of change (an energy-like quantity
+// read without a declared carrier) modulates circulation. V10 declares energy
+// with its own carrier and reads its effect on structure from the data. The
+// ρ-weighted functions in this file (compute_rho*, operator_sigma,
+// antisymmetric_term, operator_r, operator_e, operator_e_v5,
+// operator_r_persistence) are unchanged and remain available to V9 callers;
+// they are not used by V10 readings.
+//
+// Applied to g = B(A(x)) this is the V10 circulation of the ABR path; applied
+// to g = Δ(x) it is the circulation of the primary path. V9's R − B equals
+// ρ[src(e)]·Ξ[e] on the spatial term, so the sign of Ξ is the sign V9's
+// indicator read.
+
+pub fn operator_circulation(g: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+    g.iter().map(|c| {
+        (0..rel.n_edges()).map(|e| {
+            let fwd: f64 = rel.succ(e).iter().map(|&f| c[f]).sum();
+            let bwd: f64 = rel.pred(e).iter().map(|&p| c[p]).sum();
+            fwd - bwd
+        }).collect()
+    }).collect()
+}
+
+/// Half-width of Ξ(g) from half-widths dg: Σ_succ dg + Σ_pred dg.
+pub fn circulation_half_width(dg: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+    dg.iter().map(|c| {
+        (0..rel.n_edges()).map(|e| {
+            rel.succ(e).iter().chain(rel.pred(e)).map(|&f| c[f]).sum()
+        }).collect()
+    }).collect()
 }
 
 // ── Operator E (V4 spatial kernel, unchanged) ─────────────────────────────
@@ -1131,6 +1203,9 @@ pub fn operator_e(
 // Directed difference between current and prior kernel output.
 // Direction is fixed: E_current − E_prior.
 // The reverse direction is not traceable to an observable through M.
+// The prior is always the earlier output: pairing a later output as the
+// prior of an earlier one assumes reverse evolution and is inadmissible.
+// Re-reading or comparing earlier outputs is analysis and is admissible.
 //
 // Evaluated only over a declared pair (E_prior, E_current), both kernel
 // outputs of declared observations through M. Not evaluated at the first
@@ -1430,6 +1505,38 @@ mod tests {
         let d_rev = operator_delta(&x, &rel_rev);
         assert!((d_fwd.field[0][0] + d_rev.field[0][0]).abs() < 1e-12,
             "forward and reverse must be exact negations — direction is structural");
+    }
+
+    // [V10 DIRECTION] Looking back is analysis, not reverse evolution.
+    // On the chain 0 → 1 → 2, R reads e1's arriving relation e0 backward
+    // (the −ρ·Σ_pred term), and e0 keeps its declared direction: it arrives
+    // where e1 begins. Reading is backward; evolution is not.
+    #[test]
+    fn r_reads_arriving_relations_backward_without_reversing_them() {
+        let rel = test_rel_from_edges(3, vec![(0,1), (1,2)]);
+        assert_eq!(rel.pred(1), &[0]);
+        assert_eq!(rel.edges[0].1, rel.edges[1].0, "the arriving relation keeps its declared direction");
+        assert!(rel.succ(1).is_empty() && rel.pred(0).is_empty());
+        let g = EdgeField { spatial: vec![vec![2.0, 5.0]], comp: vec![], comp_pairs: vec![], k: 1 };
+        let rho = vec![0.5, 0.25, 0.0];
+        let r = operator_r(&g, &rel, &rho, &[]);
+        // e1: no successors; its arriving relation e0 is read backward.
+        assert!((r.spatial[0][1] - (5.0 + 0.25 * (0.0 - 2.0))).abs() < 1e-12);
+        // e0: reads its successor e1 forward; nothing arrives at node 0.
+        assert!((r.spatial[0][0] - (2.0 + 0.5 * (5.0 - 0.0))).abs() < 1e-12);
+    }
+
+    // [V10 DIRECTION] Reading a relation from its other end is the same
+    // relation read backward (−A), and a declared reverse is a different
+    // relation with its own provenance: neither makes evolution two-way.
+    // B accumulates in the declared direction only: an arriving relation is
+    // never added into a relation's accumulation.
+    #[test]
+    fn b_accumulates_only_in_the_declared_direction() {
+        let rel = test_rel_from_edges(3, vec![(0,1), (1,2)]);
+        let g = EdgeField { spatial: vec![vec![2.0, 5.0]], comp: vec![], comp_pairs: vec![], k: 1 };
+        let b = operator_b(&g, &rel);
+        assert_eq!(b.spatial[0], vec![7.0, 5.0], "e1 does not take in its arriving relation e0");
     }
 
     // [MATH] For an isolated edge (no adjacency), Σ = Δ exactly.

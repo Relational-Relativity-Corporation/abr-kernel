@@ -1,6 +1,6 @@
 # Verification Pass Ordering Protocol
 
-**Metatron Dynamics, Inc.** Kernel V9.\
+**Metatron Dynamics, Inc.** Kernel V10.\
 Reference procedure. Bounded over D. No claim beyond D.
 
 ## Purpose
@@ -285,6 +285,10 @@ those already declared elsewhere in the kernel.
 ## Kernel V8 synchronization (2026-09-26)
 
 Wording aligned with the Kernel V8 vocabulary: "absent" / "absence" of declarations and evidence restated as "not supplied". No procedure changed.
+
+## Kernel V10 synchronization (2026-11-21)
+
+Release designation updated to Kernel V10, the canonical release (Origin directive). Kernel V10 is stated in `docs/kernel/V10_README.md`; `kernel_reference.md` restates it. V10 adds Df6 (simultaneity), the ground variables (energy, freedom, connection) and the relational field, and amends the Phase 1 / Phase 2 rule. No operator formula changed. Historical V9, V8 and V7 identifiers remain where they describe prior releases.
 
 ## Kernel V9 synchronization (2026-10-25)
 

@@ -1,4 +1,4 @@
-// lib.rs — Metatron Dynamics, Inc. Kernel V9.
+// lib.rs — Metatron Dynamics, Inc. Kernel V10.
 // Crate root for the ABR relational kernel.
 // Bounded over D. No claim beyond D.
 //
@@ -22,6 +22,8 @@
 //   docs/process/kernel_self_consistency_test.md
 //   docs/process/Verification_pass_protocol.md
 //
+// Kernel V10 synchronization (2026-11-21): release designation updated to
+//   Kernel V10. Comment-only change in this file; no function changed.
 // Kernel V9 synchronization (2026-10-25): release designation updated; no code changed.
 
 // Operator requirement (V7.1, 2026-09-23):
@@ -65,3 +67,20 @@ pub mod admission;
 // operators.rs functions; mandatory edge provenance; non-blocking warnings,
 // blocking errors. Independent of admission.rs.
 pub mod diagnostic_exec;
+
+// Kernel V10 ground variables (Origin, 2026-11-21): energy (tunneling),
+// freedom (superposition) and connection (entanglement): three distinct
+// variables read from one relational object over a declared sequence of
+// registrations at declared δ, through the unchanged operators. A reading
+// that cannot be calculated is a finding about the declaration (Primary
+// Region, or domain not fully declared), never a statement of absence.
+pub mod ground_variables;
+
+// Kernel V10 Df6, simultaneity (Origin, 2026-11-21): all operators and all
+// ground variables occur simultaneously; the composition order and the
+// sequence of registrations are orders of analysis. A relational field is
+// formed from at least two consecutive registrations and evaluates A, B, the
+// circulation Ξ, their persistence and the ground variables together, with no
+// operator parameters (ρ, χ and cc[p] retired from V10). One registration is
+// insufficient information. No phases.
+pub mod relational_field;

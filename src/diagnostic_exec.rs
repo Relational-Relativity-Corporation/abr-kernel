@@ -1,4 +1,4 @@
-// diagnostic_exec.rs — Metatron Dynamics, Inc. Kernel V9.
+// diagnostic_exec.rs — Metatron Dynamics, Inc. Kernel V10.
 // Thin execution wrapper for the ABR operators (A → B → R, and persistence)
 // over an experimental relational field, with mandatory edge provenance and
 // non-blocking diagnostics (Origin directive, 2026-11-07).

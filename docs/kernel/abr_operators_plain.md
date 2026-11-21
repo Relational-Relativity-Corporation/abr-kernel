@@ -1,6 +1,6 @@
 # The Operators — Plain Language
 
-**Metatron Dynamics, Inc.** Kernel V9. Bounded over D. No claim beyond D.
+**Metatron Dynamics, Inc.** Kernel V10. Bounded over D. No claim beyond D.
 
 **Foundational primitive (Kernel V9).** The foundational observable primitive is a directed relation declared from observable information. A numerical value is not itself a primitive; it is the projection of an observed relational distinction through a declared measurement mapping M. Observed relations, measurement mappings M, numerical projections in D, and calculated results are held distinct. See `kernel_reference.md` §1.
 
@@ -61,6 +61,8 @@ Phase 2 needs two declared observations — a prior one and a current one. At th
 When the observable does not change between two declared steps — when M(oₖ) = M(oₖ₋₁) — A_persistence = zero. That zero is a calculated result from two declared observations: no relational evolution occurred across that step.
 
 *Constraint: Phase 2 requires a declared pair of sequential observations. At the first declared observation, only Phase 1 is evaluated. Model-generated sequences are not observations through M.*
+
+**Kernel V10 amendment — everything happens at once (Origin, 2026-11-21, Df6).** The operators and the variables are not steps that happen one after another. All of them are happening together, all the time, in the system we are observing. When we write A, then B, then R, or look at one observation and then the next, that is the order in which *we* read the system, not the order in which the system does anything. So there are no "phases". What we need is enough information to see relational evolution at all: at least two consecutive observations of the same relations. One observation is like one frame of a video: it shows an arrangement, but no relational field can be formed from it, because nothing about evolution can be seen in a single frame. With two or more, every operator and every variable is read together over the whole sequence. The text above is kept as the V9 record.
 
 ---
 
@@ -238,6 +240,8 @@ Both phases use the same operator formulas. What changes between phases is what 
 
 A Phase 1 analysis on a single snapshot is admissible and informative. It reveals the relational structure present in that observation. It does not reveal how that structure evolves. Phase 2 requires the process, not the photograph.
 
+*Kernel V10 (Df6):* a single snapshot is now read as insufficient information. Its operator outputs are calculated results, but no relational field is formed from it; the two "phases" are read together over a sequence of at least two observations.
+
 The result is not an interpretation.
 It is a function of the declaration and the observable.
 Change the declaration and the result changes.
@@ -273,11 +277,15 @@ Those determinations remain with whoever declared the domain.
 ---
 
 *Bounded over D. No claim beyond D.*
-*Metatron Dynamics, Inc. Kernel V9.*
+*Metatron Dynamics, Inc. Kernel V10.*
 
 ---
 
+**Kernel V9 → Kernel V10 changes (2026-11-21):** Release designation updated to Kernel V10, the canonical release (Origin directive). Kernel V10 is stated in `docs/kernel/V10_README.md`; `kernel_reference.md` restates it. V10 adds Df6 (simultaneity), the ground variables (energy, freedom, connection) and the relational field, and amends the Phase 1 / Phase 2 rule. No operator formula changed. Historical V9, V8 and V7 identifiers remain where they describe prior releases.
+
 **Kernel V8 → Kernel V9 changes (2026-10-25):** Release designation updated to Kernel V9, the sole canonical documentation release (Origin directive; README commit `e54fcec`). The Kernel V9 foundational-primitive statement is added at the head of this document. Historical Kernel V8/V7 identifiers are retained where they record prior releases, the dated declaration of a rule, or the frozen V8 implementation baseline. No operator form, invariant form, Rust function, parameter, or test expectation changed.
+
+**Kernel V10 amendment (2026-11-21, Df6):** simultaneity declared: all operators and ground variables occur together; composition order and registration sequence are orders of analysis; no phases; a relational field needs at least two consecutive registrations, and one registration is insufficient information. Amendment paragraph added beside the Phase 1 / Phase 2 text, which is retained as the V9 record. No operator form changed.
 
 **V8.2 → Kernel V8 changes (2026-09-26):** *(a) Declarations of 2026-09-23 not previously written into this document (reconstructed from operators_notation_and_constraint.md and derived_invariants.rs):* "The three Primary Region quantities" section (rank-based quantities and the ρ_P ratio) replaced by "When B is evaluated — the full-operator admissibility condition"; Superposition restated as relational distinguishability of the Δ output (no longer suspended); Tunneling restated in framework-native terms (ε[e] > 0 at declared transition edges); Primary Region phenomena restated with scale-conditional observational status in place of "not directly observable"; joint necessity I-S component declared. *(b) Kernel V8 declarations:* values from M described as numerical projections; the declared-information rule stated in plain language; Phase 2 evaluated from the second declared observation — cold start removed from "Before anything is measured" and from A; A_persistence = 0 described as a calculated result; B "not evaluated" replacing "absent", with the full-operator condition replacing "persistence confirmed"; R and ρ: coupling and ρ scale values declared by M with no kernel values (V7.1); "largest gradient" corrected to "largest directed difference" (the term "gradient" was retired in notation V10). Not changed: Entanglement wording on 𝟙[e] = 0 and ε[e] = 0 (Part II audit, separate). Kernel release numbering (Origin declaration): this document's own numbering ends at V8.2.
 

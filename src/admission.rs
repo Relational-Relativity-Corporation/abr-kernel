@@ -1,4 +1,4 @@
-// admission.rs — Metatron Dynamics, Inc. Kernel V9.
+// admission.rs — Metatron Dynamics, Inc. Kernel V10.
 // V9 admission interface: independent reconstruction of a declared calculation
 // from Origin declaration records, and the admission decision for a submitted
 // calculation record (v9_specification.md §3, §6, §7, §10; Req-5, Req-6, Req-7).

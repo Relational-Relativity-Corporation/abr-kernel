@@ -1,4 +1,4 @@
-# ABR Invariant Relational Kernel — Kernel V9
+# ABR Invariant Relational Kernel — Kernel V10
 
 **Metatron Dynamics, Inc.** relationalrelativity.dev | arXiv:2601.22389
 
@@ -12,10 +12,26 @@ of a relation, or a computation over relations. A numerical value is not
 itself a primitive; it is the projection of an observed relational distinction
 through a declared measurement mapping M.
 
-**Canonical release: Kernel V9.** V9 is the governing documentation of the
+**Canonical release: Kernel V10.** V10 is the governing documentation of the
 observable relational primitive, operator constraints, provenance requirements,
-and admission discipline. Earlier version identifiers describe historical
-implementations and records, not competing mathematical authorities.
+admission discipline, and the three ground variables. Its canonical statement,
+item by item, is `docs/kernel/V10_README.md`. Earlier version identifiers
+describe historical implementations and records, not competing mathematical
+authorities.
+
+**Relation is the primitive, derived from observation.** Relational evolution
+has not been observed to stop, and no registration stands alone; objects are
+read from relations, not the reverse. Alongside it, three variables are present
+in every observation: **energy** (how much a relation changes), **freedom** (how
+many independent ways relations vary) and **connection** (what holds together
+through relational evolution). Their absence is never observed; what varies, and
+what the kernel measures, is their degree at a declared resolution δ. The kernel
+expresses them as tunneling, superposition and entanglement.
+
+**All operators and all variables occur simultaneously** (Df6). The composition
+order and the sequence of observations are orders of analysis. A relational
+field is formed from at least two consecutive registrations; one registration
+is insufficient information.
 
 This repository is the sole canonical declaration of the ABR/ABRCE kernel:
 operator constraints, role separation protocol, reference implementation,
@@ -83,33 +99,56 @@ cargo test
 cargo run --bin provenance_demo
 ```
 
-`cargo test` on `main` runs 61 library tests (`abr_kernel`) and 3
+`cargo test` runs 63 library tests (`abr_kernel`) and 3
 `provenance_demo` tests. `cargo run --bin provenance_demo` prints the
 H-alpha photon edge reconstruction described below.
 
 `cargo test` also runs the V9 conformance suite in `tests/v9_conformance.rs`
 (35 tests, none ignored) and the V9 admission suite in `tests/v9_admission.rs`
 (12 tests), plus one `compile_fail` doctest in `src/admission.rs`. The four
-`[V9-REQUIRED]` tests exercise the bounded V9 admission interface (see Kernel V9
-Development Status below).
+`[V9-REQUIRED]` tests exercise the bounded V9 admission interface (see Kernel V9 — RPPI
+Enforcement Status below).
 
 `cargo test` also runs the diagnostic execution suite in `tests/diagnostic_exec.rs`
 (13 implementation tests over synthetic fixtures) and one `compile_fail` doctest in
 `src/diagnostic_exec.rs` (a persistence prior cannot be assembled by hand).
 
+
+`cargo test` also runs the Kernel V10 suites: `tests/v10_ground_variables.rs`
+(19 tests) and `tests/v10_relational_field.rs` (6 tests), over synthetic
+fixtures. In total, `cargo test` runs 153 tests: 63 library, 3 `provenance_demo`,
+13 diagnostic execution, 19 ground variables, 6 relational field, 12 admission,
+35 conformance and 2 doctests.
+
+**Verification (2026-11-21).** A clean-room build of the release commit (fresh
+clone, no cache) compiles with no warnings and passes all 153 tests. An
+end-to-end run through the public API alone (a synthetic four-locus field with
+two interior loci, two components and five registrations) formed the relational
+field with no operator parameters, classified every minor as held or
+reorganizing, read all three ground variables, and returned the expected
+declaration findings for a single registration and for the Primary Region. The
+first registration was checked by hand. These are synthetic fixtures: they
+confirm that the forms compute as declared and establish no empirical validity.
+The invariant tests against registered data (I-SC, OC-SC-1 to OC-SC-4) are next.
 ---
 
 ## Contents
 
-**Kernel V9 is the canonical documentation release.** Historical V8 and V7
+**Kernel V10 is the canonical documentation release.** Historical V9, V8 and V7
 identifiers remain only where needed to describe prior implementations,
 release history, or explicitly frozen source. Document-local revision numbers
 are historical identifiers, not alternate canonical kernel versions.
 The Rust package `abr-kernel` (library crate `abr_kernel`) is version
-`9.0.0`, the Kernel V9 release. Its operator formulas and public API are
-unchanged from the frozen V8 implementation (`8.0.0`).
+`10.0.0`, the Kernel V10 release. Its operator formulas are unchanged from the
+frozen V8 implementation (`8.0.0`); V10 adds the `ground_variables` and
+`relational_field` modules.
 
 ### `docs/kernel/` — what the kernel is
+
+**`V10_README.md`** — the canonical statement of Kernel V10
+Every V10 item by ID, from the relational declaration of variables and
+conditions to the formal mathematics, traceability, code scope, conflicts and
+open decisions. Includes Df6 (simultaneity) and the three ground variables.
 
 **`kernel_reference.md`** — start here
 A single reference for people and AI systems using the kernel: roles and
@@ -155,6 +194,22 @@ The seven verification methods (CP, CS, DI, CA, IR, AG, CR), the two
 Origin obligations, and the publication gate.
 
 ### `src/` and `bin/` — reference implementation
+
+**`src/ground_variables.rs`** (Kernel V10)
+Energy, freedom and connection read over a declared sequence at declared δ,
+through the unchanged operators. One relational object, the minor pattern
+P(F): over the sequence each minor is held unresolved (connection), held
+resolved (freedom) or reorganizing. Connection is graded identity,
+proportional and sustained. A reading that cannot be calculated is a finding
+about the declaration (Primary Region, or domain not fully declared), never a
+statement of absence. See `kernel_reference.md` §21.
+
+**`src/relational_field.rs`** (Kernel V10, Df6)
+`RelationalField::new` forms a relational field from at least two consecutive
+registrations and evaluates A, B, the circulation Ξ, their persistence and the
+ground variables together, in one call, with **no operator parameters**. ρ and
+χ (ρ_base, χ₀, the max selection, the saturating form) and cc[p] are retired
+from V10; the ρ-weighted V9 functions in `operators.rs` remain for V9 callers.
 
 **`src/operators.rs`**
 Reference implementation in Rust. Primary kernel (Δ → Σ) and ABR kernel
@@ -317,10 +372,19 @@ declared source.
 
 ---
 
-## Kernel V9 — Canonical Documentation and Enforcement Status
+## Kernel V10 — Ground Variables, Simultaneity and Status
 
-Kernel V9 is the canonical documentation of the relational primitive and its
-mathematical requirements. Enforcement of the Relational Primitive Provenance
+Kernel V10 (2026-11-21) declares Df6 (simultaneity) and the three ground
+variables, and implements them in `src/ground_variables.rs` and
+`src/relational_field.rs`. Operator formulas are unchanged. Many V10 items
+remain Proposed or Open; their status, item by item, is in
+`docs/kernel/V10_README.md` (Parts 6 and 7). RPPI enforcement status below is
+unchanged from V9.
+
+## Kernel V9 — RPPI Enforcement Status
+
+Kernel V9 established the relational primitive and its provenance
+requirements, carried unchanged into V10. Enforcement of the Relational Primitive Provenance
 Invariant remains under development; canonical status does not imply that
 all V9 admission interfaces are implemented. The RPPI and its enforcement
 architecture are specified in `docs/kernel/v9_specification.md`.
@@ -371,11 +435,28 @@ distinct frame remain OPEN.
 
 ## Version and historical implementation record
 
-**Current canonical documentation: Kernel V9.** The historical notes below
+**Current canonical documentation: Kernel V10.** The historical notes below
 preserve the provenance of earlier implementations; they do not designate
-V8 as the current canonical mathematical reference. The frozen V8 operator
-implementation is an implementation baseline within the V9 development
-record, not a second source of mathematical authority.
+V9 or V8 as the current canonical mathematical reference. The frozen V8
+operator implementation is an implementation baseline within the V9 and V10
+development record, not a second source of mathematical authority.
+
+### Kernel V10 package release (2026-11-21)
+
+- Package `abr-kernel` version `9.0.0` → `10.0.0` (Origin decision). Package
+  name and library crate name `abr_kernel` unchanged.
+- No operator formula, V9 function signature, return type, parameter, or
+  existing test expectation changed. New public modules: `ground_variables`,
+  `relational_field`.
+- Df6 (simultaneity) declared; the Phase 1 / Phase 2 rule amended in
+  `kernel_reference.md`, `operators_notation_and_constraint.md`,
+  `role_separation_and_operator_application.md` and `abr_operators_plain.md`,
+  with the V9 text retained as record.
+- Release designation synchronized across code comments and documents.
+- ρ and χ (with ρ_base, χ₀, the max selection, the saturating form) and
+  cc[p] retired from V10 readings; parameter-free circulation Ξ added
+  (`operator_circulation`). OC-K-1 dissolved.
+- Tests: 153 pass (see Building and testing).
 
 ### Kernel V9 package release (2026-10-25)
 
