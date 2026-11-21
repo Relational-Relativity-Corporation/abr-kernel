@@ -1,0 +1,470 @@
+//! Kernel V10 — property tests for PC-D1 to PC-D5 and I-SC-D1 to I-SC-D8.
+//!
+//! Each property is checked against many randomly generated fields: random
+//! topologies, components, registration counts, values and δ. The generator
+//! is seeded and self-contained (no external dependency, per Cargo.toml), so
+//! every case is reproducible from the seed printed on failure.
+//!
+//! Values are multiples of 1/8 and δ multiples of 1/16, within small ranges,
+//! so every sum, difference and product here is exact in f64. Boundary
+//! comparisons (|x| > δ) are therefore exact, and no property can pass or
+//! fail by rounding.
+//!
+//! [IMPL] SYNTHETIC: these establish that the mathematics holds as stated
+//! over the forms, nothing empirical.
+
+use abr_kernel::ground_variables::*;
+use abr_kernel::operators::{DeclaredRelations, EdgeProvenance, NodeField};
+use abr_kernel::persistence_change::*;
+use abr_kernel::relational_field::RelationalField;
+
+const CASES: u64 = 2000;
+
+use std::sync::atomic::{AtomicUsize, Ordering::Relaxed};
+
+/// Counts how often a conditional property was actually exercised, so no
+/// property passes vacuously.
+fn hit(c: &AtomicUsize) { c.fetch_add(1, Relaxed); }
+fn exercised(c: &AtomicUsize, name: &str) {
+    let n = c.load(Relaxed);
+    assert!(n > 0, "{name}: condition never occurred, property untested");
+    eprintln!("{name}: exercised {n} times");
+}
+
+// ── Seeded generator (SplitMix64) ───────────────────────────────────────────
+
+struct Rng(u64);
+
+impl Rng {
+    fn next(&mut self) -> u64 {
+        self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
+        let mut z = self.0;
+        z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+        z ^ (z >> 31)
+    }
+    fn int(&mut self, lo: i64, hi: i64) -> i64 { lo + (self.next() % (hi - lo + 1) as u64) as i64 }
+    fn usize(&mut self, lo: usize, hi: usize) -> usize { self.int(lo as i64, hi as i64) as usize }
+    /// A multiple of 1/8 in [lo, hi].
+    fn eighth(&mut self, lo: f64, hi: f64) -> f64 { self.int((lo * 8.0) as i64, (hi * 8.0) as i64) as f64 / 8.0 }
+    /// A δ: a multiple of 1/16 in [0, hi].
+    fn delta(&mut self, hi: f64) -> f64 { self.int(0, (hi * 16.0) as i64) as f64 / 16.0 }
+    fn chance(&mut self, p_in_8: u64) -> bool { self.next() % 8 < p_in_8 }
+}
+
+/// Run `prop` on CASES seeds; report the seed on failure.
+fn for_all(name: &str, prop: impl Fn(&mut Rng)) {
+    for seed in 0..CASES {
+        let mut r = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0xA5A5);
+        let caught = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| prop(&mut r)));
+        if caught.is_err() { panic!("property {name} failed at seed {seed}"); }
+    }
+}
+
+// ── Random declarations ─────────────────────────────────────────────────────
+
+fn random_rel(r: &mut Rng, allow_parallel: bool) -> DeclaredRelations {
+    let n = r.usize(3, 7);
+    // Without parallel edges there are at most n(n − 1) distinct directed edges.
+    let cap = if allow_parallel { 9 } else { 9.min(n * (n - 1)) };
+    let m = r.usize(2, cap);
+    let mut edges: Vec<(usize, usize)> = Vec::new();
+    while edges.len() < m {
+        let (s, t) = (r.usize(0, n - 1), r.usize(0, n - 1));
+        if s == t { continue; }
+        if !allow_parallel && edges.contains(&(s, t)) { continue; }
+        edges.push((s, t));
+    }
+    DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m])
+}
+
+/// A sequence of node-valued registrations: a random walk per locus and
+/// component, with frequent zero steps so persistence occurs.
+fn random_seq(r: &mut Rng, n: usize, k: (usize, usize), regs: (usize, usize), d_hi: f64) -> Vec<Registration> {
+    let (k, regs) = (r.usize(k.0, k.1), r.usize(regs.0, regs.1));
+    let mut x: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| r.eighth(-4.0, 4.0)).collect()).collect();
+    let delta: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| r.delta(d_hi)).collect()).collect();
+    let mut out = Vec::new();
+    for _ in 0..regs {
+        out.push(Registration::new(NodeField::new(x.clone()), delta.clone()));
+        for c in x.iter_mut() {
+            for v in c.iter_mut() {
+                if r.chance(5) { *v += r.eighth(-2.0, 2.0); }
+            }
+        }
+    }
+    out
+}
+
+/// Random edge-registered series a[t][c][e] with δ.
+fn random_edges(r: &mut Rng, m: (usize, usize), k: (usize, usize), regs: (usize, usize), d_hi: f64) -> EdgeSeries {
+    let (m, k, regs) = (r.usize(m.0, m.1), r.usize(k.0, k.1), r.usize(regs.0, regs.1));
+    let mut a: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.eighth(-4.0, 4.0)).collect()).collect();
+    let da: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.delta(d_hi)).collect()).collect();
+    let (mut aa, mut dd) = (Vec::new(), Vec::new());
+    for _ in 0..regs {
+        aa.push(a.clone());
+        dd.push(da.clone());
+        for c in a.iter_mut() {
+            for v in c.iter_mut() {
+                if r.chance(5) { *v += r.eighth(-2.0, 2.0); }
+            }
+        }
+    }
+    EdgeSeries::from_edge_values(aa, dd).unwrap()
+}
+
+fn widen(seq: &[Registration], r: &mut Rng) -> Vec<Registration> {
+    // δ' ≥ δ at every value; the same for every registration.
+    let k = seq[0].x.k;
+    let n = seq[0].x.n;
+    let extra: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| r.delta(0.25)).collect()).collect();
+    seq.iter().map(|g| {
+        let delta = g.delta.iter().zip(&extra).map(|(d, x)| d.iter().zip(x).map(|(a, b)| a + b).collect()).collect();
+        Registration::new(g.x.clone(), delta)
+    }).collect()
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PC-D1 to PC-D5
+// ═══════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn prop_pc_d1_shares_partition_every_level() {
+    for_all("PC-D1", |r| {
+        let rel = random_rel(r, true);
+        let seq = random_seq(r, rel.n_nodes, (1, 3), (2, 6), 0.5);
+        let pc = PersistenceChange::new(&EdgeSeries::from_registrations(&seq, &rel).unwrap());
+        let sh = pc.relation_shares(None);
+        assert_eq!(sh.evaluated(), pc.relations.len());
+        for lvl in [&pc.across_components, &pc.across_steps] {
+            if let Ok(c) = lvl {
+                assert_eq!(Shares::of(c.readings.iter().map(|x| &x.reading)).evaluated(), c.readings.len());
+            }
+        }
+        if let (Some(f), Some(s)) = (sh.f_delta(), sh.s_delta()) {
+            assert!((f + s - 1.0).abs() < 1e-12);
+        }
+    });
+}
+
+#[test]
+fn prop_pc_d2_coarser_delta_never_adds_freedom_pc1_pc2() {
+    static N1: AtomicUsize = AtomicUsize::new(0);
+    static N2: AtomicUsize = AtomicUsize::new(0);
+    for_all("PC-D2 (PC1, PC2)", |r| {
+        let rel = random_rel(r, false);
+        let seq = random_seq(r, rel.n_nodes, (1, 3), (2, 6), 0.5);
+        let wide = widen(&seq, r);
+        let fine = PersistenceChange::new(&EdgeSeries::from_registrations(&seq, &rel).unwrap());
+        let coarse = PersistenceChange::new(&EdgeSeries::from_registrations(&wide, &rel).unwrap());
+        for (f, c) in fine.relations.iter().zip(&coarse.relations) {
+            if c.reading == Reading::Freedom { assert_eq!(f.reading, Reading::Freedom); hit(&N1); }
+        }
+        for (fl, cl) in [(&fine.across_components, &coarse.across_components), (&fine.across_steps, &coarse.across_steps)] {
+            if let (Ok(fl), Ok(cl)) = (fl, cl) {
+                for c in cl.readings.iter().filter(|x| x.reading == Reading::Freedom) {
+                    if let Some(f) = fl.readings.iter().find(|x| x.e == c.e && x.f == c.f && x.over == c.over) {
+                        assert_eq!(f.reading, Reading::Freedom);
+                        hit(&N2);
+                    }
+                }
+            }
+        }
+    });
+    exercised(&N1, "PC-D2 PC1 coarse freedom");
+    exercised(&N2, "PC-D2 PC2 coarse freedom");
+}
+
+#[test]
+fn prop_pc_d2_crossings_are_monotone_in_delta() {
+    static N: AtomicUsize = AtomicUsize::new(0);
+    // The PC3 statement that does hold: a crossing (opposite resolved signs)
+    // at δ' is a crossing at every δ ≤ δ'.
+    for_all("PC-D2 (PC3 crossings)", |r| {
+        let rel = random_rel(r, false);
+        let seq = random_seq(r, rel.n_nodes, (2, 3), (2, 6), 0.5);
+        let wide = widen(&seq, r);
+        let fine = arrangement_steps(&EdgeSeries::from_registrations(&seq, &rel).unwrap()).unwrap();
+        let coarse = arrangement_steps(&EdgeSeries::from_registrations(&wide, &rel).unwrap()).unwrap();
+        for c in &coarse {
+            if let (AtDelta::Resolved(p), AtDelta::Resolved(q)) = (c.before, c.after) {
+                if p != q {
+                    let f = fine.iter().find(|x| (x.step, x.e, x.f, x.i, x.j) == (c.step, c.e, c.f, c.i, c.j))
+                        .expect("edges resolved at δ' are resolved at δ");
+                    assert_eq!((f.before, f.after), (c.before, c.after));
+                    hit(&N);
+                }
+            }
+        }
+    });
+    exercised(&N, "PC-D2 PC3 crossings");
+}
+
+#[test]
+fn pc3_freedom_is_not_monotone_in_delta() {
+    // Counterexample to extending PC-D2 to PC3. One minor: 1.0 at s, 0.5 at
+    // s+1. At a fine δ both states are resolved positive (structure). At a
+    // coarser δ the second state is not resolved, so the state changes
+    // (freedom). PC3 compares two states, so coarsening can create freedom.
+    let a = vec![
+        vec![vec![1.0, 0.0], vec![0.0, 1.0]],
+        vec![vec![1.0, 0.0], vec![0.0, 0.5]],
+    ];
+    let with = |d: f64| {
+        let da = a.iter().map(|t| t.iter().map(|c| vec![d; c.len()]).collect()).collect();
+        arrangement_steps(&EdgeSeries::from_edge_values(a.clone(), da).unwrap()).unwrap()[0].reading
+    };
+    assert_eq!(with(0.0625), Reading::Structure);
+    assert_eq!(with(0.25), Reading::Freedom);
+}
+
+#[test]
+fn prop_pc_d3_offsets_and_rescaling_change_no_reading() {
+    for_all("PC-D3", |r| {
+        let rel = random_rel(r, false);
+        let k = r.usize(1, 3);
+        let seq = random_seq(r, rel.n_nodes, (k, k), (2, 5), 0.5);
+        let readings = |seq: &[Registration]| {
+            let pc = PersistenceChange::new(&EdgeSeries::from_registrations(seq, &rel).unwrap());
+            let mut v: Vec<Reading> = pc.relations.iter().map(|x| x.reading).collect();
+            for lvl in [&pc.across_components, &pc.across_steps] {
+                if let Ok(c) = lvl { v.extend(c.readings.iter().map(|x| x.reading)); }
+            }
+            if let Ok(a) = &pc.arrangement { v.extend(a.iter().map(|x| x.reading)); }
+            v
+        };
+        let base = readings(&seq);
+        // Offset one component at every locus and registration (exact).
+        let (c, off) = (r.usize(0, k - 1), r.eighth(-8.0, 8.0));
+        let shifted: Vec<Registration> = seq.iter().map(|g| {
+            let mut d = g.x.data.clone();
+            d[c].iter_mut().for_each(|v| *v += off);
+            Registration::new(NodeField::new(d), g.delta.clone())
+        }).collect();
+        assert_eq!(base, readings(&shifted));
+        // Rescale one component by ±2^p (exact), δ by 2^p.
+        let p = r.int(-2, 3) as i32;
+        let lam = 2f64.powi(p) * if r.chance(4) { -1.0 } else { 1.0 };
+        let scaled: Vec<Registration> = seq.iter().map(|g| {
+            let (mut d, mut dl) = (g.x.data.clone(), g.delta.clone());
+            d[c].iter_mut().for_each(|v| *v *= lam);
+            dl[c].iter_mut().for_each(|v| *v *= lam.abs());
+            Registration::new(NodeField::new(d), dl)
+        }).collect();
+        assert_eq!(base, readings(&scaled));
+    });
+}
+
+#[test]
+fn prop_pc_d3_swapping_edges_negates_change_minors() {
+    for_all("PC-D3 (edge swap)", |r| {
+        let k = r.usize(1, 3);
+        let s = random_edges(r, (2, 2), (k, k), (3, 5), 0.5);
+        let swapped = EdgeSeries::from_edge_values(
+            s.a.iter().map(|t| t.iter().map(|c| vec![c[1], c[0]]).collect()).collect(),
+            s.da.iter().map(|t| t.iter().map(|c| vec![c[1], c[0]]).collect()).collect()).unwrap();
+        let (x, y) = (coupling_across_steps(&s).unwrap(), coupling_across_steps(&swapped).unwrap());
+        assert_eq!(x.readings.len(), y.readings.len());
+        for (p, q) in x.readings.iter().zip(&y.readings) {
+            assert_eq!(p.minor, -q.minor);
+            assert_eq!(p.reading, q.reading);
+        }
+    });
+}
+
+#[test]
+fn prop_pc_d4_parallel_node_edges_are_identities() {
+    static N: AtomicUsize = AtomicUsize::new(0);
+    for_all("PC-D4", |r| {
+        let rel = random_rel(r, true);
+        let seq = random_seq(r, rel.n_nodes, (2, 3), (3, 5), 0.5);
+        let s = EdgeSeries::from_registrations(&seq, &rel).unwrap();
+        let expected: Vec<(usize, usize)> = (0..rel.n_edges())
+            .flat_map(|e| ((e + 1)..rel.n_edges()).map(move |f| (e, f)))
+            .filter(|&(e, f)| rel.edges[e] == rel.edges[f]).collect();
+        assert_eq!(s.forced_pairs, expected);
+        if !expected.is_empty() { hit(&N); }
+        let pc = PersistenceChange::new(&s);
+        for lvl in [&pc.across_components, &pc.across_steps] {
+            if let Ok(c) = lvl { assert!(c.readings.iter().all(|x| !expected.contains(&(x.e, x.f)))); }
+        }
+        if let Ok(a) = &pc.arrangement { assert!(a.iter().all(|x| !expected.contains(&(x.e, x.f)))); }
+    });
+    exercised(&N, "PC-D4 parallel edges");
+}
+
+#[test]
+fn prop_pc_d5_minimum_information() {
+    for_all("PC-D5", |r| {
+        let rel = random_rel(r, false);
+        let two = random_seq(r, rel.n_nodes, (1, 1), (2, 2), 0.5);
+        assert_eq!(EdgeSeries::from_registrations(&two[..1], &rel).unwrap_err(), DeclarationGap::NoProcessSequence);
+        let s = EdgeSeries::from_registrations(&two, &rel).unwrap();
+        assert_eq!(coupling_across_steps(&s).unwrap_err(), DeclarationGap::NoProcessSequence);
+        assert_eq!(coupling_across_components(&s).unwrap_err(), DeclarationGap::SingleComponent);
+        assert_eq!(arrangement_steps(&s).unwrap_err(), DeclarationGap::SingleComponent);
+        assert_eq!(relation_changes(&s).len(), rel.n_edges());
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// I-SC-D1 to I-SC-D8
+// ═══════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn prop_isc_d1_change_bound_is_valid_and_sign_persists() {
+    static N: AtomicUsize = AtomicUsize::new(0);
+    for_all("I-SC-D1", |r| {
+        let s = random_edges(r, (2, 5), (2, 3), (2, 2), 0.0);
+        let (d, _) = s.change(0);
+        let (m, k) = (s.n_edges(), s.k());
+        for e in 0..m { for f in (e + 1)..m { for i in 0..k { for j in (i + 1)..k {
+            let (m0, m1) = (minor(&s.a[0], e, f, i, j), minor(&s.a[1], e, f, i, j));
+            let bound = minor_change_bound(&s.a[0], &d, e, f, i, j);
+            assert!((m1 - m0).abs() <= bound, "the change bound must bound |Δm|");
+            if step_preserves_sign(m0, bound) { assert_eq!(m0.signum(), m1.signum()); hit(&N); }
+        }}}}
+    });
+    exercised(&N, "I-SC-D1 sign preserved");
+}
+
+#[test]
+fn prop_isc_d2_freedom_and_connection_partition_each_minor() {
+    for_all("I-SC-D2", |r| {
+        let s = random_edges(r, (2, 5), (2, 3), (2, 2), 0.5);
+        for x in arrangement_steps(&s).unwrap() {
+            // Each state is exactly one of resolved (freedom) or not (connection).
+            for st in [x.before, x.after] {
+                assert!(matches!(st, AtDelta::Resolved(_)) ^ matches!(st, AtDelta::NotResolved));
+            }
+        }
+    });
+}
+
+#[test]
+fn prop_isc_d3_d4_fixed_ratio_or_offset_locks_change() {
+    for_all("I-SC-D3/D4", |r| {
+        let (k, regs) = (r.usize(2, 3), r.usize(3, 5));
+        let lam = r.eighth(-3.0, 3.0);
+        let off: Vec<f64> = (0..k).map(|_| if r.chance(4) { r.eighth(-4.0, 4.0) } else { 0.0 }).collect();
+        let mut e: Vec<f64> = (0..k).map(|_| r.eighth(-4.0, 4.0)).collect();
+        let mut a = Vec::new();
+        for _ in 0..regs {
+            a.push((0..k).map(|c| vec![e[c], lam * e[c] + off[c]]).collect::<Vec<_>>());
+            for v in e.iter_mut() { *v += r.eighth(-2.0, 2.0); }
+        }
+        let da = a.iter().map(|t| t.iter().map(|c| vec![0.0625; c.len()]).collect()).collect();
+        let s = EdgeSeries::from_edge_values(a, da).unwrap();
+        for lvl in [coupling_across_components(&s), coupling_across_steps(&s)] {
+            for x in lvl.unwrap().readings {
+                assert_eq!(x.minor, 0.0);
+                assert_eq!(x.reading, Reading::Structure);
+            }
+        }
+    });
+}
+
+#[test]
+fn prop_isc_d5_circulation_additive_and_sign_persists() {
+    static N: AtomicUsize = AtomicUsize::new(0);
+    for_all("I-SC-D5", |r| {
+        let rel = random_rel(r, false);
+        let seq = random_seq(r, rel.n_nodes, (1, 3), (2, 5), 0.0);
+        let f = RelationalField::new(&rel, seq, None).unwrap();
+        for s in 0..f.n_steps() {
+            for c in 0..f.spatial[s].circulation.len() {
+                for e in 0..rel.n_edges() {
+                    let (now, ch) = (f.spatial[s].circulation[c][e], f.persistence[s].circulation[c][e]);
+                    let next = f.spatial[s + 1].circulation[c][e];
+                    assert_eq!(next, now + ch);
+                    if step_preserves_sign(now, ch.abs()) && ch != 0.0 { assert_eq!(now.signum(), next.signum()); hit(&N); }
+                }
+            }
+        }
+    });
+    exercised(&N, "I-SC-D5 circulation sign preserved under change");
+}
+
+#[test]
+fn prop_isc_d6_uniform_rescaling_holds_every_sign() {
+    for_all("I-SC-D6", |r| {
+        let rel = random_rel(r, false);
+        let k = r.usize(2, 3);
+        let base: Vec<Vec<f64>> = (0..k).map(|_| (0..rel.n_nodes).map(|_| r.eighth(-4.0, 4.0)).collect()).collect();
+        let kappa = 2f64.powi(r.int(-2, 3) as i32);
+        let scaled: Vec<Vec<f64>> = base.iter().map(|c| c.iter().map(|v| kappa * v).collect()).collect();
+        let zero = vec![vec![0.0; rel.n_nodes]; k];
+        let seq = vec![Registration::new(NodeField::new(base), zero.clone()),
+                       Registration::new(NodeField::new(scaled), zero)];
+        let f = RelationalField::new(&rel, seq.clone(), None).unwrap();
+        for c in 0..k { for e in 0..rel.n_edges() {
+            assert_eq!(f.spatial[1].circulation[c][e], kappa * f.spatial[0].circulation[c][e]);
+        }}
+        let s = EdgeSeries::from_registrations(&seq, &rel).unwrap();
+        for x in arrangement_steps(&s).unwrap() { assert_eq!(x.reading, Reading::Structure); }
+    });
+}
+
+#[test]
+fn prop_isc_d7a_same_sign_halves_resolve_the_whole() {
+    for_all("I-SC-D7(a)", |r| {
+        let v = [r.eighth(-4.0, 4.0), 0.0, 0.0];
+        let sign = if r.chance(4) { 1.0 } else { -1.0 };
+        let (d0, d1, d2) = (r.delta(0.5), r.delta(0.5), r.delta(0.5));
+        let h1 = sign * (d0 + d1 + 0.125 * r.int(1, 16) as f64);
+        let h2 = sign * (d1 + d2 + 0.125 * r.int(1, 16) as f64);
+        let v = [v[0], v[0] + h1, v[0] + h1 + h2];
+        let whole = v[2] - v[0];
+        // Both halves are resolved with one sign by construction.
+        assert!(h1.abs() > d0 + d1 && h2.abs() > d1 + d2);
+        assert!(whole.abs() > d0 + d2 && whole.signum() == sign);
+        // And the forms agree.
+        let series = |vals: &[f64], ds: &[f64]| EdgeSeries::from_edge_values(
+            vals.iter().map(|&x| vec![vec![x]]).collect(), ds.iter().map(|&d| vec![vec![d]]).collect()).unwrap();
+        let halves = relation_changes(&series(&v, &[d0, d1, d2]));
+        let coarse = relation_changes(&series(&[v[0], v[2]], &[d0, d2]));
+        assert!(halves.iter().all(|x| x.reading == Reading::Freedom));
+        assert_eq!(coarse[0].reading, Reading::Freedom);
+    });
+}
+
+#[test]
+fn prop_isc_d8_crossing_needs_change_above_both_resolutions() {
+    static N: AtomicUsize = AtomicUsize::new(0);
+    for_all("I-SC-D8", |r| {
+        let s = random_edges(r, (2, 5), (2, 3), (2, 5), 0.5);
+        for x in arrangement_steps(&s).unwrap() {
+            if let (AtDelta::Resolved(p), AtDelta::Resolved(q)) = (x.before, x.after) {
+                if p != q {
+                    let (d, _) = s.change(x.step);
+                    let bound = minor_change_bound(&s.a[x.step], &d, x.e, x.f, x.i, x.j);
+                    let hw = minor_half_width(&s.a[x.step], &s.da[x.step], x.e, x.f, x.i, x.j)
+                        + minor_half_width(&s.a[x.step + 1], &s.da[x.step + 1], x.e, x.f, x.i, x.j);
+                    assert!(bound > hw);
+                    hit(&N);
+                }
+            }
+        }
+    });
+    exercised(&N, "I-SC-D8 crossings");
+}
+
+#[test]
+fn prop_energy_readings_invariant_under_carrier_rescaling() {
+    // The W14 result behind the wavenumber carrier: multiplying a carrier and
+    // its δ by one constant changes no energy reading.
+    for_all("V3 rescaling", |r| {
+        let rel = random_rel(r, false);
+        let vals: Vec<f64> = (0..rel.n_nodes).map(|_| r.eighth(-4.0, 4.0)).collect();
+        let del: Vec<f64> = (0..rel.n_nodes).map(|_| r.delta(0.5)).collect();
+        let kappa = 2f64.powi(r.int(-3, 6) as i32);
+        let c = |s: f64| EnergyCarrier { name: "c".into(), unit: "u".into(),
+            values: vals.iter().map(|v| s * v).collect(), delta: del.iter().map(|d| s * d).collect() };
+        let (x, y) = (energy_exchange(&c(1.0), &rel), energy_exchange(&c(kappa), &rel));
+        for (p, q) in x.iter().zip(&y) {
+            assert_eq!(p.floor_resolved, q.floor_resolved);
+            assert_eq!(p.degree(), q.degree());
+        }
+    });
+}

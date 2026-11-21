@@ -65,6 +65,12 @@
 //          fixed evaluated set F_δ is non-increasing in δ. Structure at a
 //          coarse δ is change held below that δ, never a statement that
 //          nothing changed (O1, W2).
+//          CORRECTED (2026-11-21, found by tests/v10_properties.rs): this
+//          holds for PC1 and PC2, which compare one value with its
+//          half-width. It does not hold for PC3, which compares two states:
+//          coarsening δ can turn resolved → resolved (structure) into
+//          resolved → not resolved (freedom). What holds for PC3: a crossing
+//          (opposite resolved signs) at δ′ is a crossing at every δ ≤ δ′.
 //   PC-D3  Invariance. Offsets cancel in A and Δ. Rescaling a component
 //          (values and δ together, by λ ≠ 0) leaves every reading unchanged.
 //          Swapping e and f negates every minor and changes no reading.
