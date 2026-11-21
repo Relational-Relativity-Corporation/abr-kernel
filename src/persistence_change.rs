@@ -439,8 +439,9 @@ impl PersistenceChange {
 
     /// Rate of relational evolution (V5, restated 2026-11-21, 10th): for each
     /// relation and component, the number of declared steps over which its
-    /// change is resolved at δ, out of all declared steps. Counted, never
-    /// timed: time is not a variable.
+    /// change is resolved at δ, out of all declared steps. The count is the
+    /// reading. Time is never primitive: a clock duration of the same steps
+    /// may be cited beside it only as a declared intersection (W15).
     pub fn evolution_counts(&self) -> Vec<EvolutionCount> {
         let steps = self.relations.iter().map(|r| r.step + 1).max().unwrap_or(0);
         let mut out: Vec<EvolutionCount> = Vec::new();

@@ -194,7 +194,7 @@ See V4 for full table. Unchanged from V4.
 
 ## VR-τ-01 — Relational Progression Interval τ[v]
 
-> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. The entry below is kept as the record.
+> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. *(Wording amended 11th, W15: time is never primitive; a registered time may be cited as an intersection, but this time is computed through a construct, not registered.)* The entry below is kept as the record.
 
 **Quantity:** τ[v] = ℏ / |A_persistence[e_coupling] · cos(θ[e_v, e_coupling])|
 
@@ -207,6 +207,8 @@ See V4 for full table. Unchanged from V4.
 ## VR-Φ-01 — Coherence Potential Φ[v]
 
 > **Retired from V10 (Origin, 2026-11-21, 10th):** Φ = ι·τ takes a lifetime as input; time is not a variable. Historical comparison only. The entry below is kept as the record.
+>
+> **Amended (11th, W15):** time is never primitive, but a registered lifetime may be cited as a declared intersection. Φ is restored as a declared intersection (C), not a kernel reading and not an observable basis for any invariant. "Confirmed" and "Observed" below are read as "intersection computed". Before citing, each of the 29 loci's lifetime is checked: measured (admissible as intersection) or converted from a width through ħ/Γ (computed, excluded under W14).
 
 **Quantity:** Φ[v] = ι[v] · τ[v]
 
@@ -221,6 +223,8 @@ Formal derivation: OC-Φ-1 pending.
 ## VR-ΦS-01 — Collective Coherence Potential Φ[S]
 
 > **Retired from V10 (Origin, 2026-11-21, 10th):** Φ = ι·τ takes a lifetime as input; time is not a variable. Historical comparison only. The entry below is kept as the record.
+>
+> **Amended (11th, W15):** restored as a declared intersection (C), as for VR-Φ-01.
 
 **Quantity:** Φ[S] = ι[S] · τ[S], where ι[S] = Σᵢ ι[vᵢ]
 
@@ -273,7 +277,7 @@ Unchanged from V4.
 
 ## VR-γ-τ-01 — Relational Progression Interval τ[v] at Photon Edges
 
-> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. The entry below is kept as the record.
+> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. *(Wording amended 11th, W15: time is never primitive; a registered time may be cited as an intersection, but this time is computed through a construct, not registered.)* The entry below is kept as the record.
 
 **12 values confirmed.** See V4 for full table. Unchanged from V4.
 
@@ -283,7 +287,7 @@ Unchanged from V4.
 
 ## VR-γ-N-01 — Relational Cycle Count N[v] at Photon-Emitting Loci
 
-> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. The entry below is kept as the record.
+> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. *(Wording amended 11th, W15: time is never primitive; a registered time may be cited as an intersection, but this time is computed through a construct, not registered.)* The entry below is kept as the record.
 
 **H n=3 confirmed:** N = 4.58×10⁶, log₁₀ = 6.66. Unchanged from V4.
 

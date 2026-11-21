@@ -50,11 +50,13 @@ redone: it must still compile.
 
 Unchanged and available in V10: `operator_a`, `operator_delta`, `operator_b`,
 `operator_a_persistence`, `operator_b_persistence`, `DeclaredRelations`,
-`NodeField`, `EdgeField`, the photon edge ε function, J and the other
+`NodeField`, `EdgeField`, the photon edge ε function, Φ (as a declared intersection), J and the other
 Part I invariants, and `provenance.rs`. *(τ = ħ/ε and its functions were retired
-from V10 on 2026-11-21, 9th, and Φ on the 10th; both are behind the V9
-fence: time is not a variable. A rate of relational evolution is
-`PersistenceChange::evolution_counts`, counted in steps.)*
+from V10 on 2026-11-21, 9th: that time is computed from energy, not
+registered. Time is never primitive (W15); a registered time may enter only
+as a declared intersection, described as such. Φ = ι·τ is available as a
+declared intersection (C), not a kernel reading. A rate of relational
+evolution is `PersistenceChange::evolution_counts`, counted in steps.)*
 
 ---
 
@@ -94,8 +96,10 @@ fence: time is not a variable. A rate of relational evolution is
 - No single-snapshot readings.
 - No reading of a zero, or an unresolved value, as absence (W2).
 - No V9 indicator (𝟙[e]) as a connection reading.
-- No time as a variable: no τ = ħ/ε, N[v], Φ, κ[region] or clock rate. Count
-  steps of relational evolution instead.
+- No time as a primitive (W15): no time orders a sequence, enters a kernel
+  form or bases a reading. A registered time may be cited as a declared
+  intersection. No time computed through a construct (τ = ħ/ε, ħ/Γ, N[v],
+  κ[region]). Count steps of relational evolution for the reading.
 - No V9 numbers as V10 inputs. They enter only as the declared comparison in
   step 7.
 

@@ -11,6 +11,9 @@ Bounded over D. No claim beyond D.
 > N[v], Φ (stability and relational) and κ[region] are retired from V10 and
 > kept here as the record and as historical comparison. A rate of relational
 > evolution is counted in steps (V10_README V5). ε = hc/λ is under W14 audit B2.
+> **Amended (11th, W15):** "no time in V10" overstated the rule. Time is never
+> primitive; a registered time may enter as a declared intersection, described
+> as such. Φ_stability is restored on that basis; τ = ħ/ε stays retired.
 
 ---
 

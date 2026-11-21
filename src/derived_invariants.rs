@@ -370,11 +370,12 @@
 /// Observable provenance: spectroscopic frequency-energy measurement.
 /// Used in τ[v] expression as the declared action scale.
 #[cfg(feature = "v9")]
-// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
-// that labels steps of relational evolution, not a variable (abr_operators_plain
-// §'Temporal ordering is not the primitive'). No registration relates energy to
-// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
-// V9 fence; numbers it produced are kept only as declared historical comparison.
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub const HBAR: f64 = 1.054_571_817e-34;
 
 /// e_unit — elementary charge unit (C).
@@ -580,11 +581,12 @@ pub fn epsilon_photon_edge(lambda_m: f64) -> f64 {
 /// # Arguments
 /// * `lambda_m` — declared wavelength from M (meters)
 #[cfg(feature = "v9")]
-// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
-// that labels steps of relational evolution, not a variable (abr_operators_plain
-// §'Temporal ordering is not the primitive'). No registration relates energy to
-// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
-// V9 fence; numbers it produced are kept only as declared historical comparison.
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub fn tau_photon_edge(lambda_m: f64) -> f64 {
     let eps = epsilon_photon_edge(lambda_m);
     HBAR / eps
@@ -615,11 +617,12 @@ pub fn tau_photon_edge(lambda_m: f64) -> f64 {
 /// N[v] — dimensionless count of declared relational intervals within
 /// the measured stability interval.
 #[cfg(feature = "v9")]
-// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
-// that labels steps of relational evolution, not a variable (abr_operators_plain
-// §'Temporal ordering is not the primitive'). No registration relates energy to
-// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
-// V9 fence; numbers it produced are kept only as declared historical comparison.
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub fn n_relational_cycles(tau_stability_s: f64, lambda_m: f64) -> f64 {
     debug_assert!(tau_stability_s > 0.0, "τ_stability must be positive");
     debug_assert!(lambda_m > 0.0, "λ must be positive");
@@ -649,11 +652,12 @@ pub fn n_relational_cycles(tau_stability_s: f64, lambda_m: f64) -> f64 {
 /// * `a_persistence_coupling` — A_persistence[e_coupling]
 /// * `cos_theta` — cos(θ[e_v, e_coupling]): coupling projection.
 #[cfg(feature = "v9")]
-// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
-// that labels steps of relational evolution, not a variable (abr_operators_plain
-// §'Temporal ordering is not the primitive'). No registration relates energy to
-// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
-// V9 fence; numbers it produced are kept only as declared historical comparison.
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub fn tau_v(a_persistence_coupling: f64, cos_theta: f64) -> f64 {
     let denominator = (a_persistence_coupling * cos_theta).abs();
     debug_assert!(
@@ -665,11 +669,12 @@ pub fn tau_v(a_persistence_coupling: f64, cos_theta: f64) -> f64 {
 
 /// τ[v] for the isolated locus case: τ = ℏ / E[v].
 #[cfg(feature = "v9")]
-// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
-// that labels steps of relational evolution, not a variable (abr_operators_plain
-// §'Temporal ordering is not the primitive'). No registration relates energy to
-// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
-// V9 fence; numbers it produced are kept only as declared historical comparison.
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub fn tau_v_isolated(e_v: f64) -> f64 {
     debug_assert!(e_v > 0.0, "E[v] must be positive for an active locus");
     HBAR / e_v
@@ -735,11 +740,13 @@ pub fn equilibrium_bond_angle_deg(n_bonds: usize) -> Option<f64> {
 ///
 /// # Returns
 /// Φ[v] in kg·s.
-#[cfg(feature = "v9")]
-// RETIRED FROM V10 (Origin, 2026-11-21, 10th). Φ = ι·τ takes a time (a
-// lifetime in seconds) as input; time is not a variable, and the record gives
-// no registered sequence of the locus to count steps from. Behind the V9
-// fence; VR-Φ-01 and VR-ΦS-01 kept only as declared historical comparison.
+// DECLARED INTERSECTION (C), not a kernel reading (Origin, 2026-11-21, 11th;
+// W15). Φ = ι·τ is the product of an inertia (PDG: fitted) and a lifetime
+// projected onto a clock. Time is never primitive; a registered lifetime may be
+// cited as an intersection, and is described as one wherever Φ appears. No
+// invariant is based on it (I-RE's basis stays withdrawn). A lifetime converted
+// from a width through ħ/Γ is computed, not registered, and does not enter (W14).
+// Briefly fenced on the 10th; restored on the 11th.
 pub fn phi_v(iota_v: f64, tau_v: f64) -> f64 {
     debug_assert!(iota_v > 0.0, "ι[v] must be positive — relational inertia ∈ ℝ⁺");
     debug_assert!(tau_v > 0.0, "τ[v] must be positive");
@@ -747,11 +754,13 @@ pub fn phi_v(iota_v: f64, tau_v: f64) -> f64 {
 }
 
 /// log₁₀(Φ[v]) — declared projection for cross-region comparison.
-#[cfg(feature = "v9")]
-// RETIRED FROM V10 (Origin, 2026-11-21, 10th). Φ = ι·τ takes a time (a
-// lifetime in seconds) as input; time is not a variable, and the record gives
-// no registered sequence of the locus to count steps from. Behind the V9
-// fence; VR-Φ-01 and VR-ΦS-01 kept only as declared historical comparison.
+// DECLARED INTERSECTION (C), not a kernel reading (Origin, 2026-11-21, 11th;
+// W15). Φ = ι·τ is the product of an inertia (PDG: fitted) and a lifetime
+// projected onto a clock. Time is never primitive; a registered lifetime may be
+// cited as an intersection, and is described as one wherever Φ appears. No
+// invariant is based on it (I-RE's basis stays withdrawn). A lifetime converted
+// from a width through ħ/Γ is computed, not registered, and does not enter (W14).
+// Briefly fenced on the 10th; restored on the 11th.
 pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 {
     phi_v(iota_v, tau_v).log10()
 }
@@ -773,11 +782,13 @@ pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 {
 /// # Arguments
 /// * `iota_s` — total relational inertia of declared system S: Σᵢ ι[vᵢ]
 /// * `tau_s` — declared system-level relational progression interval
-#[cfg(feature = "v9")]
-// RETIRED FROM V10 (Origin, 2026-11-21, 10th). Φ = ι·τ takes a time (a
-// lifetime in seconds) as input; time is not a variable, and the record gives
-// no registered sequence of the locus to count steps from. Behind the V9
-// fence; VR-Φ-01 and VR-ΦS-01 kept only as declared historical comparison.
+// DECLARED INTERSECTION (C), not a kernel reading (Origin, 2026-11-21, 11th;
+// W15). Φ = ι·τ is the product of an inertia (PDG: fitted) and a lifetime
+// projected onto a clock. Time is never primitive; a registered lifetime may be
+// cited as an intersection, and is described as one wherever Φ appears. No
+// invariant is based on it (I-RE's basis stays withdrawn). A lifetime converted
+// from a width through ħ/Γ is computed, not registered, and does not enter (W14).
+// Briefly fenced on the 10th; restored on the 11th.
 pub fn phi_s(iota_s: f64, tau_s: f64) -> f64 {
     debug_assert!(iota_s > 0.0, "ι[S] must be positive");
     debug_assert!(tau_s > 0.0, "τ[S] must be positive");
@@ -785,11 +796,13 @@ pub fn phi_s(iota_s: f64, tau_s: f64) -> f64 {
 }
 
 /// Accumulation condition: Φ[S] > Σᵢ Φ[vᵢ].
-#[cfg(feature = "v9")]
-// RETIRED FROM V10 (Origin, 2026-11-21, 10th). Φ = ι·τ takes a time (a
-// lifetime in seconds) as input; time is not a variable, and the record gives
-// no registered sequence of the locus to count steps from. Behind the V9
-// fence; VR-Φ-01 and VR-ΦS-01 kept only as declared historical comparison.
+// DECLARED INTERSECTION (C), not a kernel reading (Origin, 2026-11-21, 11th;
+// W15). Φ = ι·τ is the product of an inertia (PDG: fitted) and a lifetime
+// projected onto a clock. Time is never primitive; a registered lifetime may be
+// cited as an intersection, and is described as one wherever Φ appears. No
+// invariant is based on it (I-RE's basis stays withdrawn). A lifetime converted
+// from a width through ħ/Γ is computed, not registered, and does not enter (W14).
+// Briefly fenced on the 10th; restored on the 11th.
 pub fn accumulation_condition(phi_s_val: f64, phi_components: &[f64]) -> bool {
     let sum_components: f64 = phi_components.iter().sum();
     phi_s_val > sum_components
@@ -965,7 +978,6 @@ mod tests {
 
     // ── Φ[v] ─────────────────────────────────────────────────────────────
 
-    #[cfg(feature = "v9")]
     #[test]
     fn phi_v_formula_holds() {
         // Φ[v] = ι[v] · τ[v]
@@ -978,7 +990,6 @@ mod tests {
         assert!(phi > 0.0 && phi.is_finite());
     }
 
-    #[cfg(feature = "v9")]
     #[test]
     fn phi_v_proton_electron_ordering() {
         // Φ_proton > Φ_electron when τ is the same.
@@ -995,7 +1006,6 @@ mod tests {
         assert!((log_ratio - expected_ratio).abs() < 0.01);
     }
 
-    #[cfg(feature = "v9")]
     #[test]
     fn phi_v_scale_invariance_form() {
         // Form invariance: Φ[v] = ι[v] · τ[v] holds at any scale.
@@ -1014,7 +1024,6 @@ mod tests {
 
     // ── Φ[S] ─────────────────────────────────────────────────────────────
 
-    #[cfg(feature = "v9")]
     #[test]
     fn accumulation_condition_holds_when_collective_exceeds_sum() {
         let phi_s_val = 100.0;
@@ -1022,7 +1031,6 @@ mod tests {
         assert!(accumulation_condition(phi_s_val, &components));
     }
 
-    #[cfg(feature = "v9")]
     #[test]
     fn accumulation_condition_fails_when_collective_equals_sum() {
         let phi_s_val = 90.0;
@@ -1356,11 +1364,12 @@ pub fn tunneling_floor_holds(epsilon_e: f64, tol: f64) -> bool {
 /// # Returns
 /// true if τ[v] < ∞ (finite, as required by tunneling invariant).
 #[cfg(feature = "v9")]
-// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is a downstream projection
-// that labels steps of relational evolution, not a variable (abr_operators_plain
-// §'Temporal ordering is not the primitive'). No registration relates energy to
-// an interval of relational evolution; τ = ħ/ε is a construct (W14). Behind the
-// V9 fence; numbers it produced are kept only as declared historical comparison.
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub fn tunneling_tau_bounded(tau_v: f64) -> bool {
     tau_v.is_finite() && tau_v > 0.0
 }
