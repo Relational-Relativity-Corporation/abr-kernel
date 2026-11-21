@@ -287,3 +287,24 @@ fn energy_carrier_as_a_component_reads_through_the_same_forms() {
     let e = abr_kernel::ground_variables::energy(Some(&carriers), 4, &r).unwrap();
     assert!(e.share_resolved > 0.0);
 }
+
+// ── V5 restated: rate of relational evolution as counted steps ─────────────
+
+#[test]
+fn v5_rate_is_counted_steps_never_time() {
+    // Edge 0 changes at steps 0 and 2; edge 1 never changes. Four
+    // registrations, three steps. No clock enters.
+    let a = vec![
+        vec![vec![1.0, 5.0]], vec![vec![2.0, 5.0]], vec![vec![2.0, 5.0]], vec![vec![4.0, 5.0]],
+    ];
+    let pc = PersistenceChange::new(&edge_series(a, 0.01));
+    let c = pc.evolution_counts();
+    let e0 = c.iter().find(|x| x.edge == 0).unwrap();
+    let e1 = c.iter().find(|x| x.edge == 1).unwrap();
+    assert_eq!((e0.changed_steps, e0.steps), (2, 3));
+    assert_eq!((e1.changed_steps, e1.steps), (0, 3));
+    assert!((e0.share() - 2.0 / 3.0).abs() < 1e-12);
+    // Γ summed over relations equals PC1's freedom count (one rate, one reading).
+    let total: usize = c.iter().map(|x| x.changed_steps).sum();
+    assert_eq!(total, pc.relation_shares(None).freedom);
+}

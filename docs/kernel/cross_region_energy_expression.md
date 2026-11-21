@@ -42,6 +42,9 @@ Bounded over D. No claim beyond D.
 > inputs κ[Primary] = E/ι = c² is the unit conversion returning itself, and
 > Φ_relational = ℏ/c² for every locus: identities, not readings. Φ_stability
 > (a measured lifetime) is open under the same rule (V10_README Part 7, TIME).
+> **Amended (10th):** Φ_stability is retired from V10 as well: it takes a
+> lifetime as input, and no registered sequence of the locus exists to count
+> steps from. Historical comparison only.
 > The text below is kept as the record.
 
 ---

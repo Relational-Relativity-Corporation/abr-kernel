@@ -735,6 +735,11 @@ pub fn equilibrium_bond_angle_deg(n_bonds: usize) -> Option<f64> {
 ///
 /// # Returns
 /// Φ[v] in kg·s.
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 10th). Φ = ι·τ takes a time (a
+// lifetime in seconds) as input; time is not a variable, and the record gives
+// no registered sequence of the locus to count steps from. Behind the V9
+// fence; VR-Φ-01 and VR-ΦS-01 kept only as declared historical comparison.
 pub fn phi_v(iota_v: f64, tau_v: f64) -> f64 {
     debug_assert!(iota_v > 0.0, "ι[v] must be positive — relational inertia ∈ ℝ⁺");
     debug_assert!(tau_v > 0.0, "τ[v] must be positive");
@@ -742,6 +747,11 @@ pub fn phi_v(iota_v: f64, tau_v: f64) -> f64 {
 }
 
 /// log₁₀(Φ[v]) — declared projection for cross-region comparison.
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 10th). Φ = ι·τ takes a time (a
+// lifetime in seconds) as input; time is not a variable, and the record gives
+// no registered sequence of the locus to count steps from. Behind the V9
+// fence; VR-Φ-01 and VR-ΦS-01 kept only as declared historical comparison.
 pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 {
     phi_v(iota_v, tau_v).log10()
 }
@@ -763,6 +773,11 @@ pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 {
 /// # Arguments
 /// * `iota_s` — total relational inertia of declared system S: Σᵢ ι[vᵢ]
 /// * `tau_s` — declared system-level relational progression interval
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 10th). Φ = ι·τ takes a time (a
+// lifetime in seconds) as input; time is not a variable, and the record gives
+// no registered sequence of the locus to count steps from. Behind the V9
+// fence; VR-Φ-01 and VR-ΦS-01 kept only as declared historical comparison.
 pub fn phi_s(iota_s: f64, tau_s: f64) -> f64 {
     debug_assert!(iota_s > 0.0, "ι[S] must be positive");
     debug_assert!(tau_s > 0.0, "τ[S] must be positive");
@@ -770,6 +785,11 @@ pub fn phi_s(iota_s: f64, tau_s: f64) -> f64 {
 }
 
 /// Accumulation condition: Φ[S] > Σᵢ Φ[vᵢ].
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 10th). Φ = ι·τ takes a time (a
+// lifetime in seconds) as input; time is not a variable, and the record gives
+// no registered sequence of the locus to count steps from. Behind the V9
+// fence; VR-Φ-01 and VR-ΦS-01 kept only as declared historical comparison.
 pub fn accumulation_condition(phi_s_val: f64, phi_components: &[f64]) -> bool {
     let sum_components: f64 = phi_components.iter().sum();
     phi_s_val > sum_components
@@ -945,6 +965,7 @@ mod tests {
 
     // ── Φ[v] ─────────────────────────────────────────────────────────────
 
+    #[cfg(feature = "v9")]
     #[test]
     fn phi_v_formula_holds() {
         // Φ[v] = ι[v] · τ[v]
@@ -957,6 +978,7 @@ mod tests {
         assert!(phi > 0.0 && phi.is_finite());
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn phi_v_proton_electron_ordering() {
         // Φ_proton > Φ_electron when τ is the same.
@@ -973,6 +995,7 @@ mod tests {
         assert!((log_ratio - expected_ratio).abs() < 0.01);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn phi_v_scale_invariance_form() {
         // Form invariance: Φ[v] = ι[v] · τ[v] holds at any scale.
@@ -991,6 +1014,7 @@ mod tests {
 
     // ── Φ[S] ─────────────────────────────────────────────────────────────
 
+    #[cfg(feature = "v9")]
     #[test]
     fn accumulation_condition_holds_when_collective_exceeds_sum() {
         let phi_s_val = 100.0;
@@ -998,6 +1022,7 @@ mod tests {
         assert!(accumulation_condition(phi_s_val, &components));
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn accumulation_condition_fails_when_collective_equals_sum() {
         let phi_s_val = 90.0;

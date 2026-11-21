@@ -248,6 +248,22 @@ pub fn relation_changes(series: &EdgeSeries) -> Vec<RelationChange> {
     out
 }
 
+/// V5 restated: steps over which one relation's change is resolved at δ.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct EvolutionCount {
+    pub edge: usize,
+    pub component: usize,
+    /// Γ: declared steps with change resolved at δ.
+    pub changed_steps: usize,
+    /// Declared steps in the cycle of analysis (registrations − 1).
+    pub steps: usize,
+}
+
+impl EvolutionCount {
+    /// Λ̂ = Γ / steps, in [0, 1]. A declared summary (C).
+    pub fn share(&self) -> f64 { self.changed_steps as f64 / self.steps as f64 }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // PC2 — Coupling of change
 // ═══════════════════════════════════════════════════════════════════════════
@@ -417,6 +433,23 @@ impl PersistenceChange {
                     self.arrangement.as_ref().err()];
         for g in errs.into_iter().flatten() {
             if !out.contains(g) { out.push(g.clone()); }
+        }
+        out
+    }
+
+    /// Rate of relational evolution (V5, restated 2026-11-21, 10th): for each
+    /// relation and component, the number of declared steps over which its
+    /// change is resolved at δ, out of all declared steps. Counted, never
+    /// timed: time is not a variable.
+    pub fn evolution_counts(&self) -> Vec<EvolutionCount> {
+        let steps = self.relations.iter().map(|r| r.step + 1).max().unwrap_or(0);
+        let mut out: Vec<EvolutionCount> = Vec::new();
+        for r in &self.relations {
+            let i = match out.iter().position(|x| x.edge == r.edge && x.component == r.component) {
+                Some(i) => i,
+                None => { out.push(EvolutionCount { edge: r.edge, component: r.component, changed_steps: 0, steps }); out.len() - 1 }
+            };
+            if r.reading == Reading::Freedom { out[i].changed_steps += 1; }
         }
         out
     }

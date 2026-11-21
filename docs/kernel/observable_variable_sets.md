@@ -7,6 +7,11 @@ Operator grounding: operators_notation_and_constraint.md
 Companion files: derived_invariants.rs, validation_record.md (Kernel V10)
 Bounded over D. No claim beyond D.
 
+> **Amended (Origin, 2026-11-21, 9th and 10th).** No time in V10: τ = ħ/ε,
+> N[v], Φ (stability and relational) and κ[region] are retired from V10 and
+> kept here as the record and as historical comparison. A rate of relational
+> evolution is counted in steps (V10_README V5). ε = hc/λ is under W14 audit B2.
+
 ---
 
 # Part 1 — Origin's Declaration

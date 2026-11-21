@@ -50,10 +50,11 @@ redone: it must still compile.
 
 Unchanged and available in V10: `operator_a`, `operator_delta`, `operator_b`,
 `operator_a_persistence`, `operator_b_persistence`, `DeclaredRelations`,
-`NodeField`, `EdgeField`, the photon edge ε function, Φ, J and the other
+`NodeField`, `EdgeField`, the photon edge ε function, J and the other
 Part I invariants, and `provenance.rs`. *(τ = ħ/ε and its functions were retired
-from V10 on 2026-11-21, 9th, and are behind the V9 fence: time is not a
-variable.)*
+from V10 on 2026-11-21, 9th, and Φ on the 10th; both are behind the V9
+fence: time is not a variable. A rate of relational evolution is
+`PersistenceChange::evolution_counts`, counted in steps.)*
 
 ---
 
@@ -93,7 +94,8 @@ variable.)*
 - No single-snapshot readings.
 - No reading of a zero, or an unresolved value, as absence (W2).
 - No V9 indicator (𝟙[e]) as a connection reading.
-- No time computed from energy (τ = ħ/ε, N[v], Φ_relational, κ[region]).
+- No time as a variable: no τ = ħ/ε, N[v], Φ, κ[region] or clock rate. Count
+  steps of relational evolution instead.
 - No V9 numbers as V10 inputs. They enter only as the declared comparison in
   step 7.
 

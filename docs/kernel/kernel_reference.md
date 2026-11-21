@@ -1029,6 +1029,12 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 
 ### 15.5 I-RE — Relational Evolution Rate Invariant
 
+*Amended (Origin, 2026-11-21, 10th):* Φ is retired from V10 (it takes a
+lifetime as input; time is not a variable), so the 78-decade span is no longer
+an observable basis for I-RE. A rate of relational evolution is now counted:
+steps with change resolved at δ out of the declared steps (V10_README V5).
+OC-RE-1 stays open. The text below is kept as the record.
+
 Relational evolution rate decreases monotonically from the Primary Region
 outward. Primary Region is the fastest-evolving declared region in D. Φ[v]
 78-decade span is the observable expression of this invariant. Larger-scale
@@ -1427,6 +1433,7 @@ Code: `src/persistence_change.rs`.
 | Kernel V10 release (2026-11-21) | Package `abr-kernel` `9.0.0` → `10.0.0` (Origin decision). Title and release designation updated. §1 Df1 restatement; §15.6 I-SC; §18 `are_proportional` and ρ max-selection rows updated; §21 added (ground variables, minor pattern, relational field). `src/ground_variables.rs`, `src/relational_field.rs`. No operator formula, V9 function signature or existing test expectation changed. |
 | Kernel V10 ρ retirement (2026-11-21) | Origin declaration: ρ, χ, ρ_base, χ₀, the max selection, the saturating form and cc[p] retired from V10 readings; OC-K-1 dissolved. Parameter-free circulation Ξ added (`operator_circulation`). `RelationalField::new` takes no operator parameters. V9 ρ-weighted functions unchanged. |
 | Kernel V10 PC (2026-11-21, 7th) | Origin declaration: structure is persistence, change is freedom (PC1–PC4); V2 restated, V8 re-read, I-SC-1 restated; coupled-change grade of connection; energy as a component; edge-valued registration ER-1; provenance chain (V10_README §2.0). `src/persistence_change.rs`. First V2 form kept as declared comparison |
+| Kernel V10 no time (2026-11-21, 10th) | Φ = ι·τ retired from V10 (`phi_v`, `phi_v_log10`, `phi_s`, `accumulation_condition` behind the V9 fence); V5 restated as counted steps (`evolution_counts`); R4 window restated as a count of registrations; I-RE basis withdrawn |
 | Kernel V10 τ retirement (2026-11-21, 9th) | Origin declaration: the τ = ħ/ε family is retired from V10 (time is a downstream projection, not a variable; no registration relates energy to an interval of evolution). `HBAR`, `tau_photon_edge`, `n_relational_cycles`, `tau_v`, `tau_v_isolated`, `tunneling_tau_bounded` behind the V9 fence. Φ_relational and κ[region] retired as identities. §13 text kept as record |
 | Kernel V10.1 V9 fence (2026-11-21) | Origin declaration W13: V10 work uses only V10 forms. Cargo feature `v9`, off by default, gates the retired and superseded V9 elements (§21.5). Package `10.1.0`. Migration guide and end-to-end template added. No code removed. |
 

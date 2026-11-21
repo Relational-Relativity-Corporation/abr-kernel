@@ -206,6 +206,8 @@ See V4 for full table. Unchanged from V4.
 
 ## VR-Φ-01 — Coherence Potential Φ[v]
 
+> **Retired from V10 (Origin, 2026-11-21, 10th):** Φ = ι·τ takes a lifetime as input; time is not a variable. Historical comparison only. The entry below is kept as the record.
+
 **Quantity:** Φ[v] = ι[v] · τ[v]
 
 **Confirmed across 29 declared loci, 78 decades.** See V4 for full table.
@@ -217,6 +219,8 @@ Formal derivation: OC-Φ-1 pending.
 ---
 
 ## VR-ΦS-01 — Collective Coherence Potential Φ[S]
+
+> **Retired from V10 (Origin, 2026-11-21, 10th):** Φ = ι·τ takes a lifetime as input; time is not a variable. Historical comparison only. The entry below is kept as the record.
 
 **Quantity:** Φ[S] = ι[S] · τ[S], where ι[S] = Σᵢ ι[vᵢ]
 
