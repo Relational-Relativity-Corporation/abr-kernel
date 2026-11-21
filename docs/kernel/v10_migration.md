@@ -43,6 +43,7 @@ redone: it must still compile.
 | `epsilon_e` (ε = \|Δι\|·𝟙) | `ground_variables::energy`, `energy_exchange` | ε = \|A(c)\| of a declared carrier c; connection is not a factor |
 | `tunneling_floor_holds` (ε > tol) | `EnergyExchange::floor_resolved` | ε > δ_ε, with δ_ε = δ_c[s] + δ_c[t] |
 | `superposition_condition`, `are_proportional` | `GroundReading::freedom` (`persistence_change`) | Freedom is change permitted, PC1–PC3 (2026-11-21, 7th). The first V10 form, `ground_variables::freedom` (minor held resolved), reads a persistent arrangement and is kept as `v2_held_arrangement` for comparison |
+| *(first mapping, kept; amended 2026-11-21, 7th)* `superposition_condition`, `are_proportional` | `ground_variables::freedom` | Minor form, held resolved over the sequence |
 | `superposition_resolved` (interior present) | `ground_variables::has_interior` | Freedom no longer needs an interior |
 | `detection_indicator` (𝟙[e]), `entanglement_condition`, `decoherence_condition` | `ground_variables::connection` | Graded identity / proportional / sustained; a neighbourless edge is *not formable*, never decoherent |
 | `diagnostic_exec` | `RelationalField` with `GroundReading::findings` | Findings about the declaration replace warnings and errors |

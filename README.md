@@ -108,14 +108,32 @@ off by default. V10 work cannot use them by accident: a call does not compile.
 V9 work opts in visibly with `features = ["v9"]`. The code stays where it was,
 with its history. See `docs/kernel/v10_migration.md`.
 
-`cargo test` (V10 only) runs 68 tests: 42 library, 3 `provenance_demo`, 18
-ground variables and 5 relational field. Building without the `v9` feature is
-itself a check that no V10 module depends on a fenced element.
+`cargo test` (V10 only) runs 115 tests:
+- 35 library;
+- 3 `provenance_demo`;
+- 18 ground variables;
+- 17 persistence and change (PC);
+- 21 property tests (`tests/v10_properties.rs`, 2000 seeded random fields each);
+- 5 relational field;
+- 16 structural consistency (I-SC-D3 to I-SC-D13).
 
-`cargo test --features v9` runs all 153 tests: 63 library, 3 `provenance_demo`,
-13 diagnostic execution (`tests/diagnostic_exec.rs`), 19 ground variables, 6
-relational field, 12 V9 admission (`tests/v9_admission.rs`), 35 V9 conformance
-(`tests/v9_conformance.rs`) and 2 `compile_fail` doctests. The four
+Building without the `v9` feature is itself a check that no V10 module depends on a fenced element.
+
+`cargo test --features v9` runs all 207 tests:
+- 63 library;
+- 3 `provenance_demo`;
+- 13 diagnostic execution (`tests/diagnostic_exec.rs`);
+- 19 ground variables;
+- 17 persistence and change;
+- 21 property tests;
+- 6 relational field;
+- 16 structural consistency;
+- 12 V9 admission (`tests/v9_admission.rs`);
+- 35 V9 conformance (`tests/v9_conformance.rs`);
+- 2 `compile_fail` doctests.
+
+*(Counts as of 2026-11-21 on branch `claude/kind-keller-is6bq1`. At the V10.1
+release they were 68 and 153.)* The four
 `[V9-REQUIRED]` conformance tests exercise the bounded V9 admission interface
 (see Kernel V9 — RPPI Enforcement Status below). The two V10 tests that compare
 against V9 forms run only here, as declared historical comparisons.
@@ -133,6 +151,12 @@ declaration findings for a single registration and for the Primary Region. The
 first registration was checked by hand. These are synthetic fixtures: they
 confirm that the forms compute as declared and establish no empirical validity.
 The invariant tests against registered data (I-SC, OC-SC-1 to OC-SC-4) are next.
+
+*Since V10.1 (2026-11-21, branch `claude/kind-keller-is6bq1`):* structure and
+freedom as persistence and change (PC) declared, with the provenance chain
+(`V10_README.md` §2.0); W14 and W15; τ = ħ/ε retired; derived structural
+consistency I-SC-D3 to I-SC-D13 with property tests. The verification package
+for all of it is `docs/kernel/VERIFICATION_2026-11-21.md`.
 ---
 
 ## Contents
@@ -142,9 +166,9 @@ identifiers remain only where needed to describe prior implementations,
 release history, or explicitly frozen source. Document-local revision numbers
 are historical identifiers, not alternate canonical kernel versions.
 The Rust package `abr-kernel` (library crate `abr_kernel`) is version
-`10.0.0`, the Kernel V10 release. Its operator formulas are unchanged from the
-frozen V8 implementation (`8.0.0`); V10 adds the `ground_variables` and
-`relational_field` modules.
+`10.1.0`, the Kernel V10 release with the V9 fence. Its operator formulas are
+unchanged from the frozen V8 implementation (`8.0.0`). V10 adds the
+`ground_variables`, `relational_field` and `persistence_change` modules.
 
 ### `docs/kernel/` — what the kernel is
 

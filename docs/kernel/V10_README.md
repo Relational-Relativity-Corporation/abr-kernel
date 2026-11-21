@@ -1,7 +1,7 @@
 # Kernel V10: the canonical reference
 
 **Metatron Dynamics, Inc.** Bounded over D. No claim beyond D.
-Release: **Kernel V10**, package `abr-kernel` `10.1.0`. Baseline: **Kernel V9, `abr-kernel` `833ffb3`**. Last revised 2026-11-21.
+Release: **Kernel V10**, package `abr-kernel` `10.1.0`. Baseline: **Kernel V9, `abr-kernel` `833ffb3`**. Last revised 2026-11-21. *(The release line read `10.0.0` until 2026-11-21; corrected to the package version `10.1.0` of the V9 fence release.)*
 
 This is the document we refer to from now on. It is the canonical statement of Kernel V10 and is maintained here, in `abr-kernel`. It lists every V10 item from top to bottom: first the relational declaration of variables and conditions, then the formal mathematics, then traceability, code scope, what stands, conflicts and open decisions.
 
@@ -112,8 +112,11 @@ Either way the analysis returns to the declaration (G4a, W5): finer δ or a wide
 | Ground variable | Kernel invariant | What it reads | Its own object, held over the sequence |
 | --- | --- | --- | --- |
 | **Energy** | **Tunneling, I-T** | what is exchanged across a relation *(first wording "how much a relation changes", amended 2026-11-21, 7th: its change over evolution is read through PC with the carrier as a component)* | ε[e] = \|A(c)[e]\| of the declared carrier c; floor ε > δ_ε, δ_ε[e] = δ_c[s] + δ_c[t] (V3) |
+| *First statement, kept (amended 2026-11-21, 7th):* **Energy** | **Tunneling, I-T** | how much a relation changes | ε[e] = \|A(c)[e]\| of the declared carrier c; floor ε > δ_ε, δ_ε[e] = δ_c[s] + δ_c[t] (V3) |
 | **Freedom** | **Superposition, I-S** | change permitted: relations changing, and changing independently | PC1–PC3 over consecutive registrations; F_δ = changed / evaluated (§2.5). *First form (2026-11-21): pairs with at least one minor held resolved, F_δ = share of such pairs (V2); amended the same day (7th): a held state is structure* |
+| *First statement, kept (amended 2026-11-21, 7th):* **Freedom** | **Superposition, I-S** | how many independent ways relations vary | pairs with at least one minor held resolved; F_δ = share of such pairs (V2) |
 | **Connection** | **Entanglement, I-E** | shared structure: relations held together by a constraint | in state: identity, proportional, sustained (V1); in change: coupled change (PC2). Grades side by side |
+| *First statement, kept (amended 2026-11-21, 7th):* **Connection** | **Entanglement, I-E** | what holds together through evolution | graded: identity, proportional, sustained (V1) |
 | **Circulation** | Ξ (K8) | imbalance between what follows and what precedes | Ξ[e] = Σ_succ B − Σ_pred B, parameter-free; its held sign is the sustained grade of connection (V4) |
 
 
@@ -475,6 +478,7 @@ Mathematical results on the V10 forms (Derived, Generator 2026-11-21; for Verifi
 | 2026-11-21 (13th) | **Derived structural consistency I-SC-D3 to I-SC-D8** (Generator; mathematical, for Verifier review): fixed-ratio and offset coupling of change, additive circulation and its persistence condition, change without reorganization under uniform rescaling, dependence of readings on the declared registrations, and the change needed for a crossing. Ten tests. OC-SC-4 partly derived. No declaration changed. Default build 88 tests, with `v9` 180 | §2.6; OC-SC-4 |
 | 2026-11-21 (14th) | **Property tests** for PC-D1 to PC-D5, I-SC-D1 to I-SC-D8 and carrier rescaling: 16 tests, 2000 seeded random fields each, exact dyadic arithmetic, every conditional property checked for exercise. **PC-D2 corrected:** monotonicity in δ holds for PC1 and PC2 but not PC3 (counterexample); for PC3 only crossings are monotone. No declaration changed. Default build 104 tests, with `v9` 196 | PC-D2; `tests/v10_properties.rs` |
 | 2026-11-21 (15th) | **Derived I-SC-D9 to I-SC-D13** (Generator; mathematical, for Verifier review): exact but not δ-transitivity of coupled change; closure on change around a cycle; total circulation as a degree-weighted sum; locality of readings to components; bounds on the counted rate under omitted registrations. Code: cycle closure on a series, circulation weights. Each with a worked example and a property test. No declaration changed. Default build 115 tests, with `v9` 207 | §2.6; K7 partly; Part 4 |
+| 2026-11-21 (16th) | **Verification package** (`VERIFICATION_2026-11-21.md`) prepared before merge, covering every commit since `main` `70418df`. Provenance check of every deleted line: the three §1.2 rows, the release line and one migration-guide row had been replaced, and their originals are now restored beside the amendments. `README.md` counts and package version updated. No declaration changed | Verification |
 
 ---
 
