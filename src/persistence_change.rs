@@ -135,6 +135,20 @@ pub enum EdgeOrigin {
 /// both registrations plus the unshared gain on each end's own change
 /// (`dgain`); offsets cancel in every change and do not enter. A shared gain
 /// changes no classification and enters only `change_magnitude`.
+///
+/// **Gains on edge-registered values (corrected after the Verifier's 10.3.0
+/// review, 2026-11-22, 34th).** A gain factor common to every edge of a
+/// component, or common to every component of an edge, multiplies each minor
+/// by one positive factor ((1+γ_i)(1+γ_j), or (1+γ_e)(1+γ_f)) and changes no
+/// classification: it is *shared* and enters `change_magnitude` only. An
+/// *independent* gain on one (component, edge) entry does not: in
+/// m = Δ_i[e]·Δ_j[f] − Δ_j[e]·Δ_i[f] it scales one term and not the other,
+/// so it can move a minor across zero. It enters the bound of every minor
+/// that mixes components (PC2(a), PC3), as γ·|value| on that entry
+/// (`mixed_gain`). It is not added to PC1 or PC2(b): a factor on one entry
+/// scales Δ there by one positive factor (PC1), and over one component the
+/// same entries carry the same factor at both steps (PC2(b)), so neither
+/// classification changes.
 #[derive(Debug, Clone, PartialEq)]
 pub struct EdgeSeries {
     /// a[t][c][e]
@@ -145,8 +159,14 @@ pub struct EdgeSeries {
     pub da_rep: Vec<Vec<Vec<f64>>>,
     /// Unshared-gain part of the change bound [step][c][e]: γ_s·|Δx_s| + γ_t·|Δx_t| (Z1a).
     pub dgain: Vec<Vec<Vec<f64>>>,
-    /// Shared gain bound [c][e], 0 ≤ γ < 1: enters reported change magnitudes only (Z1a).
+    /// Shared gain bound [c][e] (a component factor times an edge factor):
+    /// enters reported change magnitudes only (Z1a).
     pub shared_gain: Vec<Vec<f64>>,
+    /// Independent gain bound [c][e] on edge-registered values: enters the
+    /// bound of every minor that mixes components (PC2(a), PC3) and reported
+    /// magnitudes. Zero for node-derived series, whose unshared gains are
+    /// already in `da` and `dgain`.
+    pub mixed_gain: Vec<Vec<f64>>,
     pub origin: EdgeOrigin,
     /// Edge pairs whose coupling the declaration fixes (PC-D4).
     pub forced_pairs: Vec<(usize, usize)>,
@@ -184,7 +204,8 @@ impl EdgeSeries {
                 if rel.edges[e] == rel.edges[f] { forced_pairs.push((e, f)); }
             }
         }
-        Ok(EdgeSeries { a, da, da_rep, dgain, shared_gain, origin: EdgeOrigin::NodeDerived, forced_pairs })
+        let mixed_gain = vec![vec![0.0; rel.n_edges()]; k];
+        Ok(EdgeSeries { a, da, da_rep, dgain, shared_gain, mixed_gain, origin: EdgeOrigin::NodeDerived, forced_pairs })
     }
 
     /// From a registered value per declared edge and component, with δ per
@@ -206,32 +227,38 @@ impl EdgeSeries {
         Ok(EdgeSeries {
             dgain: vec![vec![vec![0.0; m]; k]; steps],
             shared_gain: vec![vec![0.0; m]; k],
+            mixed_gain: vec![vec![0.0; m]; k],
             da_rep: da.clone(),
             a, da, origin: EdgeOrigin::EdgeRegistered, forced_pairs: Vec::new(),
         })
     }
 
     /// Declare run-constant parts for an edge-valued series (Z1a): an offset
-    /// bound per component and edge, entering the state bound only, and a
-    /// gain bound per component and edge. A relation registered as one value
-    /// carries one gain at both its ends, so the gain is shared by that
-    /// relation: it changes no classification (a per-edge factor 1 + γ′ > 0
-    /// preserves every Δ's sign and every minor's sign) and enters only
-    /// `change_magnitude`. Gains in [0, 1).
-    pub fn with_run_constant(mut self, offset: Vec<Vec<f64>>, gain: Vec<Vec<f64>>) -> Self {
+    /// bound per component and edge, entering the state bound only, and the
+    /// gain bounds in three parts (`EdgeGains`). Every gain bound in [0, 1).
+    ///
+    /// *Was (10.3.0 before the Verifier's review):* one gain per component and
+    /// edge, treated as shared by its relation and excluded from every
+    /// classification. That holds only for gains common to a component or to
+    /// an edge: an independent gain can change a minor that mixes components.
+    pub fn with_run_constant(mut self, offset: Vec<Vec<f64>>, gains: EdgeGains) -> Self {
         let (k, m) = (self.k(), self.n_edges());
         assert!(offset.len() == k && offset.iter().all(|o| o.len() == m),
             "an offset must be declared for every component and edge");
-        assert!(gain.len() == k && gain.iter().all(|g| g.len() == m),
-            "a gain must be declared for every component and edge");
+        assert!(gains.component.len() == k && gains.edge.len() == m
+            && gains.independent.len() == k && gains.independent.iter().all(|g| g.len() == m),
+            "gains must be declared per component, per edge, and per component and edge");
         assert!(offset.iter().flatten().all(|o| o.is_finite() && *o >= 0.0),
             "an offset bound must be finite and non-negative");
-        assert!(gain.iter().flatten().all(|g| g.is_finite() && *g >= 0.0 && *g < 1.0),
+        assert!(gains.component.iter().chain(&gains.edge).chain(gains.independent.iter().flatten())
+            .all(|g| g.is_finite() && *g >= 0.0 && *g < 1.0),
             "a gain bound must lie in [0, 1): a declared gain is strictly positive (Z1a)");
         for t in 0..self.n_registrations() {
             for c in 0..k { for e in 0..m { self.da[t][c][e] = self.da_rep[t][c][e] + offset[c][e]; } }
         }
-        self.shared_gain = gain;
+        self.shared_gain = (0..k).map(|c| (0..m)
+            .map(|e| (1.0 + gains.component[c]) * (1.0 + gains.edge[e]) - 1.0).collect()).collect();
+        self.mixed_gain = gains.independent;
         self
     }
 
@@ -255,11 +282,41 @@ impl EdgeSeries {
     pub fn change_magnitude(&self, s: usize) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
         let (d, dd) = self.change(s);
         let dm = (0..self.k()).map(|c| (0..self.n_edges())
-            .map(|e| dd[c][e] + self.shared_gain[c][e] * d[c][e].abs()).collect()).collect();
+            .map(|e| {
+                let g = (1.0 + self.shared_gain[c][e]) * (1.0 + self.mixed_gain[c][e]) - 1.0;
+                dd[c][e] + g * d[c][e].abs()
+            }).collect()).collect();
         (d, dm)
     }
 
+    /// Bounds for a minor that mixes components: the bound on each entry
+    /// widened by its independent gain on the entry's value, δ + γ·|v|.
+    fn mixed(&self, v: &[Vec<f64>], dv: &[Vec<f64>]) -> Vec<Vec<f64>> {
+        (0..self.k()).map(|c| (0..self.n_edges())
+            .map(|e| dv[c][e] + self.mixed_gain[c][e] * v[c][e].abs()).collect()).collect()
+    }
+
     fn is_forced(&self, e: usize, f: usize) -> bool { self.forced_pairs.contains(&(e, f)) }
+}
+
+/// Gain bounds on edge-registered values, in three parts (Z1a; corrected
+/// after the Verifier's 10.3.0 review). Each bound in [0, 1).
+#[derive(Debug, Clone, PartialEq)]
+pub struct EdgeGains {
+    /// A gain common to every edge of component c: shared.
+    pub component: Vec<f64>,
+    /// A gain common to every component of edge e: shared.
+    pub edge: Vec<f64>,
+    /// A gain on one (component, edge) entry alone: enters the bounds of
+    /// minors that mix components.
+    pub independent: Vec<Vec<f64>>,
+}
+
+impl EdgeGains {
+    /// No gain declared, for k components and m edges.
+    pub fn none(k: usize, m: usize) -> Self {
+        EdgeGains { component: vec![0.0; k], edge: vec![0.0; m], independent: vec![vec![0.0; m]; k] }
+    }
 }
 
 /// Counts at one level over one evaluated set (PC4).
@@ -371,15 +428,18 @@ pub struct Couplings {
 
 /// μ over two readings (x, dx) and (y, dy), each indexed by edge. Edges whose
 /// change is not resolved in either reading persisted (PC1) and enter no pair.
-fn couple(series: &EdgeSeries, over: ReadingPair, x: (&[f64], &[f64]), y: (&[f64], &[f64]), out: &mut Vec<ChangeCoupling>) {
+/// `hx`, `hy` are the bounds used in the minor (widened by independent gains
+/// when the minor mixes components); entry uses the change bounds `x.1`, `y.1`.
+fn couple(series: &EdgeSeries, over: ReadingPair, x: (&[f64], &[f64]), y: (&[f64], &[f64]),
+          hx: &[f64], hy: &[f64], out: &mut Vec<ChangeCoupling>) {
     let moved: Vec<usize> = (0..series.n_edges())
         .filter(|&e| x.0[e].abs() > x.1[e] || y.0[e].abs() > y.1[e]).collect();
     for (n, &e) in moved.iter().enumerate() {
         for &f in &moved[n + 1..] {
             if series.is_forced(e, f) { continue; }
             let minor = x.0[e] * y.0[f] - y.0[e] * x.0[f];
-            let hw = product_half_width(x.0[e], x.1[e], y.0[f], y.1[f])
-                + product_half_width(y.0[e], y.1[e], x.0[f], x.1[f]);
+            let hw = product_half_width(x.0[e], hx[e], y.0[f], hy[f])
+                + product_half_width(y.0[e], hy[e], x.0[f], hx[f]);
             out.push(ChangeCoupling { e, f, over, minor, half_width: hw, reading: read(minor, hw) });
         }
     }
@@ -392,10 +452,11 @@ pub fn coupling_across_components(series: &EdgeSeries) -> Result<Couplings, Decl
     let mut readings = Vec::new();
     for s in 0..series.n_steps() {
         let (d, dd) = series.change(s);
+        let hm = series.mixed(&d, &dd);
         for i in 0..series.k() {
             for j in (i + 1)..series.k() {
                 couple(series, ReadingPair::Components { step: s, i, j },
-                    (&d[i], &dd[i]), (&d[j], &dd[j]), &mut readings);
+                    (&d[i], &dd[i]), (&d[j], &dd[j]), &hm[i], &hm[j], &mut readings);
             }
         }
     }
@@ -413,7 +474,7 @@ pub fn coupling_across_steps(series: &EdgeSeries) -> Result<Couplings, Declarati
         let (d1, dd1) = series.change(s + 1);
         for c in 0..series.k() {
             couple(series, ReadingPair::Steps { component: c, step: s },
-                (&d0[c], &dd0[c]), (&d1[c], &dd1[c]), &mut readings);
+                (&d0[c], &dd0[c]), (&d1[c], &dd1[c]), &dd0[c], &dd1[c], &mut readings);
         }
     }
     Ok(Couplings { readings, forced_pairs: series.forced_pairs.clone() })
@@ -443,8 +504,10 @@ pub fn arrangement_steps(series: &EdgeSeries) -> Result<Vec<ArrangementStep>, De
     if series.k() < 2 { return Err(DeclarationGap::SingleComponent); }
     if series.n_edges() < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
     let resolved = |t: usize, e: usize| (0..series.k()).any(|c| series.a[t][c][e].abs() > series.da[t][c][e]);
+    let widened: Vec<Vec<Vec<f64>>> = (0..series.n_registrations())
+        .map(|t| series.mixed(&series.a[t], &series.da[t])).collect();
     let state = |t: usize, e: usize, f: usize, i: usize, j: usize| {
-        let (a, da) = (&series.a[t], &series.da[t]);
+        let (a, da) = (&series.a[t], &widened[t]);
         let m = a[i][e] * a[j][f] - a[j][e] * a[i][f];
         let hw = product_half_width(a[i][e], da[i][e], a[j][f], da[j][f])
             + product_half_width(a[j][e], da[j][e], a[i][f], da[i][f]);

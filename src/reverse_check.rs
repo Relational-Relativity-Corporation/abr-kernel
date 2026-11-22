@@ -37,9 +37,10 @@ fn mismatch<T: std::fmt::Debug>(q: &'static str, reported: T, rederived: T) -> V
 pub enum Inputs<'a> {
     /// Node-valued registrations over declared relations (link 4, node-derived).
     Nodes { seq: &'a [Registration], rel: &'a DeclaredRelations },
-    /// Edge-registered values (ER-1): a[t][c][e], repeatability δ[t][c][e] and
-    /// the run-constant offset bound [c][e] (0 when none was declared).
-    Edges { a: &'a [Vec<Vec<f64>>], delta: &'a [Vec<Vec<f64>>], offset: &'a [Vec<f64>] },
+    /// Edge-registered values (ER-1): a[t][c][e], repeatability δ[t][c][e],
+    /// the run-constant offset bound [c][e] and the independent gain bound
+    /// [c][e] (0 where none was declared; shared gains enter no reading).
+    Edges { a: &'a [Vec<Vec<f64>>], delta: &'a [Vec<Vec<f64>>], offset: &'a [Vec<f64>], independent_gain: &'a [Vec<f64>] },
 }
 
 impl Inputs<'_> {
@@ -88,6 +89,11 @@ impl Inputs<'_> {
             Inputs::Edges { delta, .. } => delta[s + 1][c][e] + delta[s][c][e],
         };
         (d, hw)
+    }
+    /// The bound of an entry inside a minor that mixes components: widened by
+    /// the independent gain on the entry's value (edge-registered only).
+    fn mixing(&self, c: usize, e: usize, v: f64, hw: f64) -> f64 {
+        match self { Inputs::Nodes { .. } => hw, Inputs::Edges { independent_gain, .. } => hw + independent_gain[c][e] * v.abs() }
     }
     fn forced(&self, e: usize, f: usize) -> bool {
         match self { Inputs::Nodes { rel, .. } => rel.edges[e] == rel.edges[f], Inputs::Edges { .. } => false }
@@ -139,7 +145,12 @@ pub fn reverse_coupling(inp: Inputs, x: &ChangeCoupling) -> Verdict {
         return mismatch("edges entered (change resolved in either reading, PC1)", true, false);
     }
     let minor = xe.0 * yf.0 - ye.0 * xf.0;
-    let hw = hw_product(xe.0, xe.1, yf.0, yf.1) + hw_product(ye.0, ye.1, xf.0, xf.1);
+    // A minor across components carries the independent gains; across steps
+    // (one component) it does not.
+    let mixes = matches!(x.over, ReadingPair::Components { .. });
+    let h = |c: usize, e: usize, p: (f64, f64)| if mixes { inp.mixing(c, e, p.0, p.1) } else { p.1 };
+    let (hxe, hxf, hye, hyf) = (h(c0, x.e, xe), h(c0, x.f, xf), h(c1, x.e, ye), h(c1, x.f, yf));
+    let hw = hw_product(xe.0, hxe, yf.0, hyf) + hw_product(ye.0, hye, xf.0, hxf);
     if minor != x.minor { return mismatch("minor", x.minor, minor); }
     if hw != x.half_width { return mismatch("half_width", x.half_width, hw); }
     let r = reading_of(minor, hw);
@@ -160,7 +171,7 @@ pub fn reverse_arrangement(inp: Inputs, x: &ArrangementStep) -> Verdict {
     }
     let state = |t: usize| {
         let a = |c: usize, e: usize| inp.a(t, c, e);
-        let h = |c: usize, e: usize| inp.state_hw(t, c, e);
+        let h = |c: usize, e: usize| inp.mixing(c, e, inp.a(t, c, e), inp.state_hw(t, c, e));
         let (i, j, e, f) = (x.i, x.j, x.e, x.f);
         let m = a(i, e) * a(j, f) - a(j, e) * a(i, f);
         let hw = hw_product(a(i, e), h(i, e), a(j, f), h(j, f)) + hw_product(a(j, e), h(j, e), a(i, f), h(i, f));

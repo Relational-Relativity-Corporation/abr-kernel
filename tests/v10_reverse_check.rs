@@ -100,9 +100,11 @@ fn prop_b2_every_reading_reverse_checks_to_match_edge_registered() {
             aa.push(v.clone()); dd.push(d.clone());
             for cv in v.iter_mut() { for x in cv.iter_mut() { if g.chance() { *x += g.eighth() / 2.0; } } }
         }
-        let gain: Vec<Vec<f64>> = vec![vec![0.125; m]; k];
-        let s = EdgeSeries::from_edge_values(aa.clone(), dd.clone()).unwrap().with_run_constant(off.clone(), gain);
-        let n = check_all(Inputs::Edges { a: &aa, delta: &dd, offset: &off }, &PersistenceChange::new(&s));
+        // Shared gains (component, edge) and, in half the cases, independent gains.
+        let ind: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| if seed % 4 >= 2 { g.gain() } else { 0.0 }).collect()).collect();
+        let gains = EdgeGains { component: vec![0.125; k], edge: vec![0.25; m], independent: ind.clone() };
+        let s = EdgeSeries::from_edge_values(aa.clone(), dd.clone()).unwrap().with_run_constant(off.clone(), gains);
+        let n = check_all(Inputs::Edges { a: &aa, delta: &dd, offset: &off, independent_gain: &ind }, &PersistenceChange::new(&s));
         c += n.1; a += n.2;
     }
     assert!(c > 1000 && a > 1000, "vacuous: {c} {a}");

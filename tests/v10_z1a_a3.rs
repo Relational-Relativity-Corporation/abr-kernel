@@ -151,7 +151,7 @@ fn z1a_an_edge_valued_offset_enters_the_state_bound_only() {
     let a = vec![vec![vec![1.0, 2.0]], vec![vec![1.5, 2.0]], vec![vec![2.0, 2.0]]];
     let da = vec![vec![vec![0.0625; 2]]; 3];
     let base = EdgeSeries::from_edge_values(a.clone(), da.clone()).unwrap();
-    let off = EdgeSeries::from_edge_values(a, da).unwrap().with_run_constant(vec![vec![0.25, 0.25]], vec![vec![0.0, 0.0]]);
+    let off = EdgeSeries::from_edge_values(a, da).unwrap().with_run_constant(vec![vec![0.25, 0.25]], EdgeGains::none(1, 2));
     for s in 0..2 { assert_eq!(base.change(s), off.change(s)); }
     assert_eq!(off.da[0][0][0], 0.3125);
     assert_eq!(off.da_rep, base.da_rep);
@@ -231,7 +231,7 @@ fn z1a_a_gain_bound_of_one_or_more_is_refused() {
 #[should_panic(expected = "a gain bound must lie in [0, 1)")]
 fn z1a_an_edge_gain_bound_of_one_or_more_is_refused() {
     let s = EdgeSeries::from_edge_values(vec![vec![vec![1.0]], vec![vec![2.0]]], vec![vec![vec![0.0]]; 2]).unwrap();
-    let _ = s.with_run_constant(vec![vec![0.0]], vec![vec![1.5]]);
+    let _ = s.with_run_constant(vec![vec![0.0]], EdgeGains { component: vec![0.0], edge: vec![0.0], independent: vec![vec![1.5]] });
 }
 
 #[test]
@@ -375,4 +375,150 @@ fn a3_the_flag_agrees_with_the_sustained_grade_on_random_fields() {
         }
     });
     exercised(&FLAGGED, "a3_flag: a flagged edge in a formed sustained grade");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Gains on edge-registered values (the Verifier's 10.3.0 finding, 34th)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Two components, two edges, zero repeatability: both changes are (1, 1)
+/// at step 0, so the PC2(a) minor is 0 and reads structure.
+fn verifier_case(scale_entry: f64) -> Vec<Vec<Vec<f64>>> {
+    vec![vec![vec![0.0, 0.0], vec![0.0, 0.0]], vec![vec![1.0 * scale_entry, 1.0], vec![1.0, 1.0]]]
+}
+
+fn pc2a(s: &EdgeSeries) -> Vec<(f64, Reading)> {
+    coupling_across_components(s).unwrap().readings.iter().map(|x| (x.minor, x.reading)).collect()
+}
+
+#[test]
+fn z1a_the_verifiers_case_an_independent_gain_enters_the_mixing_minor() {
+    let zero = vec![vec![vec![0.0; 2]; 2]; 2];
+    let base = EdgeSeries::from_edge_values(verifier_case(1.0), zero.clone()).unwrap();
+    assert_eq!(pc2a(&base), vec![(0.0, Reading::Structure)]);
+    // A factor 1.125 on one (component, edge) entry moves the minor off zero.
+    let moved = EdgeSeries::from_edge_values(verifier_case(1.125), zero.clone()).unwrap();
+    assert_eq!(pc2a(&moved), vec![(0.125, Reading::Freedom)]);
+    // Declared as an independent gain of 1/8 on that entry, neither reads freedom:
+    let mut ind = vec![vec![0.0; 2]; 2];
+    ind[0][0] = 0.125;
+    let g = || EdgeGains { component: vec![0.0; 2], edge: vec![0.0; 2], independent: ind.clone() };
+    let base = EdgeSeries::from_edge_values(verifier_case(1.0), zero.clone()).unwrap().with_run_constant(vec![vec![0.0; 2]; 2], g());
+    let moved = EdgeSeries::from_edge_values(verifier_case(1.125), zero.clone()).unwrap().with_run_constant(vec![vec![0.0; 2]; 2], g());
+    assert_eq!(pc2a(&base)[0].1, Reading::Structure);
+    assert_eq!(pc2a(&moved)[0].1, Reading::Structure);
+    // PC1 is unchanged by the declaration.
+    let r = |s: &EdgeSeries| PersistenceChange::new(s).relations.iter().map(|x| (x.change, x.half_width, x.reading)).collect::<Vec<_>>();
+    assert_eq!(r(&base), r(&EdgeSeries::from_edge_values(verifier_case(1.0), zero).unwrap()));
+}
+
+#[test]
+fn z1a_a_shared_gain_scales_a_whole_component_or_edge_and_changes_nothing() {
+    let zero = vec![vec![vec![0.0; 2]; 2]; 2];
+    // The same factor 1.125 on every edge of component 0: the minor stays 0.
+    let mut a = verifier_case(1.0);
+    for t in 0..2 { for e in 0..2 { a[t][0][e] *= 1.125; } }
+    assert_eq!(pc2a(&EdgeSeries::from_edge_values(a, zero.clone()).unwrap()), vec![(0.0, Reading::Structure)]);
+    // The same factor on every component of edge 0: the minor stays 0.
+    let mut a = verifier_case(1.0);
+    for t in 0..2 { for c in 0..2 { a[t][c][0] *= 1.125; } }
+    assert_eq!(pc2a(&EdgeSeries::from_edge_values(a, zero).unwrap()), vec![(0.0, Reading::Structure)]);
+}
+
+fn random_edge_values(r: &mut Rng) -> (Vec<Vec<Vec<f64>>>, Vec<Vec<Vec<f64>>>) {
+    let (m, k, regs) = (r.usize(2, 5), r.usize(2, 3), r.usize(3, 4));
+    let mut v: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.eighth(-4.0, 4.0)).collect()).collect();
+    let d: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.delta(0.25)).collect()).collect();
+    let (mut aa, mut dd) = (Vec::new(), Vec::new());
+    for _ in 0..regs {
+        aa.push(v.clone()); dd.push(d.clone());
+        for c in v.iter_mut() { for x in c.iter_mut() { if r.chance(5) { *x += r.eighth(-2.0, 2.0); } } }
+    }
+    (aa, dd)
+}
+
+fn all_readings(s: &EdgeSeries) -> String {
+    let p = PersistenceChange::new(s);
+    let r: Vec<_> = p.relations.iter().map(|x| (x.step, x.component, x.edge, x.reading)).collect();
+    let c: Vec<_> = [&p.across_components, &p.across_steps].iter()
+        .map(|cs| cs.as_ref().map(|cs| cs.readings.iter().map(|x| (x.e, x.f, x.over, x.reading)).collect::<Vec<_>>()).ok()).collect();
+    let a: Vec<_> = p.arrangement.as_ref().map(|xs| xs.iter().map(|x| (x.step, x.e, x.f, x.i, x.j, x.reading)).collect::<Vec<_>>()).unwrap_or_default();
+    format!("{r:?}{c:?}{a:?}")
+}
+
+/// Shared factors (1 + γ_c)(1 + γ_e) on the values, with δ scaled by the same
+/// factor (δ declared in the registered unit), change no reading.
+#[test]
+fn prop_z1a_shared_component_and_edge_factors_change_no_reading() {
+    for_all("z1a_shared_factors", |r| {
+        let (a, d) = random_edge_values(r);
+        let (k, m) = (a[0].len(), a[0][0].len());
+        let fc: Vec<f64> = (0..k).map(|_| [1.0, 1.125, 1.25, 1.5][r.usize(0, 3)]).collect();
+        let fe: Vec<f64> = (0..m).map(|_| [1.0, 1.125, 1.25, 1.5][r.usize(0, 3)]).collect();
+        let sc = |x: &Vec<Vec<Vec<f64>>>| x.iter().map(|t| t.iter().enumerate().map(|(c, v)| v.iter().enumerate()
+            .map(|(e, y)| y * fc[c] * fe[e]).collect()).collect()).collect::<Vec<Vec<Vec<f64>>>>();
+        let (s0, s1) = (EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap(), EdgeSeries::from_edge_values(sc(&a), sc(&d)).unwrap());
+        assert_eq!(all_readings(&s0), all_readings(&s1));
+    });
+}
+
+/// An independent factor 1 + γ′ on each entry, |γ′| ≤ γ declared: every
+/// PC2(a) and PC3 minor resolved under the declared bound keeps its sign, and
+/// PC1 and PC2(b) readings are unchanged when δ scales with the entry.
+#[test]
+fn prop_z1a_independent_gains_never_reverse_a_resolved_mixing_minor() {
+    static RESOLVED: AtomicUsize = AtomicUsize::new(0);
+    static WOULD_FLIP: AtomicUsize = AtomicUsize::new(0);
+    for_all("z1a_independent_gains", |r| {
+        let (a, d) = random_edge_values(r);
+        let (k, m) = (a[0].len(), a[0][0].len());
+        let gam: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| [0.125, 0.25, 0.5][r.usize(0, 2)]).collect()).collect();
+        // γ′ a multiple of γ/4 in [−γ, γ], the same over the run (run-constant).
+        let fac: Vec<Vec<f64>> = gam.iter().map(|gc| gc.iter().map(|g| 1.0 + g * (r.usize(0, 8) as f64 - 4.0) / 4.0).collect()).collect();
+        let sc = |x: &Vec<Vec<Vec<f64>>>| x.iter().map(|t| t.iter().enumerate().map(|(c, v)| v.iter().enumerate()
+            .map(|(e, y)| y * fac[c][e]).collect()).collect()).collect::<Vec<Vec<Vec<f64>>>>();
+        let gains = || EdgeGains { component: vec![0.0; k], edge: vec![0.0; m], independent: gam.clone() };
+        let declared = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap().with_run_constant(vec![vec![0.0; m]; k], gains());
+        let truth = EdgeSeries::from_edge_values(sc(&a), d.clone()).unwrap();
+        let undeclared = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap();
+        // PC2(a): a minor resolved with the declared bound has the same sign on the scaled values.
+        let (pd, pt) = (PersistenceChange::new(&declared), PersistenceChange::new(&truth));
+        let pu = PersistenceChange::new(&undeclared);
+        let truth_minor = |x: &ChangeCoupling| pt.across_components.as_ref().ok().and_then(|cs|
+            cs.readings.iter().find(|y| (y.e, y.f, y.over) == (x.e, x.f, x.over)).map(|y| y.minor));
+        if let Ok(cs) = &pd.across_components {
+            for x in cs.readings.iter().filter(|x| x.reading == Reading::Freedom) {
+                hit(&RESOLVED);
+                if let Some(tm) = truth_minor(x) { assert!(tm * x.minor > 0.0, "a resolved minor reversed"); }
+            }
+        }
+        // Without the declaration, some resolved minors would reverse sign.
+        if let (Ok(cu), Ok(ct)) = (&pu.across_components, &pt.across_components) {
+            for x in &cu.readings {
+                if x.reading == Reading::Freedom {
+                    if let Some(y) = ct.readings.iter().find(|y| (y.e, y.f, y.over) == (x.e, x.f, x.over)) {
+                        if y.minor * x.minor < 0.0 { hit(&WOULD_FLIP); }
+                    }
+                }
+            }
+        }
+        // PC3: a resolved state minor under the declared bound keeps its sign.
+        if let (Ok(xd), Ok(xt)) = (&pd.arrangement, &pt.arrangement) {
+            for x in xd {
+                if let Some(y) = xt.iter().find(|y| (y.step, y.e, y.f, y.i, y.j) == (x.step, x.e, x.f, x.i, x.j)) {
+                    for (p, q) in [(x.before, y.before), (x.after, y.after)] {
+                        if let AtDelta::Resolved(sp) = p { assert!(q == AtDelta::NotResolved || q == AtDelta::Resolved(sp)); }
+                    }
+                }
+            }
+        }
+        // PC1 and PC2(b): with δ scaled by each entry's factor, unchanged.
+        let truth_scaled_d = EdgeSeries::from_edge_values(sc(&a), sc(&d)).unwrap();
+        let p1 = |s: &EdgeSeries| PersistenceChange::new(s).relations.iter().map(|x| x.reading).collect::<Vec<_>>();
+        assert_eq!(p1(&undeclared), p1(&truth_scaled_d));
+        let p2b = |s: &EdgeSeries| PersistenceChange::new(s).across_steps.map(|cs| cs.readings.iter().map(|x| (x.e, x.f, x.over, x.reading)).collect::<Vec<_>>()).ok();
+        assert_eq!(p2b(&undeclared), p2b(&truth_scaled_d));
+    });
+    exercised(&RESOLVED, "z1a_independent_gains: a resolved mixing minor under the declared bound");
+    exercised(&WOULD_FLIP, "z1a_independent_gains: an undeclared gain reversing a resolved minor");
 }

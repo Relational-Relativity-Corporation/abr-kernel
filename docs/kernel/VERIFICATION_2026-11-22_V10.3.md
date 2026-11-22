@@ -15,8 +15,8 @@ Prepared by the Generator for the Verifier and Origin, **before** this work is m
 ```bash
 git clone https://github.com/Relational-Relativity-Corporation/abr-kernel.git
 cd abr-kernel && git checkout claude/kind-keller-is6bq1
-cargo test                                  # expect 179 passed, 0 failed
-cargo test --features v9                    # expect 271 passed, 0 failed
+cargo test                                  # expect 183 passed, 0 failed (179 before §12)
+cargo test --features v9                    # expect 275 passed, 0 failed (271 before §12)
 cargo run --example v10_relational_field    # runs to completion
 cargo build --all-targets --features v9     # expect no warnings
 ```
@@ -94,7 +94,7 @@ Every other amendment is inserted beside the text it amends. The V10.2 status li
 1. **T8 read with Origin's clarification of 2026-11-07** (`kernel_reference.md` §8): a cyclic arrangement is admitted as a declared feedback loop with a basis, rather than every cyclic field being refused. Opposite directions are treated as a 2-cycle needing their own basis.
 2. **A-3 flagged edges stay in the sustained grade's held and reorganizing lists**, with the flag beside them, rather than being removed from the grade.
 3. **Z1a's unshared gain enters the state bound** (§5, item 1), as well as the change bound the correction stated.
-4. **Z1a for edge-registered values:** one gain per edge is treated as shared by that relation (it changes no classification), since a relation registered as one value carries one gain at both its ends.
+4. **Z1a for edge-registered values:** one gain per edge is treated as shared by that relation *[Found wrong by the Verifier; corrected, §12]* (it changes no classification), since a relation registered as one value carries one gain at both its ends.
 5. **Identity is checked before T8**, so a field lacking both is refused for identity first.
 6. **Enforcement placement:** the constructor `from_edges_with_provenance` stays a building block and checks nothing; the reading entry points check (Origin's decision for T8, applied to identity as well).
 
@@ -135,6 +135,31 @@ The application's vessel field has no directed cycle (heater → water → wall 
 1. Disposition of the Verifier's findings, and of the six choices in §7.
 2. Status of `rppi_v10.md` (Proposed → Declared, or amended).
 3. The merge of both branches, in the order of §9, with every commit kept.
+
+## 12. Verifier's review (2026-11-22) and disposition
+
+**Reproduced by the Verifier:** kernel `717ca2a`, 179 and 271 passed, the example ran, no warnings; chemistry `9762324`, 43 passed and the profile example ran with the documented patch. The committed application lockfile still targets 10.2.0, so the kernel-first merge order and the lockfile update are required.
+
+**Finding (blocker), accepted: independent positive gains can change a PC2(a) classification on edge-registered data, and the same holds for PC3 state minors.** `EdgeSeries::with_run_constant` took a gain per component and edge and excluded it from every classification. The invariance holds only when both terms of a minor get the same factor: a gain common to a whole component, or to a whole edge. In m = Δ_i[e]·Δ_j[f] − Δ_j[e]·Δ_i[f], a factor on Δ_i[e] alone scales one term. The Verifier's case: changes (1, 1) and (1, 1) at zero repeatability read structure; 1.125 on one entry made the kernel read freedom. The Generator's earlier argument ("a per-edge factor preserves every minor's sign") assumed the factor was the same in every component.
+
+**Disposition (both remedies the Verifier named, each where it applies):**
+
+1. **Enforce the condition for shared gains.** `EdgeGains { component, edge, independent }`. The `component` and `edge` parts are the only shared forms; their combined factor (1 + γ_c)(1 + γ_e) enters `change_magnitude` only.
+2. **Carry independent gains into the affected minor bounds.** The `independent` part enters the bound of each entry inside every minor that mixes components, PC2(a) and the PC3 state minors, as γ·|value|. It does not enter PC1 or PC2(b): a factor on one entry scales Δ there by one positive factor (PC1), and over one component the same entries carry the same factor at both steps (PC2(b)). It does not change which edges enter a pair (that is PC1's reading).
+3. **Node-derived series are unaffected.** Their unshared (per-locus) gains were already in the state and change bounds, and a shared gain is per component, which scales whole components.
+4. **The reverse check mirrors the correction** (`Inputs::Edges` takes the independent gain) and still matches exactly over random fields with independent gains.
+
+**Tests added** (`tests/v10_z1a_a3.rs`, 4):
+- the Verifier's case: with the gain declared on the entry, both the unscaled and the scaled values read structure, and PC1 is unchanged;
+- a factor common to a whole component, or a whole edge, leaves the minor at 0;
+- property over 300 random fields: shared factors, with δ scaled, change no reading;
+- property over 300 random fields: independent factors within the declared bound never reverse a resolved PC2(a) or PC3 minor, PC1 and PC2(b) are unchanged, and without the declaration some resolved minors do reverse (exercised).
+
+**Tests now: 183 (default), 275 (`--features v9`)**, no warnings.
+
+**A-3 (checked by the Verifier):** exactly one empty side is flagged and both empty is not formable. Flagged edges still count in the sustained grade's held and reorganizing lists, as disclosed (§7, choice 2). That remains Origin's decision on how the summary is read.
+
+**Review this state:** kernel `claude/kind-keller-is6bq1` at the commit that adds this section; chemistry unchanged at `9762324` (it declares no gains, and its 43 tests pass against this kernel).
 
 ---
 
