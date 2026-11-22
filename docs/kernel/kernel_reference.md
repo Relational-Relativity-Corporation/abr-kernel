@@ -1066,9 +1066,11 @@ Derived (2026-11-21, Generator): I-SC-D3 to I-SC-D13, relating proportional
 state, coupled change, circulation, cycle closure, components and the
 declared sequence
 (`V10_README.md` §2.6, `tests/v10_structural_consistency.rs`). OC-SC-4 partly
-derived.
+derived. **[10.3.0 (2026-11-22, 26th): I-SC-D14 derived, the held minor pattern
+and the sustained circulation are independent grades, all four combinations
+realized (`tests/v10_grade_independence.rs`). OC-SC-4 closed.]**
 
-Open conditions: OC-SC-1 to OC-SC-4 (`derived_invariants.rs` Part II).
+Open conditions: OC-SC-1 to OC-SC-3 (`derived_invariants.rs` Part II) *(was: OC-SC-1 to OC-SC-4; OC-SC-4 closed by I-SC-D14, 10.3.0)*.
 
 ---
 

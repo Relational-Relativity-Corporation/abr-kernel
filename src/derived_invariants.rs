@@ -1835,11 +1835,25 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            resolved step (D7(a) by induction:
 //            |ΣΔ| = Σ|Δ| > Σ δΔ ≥ δ_first + δ_last). For any coarsening into
 //            G groups, #(one-sign groups) ≤ Γ_coarse ≤ G.
+//   I-SC-D14 Independence of the held minor pattern and the sustained
+//            circulation (10.3.0, 2026-11-22). (i) A per-edge positive
+//            scaling A[·][e] → λ_e·A[·][e] multiplies m_ij(e, f) by λ_e·λ_f
+//            > 0 (every minor keeps its sign) while Ξ(B(A)), linear within a
+//            component and mixing neighbouring edges, can reverse. (ii)
+//            Mixing two components by a 2×2 matrix R multiplies every minor
+//            by det R and maps Ξ(B(A)) to R·Ξ(B(A)): a swap reverses every
+//            minor and holds each circulation whose components agree in sign;
+//            −swap reverses both. All four combinations occur on one
+//            declaration at one δ (`tests/v10_grade_independence.rs`), so
+//            neither grade implies the other; they are read side by side,
+//            each with its own persistence condition (D1, D5).
 //
 // OC-SC-4 (held pattern vs sustained circulation), partly derived: I-SC-D5
 // gives the sustained grade its own persistence condition; I-SC-D6 gives a
 // common sufficient condition (uniform positive rescaling) under which both
 // hold. A general relation between the two is still open.
+// [CLOSED, 10.3.0 (26th): I-SC-D14. The general relation is independence;
+// D6 remains a common sufficient condition for both to hold.]
 //
 // Proposed (framework-level, awaiting observation):
 //   I-SC-1   Condensate-to-plasma axis. Along registrations of one declared
@@ -1873,6 +1887,7 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //          drives Δm).
 // OC-SC-4  Relation between the minor pattern (held connection) and the
 //          persistent (R − B) circulation sign (sustained connection).
+//          [Closed, 10.3.0: I-SC-D14, independent grades.]
 
 // V3 → V4: Four new invariants added.
 // I-T (Tunneling): quantum boundary component of Δ(ι)[e] is nonzero at
