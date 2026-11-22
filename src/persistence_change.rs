@@ -256,6 +256,7 @@ impl EdgeSeries {
             assert!(at.iter().chain(dt).all(|c| c.len() == m), "every registration must cover the declared edges");
             assert!(at.iter().flatten().all(|v| v.is_finite()), "values must be finite (∈ D)");
             assert!(dt.iter().flatten().all(|d| d.is_finite() && *d >= 0.0), "δ must be finite and non-negative");
+            assert!(at.iter().flatten().chain(dt.iter().flatten()).all(|v| crate::exact::in_exact_range(*v)), "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
         }
         if m < 1 { return Err(DeclarationGap::FewerThanTwoEdges); }
         let steps = a.len() - 1;
@@ -290,6 +291,8 @@ impl EdgeSeries {
         assert!(gains.component.iter().chain(&gains.edge).chain(gains.independent.iter().flatten())
             .all(|g| g.is_finite() && *g >= 0.0 && *g < 1.0),
             "a gain bound must lie in [0, 1): a declared gain is strictly positive (Z1a)");
+        assert!(offset.iter().flatten().chain(&gains.component).chain(&gains.edge).chain(gains.independent.iter().flatten())
+            .all(|v| crate::exact::in_exact_range(*v)), "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
         for t in 0..self.n_registrations() {
             for c in 0..k { for e in 0..m { self.da[t][c][e] = crate::exact::sum_up([self.da_rep[t][c][e], offset[c][e]]); } }
         }
@@ -783,8 +786,29 @@ fn add_term_bound(bound: &mut crate::exact::Expansion, v_abs: &crate::exact::Exp
 }
 
 /// Closure at registration t. `None` when `cycle` is not a closed walk.
+///
+/// **What the pair guarantees** (the Verifier's batch-2 note, 46th): the value
+/// is the exact closure rounded once, the bound the exact bound rounded up.
+/// A caller comparing the pair, |value| > bound, gets the one-sided guarantee
+/// of `exact.rs`: a closure read as resolved is resolved exactly. A closure
+/// within one rounding unit above its bound can read as holding. For the
+/// exact verdict use `cycle_closure_resolved`.
 pub fn cycle_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], t: usize, c: usize)
     -> Option<(f64, f64)>
+{
+    closure_exact(series, rel, cycle, t, c).map(|(v, h)| (v.nearest(), h.up()))
+}
+
+/// The exact verdict on the closure at registration t: `Some(true)` when it is
+/// resolved (does not hold at δ), decided on the exact value and bound.
+pub fn cycle_closure_resolved(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], t: usize, c: usize)
+    -> Option<bool>
+{
+    closure_exact(series, rel, cycle, t, c).map(|(v, h)| crate::exact::exceeds(&v, &h))
+}
+
+fn closure_exact(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], t: usize, c: usize)
+    -> Option<(crate::exact::Expansion, crate::exact::Expansion)>
 {
     // The walk is checked before any registration is read: an open walk is
     // `None` whatever `t` is (the Verifier's probe, 39th; 28f39d8 read
@@ -798,12 +822,27 @@ pub fn cycle_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usi
         v.add_times(&ae, sg as f64);
         add_term_bound(&mut h, &ae.abs(), &Expansion::of(da[e]), series.closure_gain[c][e]);
     }
-    Some((v.nearest(), h.up()))
+    Some((v, h))
 }
 
 /// Closure of the change over step s. `None` when `cycle` is not a closed walk.
+/// The pair carries the one-sided guarantee described at `cycle_closure`; for
+/// the exact verdict use `cycle_change_closure_resolved`.
 pub fn cycle_change_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], s: usize, c: usize)
     -> Option<(f64, f64)>
+{
+    change_closure_exact(series, rel, cycle, s, c).map(|(v, h)| (v.nearest(), h.up()))
+}
+
+/// The exact verdict on the change closure over step s.
+pub fn cycle_change_closure_resolved(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], s: usize, c: usize)
+    -> Option<bool>
+{
+    change_closure_exact(series, rel, cycle, s, c).map(|(v, h)| crate::exact::exceeds(&v, &h))
+}
+
+fn change_closure_exact(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], s: usize, c: usize)
+    -> Option<(crate::exact::Expansion, crate::exact::Expansion)>
 {
     // Checked first, as in `cycle_closure` (39th). *Was (10.3.0):* `change(s)`
     // ran before the check, so an open walk with an out-of-range s panicked.
@@ -816,7 +855,7 @@ pub fn cycle_change_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle:
         v.add_times(&de, sg as f64);
         add_term_bound(&mut h, &de.abs(), &series.change_bound_exact(s, c, e), series.closure_gain[c][e]);
     }
-    Some((v.nearest(), h.up()))
+    Some((v, h))
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

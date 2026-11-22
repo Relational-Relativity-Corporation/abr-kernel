@@ -311,6 +311,8 @@ impl Registration {
         assert!(delta.iter().all(|d| d.len() == x.n), "δ must be declared for every node");
         assert!(delta.iter().flatten().all(|d| d.is_finite() && *d >= 0.0),
             "δ must be finite and non-negative");
+        assert!(x.data.iter().flatten().chain(delta.iter().flatten()).all(|v| crate::exact::in_exact_range(*v)),
+            "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
         let zero = vec![vec![0.0; x.n]; x.k];
         let k = x.k;
         Registration { x, delta, offset: zero.clone(), locus_gain: zero, shared_gain: vec![0.0; k] }
@@ -330,6 +332,8 @@ impl Registration {
             "an offset bound must be finite and non-negative");
         assert!(locus_gain.iter().flatten().chain(&shared_gain).all(|g| g.is_finite() && *g >= 0.0 && *g < 1.0),
             "a gain bound must lie in [0, 1): a declared gain is strictly positive (Z1a)");
+        assert!(offset.iter().flatten().chain(locus_gain.iter().flatten()).chain(&shared_gain).all(|v| crate::exact::in_exact_range(*v)),
+            "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
         self.offset = offset;
         self.locus_gain = locus_gain;
         self.shared_gain = shared_gain;
@@ -705,14 +709,20 @@ fn circulation_signs(r: &Registration, rel: &DeclaredRelations) -> Vec<Option<Ve
     use crate::exact::Expansion;
     let x = exact_field(r, rel);
     let k = r.x.k;
-    let dc = crate::operators::circulation_of_accumulation_half_width(&x.da, rel);
+    // The bound is kept exact through the decision and never rounded first
+    // (the Verifier's batch-2 finding 3, 46th). *Was (45th):* rounded up before
+    // the comparison, so on 0 → 1 → 2 → 3 with x = [0, 1, 0, −2⁻⁵³],
+    // δ = [0, 1, 0, 2⁻⁵⁴] the circulation 1 + 2⁻⁵³ at edge 0 was compared with
+    // 1 + 2⁻⁵² instead of its bound 1 + 2⁻⁵⁴, and the held edge was omitted.
     (0..rel.n_edges()).map(|e| {
         if rel.succ(e).is_empty() && rel.pred(e).is_empty() { return None; }
         let w = crate::operators::circulation_of_accumulation_coefficients(rel, e, -1);
+        let wb = crate::operators::circulation_of_accumulation_coefficients(rel, e, 1);
         Some((0..k).map(|ci| {
-            let mut v = Expansion::new();
+            let (mut v, mut h) = (Expansion::new(), Expansion::new());
             for (f, &kf) in w.iter().enumerate() { if kf != 0 { v.add_times(&x.a[ci][f], kf as f64); } }
-            sign_at_delta_exact(&v, &Expansion::of(dc[ci][e]))
+            for (f, &kf) in wb.iter().enumerate() { if kf != 0 { h.add_product(kf as f64, x.da[ci][f]); } }
+            sign_at_delta_exact(&v, &h)
         }).collect())
     }).collect()
 }
@@ -880,6 +890,7 @@ pub fn energy_exchange(c: &EnergyCarrier, rel: &DeclaredRelations) -> Vec<Energy
     assert_eq!(c.delta.len(), rel.n_nodes, "δ_c must be declared at every locus");
     assert!(c.values.iter().all(|v| v.is_finite()), "carrier values must be in D");
     assert!(c.delta.iter().all(|d| d.is_finite() && *d >= 0.0), "δ_c must be finite and non-negative");
+    assert!(c.values.iter().chain(&c.delta).all(|v| crate::exact::in_exact_range(*v)), "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
     // ε = |c[s] − c[t]| rounded once, δ_ε rounded up, the floor decided
     // exactly (OC-NUM-1, 45th).
     use crate::exact::{exceeds, Expansion};

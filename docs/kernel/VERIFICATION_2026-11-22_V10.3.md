@@ -303,6 +303,21 @@ Batch 2 is §17, the exact sums, together with this section. Origin decided (Par
 
 **Reproduce:** kernel `claude/vibrant-tesla-2fp7ve`: 210 (default), 302 (`v9`), no warnings. Application `claude/vibrant-tesla-2fp7ve` against it with a local patch: 43, no warnings.
 
+
+## 19. Verifier's batch-2 disposition (2026-11-23) and response
+
+**Reproduced by the Verifier at `80828f4` / `ee0cf14`:** 210, 302 and 43, no warnings. Hand checks passed: the rounding and products within range, the `fsum` correction, the residual-based `up`, `times`, `product_bound`, the Ξ(B(·)) coefficients, the shared state bound, the persistence forms and `pc1_exact`.
+
+| # | Finding | Response |
+| --- | --- | --- |
+| 1 | A false PC3 resolution: values near 2⁻¹⁰⁷⁴ made a product's residual underflow, and finite-input admission accepted the record | Every product of non-zero factors below 2⁻⁹⁶⁹, or not finite, is refused (`Expansion::add_product`). V10 admission refuses values, bounds, offsets and gains outside 0 ∪ [2⁻²⁰⁰, 2²⁰⁰]. The Verifier's record is refused |
+| 2 | `[MAX, MAX, −MAX]` gave NaN, `[MAX, −MAX, MAX]` gave MAX | A sum that overflows is refused (`Expansion::add`). Outside the admitted range a sum may be refused in one order and computed in another, but it is never wrong |
+| 3 | The sustained grade rounded its final bound before deciding; the K7 pair gives only the one-sided guarantee | The sustained bound is kept exact through the decision. K7 gains `cycle_closure_resolved` and `cycle_change_closure_resolved` for the exact verdict; the pairs are documented as one-sided |
+
+**Origin's point on range** (Part 9, 46th; OC-RANGE-1): the 2⁻²⁰⁰ to 2²⁰⁰ limit is an arithmetic backstop, not the observed range. The observed range is to be declared and established by comparison to the human reference frame; that decision is open.
+
+**Tests:** `tests/v10_exact_range.rs` (11): each finding as a regression; admission at the range's edges; and a property that no reading of a field drawn from the whole admitted range is refused. **221 (default), 313 (`v9`)**, no warnings. The application at `ee0cf14` passes 43 against this kernel.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*

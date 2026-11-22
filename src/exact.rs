@@ -32,8 +32,31 @@
 //! closure depends on its traversal order. Listed as OC-LM-1, item 1, for
 //! Origin to confirm.
 //!
-//! Assumes finite inputs whose sums and products neither overflow nor
-//! underflow f64 (every V10 entry is checked finite at admission).
+//! **The range of exact arithmetic (the Verifier's batch-2 findings,
+//! 2026-11-23, 46th).** The two-sum and the fused-multiply-add product are
+//! exact only while no intermediate overflows and no product underflows.
+//! *Was:* an assumption ("finite inputs whose sums and products neither
+//! overflow nor underflow"), which admission did not enforce. The Verifier
+//! found two consequences:
+//! - a PC3 state read as resolved from values near 2⁻¹⁰⁷⁴, where a product's
+//!   residual underflowed;
+//! - `[MAX, MAX, −MAX]` summed to NaN while `[MAX, −MAX, MAX]` gave MAX.
+//!
+//! Now:
+//! 1. **Admission.** Every registered value, bound, offset and gain is 0 or
+//!    has magnitude in [2⁻²⁰⁰, 2²⁰⁰] (`in_exact_range`; about 10⁻⁶⁰ to
+//!    10⁶⁰), checked where V10 data enters. A value outside it is refused.
+//! 2. **Every operation checks itself.** A sum whose running total is not
+//!    finite, or a product of two non-zero factors below 2⁻⁹⁶⁹ (where the
+//!    residual may not be exact) or not finite, panics: outside the range of
+//!    exact arithmetic. So a result is exact or refused, never silently
+//!    wrong, whatever the inputs.
+//!
+//! Inside the admitted range the second check does not fire on the V10 forms:
+//! every non-zero partial they form lies between about 2⁻⁹⁰⁴ and 2⁴²⁰
+//! (values and bounds ≥ 2⁻²⁰⁰, their exact differences ≥ 2⁻²⁵², gains ≥
+//! 2⁻²⁰⁰, at most two of each multiplied). Tested by
+//! `tests/v10_exact_range.rs`.
 
 /// An exact sum of f64 terms.
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -42,11 +65,20 @@ pub struct Expansion {
     partials: Vec<f64>,
 }
 
+/// The admitted range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (46th).
+pub fn in_exact_range(x: f64) -> bool {
+    x == 0.0 || (x.is_finite() && x.abs() >= 2f64.powi(-200) && x.abs() <= 2f64.powi(200))
+}
+
+/// Below this, a product's fused-multiply-add residual may not be exact.
+const PRODUCT_FLOOR: f64 = f64::from_bits(54u64 << 52); // 2⁻⁹⁶⁹: biased exponent −969 + 1023
+
 impl Expansion {
     pub fn new() -> Self { Expansion { partials: Vec::new() } }
 
     /// Add x exactly.
     pub fn add(&mut self, x: f64) {
+        assert!(x.is_finite(), "a term outside the range of exact arithmetic (OC-NUM-1): {x}");
         let mut x = x;
         let mut i = 0;
         for j in 0..self.partials.len() {
@@ -57,6 +89,7 @@ impl Expansion {
             if lo != 0.0 { self.partials[i] = lo; i += 1; }
             x = hi;
         }
+        assert!(x.is_finite(), "a sum outside the range of exact arithmetic (OC-NUM-1): it overflowed");
         self.partials.truncate(i);
         self.partials.push(x);
     }
@@ -64,6 +97,9 @@ impl Expansion {
     /// Add the product a·b exactly: p = fl(a·b) and the error fma(a, b, −p).
     pub fn add_product(&mut self, a: f64, b: f64) {
         let p = a * b;
+        assert!(p.is_finite(), "a product outside the range of exact arithmetic (OC-NUM-1): it overflowed");
+        assert!(a == 0.0 || b == 0.0 || p.abs() >= PRODUCT_FLOOR,
+            "a product outside the range of exact arithmetic (OC-NUM-1): {a:e} × {b:e} underflows");
         let e = a.mul_add(b, -p);
         self.add(p);
         if e != 0.0 { self.add(e); }
