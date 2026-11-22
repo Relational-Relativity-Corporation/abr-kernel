@@ -341,6 +341,12 @@ arrangement of declared relationships. A cyclic set of independently declared
 relations — for example a feedback loop between declared loci — is a declared
 relationship, admissible with provenance like any other.
 
+*Kernel V10.3 (2026-11-22): checked by `topology::check_t8` (T8). A
+self-relation is refused; every directed cycle must carry at least one edge
+declared feedback with a stated basis; opposite directions form a 2-cycle and
+need their own basis. Enforced at every V10 reading entry point
+(`DeclarationGap::T8`; Origin, 2026-11-22). See `V10_README.md` T8.*
+
 **Before Δ / Before A.** No transformation that alters pairwise differences
 precedes A or Δ unless declared within M. Admissible: uniform shift, declared
 unit scale. All else requires declaration with preserved and discarded
@@ -848,7 +854,7 @@ pub fn equilibrium_bond_angle_deg(n_bonds: usize) -> Option<f64> { ... }
 // returns None for n_bonds outside {2, 3, 4}
 ```
 
-### 13.9 Φ[v] — Coherence Potential (Node)
+### 13.9 Φ[v] — Coherence Density (Node) *(was: Coherence Potential; renamed 10.3.0, E6, W7)*
 
 ```
 Φ[v] = ι[v] · τ[v]
@@ -866,7 +872,7 @@ pub fn phi_v(iota_v: f64, tau_v: f64) -> f64 { iota_v * tau_v }
 pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 { phi_v(iota_v, tau_v).log10() }
 ```
 
-### 13.10 Φ[S] — Coherence Potential (Collective)
+### 13.10 Φ[S] — Coherence Density (Collective) *(was: Coherence Potential; renamed 10.3.0, E6, W7)*
 
 ```
 Φ[S] = ι[S] · τ[S]  where  ι[S] = Σᵢ ι[vᵢ]
@@ -912,7 +918,7 @@ pub fn r_output_states(n_declared_edges_at_v: usize) -> f64 { 2.0 * j_v(n_declar
 | N[v] at photon-emitting loci | τ_stability · ε[e] / ℏ | `n_relational_cycles(tau_stability_s, lambda_m)` |
 | τ[v] unified | ℏ / \|A_persistence[e_coupling] · cos θ\| | `tau_v(a_p, cos_theta)`; isolated case `tau_v_isolated(e_v)` |
 | θ[e] equilibrium bond angle | from Σᵢ v[eᵢ] = 0 (2, 3, 4 bonds) | `equilibrium_bond_angle_rad`, `_deg` |
-| Φ[v] coherence potential | ι[v] · τ[v] | `phi_v`, `phi_v_log10` |
+| Φ[v] coherence density *(was: coherence potential; renamed 10.3.0, E6, W7)* | ι[v] · τ[v] | `phi_v`, `phi_v_log10` |
 | Φ[S] collective | ι[S] · τ[S]; accumulation Φ[S] > Σᵢ Φ[vᵢ] | `phi_s`, `accumulation_condition` |
 | J[v] R output multiplicity | (declared edges at v) / 2; states 2J+1 | `j_v`, `r_output_states` |
 
@@ -1066,9 +1072,11 @@ Derived (2026-11-21, Generator): I-SC-D3 to I-SC-D13, relating proportional
 state, coupled change, circulation, cycle closure, components and the
 declared sequence
 (`V10_README.md` §2.6, `tests/v10_structural_consistency.rs`). OC-SC-4 partly
-derived.
+derived. **[10.3.0 (2026-11-22, 26th): I-SC-D14 derived, the held minor pattern
+and the sustained circulation are independent grades, all four combinations
+realized (`tests/v10_grade_independence.rs`). OC-SC-4 closed.]**
 
-Open conditions: OC-SC-1 to OC-SC-4 (`derived_invariants.rs` Part II).
+Open conditions: OC-SC-1 to OC-SC-3 (`derived_invariants.rs` Part II) *(was: OC-SC-1 to OC-SC-4; OC-SC-4 closed by I-SC-D14, 10.3.0)*.
 
 ---
 
@@ -1442,6 +1450,7 @@ Code: `src/persistence_change.rs`.
 | Kernel V10 ρ retirement (2026-11-21) | Origin declaration: ρ, χ, ρ_base, χ₀, the max selection, the saturating form and cc[p] retired from V10 readings; OC-K-1 dissolved. Parameter-free circulation Ξ added (`operator_circulation`). `RelationalField::new` takes no operator parameters. V9 ρ-weighted functions unchanged. |
 | Kernel V10 PC (2026-11-21, 7th) | Origin declaration: structure is persistence, change is freedom (PC1–PC4); V2 restated, V8 re-read, I-SC-1 restated; coupled-change grade of connection; energy as a component; edge-valued registration ER-1; provenance chain (V10_README §2.0). `src/persistence_change.rs`. First V2 form kept as declared comparison |
 | Kernel V10.2 release (2026-11-22) | Package `10.2.0`: PC and the provenance chain, W14, W15, τ = ħ/ε retired, Φ as a declared intersection, I-SC-D3 to I-SC-D13, step profile, relation transitions, the open-conditions decisions (V10_README Part 9, 20th and 21st). Merged to `main` with every commit kept |
+| Kernel V10.3 release (2026-11-22) | Package `10.2.0` → `10.3.0` (Origin decision). Z1a δ in two parts and the gain-sign condition; the A-3 flag; renames E6, E7, OC-Z-1; I-SC-D14 (OC-SC-4 closed); T8 enforced at the reading entry points (§8 note); K7 routes and cycle basis; RPPI-V10 (`rppi_v10.md`, Proposed) with the reverse check and relation identity as a kernel input. See `V10_README.md` Part 9, 24th to 32nd |
 | Kernel V10 W14 audit applied (2026-11-21, 12th) | hc/λ output Projected, wavenumber carrier; OC-T-1 restated; Bell and J[v] matches as cited intersections; §13.1 classes column; database source classing required; classical/quantum passage bounded; entanglement pointer. Original text kept |
 | Kernel V10 W15 (2026-11-21, 11th) | Origin: time is never primitive; a registered time may enter as a declared intersection, described as such. Φ restored as a declared intersection (out of the V9 fence); τ = ħ/ε stays retired; the 10th's "no time" wording corrected |
 | Kernel V10 no time (2026-11-21, 10th) | Φ = ι·τ retired from V10 (`phi_v`, `phi_v_log10`, `phi_s`, `accumulation_condition` behind the V9 fence); V5 restated as counted steps (`evolution_counts`); R4 window restated as a count of registrations; I-RE basis withdrawn |

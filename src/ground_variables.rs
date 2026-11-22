@@ -168,6 +168,13 @@ pub enum DeclarationGap {
     NoNeighbourInField,
     /// No energy carrier is declared in M for this domain (R9a, V3a).
     NoCarrierDeclared,
+    /// The declared field fails T8: a self-relation, or a directed cycle with
+    /// no declared feedback edge, or a fault in a feedback declaration
+    /// (`topology`; Origin, 2026-11-22, 28th).
+    T8(Vec<crate::topology::T8Refusal>),
+    /// A declared edge lacks its identity or direction basis, or two edges
+    /// share an id (RPPI-V10 G-1; Origin, 2026-11-22, 31st).
+    RelationIdentity(Vec<crate::topology::IdentityRefusal>),
 }
 
 impl DeclarationGap {
@@ -201,6 +208,13 @@ impl DeclarationGap {
                  continuing from or arriving at these edges; never reverse an edge",
             DeclarationGap::NoCarrierDeclared =>
                 "declare the energy carrier, its unit, mapping and δ in M (R9a)",
+            DeclarationGap::RelationIdentity(_) =>
+                "declare every relation's identity and the observable property of the process \
+                 its direction is declared from (Df2, T2); a class label is not an identity",
+            DeclarationGap::T8(_) =>
+                "remove the self-relation, or declare at least one edge of each named \
+                 directed cycle as feedback with its registered basis (T8); never reverse \
+                 an edge to break a cycle (W8)",
         }
     }
 }
@@ -233,11 +247,52 @@ pub struct Finding {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// One registration: the declared node field and its δ per component and node.
+///
+/// **δ in two parts (Z1a, Declared 2026-11-22; corrected and confirmed by
+/// Origin, Part 9, 23rd).** `delta` is the *repeatability* bound: how far a
+/// repeated registration of the same state can differ. It enters every form.
+/// The *run-constant* parts are what stays fixed over one run of one
+/// observing chain, declared beside it and the same in every registration of
+/// the run (`with_run_constant`):
+///
+/// - `offset[c][i]`: a bound on an additive offset at locus i. It cancels in
+///   every change (x′ + o − (x + o) = x′ − x), so it enters the **state
+///   forms only** (A, the minors on A, identity, Ξ). An offset common to every
+///   locus of a component also cancels in A and need not be declared.
+/// - `locus_gain[c][i]`: a bound γ_i on the part of the gain at locus i that
+///   is **not shared** with the other loci of the component. It enters the
+///   state bound as γ_i·|x_i| and the change bound as γ_s·|Δx_s| + γ_t·|Δx_t|
+///   for a relation (s, t).
+/// - `shared_gain[c]`: a bound γ on the gain common to every locus of the
+///   component. A shared gain scales each relation and each change by the same
+///   factor 1 + γ′, |γ′| ≤ γ, so it leaves **every classification unchanged**
+///   and enters only reported change magnitudes, as γ·|Δ|
+///   (`EdgeSeries::change_magnitude`).
+///
+/// **The gain-sign condition (the Verifier's qualifier, made explicit in
+/// 10.3.0).** The statements above hold because a declared gain is a factor
+/// 1 + γ′ with 0 ≤ γ < 1: strictly positive, and the repeatability bound is
+/// declared in the registered unit, so it scales with the value. A gain bound
+/// γ ≥ 1 would admit a factor ≤ 0 and is refused. A *negative* scale (a
+/// reversed polarity, a reversed sense of a chain) is not a gain: it is a
+/// declared mapping (W14). Under it every resolution at δ, every held state and
+/// every crossing is unchanged, and the reported first-order signs (A, Δ, Ξ)
+/// reverse; a minor's sign reverses with the product of the two components'
+/// scale signs (property test `pc_d3_negative_scale_reverses_signs_only`).
+///
+/// `Registration::new` declares the repeatability alone, with every
+/// run-constant part zero, so a record declared before 10.3.0 reads as before.
 #[derive(Debug, Clone)]
 pub struct Registration {
     pub x: NodeField,
-    /// δ[c][i], same shape as `x.data`.
+    /// Repeatability δ[c][i], same shape as `x.data`.
     pub delta: Vec<Vec<f64>>,
+    /// Run-constant offset bound [c][i] (state forms only).
+    pub offset: Vec<Vec<f64>>,
+    /// Run-constant gain bound not shared between loci [c][i], 0 ≤ γ < 1.
+    pub locus_gain: Vec<Vec<f64>>,
+    /// Run-constant gain bound shared by every locus of a component [c], 0 ≤ γ < 1.
+    pub shared_gain: Vec<f64>,
 }
 
 impl Registration {
@@ -246,7 +301,46 @@ impl Registration {
         assert!(delta.iter().all(|d| d.len() == x.n), "δ must be declared for every node");
         assert!(delta.iter().flatten().all(|d| d.is_finite() && *d >= 0.0),
             "δ must be finite and non-negative");
-        Registration { x, delta }
+        let zero = vec![vec![0.0; x.n]; x.k];
+        let k = x.k;
+        Registration { x, delta, offset: zero.clone(), locus_gain: zero, shared_gain: vec![0.0; k] }
+    }
+
+    /// Declare the run-constant parts of δ (Z1a). Same shapes as `delta`;
+    /// `shared_gain` per component. Offsets finite and non-negative; gains in
+    /// [0, 1) (the gain-sign condition).
+    pub fn with_run_constant(mut self, offset: Vec<Vec<f64>>, locus_gain: Vec<Vec<f64>>, shared_gain: Vec<f64>) -> Self {
+        let (k, n) = (self.x.k, self.x.n);
+        assert!(offset.len() == k && offset.iter().all(|o| o.len() == n),
+            "an offset must be declared for every component and node");
+        assert!(locus_gain.len() == k && locus_gain.iter().all(|g| g.len() == n),
+            "a locus gain must be declared for every component and node");
+        assert_eq!(shared_gain.len(), k, "a shared gain must be declared for every component");
+        assert!(offset.iter().flatten().all(|o| o.is_finite() && *o >= 0.0),
+            "an offset bound must be finite and non-negative");
+        assert!(locus_gain.iter().flatten().chain(&shared_gain).all(|g| g.is_finite() && *g >= 0.0 && *g < 1.0),
+            "a gain bound must lie in [0, 1): a declared gain is strictly positive (Z1a)");
+        self.offset = offset;
+        self.locus_gain = locus_gain;
+        self.shared_gain = shared_gain;
+        self
+    }
+
+    /// The state bound at locus i of component c: repeatability, offset and
+    /// the unshared gain on the registered value (Z1a). The shared gain does
+    /// not enter: it changes no classification.
+    ///
+    /// The gain scales the registered value together with its repeatability
+    /// bound: the value lies in (1 + γ′)(x ± δ), |γ′| ≤ γ, so its distance
+    /// from x is at most δ + γ·(|x| + δ) (corrected after the Verifier's
+    /// second 10.3.0 review, 35th; *was* δ + γ·|x|).
+    pub fn state_delta(&self, c: usize, i: usize) -> f64 {
+        self.delta[c][i] + self.offset[c][i] + self.locus_gain[c][i] * (self.x.data[c][i].abs() + self.delta[c][i])
+    }
+
+    /// True when the run-constant parts are the same as `other`'s.
+    pub fn same_run_constant(&self, other: &Registration) -> bool {
+        self.offset == other.offset && self.locus_gain == other.locus_gain && self.shared_gain == other.shared_gain
     }
 }
 
@@ -254,19 +348,23 @@ fn check_sequence(seq: &[Registration], rel: &DeclaredRelations) -> Result<(), D
     if seq.len() < 2 {
         return Err(DeclarationGap::NoProcessSequence);
     }
+    crate::topology::admit_field(rel)?;
     let k = seq[0].x.k;
     assert!(seq.iter().all(|r| r.x.k == k),
         "every registration must declare the same components");
     assert!(seq.iter().all(|r| r.x.n == rel.n_nodes),
         "every registration must cover the declared loci");
+    assert!(seq.iter().all(|r| r.same_run_constant(&seq[0])),
+        "the run-constant parts of δ must be the same in every registration of the run (Z1a)");
     Ok(())
 }
 
-/// A(x) and δ_A for one registration.
+/// A(x) and δ_A for one registration. δ_A is the **state** bound (Z1a):
+/// repeatability, offset and unshared gain at both ends.
 fn a_with_half_width(r: &Registration, rel: &DeclaredRelations) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
     let a = operator_a(&r.x, rel, &[]).spatial;
     let da = (0..r.x.k)
-        .map(|c| rel.edges.iter().map(|&(s, t)| r.delta[c][s] + r.delta[c][t]).collect())
+        .map(|c| rel.edges.iter().map(|&(s, t)| r.state_delta(c, s) + r.state_delta(c, t)).collect())
         .collect();
     (a, da)
 }
@@ -566,8 +664,23 @@ pub struct Sustained {
     pub reorganizing_edges: Vec<usize>,
     /// Edges with no neighbour in the field (IV-3).
     pub not_formable: Vec<usize>,
-    /// held / formable edges.
-    pub share_held: f64,
+    /// Formable edges with exactly one empty side, successor or predecessor
+    /// (A-3): their circulation is record-boundary-conditioned. They are read
+    /// and listed in `held_edges` or `reorganizing_edges` as usual, and
+    /// flagged here; a Ξ at one of them is never read as a circulation of
+    /// zero, since the missing side is not registered.
+    pub boundary_conditioned: Vec<usize>,
+    /// The headline (A-3, the Verifier's recommendation, 2026-11-22, 35th):
+    /// held / formable edges with **both sides registered**. `None` when no
+    /// formable edge has both sides registered. *Was:* held / all formable
+    /// edges, now `share_held_all`.
+    pub share_held: Option<f64>,
+    /// Reported apart: held / boundary-conditioned edges. `None` when no edge
+    /// is boundary-conditioned.
+    pub share_held_boundary: Option<f64>,
+    /// held / all formable edges, both kinds together (the earlier headline,
+    /// kept for comparison).
+    pub share_held_all: f64,
 }
 
 fn sustained(seq: &[Registration], rel: &DeclaredRelations) -> Result<Sustained, DeclarationGap> {
@@ -589,11 +702,20 @@ fn sustained(seq: &[Registration], rel: &DeclaredRelations) -> Result<Sustained,
     }
     let formable = rel.n_edges() - nf.len();
     if formable == 0 { return Err(DeclarationGap::NoNeighbourInField); }
+    let boundary: Vec<usize> = (0..rel.n_edges())
+        .filter(|&e| rel.succ(e).is_empty() != rel.pred(e).is_empty()).collect();
+    let share = |of: &dyn Fn(usize) -> bool| {
+        let n = (0..rel.n_edges()).filter(|&e| !nf.contains(&e) && of(e)).count();
+        (n > 0).then(|| held.iter().filter(|&&e| of(e)).count() as f64 / n as f64)
+    };
     Ok(Sustained {
-        share_held: held.len() as f64 / formable as f64,
+        share_held: share(&|e| !boundary.contains(&e)),
+        share_held_boundary: share(&|e| boundary.contains(&e)),
+        share_held_all: held.len() as f64 / formable as f64,
         held_edges: held,
         reorganizing_edges: reorg,
         not_formable: nf,
+        boundary_conditioned: boundary,
     })
 }
 
@@ -728,6 +850,7 @@ pub fn energy(carriers: Option<&[EnergyCarrier]>, n_registrations: usize, rel: &
     -> Result<Energy, DeclarationGap>
 {
     if n_registrations < 2 { return Err(DeclarationGap::NoProcessSequence); }
+    crate::topology::admit_field(rel)?;
     let cs = carriers.ok_or(DeclarationGap::NoCarrierDeclared)?;
     assert_eq!(cs.len(), n_registrations, "the carrier must be declared at every registration");
     if rel.n_edges() == 0 { return Err(DeclarationGap::FewerThanTwoEdges); }

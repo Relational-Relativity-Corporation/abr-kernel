@@ -99,8 +99,8 @@
 //   PART I — Layer 3 derived quantities (all confirmed, derived):
 //     ε[e]   — relational energy contrast
 //     τ[v]   — relational progression interval (unified expression)
-//     Φ[v]   — coherence potential (node)
-//     Φ[S]   — coherence potential (collective)
+//     Φ[v]   — coherence density (node) (was: coherence potential; renamed 10.3.0, E6, W7)
+//     Φ[S]   — coherence density (collective) (was: coherence potential)
 //     J[v]   — R output multiplicity
 //     𝟙[e]   — detection indicator (derived from R antisymmetry)
 //     θ[e]   — B output vector direction
@@ -724,7 +724,7 @@ pub fn equilibrium_bond_angle_deg(n_bonds: usize) -> Option<f64> {
     equilibrium_bond_angle_rad(n_bonds).map(|r| r.to_degrees())
 }
 
-// ── Φ[v] — Coherence Potential (Node) ────────────────────────────────────
+// ── Φ[v] — Coherence Density (Node) (was: Coherence Potential; E6) ───────
 //
 // Φ[v] = ι[v] · τ[v]
 //
@@ -745,7 +745,8 @@ pub fn equilibrium_bond_angle_deg(n_bonds: usize) -> Option<f64> {
 //   Primary Region:  log₁₀(Φ) ∈ [+36.53, +39.47]
 //   Planetary:       log₁₀(Φ) ∈ [+59.02, +62.02]
 
-/// Compute Φ[v] = ι[v] · τ[v] — coherence potential at a declared locus.
+/// Compute Φ[v] = ι[v] · τ[v] — coherence density at a declared locus
+/// (was: coherence potential; renamed 10.3.0, E6, W7).
 ///
 /// # Arguments
 /// * `iota_v` — relational inertia at locus v (kg, or declared ι_unit per region)
@@ -780,7 +781,7 @@ pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 {
     phi_v(iota_v, tau_v).log10()
 }
 
-// ── Φ[S] — Coherence Potential (Collective) ───────────────────────────────
+// ── Φ[S] — Coherence Density (Collective) (was: Coherence Potential; E6) ─
 //
 // Φ[S] = ι[S] · τ[S]     where ι[S] = Σᵢ ι[vᵢ]
 //
@@ -792,7 +793,8 @@ pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 {
 //
 // Accumulation condition: Φ[S] > Σᵢ Φ[vᵢ]
 
-/// Compute Φ[S] = ι[S] · τ[S] — collective coherence potential.
+/// Compute Φ[S] = ι[S] · τ[S] — collective coherence density
+/// (was: collective coherence potential; renamed 10.3.0, E6, W7).
 ///
 /// # Arguments
 /// * `iota_s` — total relational inertia of declared system S: Σᵢ ι[vᵢ]
@@ -1833,11 +1835,25 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            resolved step (D7(a) by induction:
 //            |ΣΔ| = Σ|Δ| > Σ δΔ ≥ δ_first + δ_last). For any coarsening into
 //            G groups, #(one-sign groups) ≤ Γ_coarse ≤ G.
+//   I-SC-D14 Independence of the held minor pattern and the sustained
+//            circulation (10.3.0, 2026-11-22). (i) A per-edge positive
+//            scaling A[·][e] → λ_e·A[·][e] multiplies m_ij(e, f) by λ_e·λ_f
+//            > 0 (every minor keeps its sign) while Ξ(B(A)), linear within a
+//            component and mixing neighbouring edges, can reverse. (ii)
+//            Mixing two components by a 2×2 matrix R multiplies every minor
+//            by det R and maps Ξ(B(A)) to R·Ξ(B(A)): a swap reverses every
+//            minor and holds each circulation whose components agree in sign;
+//            −swap reverses both. All four combinations occur on one
+//            declaration at one δ (`tests/v10_grade_independence.rs`), so
+//            neither grade implies the other; they are read side by side,
+//            each with its own persistence condition (D1, D5).
 //
 // OC-SC-4 (held pattern vs sustained circulation), partly derived: I-SC-D5
 // gives the sustained grade its own persistence condition; I-SC-D6 gives a
 // common sufficient condition (uniform positive rescaling) under which both
 // hold. A general relation between the two is still open.
+// [CLOSED, 10.3.0 (26th): I-SC-D14. The general relation is independence;
+// D6 remains a common sufficient condition for both to hold.]
 //
 // Proposed (framework-level, awaiting observation):
 //   I-SC-1   Condensate-to-plasma axis. Along registrations of one declared
@@ -1871,6 +1887,7 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //          drives Δm).
 // OC-SC-4  Relation between the minor pattern (held connection) and the
 //          persistent (R − B) circulation sign (sustained connection).
+//          [Closed, 10.3.0: I-SC-D14, independent grades.]
 
 // V3 → V4: Four new invariants added.
 // I-T (Tunneling): quantum boundary component of Δ(ι)[e] is nonzero at

@@ -101,3 +101,14 @@ pub mod ground_variables;
 pub mod relational_field;
 
 pub mod persistence_change;
+
+// Kernel V10.3 — topology checks on a declared field: T8 (self-relations
+// refused; a directed cycle admitted only as a declared feedback loop with a
+// stated basis) and, with K7, route enumeration and a cycle basis.
+pub mod topology;
+
+// Kernel V10.3 — RPPI-V10, the kernel's share of the reverse check (B2):
+// from the declared inputs and a reported reading's identity, rebuild the
+// fields and re-execute the form independently of the code that produced
+// it, returning MATCH or MISMATCH (`docs/kernel/rppi_v10.md`).
+pub mod reverse_check;

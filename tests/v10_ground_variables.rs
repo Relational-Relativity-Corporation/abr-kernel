@@ -6,14 +6,16 @@
 //! carrier values are [INTERFACE VALUE]s chosen to exercise a code path. These
 //! tests verify the forms; they establish no empirical validity.
 
+#[path = "support/synthetic_identity.rs"]
+mod synthetic_identity;
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{
     operator_a, DeclaredRelations, EdgeProvenance, NodeField,
 };
 
 fn rel(n: usize, edges: &[(usize, usize)]) -> DeclaredRelations {
-    DeclaredRelations::from_edges_with_provenance(
-        n, edges.to_vec(), vec![EdgeProvenance::Continuation; edges.len()])
+    synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(
+        n, edges.to_vec(), vec![EdgeProvenance::Continuation; edges.len()]))
 }
 
 fn chain() -> DeclaredRelations {
@@ -234,7 +236,12 @@ fn sustained_edge_with_no_neighbour_is_not_formable() {
     ];
     let s = connection(&seq, &rel).unwrap().sustained.unwrap();
     assert_eq!(s.not_formable, vec![2]);
-    assert_eq!(s.share_held, 1.0);
+    // Both formable edges are boundary-conditioned (A-3): the headline over
+    // edges with both sides registered has nothing to count; the flagged
+    // edges are reported apart (35th). *Was:* share_held == 1.0.
+    assert_eq!(s.share_held_all, 1.0);
+    assert_eq!(s.share_held, None);
+    assert_eq!(s.share_held_boundary, Some(1.0));
 }
 
 #[test]

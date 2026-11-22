@@ -244,3 +244,8 @@ reading. 121 tests (default), 213 (`--features v9`). On the session branch,
 Verifier's check of these dispositions.
 
 **2026-11-22:** Origin confirmed the Z1a correction and directed these dispositions merged to `main`.
+
+
+---
+
+**Kernel V10.3 (2026-11-22):** the verification package for 10.3.0 is `VERIFICATION_2026-11-22_V10.3.md`.

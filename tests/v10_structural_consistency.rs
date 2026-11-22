@@ -6,6 +6,8 @@
 //! establish that the results hold for the forms as declared, nothing
 //! empirical.
 
+#[path = "support/synthetic_identity.rs"]
+mod synthetic_identity;
 use abr_kernel::ground_variables::{
     minor, minor_change_bound, minor_half_width, sign_at_delta, step_preserves_sign, AtDelta, Registration,
 };
@@ -15,7 +17,7 @@ use abr_kernel::relational_field::RelationalField;
 
 fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
     let m = edges.len();
-    DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m])
+    synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m]))
 }
 
 fn reg(data: Vec<Vec<f64>>, d: f64) -> Registration {
@@ -234,8 +236,8 @@ fn sc_d7_opposite_halves_cancel_to_an_unresolved_whole() {
 #[test]
 fn sc_d8_a_crossing_needs_change_larger_than_both_resolutions() {
     let f = evolving_field();
-    let s = EdgeSeries::from_registrations(&f.registrations, &DeclaredRelations::from_edges_with_provenance(
-        4, vec![(0, 1), (1, 2), (2, 3), (1, 3)], vec![EdgeProvenance::Continuation; 4])).unwrap();
+    let s = EdgeSeries::from_registrations(&f.registrations, &synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(
+        4, vec![(0, 1), (1, 2), (2, 3), (1, 3)], vec![EdgeProvenance::Continuation; 4]))).unwrap();
     let mut crossings = 0;
     for x in arrangement_steps(&s).unwrap() {
         if let (AtDelta::Resolved(p), AtDelta::Resolved(q)) = (x.before, x.after) {
