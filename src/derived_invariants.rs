@@ -1885,6 +1885,17 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            components and edges exchanged: locked exchange and held
 //            arrangement are independent. V10_README §2.6,
 //            `tests/v10_carrier_component.rs`.
+//   I-SC-D18 Beginning, ending and reversal of the three persistences
+//            (Proposed, Generator, 2026-11-23, 52nd; names W16 (a)):
+//            persistent imbalance (sign of Ξ(B(A))), persistent closure
+//            (K7), persistent arrangement (PC3). (i) A reading reverses
+//            (resolved, one sign to the other) over a step only where PC1
+//            reads freedom at a relation it is formed from: otherwise one
+//            field lies within both registrations' state bounds and both
+//            readings enclose it. Under every declared part of δ. (ii) At δ
+//            a reading can begin or end with all its relations held. (iii)
+//            Persistent closure and persistent arrangement are independent.
+//            V10_README §2.6, `tests/v10_persistence_reversal.rs`.
 //
 // OC-SC-4 (held pattern vs sustained circulation), partly derived: I-SC-D5
 // gives the sustained grade its own persistence condition; I-SC-D6 gives a

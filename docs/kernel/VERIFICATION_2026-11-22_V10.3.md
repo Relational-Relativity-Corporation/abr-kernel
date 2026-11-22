@@ -347,6 +347,21 @@ Origin directed the session to continue to the derived invariants (batch 2's rev
 
 **Addendum (49th).** D17 (iv) clarified: the one-way result belongs to the bound, not the field, with a test requiring all six directions (structure to freedom and back, over the sequence, for PC1 on the carrier and for PC3 under re-declaration). A Proposed amendment of I-SC-1's scope (prepared constraints declared and held), for Origin. **244 (default), 336 (`v9`)**, no warnings.
 
+
+## 21. Batch 3, continued: I-SC-D18 (2026-11-23, for the Verifier)
+
+Origin decided W16 (a) with three names (Part 9, 52nd) and directed that the idea be applied. **I-SC-D18** (Proposed; V10_README §2.6, "I-SC-D18 in full") is the result: beginning, ending and reversal of persistent imbalance, persistent closure and persistent arrangement. No kernel code changed.
+
+**To check:**
+1. **(i), the witness argument.** Every declared change bound is at most the sum of the two state bounds, including the node-derived per-locus gain, γ·(|Δx| + δ_s + δ_{s+1}) against γ·(|x_s| + δ_s) + γ·(|x_{s+1}| + δ_{s+1}). Every reading's bound encloses the state box.
+2. **Which relations:** for the imbalance, those with non-zero net coefficient k_f (not the bound's k̄_f), which is the stronger statement.
+3. **(ii)** the worked ending, and that beginnings and endings without resolved change are a property of δ (none at δ = 0).
+4. **(iii)** the four combinations, and the statement that persistent closure and persistent imbalance are not read together by the kernel.
+
+**Control.** Narrowing the relations to one fails all three property tests (with and without gains). With gains of 1/4, before the claim was widened to gains, no reversal without freedom was found; the claim now rests on the bound argument in 1.
+
+**Tests:** `tests/v10_persistence_reversal.rs` (5). **249 (default), 341 (`v9`)**, no warnings.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*
