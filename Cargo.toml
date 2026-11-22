@@ -1,6 +1,6 @@
 [package]
 name = "abr-kernel"
-version = "10.1.0"
+version = "10.2.0"
 edition = "2021"
 description = "ABR relational kernel, Kernel V10 — Primary (Delta -> Sigma) and ABR (A -> B -> R). Bounded over D. No claim beyond D."
 

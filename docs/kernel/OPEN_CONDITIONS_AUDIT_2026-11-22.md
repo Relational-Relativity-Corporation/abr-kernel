@@ -53,10 +53,10 @@ and `kernel_reference.md` §18. **Origin decided every item on 2026-11-22 (Part 
 
 | ID | What would answer it |
 |---|---|
-| OC-SC-1 | The vessel heating record H (bench stage) |
-| OC-SC-2, I-SC-3 | A record of a lattice registered at two sites to melting. Not in the bench stage |
-| OC-SC-3 | Energy as a component at the same loci: per-site energy registration (not in the bench stage) |
-| OC-T-1 (restated), OC-T-2 | The vessel exchange field: where the exchange floor is resolved at δ |
+| OC-SC-1 | A registered sequence of one system across a phase change. *Example (application):* the vessel heating record H (bench stage) |
+| OC-SC-2, I-SC-3 | A record of a lattice registered at two sites to melting. *Example (application):* not in the vessel's bench stage |
+| OC-SC-3 | Energy as a component at the same loci: a per-site energy registration. *Example (application):* not in the vessel's bench stage |
+| OC-T-1 (restated), OC-T-2 | A registered carrier: where the exchange floor is resolved at δ. *Example (application):* the vessel exchange field |
 | OC-RE-1 (I-RE) | Counted rates Γ from registered records in several regions. Its observable basis was withdrawn with Φ (10th) |
 | P-a to P-f, OC-ι-1, OC-ι-2 | Relational inertia (P1). Its inputs must be classed under W14: frequency ratios are registered, CODATA masses are fitted. Stays Proposed |
 
@@ -66,10 +66,10 @@ and `kernel_reference.md` §18. **Origin decided every item on 2026-11-22 (Part 
 |---|---|---|---|
 | **A-3** | What an empty successor or predecessor sum is | (a) 0, as now, with the edge flagged *record-boundary-conditioned*; (b) not formed at that edge | **(a) with the flag.** A record boundary cuts an ongoing relation (Df3), so the missing side is not registered, not zero. Ξ at such an edge is reported as boundary-conditioned and never read as a circulation of zero. With both sides empty it is not formable (IV-3, already). I-SC-D11's identity holds under (a) |
 | **Z1a**, OC-RES-1, OC-RES-2, OC-RD-2 | δ in two parts; δ for non-counting variation; how δ composes through a calculation | (a) declare repeatability and run-constant parts; (b) keep one δ | **(a).** Repeatability enters every form; run-constant δ (offsets, factors) enters the state forms only. It also answers RES-1 (repeatability from repeated registrations, Z3) and RES-2 and RD-2 (interval bounds for each part) |
-| **OC-D-1** | Is a backward reading's direction recorded per output or per run? | Per output; per run | **Per output.** One run reads both ways: Ξ uses successors and predecessors, and C15 reads freezing from the sink |
-| **OC-V-4** | The observer's circulation | (a) Ξ read at declared observer-participation edges (prepare, probe: the heater supply, the controller, the conductance excitation); (b) keep open | **(a).** The observer enters the topology through declared observer edges (H) |
+| **OC-D-1** | Is a backward reading's direction recorded per output or per run? | Per output; per run | **Per output.** One run reads both ways: Ξ uses successors and predecessors. *Example (application):* the vessel's claim C15 reads freezing from the sink |
+| **OC-V-4** | The observer's circulation | (a) Ξ read at declared observer-participation edges (prepare, probe). *Example (application):* the heater supply, the controller, the conductance excitation; (b) keep open | **(a).** The observer enters the topology through declared observer edges (H) |
 | **OC-F-1**, OC-Φ-6 | H as a shared frame | (a) each record declares its observer, and any comparison across observers is a declared comparison; (b) declare H shared | **(a).** No shared frame is claimed without registration (W12) |
-| **DD-1** | One field across domains with different participation? | One field; a declared comparison between domains | **A declared comparison**, as heating and freezing are distinct records and fields T and TG are read side by side |
+| **DD-1** | One field across domains with different participation? | One field; a declared comparison between domains | **A declared comparison.** *Example (application):* the vessel's heating and freezing are distinct records, and its fields T and TG are read side by side |
 | **W9, W10** | Declare the system / chain / mapping classification, and the relational invariant | Declare; keep Proposed | **Declare both.** W10 is already used as stated (C3) |
 | **E6, E7** | W7 renames ("coherence potential" → "coherence density" / "energy held in connection"); the name of Κ | Apply; defer | **Apply E6** (a mechanical rename, original text kept). **Confirm Κ = "connection density"** for E7 |
 | **OC-Z-1** | Rename σ ("extent" over δ) | ν; N_δ; keep σ | **N_δ** ("resolvable count"), since R4 now makes extent a count |
@@ -81,7 +81,7 @@ and `kernel_reference.md` §18. **Origin decided every item on 2026-11-22 (Part 
 | ID | Work |
 |---|---|
 | OC-SC-4 | Show that the held minor pattern and the sustained circulation are **independent grades**, by fields realizing all four combinations (held/held, held/reorganizing, reorganizing/held, reorganizing/reorganizing). That would close it as I-SC-D14: two grades read side by side, with the persistence conditions of D1 and D5 |
-| RPPI-V10 | Specify V10 admission: the §2.0 chain, refusal not repair, and the reverse check (B2), as the ingest now implements them for one application. A kernel-level statement, with the application as its first instance |
+| RPPI-V10 | Specify V10 admission: the §2.0 chain, refusal not repair, and the reverse check (B2), as a kernel-level statement. *Example (application):* the vessel ingest implements all three |
 | T8 | The acyclicity check in `DeclaredRelations`: refuse a cyclic field, or declare feedback loops with provenance, as T8 states |
 | K7 | Route enumeration and a cycle basis from a stated spanning tree |
 | `kernel_reference.md` §18 | Correct OC-T-3, OC-S-3 and OC-E-3 to dissolved, and add each disposition decided here |

@@ -22,11 +22,24 @@ authorities.
 **Relation is the primitive, derived from observation.** Relational evolution
 has not been observed to stop, and no registration stands alone; objects are
 read from relations, not the reverse. Alongside it, three variables are present
-in every observation: **energy** (how much a relation changes), **freedom** (how
-many independent ways relations vary) and **connection** (what holds together
-through relational evolution). Their absence is never observed; what varies, and
-what the kernel measures, is their degree at a declared resolution δ. The kernel
-expresses them as tunneling, superposition and entanglement.
+in every observation. Their absence is never observed; what varies, and what the
+kernel measures, is their degree at a declared resolution δ:
+
+- **energy:** what is exchanged across a relation;
+- **freedom:** change permitted, relations changing and changing independently;
+- **connection:** shared structure, relations held together by a constraint,
+  in their state or in their change.
+
+**Structure is persistence; change is freedom** (Origin, 2026-11-21). Every
+reading compares a relation's change between consecutive registrations with its
+resolution: held below δ is structure, resolved is freedom. The kernel expresses
+the three variables as tunneling, superposition and entanglement. These are names
+defined by their forms over registered data; where they meet the same terms in
+quantum mechanics, that is a cited intersection, not a basis (W14). The full
+chain from observable to reported number is `docs/kernel/V10_README.md` §2.0.
+*(The first wording, kept in V10_README §1.2: energy "how much a relation
+changes", freedom "how many independent ways relations vary", connection "what
+holds together through relational evolution".)*
 
 **All operators and all variables occur simultaneously** (Df6). The composition
 order and the sequence of observations are orders of analysis. A relational
@@ -132,7 +145,7 @@ Building without the `v9` feature is itself a check that no V10 module depends o
 - 35 V9 conformance (`tests/v9_conformance.rs`);
 - 2 `compile_fail` doctests.
 
-*(Counts as of 2026-11-21 on branch `claude/kind-keller-is6bq1`. At the V10.1
+*(Counts at the V10.2 release, package `10.2.0`, 2026-11-22. At the V10.1
 release they were 68 and 153.)* The four
 `[V9-REQUIRED]` conformance tests exercise the bounded V9 admission interface
 (see Kernel V9 — RPPI Enforcement Status below). The two V10 tests that compare
@@ -152,11 +165,13 @@ first registration was checked by hand. These are synthetic fixtures: they
 confirm that the forms compute as declared and establish no empirical validity.
 The invariant tests against registered data (I-SC, OC-SC-1 to OC-SC-4) are next.
 
-*Since V10.1 (2026-11-21, branch `claude/kind-keller-is6bq1`):* structure and
-freedom as persistence and change (PC) declared, with the provenance chain
-(`V10_README.md` §2.0); W14 and W15; τ = ħ/ε retired; derived structural
-consistency I-SC-D3 to I-SC-D13 with property tests. The verification package
-for all of it is `docs/kernel/VERIFICATION_2026-11-21.md`.
+**Verification (2026-11-21 and 22), V10.2.** The Verifier's first pass found
+three kernel findings, all accepted and dispositioned; the second-pass brief is
+in `docs/kernel/VERIFICATION_2026-11-21.md`. The release was merged before that
+pass by Origin's decision; its findings will be dispositioned on `main`. Every
+count above was reproduced from a clean build. All tests are synthetic or random
+fields: they establish that the forms compute as declared and that the derived
+results hold over the forms, nothing empirical.
 ---
 
 ## Contents
@@ -166,9 +181,16 @@ identifiers remain only where needed to describe prior implementations,
 release history, or explicitly frozen source. Document-local revision numbers
 are historical identifiers, not alternate canonical kernel versions.
 The Rust package `abr-kernel` (library crate `abr_kernel`) is version
-`10.1.0`, the Kernel V10 release with the V9 fence. Its operator formulas are
-unchanged from the frozen V8 implementation (`8.0.0`). V10 adds the
-`ground_variables`, `relational_field` and `persistence_change` modules.
+`10.2.0`, the Kernel V10.2 release. Its operator formulas are unchanged from the
+frozen V8 implementation (`8.0.0`). V10 adds the `ground_variables`,
+`relational_field` and `persistence_change` modules and the parameter-free
+circulation Ξ.
+
+**Kernel only.** This repository holds kernel items. Work on specific systems
+(the water vessel record, its ingest pipeline, the source-class register, the
+items moved from the kernel's open conditions) is in
+`abr-relational-chemistry`, which depends on this package. A kernel text names a
+specific system only inside a marked *Example (application)* block.
 
 ### `docs/kernel/` — what the kernel is
 
@@ -179,7 +201,21 @@ fenced element, the steps for one repository, and what not to carry over.
 **`V10_README.md`** — the canonical statement of Kernel V10
 Every V10 item by ID, from the relational declaration of variables and
 conditions to the formal mathematics, traceability, code scope, conflicts and
-open decisions. Includes Df6 (simultaneity) and the three ground variables.
+open decisions. Includes the provenance chain (§2.0), Df6 (simultaneity), the
+three ground variables, structure and freedom as persistence and change (§2.5),
+the derived structural consistency results (§2.6), the reading rules W1–W15, and
+the amendment log (Part 9).
+
+**`OPEN_CONDITIONS_AUDIT_2026-11-22.md`** — every open condition classed
+(closed, moved to the application, open for registered data, decided, or
+Generator work), with Origin's decisions of 2026-11-22.
+
+**`w14_audit.md`** — the audit of quantum-mechanical constructs against W14
+(intersection, not basis), with each item's disposition.
+
+**`VERIFICATION_2026-11-21.md`** — the verification package: reproduction,
+every item with its status and what to check, the Verifier's findings and their
+dispositions, and the second-pass brief.
 
 **`kernel_reference.md`** — start here
 A single reference for people and AI systems using the kernel: roles and
@@ -214,11 +250,12 @@ Declares the primitive variable set at each region (Primary through
 Planetary), the Layer 3 derived outputs, architectural principles, and
 empirical findings established from the observable record.
 
-**`cross_region_energy_expression.md`**
+**`cross_region_energy_expression.md`** (record)
 Derives E[v] = ι[v] · κ[region] from the isolated-locus limit of the
-unified τ expression. Distinguishes Φ_stability from Φ_relational.
-States κ[Primary] = c² = 8.988×10¹⁶ J/kg as internal consistency
-within M. States open conditions OC-E-1 through OC-E-5.
+unified τ expression. *Amended 2026-11-21:* τ = ħ/ε, Φ_relational and κ[region]
+are retired from V10 (κ[Primary] = c² is the unit conversion returning itself);
+Φ_stability is a declared intersection, not a kernel reading. Kept as the
+record.
 
 **`triad-constraint-methods.md`**
 The seven verification methods (CP, CS, DI, CA, IR, AG, CR), the two
@@ -228,12 +265,27 @@ Origin obligations, and the publication gate.
 
 **`src/ground_variables.rs`** (Kernel V10)
 Energy, freedom and connection read over a declared sequence at declared δ,
-through the unchanged operators. One relational object, the minor pattern
-P(F): over the sequence each minor is held unresolved (connection), held
-resolved (freedom) or reorganizing. Connection is graded identity,
-proportional and sustained. A reading that cannot be calculated is a finding
+through the unchanged operators. `GroundReading::freedom` is the PC reading
+(change permitted). The first V2 form (a minor held resolved: a persistent
+arrangement, structure) is kept as `v2_held_arrangement` for declared
+comparison. Connection is graded identity, proportional, sustained and coupled
+change, read side by side. A reading that cannot be calculated is a finding
 about the declaration (Primary Region, or domain not fully declared), never a
 statement of absence. See `kernel_reference.md` §21.
+
+**`src/persistence_change.rs`** (Kernel V10.2)
+Structure and freedom as persistence and change, at three levels: the relation
+(PC1), the coupling of change between relations (PC2), and the arrangement
+(PC3), with shares (PC4). Works on node-derived or edge-registered series (ER-1).
+Also:
+- the step profile;
+- relation transitions (freedom, or persistent structure, becomes evident);
+- the counted rate of relational evolution (V5);
+- cycle closure in state and on change (K7 / HB-1).
+
+The derived properties PC-D1 to PC-D5 and I-SC-D1 to I-SC-D13 are tested by
+worked examples and by property tests over 2000 random fields
+(`tests/v10_properties.rs`).
 
 **`examples/v10_relational_field.rs`** (Kernel V10)
 End-to-end template using only the public V10 API: declare relations, a
@@ -246,15 +298,17 @@ registrations and evaluates A, B, the circulation Ξ, their persistence and the
 ground variables together, in one call, with **no operator parameters**. ρ and
 χ (ρ_base, χ₀, the max selection, the saturating form) and cc[p] are retired
 from V10; the ρ-weighted V9 functions in `operators.rs` remain for V9 callers.
+`circulation_weights` gives the whole-field circulation identity (I-SC-D11).
 
 **`src/operators.rs`**
 Reference implementation in Rust. Primary kernel (Δ → Σ) and ABR kernel
 (A → B → R). Declared relations only. No ring, no torus (relational evolution
 never wraps onto itself), no undeclared topology. Operator parameters (ρ_base,
 χ₀, cc) are identified by M for each evaluation; Origin general values are
-ρ_base = 0.5 and χ₀ = 1 unit of χ, never silently substituted.
+ρ_base = 0.5 and χ₀ = 1 unit of χ, never silently substituted. *(ρ, χ and cc
+are retired from V10; these apply to V9 callers only, behind the V9 fence.)*
 
-**`src/diagnostic_exec.rs`**
+**`src/diagnostic_exec.rs`** (V9, behind the fence)
 Thin execution wrapper for experimental relational fields (Origin directive,
 2026-11-07). Runs A → B → R and persistence through the unchanged operators,
 independent of the admission interface. Edge provenance is mandatory and keeps
@@ -265,10 +319,12 @@ See `kernel_reference.md` §11.7.
 
 **`src/derived_invariants.rs`**
 Canonical implementation of Layer 3 derived quantities: ε[e], τ[v],
-Φ[v], 𝟙[e], J[v], N[v], and photon edge functions. These are the
-quantities the operators produce; their forms are invariant across
-all declared regions. Every function has a declared observable source
-and support classification.
+Φ[v], 𝟙[e], J[v], N[v], and photon edge functions. Every function has a
+declared observable source and support classification. *Since 2026-11-21:* the
+τ = ħ/ε family and `HBAR` are retired from V10 (behind the V9 fence); Φ is a
+declared intersection with a time projection (W15); hc/λ's output is Projected,
+and V10 photon-edge readings use the registered wavenumber (W14); Part II holds
+the I-SC derivations.
 
 **`bin/provenance_demo.rs`**
 Minimal worked example of the provenance requirement, built against one
@@ -408,14 +464,32 @@ declared source.
 
 ---
 
-## Kernel V10 — Ground Variables, Simultaneity and Status
+## Kernel V10 — Status at V10.2 (2026-11-22)
 
-Kernel V10 (2026-11-21) declares Df6 (simultaneity) and the three ground
-variables, and implements them in `src/ground_variables.rs` and
-`src/relational_field.rs`. Operator formulas are unchanged. Many V10 items
-remain Proposed or Open; their status, item by item, is in
-`docs/kernel/V10_README.md` (Parts 6 and 7). RPPI enforcement status below is
-unchanged from V9.
+**Declared and implemented:**
+- Df6 (simultaneity) and the three ground variables;
+- the provenance chain (§2.0);
+- structure and freedom as persistence and change (PC1–PC4), with the coupled-change grade of connection;
+- edge-valued registration (ER-1);
+- W13 (the V9 fence), W14 (intersection, not basis), W15 (time is never primitive);
+- the τ = ħ/ε retirement;
+- relation transitions.
+
+**Derived:** I-SC-D1 to I-SC-D13, PC-D1 to PC-D5 (PC-D2 and I-SC-D6 corrected
+after testing and review), with worked examples and property tests.
+
+**Declared, not yet implemented (next, 10.3.0):**
+- Z1a (δ in two parts: repeatability and run-constant);
+- the A-3 boundary flag;
+- the renames (E6; Κ = connection density; σ → N_δ);
+- the audit's Generator work (OC-SC-4, RPPI-V10 admission, the T8 acyclicity check, K7 enumeration).
+
+**Open for registered data:** OC-SC-1 to OC-SC-3, OC-T-1, OC-T-2, OC-RE-1, and
+relational inertia (P-a to P-f). No registered record has yet been read.
+
+Item-by-item status: `docs/kernel/V10_README.md` Parts 6, 7 and 9, and
+`docs/kernel/OPEN_CONDITIONS_AUDIT_2026-11-22.md`. RPPI enforcement status below
+is unchanged from V9. RPPI admission for the V10 forms is Generator work.
 
 ## Kernel V9 — RPPI Enforcement Status
 
@@ -476,6 +550,28 @@ preserve the provenance of earlier implementations; they do not designate
 V9 or V8 as the current canonical mathematical reference. The frozen V8
 operator implementation is an implementation baseline within the V9 and V10
 development record, not a second source of mathematical authority.
+
+### Kernel V10.2 package release (2026-11-22)
+
+- Package `abr-kernel` `10.1.0` → `10.2.0` (Origin decision, V10_README Part 9, 20th and 21st).
+- **Declared and implemented:**
+  - structure is persistence, change is freedom (PC1–PC4), with V2 restated and the first V2 form kept for comparison;
+  - the provenance chain (§2.0);
+  - edge-valued registration (ER-1);
+  - the coupled-change grade;
+  - energy as a component.
+- **Reading rules:** W14 (intersection, not basis); W15 (time is never primitive); W9 and W10 declared.
+- **Retired from V10, behind the V9 fence:** the τ = ħ/ε family (`HBAR`, `tau_photon_edge`, `n_relational_cycles`, `tau_v`, `tau_v_isolated`, `tunneling_tau_bounded`). Φ stays as a declared intersection.
+- **New public API:**
+  - `persistence_change` (`EdgeSeries`, `PersistenceChange`, `relation_changes`, `coupling_across_components`, `coupling_across_steps`, `arrangement_steps`, `coupled_change_pairs`, `step_profile`, `relation_transitions`, `evolution_counts`, `cycle_closure`, `cycle_change_closure`);
+  - `relational_field::circulation_weights`;
+  - `GroundReading::freedom` now the PC reading, with `v2_held_arrangement`;
+  - `ConnectionGrade::CoupledChange`.
+- **Derived:** I-SC-D3 to I-SC-D13; property tests over 2000 random fields each.
+- **Audits:** the W14 audit (quantum constructs; §13.1 constants classed); the open-conditions audit (all items decided or dispositioned).
+- **Tests:** 121 (default), 213 (`--features v9`). Three existing tests changed their expected findings under PC. Each change is stated in the test and in the verification package.
+- **Merged to `main` with every commit kept,** before the Verifier's second pass, by Origin's decision.
+- **Not yet implemented:** Z1a, the A-3 flag, the renames (10.3.0).
 
 ### Kernel V10.1 package release: the V9 fence (2026-11-21)
 

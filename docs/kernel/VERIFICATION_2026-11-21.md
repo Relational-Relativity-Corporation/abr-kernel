@@ -213,3 +213,12 @@ added lines in the repository:
 - **Code:** no line lost; **no test assertion removed or weakened.**
 - **Canonical text** (`V10_README.md`, `kernel_reference.md`): nothing lost. Every decision is appended beside its item.
 - **Replaced:** `README.md`'s test counts (they describe the current suite) and three lines of this package. One of these ("Not bumped") had been replaced outright and is now restored beside its correction above. The other two are kept as quoted first wordings.
+
+## Merge before the second pass (2026-11-22)
+
+By Origin's decision, this branch was merged to `main` as package `10.2.0`
+**before** the Verifier's second pass. The second-pass sections above remain
+the review brief. Any finding from that pass is dispositioned on `main` as
+before: corrected beside the original and logged in Part 9. The release
+commit adds only the version bump, the README update and the separation
+edits; no form, test or reading changed.
