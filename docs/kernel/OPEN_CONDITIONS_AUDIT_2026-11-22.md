@@ -71,8 +71,8 @@ and `kernel_reference.md` §18. **Origin decided every item on 2026-11-22 (Part 
 | **OC-F-1**, OC-Φ-6 | H as a shared frame | (a) each record declares its observer, and any comparison across observers is a declared comparison; (b) declare H shared | **(a).** No shared frame is claimed without registration (W12) |
 | **DD-1** | One field across domains with different participation? | One field; a declared comparison between domains | **A declared comparison.** *Example (application):* the vessel's heating and freezing are distinct records, and its fields T and TG are read side by side |
 | **W9, W10** | Declare the system / chain / mapping classification, and the relational invariant | Declare; keep Proposed | **Declare both.** W10 is already used as stated (C3) |
-| **E6, E7** | W7 renames ("coherence potential" → "coherence density" / "energy held in connection"); the name of Κ | Apply; defer | **Apply E6** (a mechanical rename, original text kept). **Confirm Κ = "connection density"** for E7 |
-| **OC-Z-1** | Rename σ ("extent" over δ) | ν; N_δ; keep σ | **N_δ** ("resolvable count"), since R4 now makes extent a count |
+| **E6, E7** | W7 renames ("coherence potential" → "coherence density" / "energy held in connection"); the name of Κ | Apply; defer | **Apply E6** (a mechanical rename, original text kept). **Confirm Κ = "connection density"** for E7. *[Applied 10.3.0 (25th).]* |
+| **OC-Z-1** | Rename σ ("extent" over δ) | ν; N_δ; keep σ | **N_δ** ("resolvable count"), since R4 now makes extent a count. *[Applied 10.3.0 (25th): Z2, R4, V5.]* |
 | **Version and merge** | Bump from 10.1.0; merge both branches | 10.2.0; 11.0.0; no bump | **10.2.0** after verification. PC, W14, W15 and the τ retirement are additions and amendments within V10. Merge with every commit kept |
 | **Boundary audit**, five inconsistencies, Symbols (Part 8), RS open list, RMC 5.6 and 5.7 | Layout approval; B as a vector; θ inputs; value classes; symbols | Settle each | **Value classes R7 → W14's three** (registered, defined, fitted) plus Projected; χ dissolved; the rest are naming. Proposed as one symbols pass |
 

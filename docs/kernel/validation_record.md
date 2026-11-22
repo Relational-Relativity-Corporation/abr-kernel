@@ -204,7 +204,7 @@ See V4 for full table. Unchanged from V4.
 
 ---
 
-## VR-Φ-01 — Coherence Potential Φ[v]
+## VR-Φ-01 — Coherence Density Φ[v] *(was: Coherence Potential; renamed 10.3.0, E6, W7)*
 
 > **Retired from V10 (Origin, 2026-11-21, 10th):** Φ = ι·τ takes a lifetime as input; time is not a variable. Historical comparison only. The entry below is kept as the record.
 >
@@ -220,7 +220,7 @@ Formal derivation: OC-Φ-1 pending.
 
 ---
 
-## VR-ΦS-01 — Collective Coherence Potential Φ[S]
+## VR-ΦS-01 — Collective Coherence Density Φ[S] *(was: Coherence Potential; renamed 10.3.0, E6, W7)*
 
 > **Retired from V10 (Origin, 2026-11-21, 10th):** Φ = ι·τ takes a lifetime as input; time is not a variable. Historical comparison only. The entry below is kept as the record.
 >
@@ -519,7 +519,7 @@ regions, 78-decade confirmation, VR-Φ-01).
 | OC-Φ-1 | Formal derivation of Φ[v] from operator fixed-point | **Closed (2026-11-22): Φ is a declared intersection (W15)** *(was: Pending)* | VR-Φ-01 |
 | OC-Φ-2 | Region-specific threshold derivation | **Closed (2026-11-22): Φ is a declared intersection (W15)** *(was: Pending)* | VR-Φ-01 |
 | OC-Φ-3 | Circadian above primary threshold | Open | VR-Φ-01 |
-| OC-Φ-4 | Φ[v] gradient derivable from Κ[v] | Open | VR-Φ-01 |
+| OC-Φ-4 | Φ[v] gradient derivable from Κ[v] (connection density, E7) | Open | VR-Φ-01 |
 | OC-Φ-5 | J/ψ minimum coherence threshold | Open | VR-Φ-01 |
 | OC-Φ-6 | Observer frame overlap — structural or contingent | **Decided (2026-11-22) with OC-F-1: each record declares its observer** *(was: Open)* | VR-Φ-01 |
 | OC-Φ-7 | He 2s metastable at +7.47 — atomic sub-threshold? | Open | VR-Φ-01 |

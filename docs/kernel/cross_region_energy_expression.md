@@ -12,7 +12,7 @@ observable_variable_sets.md (Kernel V9); session_findings_primary_region_v1.md
 ## Declaration
 
 This document's primary contribution is the distinction between
-two coherence potentials — Φ_stability and Φ_relational — that
+two coherence densities *(was: coherence potential; renamed 10.3.0, E6, W7)* — Φ_stability and Φ_relational (retired, 9th; name E8 closed) — that
 were previously conflated under the single notation Φ[v].
 
 **Φ_stability[v] = ι[v] · τ_stability[v]**
@@ -53,7 +53,7 @@ Bounded over D. No claim beyond D.
 
 ---
 
-## Two distinct coherence potentials
+## Two distinct coherence densities *(was: coherence potential; renamed 10.3.0, E6, W7)*
 
 ### Φ_stability[v] = ι[v] · τ_stability[v]
 
@@ -434,7 +434,7 @@ framework rather than a confirmed measurement reference.
 ## Summary
 
 **Primary contribution:**
-Two distinct coherence potentials distinguished:
+Two distinct coherence densities *(was: coherence potential; renamed 10.3.0, E6, W7)* distinguished:
 - Φ_stability[v] = ι[v] · τ_stability[v] — persistence measure
 - Φ_relational[v] = ι[v] · ℏ / E[v] — action scale measure
 
@@ -495,7 +495,7 @@ from four independent loci" was named as a credibility risk; resolved
 here (Bruce Stephenson, session July 2026).
 
 **V1:** Initial declaration. Primary contribution: two distinct
-coherence potentials distinguished — Φ_stability (persistence
+coherence densities *(was: coherence potential; renamed 10.3.0, E6, W7)* distinguished — Φ_stability (persistence
 measure, confirmed 29 loci) and Φ_relational (action scale,
 from isolated-locus limit of unified τ expression OC-13).
 Cross-region energy expression: E[v] = ι[v] · κ[region] where

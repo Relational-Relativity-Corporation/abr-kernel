@@ -99,8 +99,8 @@
 //   PART I — Layer 3 derived quantities (all confirmed, derived):
 //     ε[e]   — relational energy contrast
 //     τ[v]   — relational progression interval (unified expression)
-//     Φ[v]   — coherence potential (node)
-//     Φ[S]   — coherence potential (collective)
+//     Φ[v]   — coherence density (node) (was: coherence potential; renamed 10.3.0, E6, W7)
+//     Φ[S]   — coherence density (collective) (was: coherence potential)
 //     J[v]   — R output multiplicity
 //     𝟙[e]   — detection indicator (derived from R antisymmetry)
 //     θ[e]   — B output vector direction
@@ -724,7 +724,7 @@ pub fn equilibrium_bond_angle_deg(n_bonds: usize) -> Option<f64> {
     equilibrium_bond_angle_rad(n_bonds).map(|r| r.to_degrees())
 }
 
-// ── Φ[v] — Coherence Potential (Node) ────────────────────────────────────
+// ── Φ[v] — Coherence Density (Node) (was: Coherence Potential; E6) ───────
 //
 // Φ[v] = ι[v] · τ[v]
 //
@@ -745,7 +745,8 @@ pub fn equilibrium_bond_angle_deg(n_bonds: usize) -> Option<f64> {
 //   Primary Region:  log₁₀(Φ) ∈ [+36.53, +39.47]
 //   Planetary:       log₁₀(Φ) ∈ [+59.02, +62.02]
 
-/// Compute Φ[v] = ι[v] · τ[v] — coherence potential at a declared locus.
+/// Compute Φ[v] = ι[v] · τ[v] — coherence density at a declared locus
+/// (was: coherence potential; renamed 10.3.0, E6, W7).
 ///
 /// # Arguments
 /// * `iota_v` — relational inertia at locus v (kg, or declared ι_unit per region)
@@ -780,7 +781,7 @@ pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 {
     phi_v(iota_v, tau_v).log10()
 }
 
-// ── Φ[S] — Coherence Potential (Collective) ───────────────────────────────
+// ── Φ[S] — Coherence Density (Collective) (was: Coherence Potential; E6) ─
 //
 // Φ[S] = ι[S] · τ[S]     where ι[S] = Σᵢ ι[vᵢ]
 //
@@ -792,7 +793,8 @@ pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 {
 //
 // Accumulation condition: Φ[S] > Σᵢ Φ[vᵢ]
 
-/// Compute Φ[S] = ι[S] · τ[S] — collective coherence potential.
+/// Compute Φ[S] = ι[S] · τ[S] — collective coherence density
+/// (was: collective coherence potential; renamed 10.3.0, E6, W7).
 ///
 /// # Arguments
 /// * `iota_s` — total relational inertia of declared system S: Σᵢ ι[vᵢ]

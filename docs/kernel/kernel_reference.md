@@ -848,7 +848,7 @@ pub fn equilibrium_bond_angle_deg(n_bonds: usize) -> Option<f64> { ... }
 // returns None for n_bonds outside {2, 3, 4}
 ```
 
-### 13.9 Φ[v] — Coherence Potential (Node)
+### 13.9 Φ[v] — Coherence Density (Node) *(was: Coherence Potential; renamed 10.3.0, E6, W7)*
 
 ```
 Φ[v] = ι[v] · τ[v]
@@ -866,7 +866,7 @@ pub fn phi_v(iota_v: f64, tau_v: f64) -> f64 { iota_v * tau_v }
 pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 { phi_v(iota_v, tau_v).log10() }
 ```
 
-### 13.10 Φ[S] — Coherence Potential (Collective)
+### 13.10 Φ[S] — Coherence Density (Collective) *(was: Coherence Potential; renamed 10.3.0, E6, W7)*
 
 ```
 Φ[S] = ι[S] · τ[S]  where  ι[S] = Σᵢ ι[vᵢ]
@@ -912,7 +912,7 @@ pub fn r_output_states(n_declared_edges_at_v: usize) -> f64 { 2.0 * j_v(n_declar
 | N[v] at photon-emitting loci | τ_stability · ε[e] / ℏ | `n_relational_cycles(tau_stability_s, lambda_m)` |
 | τ[v] unified | ℏ / \|A_persistence[e_coupling] · cos θ\| | `tau_v(a_p, cos_theta)`; isolated case `tau_v_isolated(e_v)` |
 | θ[e] equilibrium bond angle | from Σᵢ v[eᵢ] = 0 (2, 3, 4 bonds) | `equilibrium_bond_angle_rad`, `_deg` |
-| Φ[v] coherence potential | ι[v] · τ[v] | `phi_v`, `phi_v_log10` |
+| Φ[v] coherence density *(was: coherence potential; renamed 10.3.0, E6, W7)* | ι[v] · τ[v] | `phi_v`, `phi_v_log10` |
 | Φ[S] collective | ι[S] · τ[S]; accumulation Φ[S] > Σᵢ Φ[vᵢ] | `phi_s`, `accumulation_condition` |
 | J[v] R output multiplicity | (declared edges at v) / 2; states 2J+1 | `j_v`, `r_output_states` |
 

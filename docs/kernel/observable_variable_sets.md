@@ -268,7 +268,7 @@ making it computable and comparable.
 Without a declared relation, change is present but unlocated.
 With a declared relation, change becomes ε[e] — relational
 energy contrast. It becomes τ[v] — relational progression
-interval. It becomes Φ[v] — coherence potential. It becomes
+interval. It becomes Φ[v] — coherence density *(was: coherence potential; renamed 10.3.0, E6, W7)*. It becomes
 J[v] — R output multiplicity. The entire Layer 3 output of
 the framework is the structured reading of change across
 declared relations.
@@ -837,7 +837,7 @@ H₂O: 104.45° confirmed. NH₃: 107.80° confirmed.
 
 ---
 
-### Coherence Potential (node)
+### Coherence Density (node) *(was: Coherence Potential; renamed 10.3.0, E6, W7)*
 
 **Derived quantity:** Φ[v] = ι[v] · τ[v]
 
@@ -894,7 +894,7 @@ Region structure.
 - OC-Φ-1: Formal derivation of Φ[v] from operator fixed-point
 - OC-Φ-2: Region-specific threshold derivation
 - OC-Φ-3: Circadian above primary threshold
-- OC-Φ-4: Φ[v] gradient derivable from Κ[v]
+- OC-Φ-4: Φ[v] gradient derivable from Κ[v] (Κ: connection density, E7, 10.3.0)
 - OC-Φ-5: J/ψ minimum coherence threshold
 - OC-Φ-6: Observer frame overlap — structural or contingent
 - OC-Φ-7: He 2s metastable at +7.47 — atomic sub-threshold?
@@ -902,13 +902,13 @@ Region structure.
 
 ---
 
-### Collective Coherence Potential
+### Collective Coherence Density *(was: Coherence Potential; renamed 10.3.0, E6, W7)*
 
 **Derived quantity:** Φ[S] = ι[S] · τ[S]
 
 **Accumulation condition:** Φ[S] > Σᵢ Φ[vᵢ]
 
-The collective coherence potential of a declared relational
+The collective coherence density *(was: coherence potential; renamed 10.3.0, E6, W7)* of a declared relational
 structure S exceeds the sum of individual component coherence
 potentials. The declared edges between components contribute
 coherence that no individual component provides alone.
@@ -997,7 +997,7 @@ no node to project onto — structurally absent, not suppressed.
 | OC-Φ-1 | Formal derivation of Φ[v] from operator fixed-point | Pending | Φ[v] |
 | OC-Φ-2 | Region-specific threshold derivation | Pending | Φ[v] |
 | OC-Φ-3 | Circadian above primary threshold | Open | Φ[v] |
-| OC-Φ-4 | Φ[v] gradient derivable from Κ[v] | Open | Φ[v] |
+| OC-Φ-4 | Φ[v] gradient derivable from Κ[v] (connection density, E7) | Open | Φ[v] |
 | OC-Φ-5 | J/ψ minimum coherence threshold | Open | Φ[v] |
 | OC-Φ-6 | Observer frame overlap — structural or contingent | Open | Φ[v] |
 | OC-Φ-7 | He 2s metastable at +7.47 — atomic sub-threshold? | Open | Φ[v] |
@@ -1037,8 +1037,8 @@ M maps into D. Nothing else enters without declaration through M.
 Identical operators across all regions. What changes is what
 they act on. What they produce: relational energy contrast ε[e],
 relational progression τ[v] (unified expression), B output
-vector direction θ[e], coherence potential Φ[v] = ι[v] · τ[v],
-collective coherence potential Φ[S] = ι[S] · τ[S], and R
+vector direction θ[e], coherence density Φ[v] = ι[v] · τ[v],
+collective coherence density Φ[S] = ι[S] · τ[S] *(was: coherence potential; renamed 10.3.0, E6, W7)*, and R
 output multiplicity J[v]. Canonical mathematical forms in
 derived_invariants.rs (Kernel V9).
 
@@ -1206,7 +1206,7 @@ by virtue of scale, domain, or familiarity.
 ### Derived architectural principles
 
 **AP-7:** Φ[v] = ι[v] · τ[v] is the scale-invariant coherence
-potential. The form is invariant across all regions. What
+density *(was: coherence potential; renamed 10.3.0, E6, W7)*. The form is invariant across all regions. What
 changes is the numerical value, not the expression.
 
 **AP-8:** The observer frame is the invariant reference.
