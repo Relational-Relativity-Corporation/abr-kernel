@@ -1871,6 +1871,20 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            within its bound of x[s] − x[t] (difference constraints): the
 //            converse of PC-D4. (iv) A walk through a resolved chord can
 //            hold. V10_README §2.6, `tests/v10_closure_basis.rs`.
+//   I-SC-D17 The carrier as a component (Proposed, Generator, 2026-11-23,
+//            48th; OC-SC-3). (i) ε = |A[c][e]|, δ_ε = δA[c][e]: the V3
+//            floor is the carrier component's state reading. (ii) |Δε| ≤
+//            |Δ[c][e]| under one bound, equal unless the exchange reverses:
+//            a resolved change of ε is PC1 freedom, not conversely. (iii) A
+//            change minor is resolved only where each of its two readings is
+//            resolved at PC1 on one of its edges; so PC2(a) reads "locked"
+//            wherever the structure holds on both edges, forced by the
+//            bound. (iv) c′ = a·c + b·j scales every carrier–structure minor
+//            by a (D14 (ii)); with δ propagated the bound never shrinks, so
+//            mixing never resolves a locked reading. (v) D3 and D4 with
+//            components and edges exchanged: locked exchange and held
+//            arrangement are independent. V10_README §2.6,
+//            `tests/v10_carrier_component.rs`.
 //
 // OC-SC-4 (held pattern vs sustained circulation), partly derived: I-SC-D5
 // gives the sustained grade its own persistence condition; I-SC-D6 gives a
@@ -1905,7 +1919,9 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 // OC-SC-3  [Stated in the declared mathematics 2026-11-21 (7th): the carrier
 //          registered at the same loci enters as a component; PC1 on it and
 //          PC2(a) against a structural component read the coupling. Awaits
-//          registered data.] First statement:
+//          registered data.] [2026-11-23 (48th): how the declared forms
+//          read the carrier is derived, I-SC-D17 (Proposed); OC-SC-3 stays
+//          open for registered data.] First statement:
 //          Declare the mapping from carrier exchange ε = |A(c)| to the
 //          persistence difference A_p of the declared field (how energy
 //          drives Δm).

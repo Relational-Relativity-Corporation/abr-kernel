@@ -327,6 +327,24 @@ Batch 2 is §17, the exact sums, together with this section. Origin decided (Par
 
 **Review this state as batch 2 (§17 to §19):** kernel `claude/vibrant-tesla-2fp7ve` and application `claude/vibrant-tesla-2fp7ve` at the commits that add this addendum and the evening handoff. 232 (default), 324 (`v9`), no warnings; application 44.
 
+
+## 20. Batch 3: I-SC-D17, the carrier as a component (2026-11-23, for the Verifier)
+
+Origin directed the session to continue to the derived invariants (batch 2's review taken as addressed, §19). This is the first of the agreed order: OC-SC-3, the carrier as a component (V10_README §2.6, "I-SC-D17 in full"; Part 9, 48th). It is Proposed. No kernel code changed: one new test file and the statement in `derived_invariants.rs` Part II.
+
+**To check:**
+1. **(i)** ε = |A[c][e]| and δ_ε = δA[c][e] with no run-constant part on the carrier, so the V3 floor and the state reading of the carrier component agree, through `energy_exchange` and `EdgeSeries::from_registrations`.
+2. **(ii)** |Δε| ≤ |Δ[c][e]| under the same bound, with equality unless the exchange reverses; the worked reversal (ε held, PC1 freedom).
+3. **(iii)** the product-bound argument that a change minor cannot be resolved when one of its readings holds at PC1 on both edges, including with independent gains (which widen the minor's bound and not PC1's). Its consequence for the coupled-change grade (the case for Origin) is not a fix; please confirm the case reads as stated.
+4. **(iv)** hw′ − |a|·hw ≥ 2|b|·δΔj_e·δΔj_f for c′ = a·c + b·j with δc′ = |a|·δc + |b|·δj, so mixing never resolves a locked reading. The Generator's first statement ("both directions") was refuted by the property test before commit; it is kept in the text beside the corrected one.
+5. **(v)** D3 and D4 with components and edges exchanged, by transposition of the 2×2 block.
+
+**Each test against what it rules out.** Every property requires both sides of its statement to occur (for example, (iii) requires forced, locked and resolved readings; (iv) requires lost resolutions, pairs leaving and independent readings kept). Not shown by reverting: (iii) and (iv)'s bound arguments are checked on the kernel's own bounds, so a test cannot tell a correct bound from a looser one that still covers it; the arguments in the text carry them.
+
+**For Origin:** declare I-SC-D17; decide the coupled-change finding (three options; option 2 recommended).
+
+**Tests:** `tests/v10_carrier_component.rs` (11). **243 (default), 335 (`v9`)**, no warnings. The application passes 44 against this kernel. Kernel `claude/inspiring-darwin-35a5fh` (started from `claude/vibrant-tesla-2fp7ve` at `544990e`).
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*
