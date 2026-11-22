@@ -231,7 +231,7 @@ Example: on a triangle with values (1, 1, 2), a gain of 1/8 declared on the thir
 
 **For Origin after the Verifier:**
 - declare or amend I-SC-D15 and I-SC-D16;
-- confirm the closure correction, and whether it ships as 10.3.1;
+- confirm the closure correction, and whether it ships as 10.3.1; *[superseded (Origin, 40th): versioning frozen at the pre-release `10.3.0`]*
 - whether the kernel should gain an all-cycles closure test (D16 (iii), by shortest paths).
 
 The `V10_README.md` header still reads package `10.2.0`, which has been stale since 10.3.0.
@@ -247,7 +247,7 @@ The `V10_README.md` header still reads package `10.2.0`, which has been stale si
 | 2a | **K7 correction: mathematics confirmed.** Factoring out the positive component gain gives the conservative per-term bound h + γ(\|v\| + h) | — |
 | 2b | **Finding: a small gain rounds away.** (1 + γ_e)(1 + γ_ce) − 1 with γ = 2⁻⁵⁴ on magnitude 2⁵⁴ gave −0.5 ± 0, not −0.5 ± 1 | Fixed: `combined_gain(a, b) = a + b + a·b`. The Generator found the same form in the shared gain and in `change_magnitude`, and fixed both. Regression test fails on `a0bf7ec` |
 | 2c | **Finding: `cycle_closure` indexes before validating the walk**, so an open walk with an out-of-range registration panics | Fixed: walk checked first, also in `cycle_change_closure`, where the order predates 10.3.0. Regression test fails on `a0bf7ec` |
-| 2d | **Compatibility:** the public field `closure_gain` breaks downstream struct literals and exhaustive patterns. Record an explicit decision before choosing the release number | **Owed by Origin** (options in the Generator's report) |
+| 2d | **Compatibility:** the public field `closure_gain` breaks downstream struct literals and exhaustive patterns. Record an explicit decision before choosing the release number | **Owed by Origin** (options in the Generator's report). **[Decided (Origin, 40th): versioning frozen at the pre-release `10.3.0`. The field stays; the break is recorded against `10.3.0`; no 10.3.1.]** |
 | 3 | **I-SC-D16: declare, with the interval scope explicit** (one state or one change; no joint calibration witness across registrations). Approve a separate all-cycles check (Bellman–Ford; report a resolved cycle; state the boundary comparisons) | Scope added beside (iii). The check awaits Origin's approval |
 
 **Tests now: 199 (default), 291 (`--features v9`)**, no warnings. The application at `94a89c1` passes 43 against this kernel.
