@@ -1169,7 +1169,7 @@ verification only. Synthetic test provenance is not empirical provenance.
 
 | Item | Where | Status |
 |---|---|---|
-| A-3 — empty adjacency in Σ, R, R_persistence | `operators.rs` | OPEN — not classified. Operators unchanged; `diagnostic_exec` reports each affected edge as an `UnresolvedCondition` warning (§11.7) |
+| A-3 — empty adjacency in Σ, R, R_persistence | `operators.rs` | OPEN — not classified. Operators unchanged; `diagnostic_exec` reports each affected edge as an `UnresolvedCondition` warning (§11.7) *(Decided 2026-11-22: 0, flagged record-boundary-conditioned; never read as zero circulation)* |
 | 𝟙[e] interpretation audit; ε[e] downstream | `derived_invariants.rs` | HOLD |
 | A-11 — ι at photon locus not declared through M | `derived_invariants.rs` | CLOSED — legacy import (SF-PR-16); declared-information rule applies |
 | `are_proportional` edge-order dependence and two-unit tolerance | `derived_invariants.rs` | HOLD for the V9 function, which is unchanged. **Not reached by V10 readings:** V2 uses the minor form, symmetric in edge order with one resolution in one unit (§21.4) |
@@ -1180,25 +1180,25 @@ verification only. Synthetic test provenance is not empirical provenance.
 | J[v] wording on what M observes | `derived_invariants.rs` | Origin wording decision |
 | OC-T-1 | Tunneling floor magnitude: formal expression not yet derived. *Restated (W14, 2026-11-21):* where, and at what δ, the exchange floor ε > δ_ε is resolved over a registered carrier (V3); read from registered data, no mechanism posited | OPEN |
 | OC-T-2 | Tunneling at scale: confirm beyond Primary and Atomic regions | OPEN |
-| OC-T-3 | Tunneling necessity: formally derive that absence precludes energy transfer | OPEN |
+| OC-T-3 | Tunneling necessity: formally derive that absence precludes energy transfer | OPEN *(Dissolved (G1-OC, 2026-11-12); register corrected 2026-11-22)* |
 | OC-S-1 | Kernel boundary criterion | CLOSED (2026-09-23: structural interior locus criterion) |
-| OC-S-2 | Relational distinguishability beyond Primary Region | OPEN |
-| OC-S-3 | Formally derive absence precludes self-organization | OPEN |
-| OC-E-1 | 𝟙[e] = 1 preservation under operator evolution | OPEN |
-| OC-E-2 | Decoherence rate derivation | OPEN |
-| OC-E-3 | Entanglement necessity | OPEN |
-| OC-RE-1 | Formally derive monotonic decrease of relational evolution rate | OPEN |
-| OC-R-1 | g-factor derivation: g = 2·ρ[e_B]/ρ_base | OPEN |
-| OC-θ-3 | Resonance / partial bond order | OPEN |
-| OC-θ-5 | Full 3D vector balance N > 4 | OPEN |
-| OC-Φ-1 | Formal derivation of Φ[v] from operator fixed-point | OPEN |
-| OC-Φ-2 | Region-specific stable threshold from operator fixed-point | OPEN |
-| OC-Φ-6 | Observer frame overlap — structural or contingent | OPEN |
-| OC-CA-1 | Φ[S] formal derivation from operators | OPEN |
-| OC-22 | α_r inter-region coupling formal derivation | OPEN |
-| OC-ι-1 | ι_unit structurally fundamental or instrumentally bounded | OPEN |
-| OC-ι-2 | Relational inertia ratios (ι[μ]/ι[e], ι[τ]/ι[e]) — no declared relational origin | OPEN |
-| OC-ι-3 | δι ~ ι^0.5 scaling — connection to ρ saturation not derived | OPEN |
+| OC-S-2 | Relational distinguishability beyond Primary Region | OPEN *(Closed 2026-11-22: freedom readable at every region (PC))* |
+| OC-S-3 | Formally derive absence precludes self-organization | OPEN *(Dissolved (G1-OC, 2026-11-12); register corrected 2026-11-22)* |
+| OC-E-1 | 𝟙[e] = 1 preservation under operator evolution | OPEN *(Closed 2026-11-22: 𝟙 fenced; V10 persistence conditions (PC, I-SC-D5))* |
+| OC-E-2 | Decoherence rate derivation | OPEN *(Closed 2026-11-22: a rate in time of a fenced reader (W15))* |
+| OC-E-3 | Entanglement necessity | OPEN *(Dissolved (G1-OC, 2026-11-12); register corrected 2026-11-22)* |
+| OC-RE-1 | Formally derive monotonic decrease of relational evolution rate | OPEN *(Open for registered data (counted Γ across regions); Φ basis withdrawn)* |
+| OC-R-1 | g-factor derivation: g = 2·ρ[e_B]/ρ_base | OPEN *(Closed 2026-11-22: ρ retired)* |
+| OC-θ-3 | Resonance / partial bond order | OPEN *(Moved to the application 2026-11-22)* |
+| OC-θ-5 | Full 3D vector balance N > 4 | OPEN *(Moved to the application 2026-11-22)* |
+| OC-Φ-1 | Formal derivation of Φ[v] from operator fixed-point | OPEN *(Closed 2026-11-22: Φ is a declared intersection (W15))* |
+| OC-Φ-2 | Region-specific stable threshold from operator fixed-point | OPEN *(Closed 2026-11-22: Φ is a declared intersection (W15))* |
+| OC-Φ-6 | Observer frame overlap — structural or contingent | OPEN *(Decided 2026-11-22 with OC-F-1: each record declares its observer)* |
+| OC-CA-1 | Φ[S] formal derivation from operators | OPEN *(Closed 2026-11-22: Φ is a declared intersection (W15))* |
+| OC-22 | α_r inter-region coupling formal derivation | OPEN *(Moved to the application 2026-11-22)* |
+| OC-ι-1 | ι_unit structurally fundamental or instrumentally bounded | OPEN *(Open (Proposed); inputs classed under W14)* |
+| OC-ι-2 | Relational inertia ratios (ι[μ]/ι[e], ι[τ]/ι[e]) — no declared relational origin | OPEN *(Open (Proposed); inputs classed under W14)* |
+| OC-ι-3 | δι ~ ι^0.5 scaling — connection to ρ saturation not derived | OPEN *(Closed 2026-11-22: ρ retired; the scaling is a fit (W14))* |
 
 **Kernel V9 RPPI enforcement — bounded first implementation** (`v9_specification.md`
 §6–§10; `src/provenance.rs`, `src/provenanced_exec.rs`, `src/admission.rs`). Subject to
