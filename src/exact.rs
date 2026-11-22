@@ -25,6 +25,13 @@
 //! rounding unit above its bound can read as not resolved. Never the other
 //! way, so no distinction is claimed that the registrations do not make.
 //!
+//! **Legacy mathematics (W12 as amended, Origin 2026-11-23, 42nd).** This
+//! module uses a general numerical method: Shewchuk's expansions, as in
+//! Python's `math.fsum`, with fused multiply-add. It adds no form, input or
+//! construct to any reading. Stated necessity: the 41st rule; without it, a
+//! closure depends on its traversal order. Listed as OC-LM-1, item 1, for
+//! Origin to confirm.
+//!
 //! Assumes finite inputs whose sums and products neither overflow nor
 //! underflow f64 (every V10 entry is checked finite at admission).
 

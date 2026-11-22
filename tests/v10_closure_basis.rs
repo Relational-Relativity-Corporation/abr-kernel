@@ -153,6 +153,10 @@ fn simple_cycles(rel: &DeclaredRelations) -> Vec<Vec<(usize, i8)>> {
     out
 }
 
+/// *Legacy mathematics (W12 as amended, 42nd; OC-LM-1, items 2 and 3):*
+/// difference constraints solved by Bellman–Ford. Used here only to check
+/// the cited intersection in I-SC-D16 (iii), "⇐"; it is no kernel reading.
+///
 /// Is there a node field x with |g[e] − (x[s] − x[t])| ≤ b[e] for every
 /// relation? Difference constraints solved by Bellman–Ford from a virtual
 /// source. Returns x when there is one, and checks it directly.
