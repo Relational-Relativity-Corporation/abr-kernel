@@ -329,8 +329,13 @@ impl Registration {
     /// The state bound at locus i of component c: repeatability, offset and
     /// the unshared gain on the registered value (Z1a). The shared gain does
     /// not enter: it changes no classification.
+    ///
+    /// The gain scales the registered value together with its repeatability
+    /// bound: the value lies in (1 + γ′)(x ± δ), |γ′| ≤ γ, so its distance
+    /// from x is at most δ + γ·(|x| + δ) (corrected after the Verifier's
+    /// second 10.3.0 review, 35th; *was* δ + γ·|x|).
     pub fn state_delta(&self, c: usize, i: usize) -> f64 {
-        self.delta[c][i] + self.offset[c][i] + self.locus_gain[c][i] * self.x.data[c][i].abs()
+        self.delta[c][i] + self.offset[c][i] + self.locus_gain[c][i] * (self.x.data[c][i].abs() + self.delta[c][i])
     }
 
     /// True when the run-constant parts are the same as `other`'s.
@@ -665,8 +670,17 @@ pub struct Sustained {
     /// flagged here; a Ξ at one of them is never read as a circulation of
     /// zero, since the missing side is not registered.
     pub boundary_conditioned: Vec<usize>,
-    /// held / formable edges.
-    pub share_held: f64,
+    /// The headline (A-3, the Verifier's recommendation, 2026-11-22, 35th):
+    /// held / formable edges with **both sides registered**. `None` when no
+    /// formable edge has both sides registered. *Was:* held / all formable
+    /// edges, now `share_held_all`.
+    pub share_held: Option<f64>,
+    /// Reported apart: held / boundary-conditioned edges. `None` when no edge
+    /// is boundary-conditioned.
+    pub share_held_boundary: Option<f64>,
+    /// held / all formable edges, both kinds together (the earlier headline,
+    /// kept for comparison).
+    pub share_held_all: f64,
 }
 
 fn sustained(seq: &[Registration], rel: &DeclaredRelations) -> Result<Sustained, DeclarationGap> {
@@ -688,13 +702,20 @@ fn sustained(seq: &[Registration], rel: &DeclaredRelations) -> Result<Sustained,
     }
     let formable = rel.n_edges() - nf.len();
     if formable == 0 { return Err(DeclarationGap::NoNeighbourInField); }
+    let boundary: Vec<usize> = (0..rel.n_edges())
+        .filter(|&e| rel.succ(e).is_empty() != rel.pred(e).is_empty()).collect();
+    let share = |of: &dyn Fn(usize) -> bool| {
+        let n = (0..rel.n_edges()).filter(|&e| !nf.contains(&e) && of(e)).count();
+        (n > 0).then(|| held.iter().filter(|&&e| of(e)).count() as f64 / n as f64)
+    };
     Ok(Sustained {
-        share_held: held.len() as f64 / formable as f64,
+        share_held: share(&|e| !boundary.contains(&e)),
+        share_held_boundary: share(&|e| boundary.contains(&e)),
+        share_held_all: held.len() as f64 / formable as f64,
         held_edges: held,
         reorganizing_edges: reorg,
         not_formable: nf,
-        boundary_conditioned: (0..rel.n_edges())
-            .filter(|&e| rel.succ(e).is_empty() != rel.pred(e).is_empty()).collect(),
+        boundary_conditioned: boundary,
     })
 }
 

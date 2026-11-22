@@ -83,7 +83,8 @@ fn main() {
     println!("connection: identity {:?} | proportional {:?} | coupled change {:?} | reorganizing pairs {:?}",
         c.identity, c.proportional, c.coupled_change, c.reorganizing_pairs);
     match &c.sustained {
-        Ok(s) => println!("  sustained: held {:?}, reorganizing {:?}, share {:.2}", s.held_edges, s.reorganizing_edges, s.share_held),
+        Ok(s) => println!("  sustained: held {:?}, reorganizing {:?}, share (both sides registered) {:?}, boundary-conditioned {:?} share {:?}",
+            s.held_edges, s.reorganizing_edges, s.share_held, s.boundary_conditioned, s.share_held_boundary),
         Err(e) => println!("  sustained: {:?}", e),
     }
     let en = g.energy.as_ref().unwrap();

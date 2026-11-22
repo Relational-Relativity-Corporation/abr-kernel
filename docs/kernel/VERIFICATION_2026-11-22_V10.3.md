@@ -15,8 +15,8 @@ Prepared by the Generator for the Verifier and Origin, **before** this work is m
 ```bash
 git clone https://github.com/Relational-Relativity-Corporation/abr-kernel.git
 cd abr-kernel && git checkout claude/kind-keller-is6bq1
-cargo test                                  # expect 183 passed, 0 failed (179 before §12)
-cargo test --features v9                    # expect 275 passed, 0 failed (271 before §12)
+cargo test                                  # expect 186 passed, 0 failed (179 before §12, 183 before §13)
+cargo test --features v9                    # expect 278 passed, 0 failed (271 before §12, 275 before §13)
 cargo run --example v10_relational_field    # runs to completion
 cargo build --all-targets --features v9     # expect no warnings
 ```
@@ -92,8 +92,8 @@ Every other amendment is inserted beside the text it amends. The V10.2 status li
 **The Generator's choices, for the Verifier and Origin to confirm:**
 
 1. **T8 read with Origin's clarification of 2026-11-07** (`kernel_reference.md` §8): a cyclic arrangement is admitted as a declared feedback loop with a basis, rather than every cyclic field being refused. Opposite directions are treated as a 2-cycle needing their own basis.
-2. **A-3 flagged edges stay in the sustained grade's held and reorganizing lists**, with the flag beside them, rather than being removed from the grade.
-3. **Z1a's unshared gain enters the state bound** (§5, item 1), as well as the change bound the correction stated.
+2. **A-3 flagged edges stay in the sustained grade's held and reorganizing lists**, with the flag beside them, rather than being removed from the grade. *[Refined at the Verifier's recommendation, §13: they stay in the per-edge lists, and the headline share counts only edges with both sides registered.]*
+3. **Z1a's unshared gain enters the state bound** (§5, item 1), as well as the change bound the correction stated. *[Both bounds corrected to the scaling model, §13.]*
 4. **Z1a for edge-registered values:** one gain per edge is treated as shared by that relation *[Found wrong by the Verifier; corrected, §12]* (it changes no classification), since a relation registered as one value carries one gain at both its ends.
 5. **Identity is checked before T8**, so a field lacking both is refused for identity first.
 6. **Enforcement placement:** the constructor `from_edges_with_provenance` stays a building block and checks nothing; the reading entry points check (Origin's decision for T8, applied to identity as well).
@@ -160,6 +160,35 @@ The application's vessel field has no directed cycle (heater → water → wall 
 **A-3 (checked by the Verifier):** exactly one empty side is flagged and both empty is not formable. Flagged edges still count in the sustained grade's held and reorganizing lists, as disclosed (§7, choice 2). That remains Origin's decision on how the summary is read.
 
 **Review this state:** kernel `claude/kind-keller-is6bq1` at the commit that adds this section; chemistry unchanged at `9762324` (it declares no gains, and its 43 tests pass against this kernel).
+
+## 13. Verifier's second review (2026-11-22) and disposition
+
+**Reproduced by the Verifier at `54e5728`:** 183 and 275 passed, no warnings; chemistry `9762324`, 43 passed and the profile example ran against the revised kernel with the local patch. The original Z1a classification finding (§12) is fixed.
+
+**Finding, accepted: the gain bounds did not follow the stated scaling model.** Under the model, a gain scales the registered value together with its repeatability bound. An entry with value v and bound h therefore lies in (1 + γ′)(v ± h), |γ′| ≤ γ, at distance at most γ·|v| + (1 + γ)·h = h + γ·(|v| + h) from v. `change_magnitude` added γ·|Δ| and left out γ·δΔ. The Verifier's case: Δ = 1, δΔ = 1/8, γ = 1/8 reported an upper endpoint of 1.25, while the model permits 1.125 × 1.125 = 1.265625.
+
+**Disposition.** Every gain term now uses h + γ·(|v| + h):
+
+| Bound | Was | Now |
+|---|---|---|
+| `change_magnitude` (shared and independent gains) | δΔ + γ·\|Δ\| | δΔ + γ·(\|Δ\| + δΔ) |
+| Independent-gain widening, PC2(a) and PC3 (edge-registered) | h + γ·\|v\| | h + γ·(\|v\| + h) |
+| Node-derived per-locus gain, state bound | δ + o + γ·\|x\| | δ + o + γ·(\|x\| + δ) |
+| Node-derived per-locus gain, change bound, per end | γ·\|Δx\| | γ·(\|Δx\| + δ_s + δ_{s+1}) |
+
+The Verifier named the first two. The Generator found the last two in the same review: the same omission in the node-derived gain. The reverse check mirrors all four and still matches exactly. In the PC3 widening, h includes the offset bound, so the widening is conservative there (an offset is not scaled by the gain).
+
+**Tests** (`tests/v10_z1a_a3.rs`):
+- the Verifier's case: the upper endpoint is 1.265625;
+- `prop_z1a_every_gain_bound_covers_the_scaling_model`: every corner (1 ± γ)(v ± h) lies within the bound, for magnitudes, the node state bound and the node change bound, over 300 random fields. **It fails under the old formula**, which was checked by reverting it;
+- `prop_z1a_mixing_minors_hold_under_gain_and_repeatability`: over 300 random fields, with true values (1 + γ′)(v + ε), every PC2(a) and PC3 minor resolved under the declared bounds keeps its sign. **It also passes under the old widening**, because the omitted γ·h term is small beside the interval product's own cross terms. The new widening's sufficiency therefore rests on the interval argument (an interval product over entries each within v ± H bounds the minor), not on this test;
+- three hand-computed tests updated to the corrected values, with the earlier values noted beside.
+
+**A-3 summary, the Verifier's recommendation, applied (Origin to confirm).** Flagged edges stay in the per-edge held and reorganizing lists. `Sustained.share_held`, the headline, now counts only formable edges with both sides registered, and is `None` when there are none. The flagged edges are reported apart (`share_held_boundary`). The earlier headline over all formable edges is kept as `share_held_all`. One existing test changed: `sustained_edge_with_no_neighbour_is_not_formable` asserted `share_held == 1.0` on a chain whose two formable edges are both boundary-conditioned. It now asserts `share_held_all == 1.0`, `share_held == None` and `share_held_boundary == Some(1.0)`, with the old assertion noted.
+
+**Tests now: 186 (default), 278 (`--features v9`)**, no warnings. Chemistry `9762324`: 43 passed and the profile example ran against this kernel. The chemistry branch uses none of the changed bounds or fields.
+
+**Review this state:** kernel `claude/kind-keller-is6bq1` at the commit that adds this section; chemistry unchanged at `9762324`.
 
 ---
 

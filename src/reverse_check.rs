@@ -67,7 +67,7 @@ impl Inputs<'_> {
             Inputs::Nodes { seq, rel } => {
                 let (s, u) = rel.edges[e];
                 let r = &seq[t];
-                let at = |i: usize| r.delta[c][i] + r.offset[c][i] + r.locus_gain[c][i] * r.x.data[c][i].abs();
+                let at = |i: usize| r.delta[c][i] + r.offset[c][i] + r.locus_gain[c][i] * (r.x.data[c][i].abs() + r.delta[c][i]);
                 at(s) + at(u)
             }
             Inputs::Edges { delta, offset, .. } => delta[t][c][e] + offset[c][e],
@@ -83,7 +83,7 @@ impl Inputs<'_> {
                 let (r0, r1) = (&seq[s], &seq[s + 1]);
                 let rep = r1.delta[c][p] + r1.delta[c][q] + (r0.delta[c][p] + r0.delta[c][q]);
                 let g = &r0.locus_gain[c];
-                let dx = |i: usize| (r1.x.data[c][i] - r0.x.data[c][i]).abs();
+                let dx = |i: usize| (r1.x.data[c][i] - r0.x.data[c][i]).abs() + (r0.delta[c][i] + r1.delta[c][i]);
                 rep + (g[p] * dx(p) + g[q] * dx(q))
             }
             Inputs::Edges { delta, .. } => delta[s + 1][c][e] + delta[s][c][e],
@@ -93,7 +93,7 @@ impl Inputs<'_> {
     /// The bound of an entry inside a minor that mixes components: widened by
     /// the independent gain on the entry's value (edge-registered only).
     fn mixing(&self, c: usize, e: usize, v: f64, hw: f64) -> f64 {
-        match self { Inputs::Nodes { .. } => hw, Inputs::Edges { independent_gain, .. } => hw + independent_gain[c][e] * v.abs() }
+        match self { Inputs::Nodes { .. } => hw, Inputs::Edges { independent_gain, .. } => hw + independent_gain[c][e] * (v.abs() + hw) }
     }
     fn forced(&self, e: usize, f: usize) -> bool {
         match self { Inputs::Nodes { rel, .. } => rel.edges[e] == rel.edges[f], Inputs::Edges { .. } => false }

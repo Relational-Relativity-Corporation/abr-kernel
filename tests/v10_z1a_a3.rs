@@ -178,14 +178,17 @@ fn z1a_an_unshared_gain_enters_the_change_bound_by_each_ends_change() {
     let base = EdgeSeries::from_registrations(&seq, &r).unwrap();
     assert_eq!(base.change(0).1[0][0], 0.25);
     assert_eq!(PersistenceChange::new(&base).relations[0].reading, Reading::Freedom);
-    // γ_0 = 1/4 on |Δx_0| = 1/2 adds 1/8; γ_1 on |Δx_1| = 0 adds nothing.
+    // The gain scales each end's change with its repeatability (35th):
+    // γ_0·(|Δx_0| + 2/16) = 1/4·(1/2 + 1/8) = 5/32; γ_1·(0 + 2/16) = 1/16.
+    // *Was* γ_0·|Δx_0| = 1/8 and 0 (bound 0.375).
     let g = EdgeSeries::from_registrations(&with_locus_gain(&seq, 0.25, 0.5), &r).unwrap();
-    assert_eq!(g.dgain[0][0][0], 0.125);
-    assert_eq!(g.change(0).1[0][0], 0.375);
+    assert_eq!(g.dgain[0][0][0], 0.21875);
+    assert_eq!(g.change(0).1[0][0], 0.46875);
     assert_eq!(PersistenceChange::new(&g).relations[0].reading, Reading::Freedom);
-    // γ_0 = 1/2 adds 1/4: the bound reaches |Δ| = 1/2, and Δ is not resolved.
+    // γ_0 = 1/2 adds 1/2·(5/8) = 5/16: the bound passes |Δ| = 1/2, and Δ is
+    // not resolved. *Was* 1/4, bound exactly 1/2.
     let g = EdgeSeries::from_registrations(&with_locus_gain(&seq, 0.5, 0.0), &r).unwrap();
-    assert_eq!(g.change(0).1[0][0], 0.5);
+    assert_eq!(g.change(0).1[0][0], 0.5625);
     assert_eq!(PersistenceChange::new(&g).relations[0].reading, Reading::Structure);
 }
 
@@ -193,9 +196,11 @@ fn z1a_an_unshared_gain_enters_the_change_bound_by_each_ends_change() {
 fn z1a_an_unshared_gain_enters_the_state_bound_on_the_value() {
     let (r, seq) = one_step();
     let g = EdgeSeries::from_registrations(&with_locus_gain(&seq, 0.25, 0.5), &r).unwrap();
-    // 2/16 + 1/4·|1| + 1/2·|0| at registration 0; 2/16 + 1/4·1.5 at 1.
-    assert_eq!(g.da[0][0][0], 0.375);
-    assert_eq!(g.da[1][0][0], 0.5);
+    // Per locus δ + γ·(|x| + δ) (35th): at registration 0,
+    // (1/16 + 1/4·(1 + 1/16)) + (1/16 + 1/2·(0 + 1/16)) = 27/64; at 1,
+    // (1/16 + 1/4·(1.5 + 1/16)) + 3/32 = 35/64. *Was* 0.375 and 0.5.
+    assert_eq!(g.da[0][0][0], 0.421875);
+    assert_eq!(g.da[1][0][0], 0.546875);
     assert_eq!(g.da_rep[0][0][0], 0.125);
 }
 
@@ -214,7 +219,7 @@ fn z1a_a_shared_gain_changes_no_classification_and_enters_magnitudes() {
         for s in 0..b.n_steps() {
             let ((d, dd), (_, dm)) = (b.change(s), b.change_magnitude(s));
             for c in 0..b.k() { for e in 0..b.n_edges() {
-                assert_eq!(dm[c][e], dd[c][e] + gamma * d[c][e].abs());
+                assert_eq!(dm[c][e], dd[c][e] + gamma * (d[c][e].abs() + dd[c][e]));
             } }
         }
     });
@@ -349,6 +354,14 @@ fn a3_one_empty_side_is_flagged_both_empty_is_not_formable() {
     let s = ground_reading(&seq, &r, None).connection.unwrap().sustained.unwrap();
     assert_eq!(s.boundary_conditioned, vec![0]);
     assert_eq!(s.not_formable, vec![4]);
+    // The headline counts edges 1 to 3 (both sides registered); edge 0 is
+    // reported apart (A-3, 35th); edge 0 stays in the per-edge lists.
+    assert!(s.held_edges.contains(&0) || s.reorganizing_edges.contains(&0));
+    let both: Vec<usize> = vec![1, 2, 3];
+    let held_both = both.iter().filter(|e| s.held_edges.contains(e)).count() as f64;
+    assert_eq!(s.share_held, Some(held_both / 3.0));
+    assert_eq!(s.share_held_boundary, Some(if s.held_edges.contains(&0) { 1.0 } else { 0.0 }));
+    assert_eq!(s.share_held_all, s.held_edges.len() as f64 / 4.0);
     assert!(!s.boundary_conditioned.iter().any(|e| s.not_formable.contains(e)));
 }
 
@@ -521,4 +534,128 @@ fn prop_z1a_independent_gains_never_reverse_a_resolved_mixing_minor() {
     });
     exercised(&RESOLVED, "z1a_independent_gains: a resolved mixing minor under the declared bound");
     exercised(&WOULD_FLIP, "z1a_independent_gains: an undeclared gain reversing a resolved minor");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// The scaling model in every gain bound (the Verifier's second 10.3.0
+// review, 35th): the gain scales the value together with its bound
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// The Verifier's case: Δ = 1, δΔ = 1/8, γ = 1/8. The model permits
+/// (1 + 1/8)·(1 + 1/8) = 1.265625; the bound's upper endpoint must reach it.
+#[test]
+fn z1a_the_verifiers_magnitude_case() {
+    let a = vec![vec![vec![0.0]], vec![vec![1.0]]];
+    let da = vec![vec![vec![0.0625]]; 2];
+    let s = EdgeSeries::from_edge_values(a, da).unwrap()
+        .with_run_constant(vec![vec![0.0]], EdgeGains { component: vec![0.125], edge: vec![0.0], independent: vec![vec![0.0]] });
+    let (d, dm) = s.change_magnitude(0);
+    assert_eq!((d[0][0], s.change(0).1[0][0]), (1.0, 0.125));
+    assert_eq!(d[0][0] + dm[0][0], 1.265625);
+    assert_eq!(d[0][0] - dm[0][0], 1.0 - 0.265625);
+}
+
+/// Every corner of the model, (1 + γ′)(v + ε) with γ′ = ±γ and ε = ±h, lies
+/// within v ± (h + γ·(|v| + h)): magnitudes, node state and change bounds,
+/// and the independent-gain widening.
+#[test]
+fn prop_z1a_every_gain_bound_covers_the_scaling_model() {
+    static N: AtomicUsize = AtomicUsize::new(0);
+    for_all("z1a_scaling_model", |r| {
+        // Edge-registered: magnitude and the mixing widening.
+        let (a, d) = random_edge_values(r);
+        let (k, m) = (a[0].len(), a[0][0].len());
+        let gc: Vec<f64> = (0..k).map(|_| r.delta(0.5)).collect();
+        let gi: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.delta(0.5)).collect()).collect();
+        let s = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap()
+            .with_run_constant(vec![vec![0.0; m]; k], EdgeGains { component: gc.clone(), edge: vec![0.0; m], independent: gi.clone() });
+        for st in 0..s.n_steps() {
+            let ((dl, dd), (_, dm)) = (s.change(st), s.change_magnitude(st));
+            for c in 0..k { for e in 0..m {
+                let g = (1.0 + gc[c]) * (1.0 + gi[c][e]) - 1.0;
+                for (sg, se) in [(1.0, 1.0), (1.0, -1.0), (-1.0, 1.0), (-1.0, -1.0)] {
+                    let corner = (1.0 + sg * g) * (dl[c][e] + se * dd[c][e]);
+                    assert!((corner - dl[c][e]).abs() <= dm[c][e] + 1e-12, "magnitude");
+                }
+                hit(&N);
+            } }
+        }
+        // Node-derived: the state and change bounds with per-locus gains.
+        let rl = random_rel(r);
+        let seq = random_seq(r, rl.n_nodes);
+        let (kk, n) = (seq[0].x.k, seq[0].x.n);
+        let lg: Vec<Vec<f64>> = (0..kk).map(|_| (0..n).map(|_| r.delta(0.5)).collect()).collect();
+        let seq: Vec<Registration> = seq.into_iter().map(|g| g.with_run_constant(vec![vec![0.0; n]; kk], lg.clone(), vec![0.0; kk])).collect();
+        let s = EdgeSeries::from_registrations(&seq, &rl).unwrap();
+        for t in 0..s.n_registrations() { for c in 0..kk { for (e, &(p, q)) in rl.edges.iter().enumerate() {
+            let x = &seq[t].x.data[c];
+            let dl = &seq[t].delta[c];
+            for (sp, sq, ep, eq) in [(1.0, -1.0, 1.0, -1.0), (-1.0, 1.0, -1.0, 1.0), (1.0, 1.0, 1.0, -1.0), (-1.0, -1.0, -1.0, 1.0)] {
+                let tp = (1.0 + sp * lg[c][p]) * (x[p] + ep * dl[p]);
+                let tq = (1.0 + sq * lg[c][q]) * (x[q] + eq * dl[q]);
+                assert!(((tp - tq) - (x[p] - x[q])).abs() <= s.da[t][c][e] + 1e-12, "node state");
+            }
+        } } }
+        for st in 0..s.n_steps() {
+            let (dl, dd) = s.change(st);
+            for c in 0..kk { for (e, &(p, q)) in rl.edges.iter().enumerate() {
+                let (x0, x1) = (&seq[st].x.data[c], &seq[st + 1].x.data[c]);
+                let (d0, d1) = (&seq[st].delta[c], &seq[st + 1].delta[c]);
+                // The same gain factor at both registrations (run-constant).
+                for (sp, sq) in [(1.0, -1.0), (-1.0, 1.0)] {
+                    let end = |i: usize, sg: f64, se: f64| (1.0 + sg * lg[c][i]) * ((x1[i] + se * d1[i]) - (x0[i] - se * d0[i]));
+                    let corner = end(p, sp, 1.0) - end(q, sq, -1.0);
+                    assert!((corner - dl[c][e]).abs() <= dd[c][e] + 1e-12, "node change");
+                }
+            } }
+        }
+    });
+    exercised(&N, "z1a_scaling_model");
+}
+
+/// PC2(a) and PC3 under the full model (35th): the true values are
+/// (1 + γ′)·(v + ε), |γ′| ≤ γ declared independent, |ε| ≤ δ at each
+/// registration. Every minor resolved under the declared bounds keeps its sign
+/// on the true values.
+#[test]
+fn prop_z1a_mixing_minors_hold_under_gain_and_repeatability() {
+    static N2: AtomicUsize = AtomicUsize::new(0);
+    static N3: AtomicUsize = AtomicUsize::new(0);
+    for_all("z1a_mixing_full_model", |r| {
+        let (a, d) = random_edge_values(r);
+        let (regs, k, m) = (a.len(), a[0].len(), a[0][0].len());
+        let gam: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| [0.0, 0.125, 0.25, 0.5][r.usize(0, 3)]).collect()).collect();
+        let fac: Vec<Vec<f64>> = gam.iter().map(|gc| gc.iter().map(|g| 1.0 + g * (r.usize(0, 8) as f64 - 4.0) / 4.0).collect()).collect();
+        let eps: Vec<Vec<Vec<f64>>> = (0..regs).map(|t| (0..k).map(|c| (0..m)
+            .map(|e| d[t][c][e] * (r.usize(0, 4) as f64 - 2.0) / 2.0).collect()).collect()).collect();
+        let truth: Vec<Vec<Vec<f64>>> = (0..regs).map(|t| (0..k).map(|c| (0..m)
+            .map(|e| fac[c][e] * (a[t][c][e] + eps[t][c][e])).collect()).collect()).collect();
+        let s = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap().with_run_constant(
+            vec![vec![0.0; m]; k], EdgeGains { component: vec![0.0; k], edge: vec![0.0; m], independent: gam.clone() });
+        let p = PersistenceChange::new(&s);
+        let mnr = |v: &dyn Fn(usize, usize) -> f64, i: usize, j: usize, e: usize, f: usize| v(i, e) * v(j, f) - v(j, e) * v(i, f);
+        if let Ok(cs) = &p.across_components {
+            for x in cs.readings.iter().filter(|x| x.reading == Reading::Freedom) {
+                if let ReadingPair::Components { step, i, j } = x.over {
+                    let dv = |c: usize, e: usize| truth[step + 1][c][e] - truth[step][c][e];
+                    assert!(mnr(&dv, i, j, x.e, x.f) * x.minor > 0.0, "PC2(a) minor reversed");
+                    hit(&N2);
+                }
+            }
+        }
+        if let Ok(xs) = &p.arrangement {
+            for x in xs {
+                for (t, st) in [(x.step, x.before), (x.step + 1, x.after)] {
+                    if let AtDelta::Resolved(sg) = st {
+                        let v = |c: usize, e: usize| truth[t][c][e];
+                        let tm = mnr(&v, x.i, x.j, x.e, x.f);
+                        assert!(if sg == Sign::Positive { tm > 0.0 } else { tm < 0.0 }, "PC3 state minor reversed");
+                        hit(&N3);
+                    }
+                }
+            }
+        }
+    });
+    exercised(&N2, "z1a_mixing_full_model: PC2(a)");
+    exercised(&N3, "z1a_mixing_full_model: PC3");
 }

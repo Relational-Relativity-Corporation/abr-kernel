@@ -193,8 +193,10 @@ impl EdgeSeries {
             rel.edges.iter().map(|&(s, t)| r.delta[c][s] + r.delta[c][t]).collect()
         }).collect()).collect();
         let g = &seq[0].locus_gain;
+        // Each end's change lies in (1 + γ′)(Δx ± (δ_s + δ_{s+1})): the gain
+        // term is γ·(|Δx| + δ_s + δ_{s+1}) per end (35th; *was* γ·|Δx|).
         let dgain = seq.windows(2).map(|w| (0..k).map(|c| {
-            let dx = |i: usize| (w[1].x.data[c][i] - w[0].x.data[c][i]).abs();
+            let dx = |i: usize| (w[1].x.data[c][i] - w[0].x.data[c][i]).abs() + (w[0].delta[c][i] + w[1].delta[c][i]);
             rel.edges.iter().map(|&(s, t)| g[c][s] * dx(s) + g[c][t] * dx(t)).collect()
         }).collect()).collect();
         let shared_gain = (0..k).map(|c| vec![seq[0].shared_gain[c]; rel.n_edges()]).collect();
@@ -277,23 +279,27 @@ impl EdgeSeries {
     }
 
     /// The bound on a reported change magnitude over step s, [c][e]: the
-    /// change bound plus the shared gain on the change, δΔ + γ·|Δ| (Z1a).
+    /// change Δ ± δΔ scaled by the gain factor 1 + γ′, |γ′| ≤ γ, so
+    /// δΔ + γ·(|Δ| + δΔ) (Z1a; corrected after the Verifier's second 10.3.0
+    /// review, 35th: *was* δΔ + γ·|Δ|, which left out γ·δΔ).
     /// Classifications use `change`; this is for reporting |Δ| only.
     pub fn change_magnitude(&self, s: usize) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
         let (d, dd) = self.change(s);
         let dm = (0..self.k()).map(|c| (0..self.n_edges())
             .map(|e| {
                 let g = (1.0 + self.shared_gain[c][e]) * (1.0 + self.mixed_gain[c][e]) - 1.0;
-                dd[c][e] + g * d[c][e].abs()
+                dd[c][e] + g * (d[c][e].abs() + dd[c][e])
             }).collect()).collect();
         (d, dm)
     }
 
     /// Bounds for a minor that mixes components: the bound on each entry
     /// widened by its independent gain on the entry's value, δ + γ·|v|.
+    /// The gain scales the value with its bound: δ + γ·(|v| + δ) (35th; *was*
+    /// δ + γ·|v|).
     fn mixed(&self, v: &[Vec<f64>], dv: &[Vec<f64>]) -> Vec<Vec<f64>> {
         (0..self.k()).map(|c| (0..self.n_edges())
-            .map(|e| dv[c][e] + self.mixed_gain[c][e] * v[c][e].abs()).collect()).collect()
+            .map(|e| dv[c][e] + self.mixed_gain[c][e] * (v[c][e].abs() + dv[c][e])).collect()).collect()
     }
 
     fn is_forced(&self, e: usize, f: usize) -> bool { self.forced_pairs.contains(&(e, f)) }

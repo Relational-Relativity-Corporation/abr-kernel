@@ -121,7 +121,7 @@ off by default. V10 work cannot use them by accident: a call does not compile.
 V9 work opts in visibly with `features = ["v9"]`. The code stays where it was,
 with its history. See `docs/kernel/v10_migration.md`.
 
-`cargo test` (V10 only) runs 183 tests:
+`cargo test` (V10 only) runs 186 tests:
 - 35 library;
 - 3 `provenance_demo`;
 - 18 ground variables;
@@ -129,7 +129,7 @@ with its history. See `docs/kernel/v10_migration.md`.
 - 23 property tests (`tests/v10_properties.rs`, 2000 seeded random fields each);
 - 5 relational field;
 - 17 structural consistency (I-SC-D3 to I-SC-D13);
-- 18 δ in two parts and the record-boundary flag (`tests/v10_z1a_a3.rs`);
+- 21 δ in two parts and the record-boundary flag (`tests/v10_z1a_a3.rs`);
 - 7 grade independence (I-SC-D14);
 - 14 T8 and its enforcement (`tests/v10_topology_t8.rs`);
 - 12 K7 routes and cycle basis (`tests/v10_topology_k7.rs`);
@@ -138,7 +138,7 @@ with its history. See `docs/kernel/v10_migration.md`.
 
 Building without the `v9` feature is itself a check that no V10 module depends on a fenced element.
 
-`cargo test --features v9` runs all 275 tests:
+`cargo test --features v9` runs all 278 tests:
 - 63 library;
 - 3 `provenance_demo`;
 - 13 diagnostic execution (`tests/diagnostic_exec.rs`);
@@ -147,7 +147,7 @@ Building without the `v9` feature is itself a check that no V10 module depends o
 - 23 property tests;
 - 6 relational field;
 - 17 structural consistency;
-- the 62 V10.3 tests above (18 + 7 + 14 + 12 + 6 + 5);
+- the 65 V10.3 tests above (21 + 7 + 14 + 12 + 6 + 5);
 - 12 V9 admission (`tests/v9_admission.rs`);
 - 35 V9 conformance (`tests/v9_conformance.rs`);
 - 2 `compile_fail` doctests.
@@ -590,8 +590,8 @@ development record, not a second source of mathematical authority.
 
 - Package `abr-kernel` `10.2.0` → `10.3.0` (Origin decision, V10_README Part 9, 32nd).
 - **Implemented:**
-  - Z1a, δ in two parts (`Registration::with_run_constant`, `EdgeSeries::change_magnitude`, `EdgeSeries::with_run_constant` with `EdgeGains`), with the gain-sign condition; independent gains on edge-registered entries enter the bounds of minors that mix components (corrected after the Verifier's review);
-  - the A-3 flag (`Sustained.boundary_conditioned`, `boundary_conditioned_edges`);
+  - Z1a, δ in two parts (`Registration::with_run_constant`, `EdgeSeries::change_magnitude`, `EdgeSeries::with_run_constant` with `EdgeGains`), with the gain-sign condition; independent gains on edge-registered entries enter the bounds of minors that mix components, and every gain scales its value together with its repeatability bound (both corrected after the Verifier's reviews);
+  - the A-3 flag (`Sustained.boundary_conditioned`, `boundary_conditioned_edges`), with flagged edges reported apart from the headline share (`share_held`, `share_held_boundary`, `share_held_all`);
   - T8 (`topology::check_t8`), enforced at every V10 reading entry point;
   - K7 (`topology::routes`, `two_route_cycle`, `cycle_basis`, `express_in_basis`, `basis_closures`);
   - the reverse check, kernel share (`reverse_check`);
@@ -601,7 +601,7 @@ development record, not a second source of mathematical authority.
 - **Specified:** RPPI-V10 admission (`docs/kernel/rppi_v10.md`, Proposed).
 - **Corrected:** the T8 row claimed a check that did not exist.
 - **Breaking for V10 callers.** Every field read through a V10 entry point must declare an identity and a direction basis for each edge, and feedback for each directed cycle; otherwise the reading is refused with `DeclarationGap::RelationIdentity` or `DeclarationGap::T8`. `DeclarationGap` has two new variants, and `Registration`, `EdgeSeries`, `Sustained` and `DeclaredRelations` have new public fields. A record declared only with `Registration::new` reads as before. *Example (application):* the vessel ingest declares each relation's id and basis from its `edges.csv`.
-- **Tests:** 183 (default), 275 (`--features v9`) *(179 and 271 before the Verifier's Z1a finding)*. Kernel fixtures declare synthetic identities and feedback through test-only helpers marked SYNTHETIC. No existing reading changed.
+- **Tests:** 186 (default), 278 (`--features v9`) *(179 and 271 before the Verifier's Z1a findings)*. Kernel fixtures declare synthetic identities and feedback through test-only helpers marked SYNTHETIC. No existing reading changed.
 - **For verification before merge.**
 
 ### Kernel V10.2 package release (2026-11-22)

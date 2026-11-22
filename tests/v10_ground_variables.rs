@@ -236,7 +236,12 @@ fn sustained_edge_with_no_neighbour_is_not_formable() {
     ];
     let s = connection(&seq, &rel).unwrap().sustained.unwrap();
     assert_eq!(s.not_formable, vec![2]);
-    assert_eq!(s.share_held, 1.0);
+    // Both formable edges are boundary-conditioned (A-3): the headline over
+    // edges with both sides registered has nothing to count; the flagged
+    // edges are reported apart (35th). *Was:* share_held == 1.0.
+    assert_eq!(s.share_held_all, 1.0);
+    assert_eq!(s.share_held, None);
+    assert_eq!(s.share_held_boundary, Some(1.0));
 }
 
 #[test]
