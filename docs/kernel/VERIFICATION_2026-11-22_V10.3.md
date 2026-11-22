@@ -236,6 +236,22 @@ Example: on a triangle with values (1, 1, 2), a gain of 1/8 declared on the thir
 
 The `V10_README.md` header still reads package `10.2.0`, which has been stale since 10.3.0.
 
+
+## 16. Verifier's disposition of batch 1 (2026-11-23) and response
+
+**Reproduced by the Verifier at `a0bf7ec`:** 197 (default), 289 (`v9`), and 43 ingest tests against the locally patched kernel, with no warnings. Both gain tests failed with the old closure bounds restored. The D16 control failed when "every basis closure holds" replaced "every simple cycle holds".
+
+| # | Disposition | Response |
+| --- | --- | --- |
+| 1 | **I-SC-D15: amend before declaring.** Scope the rule to the listed forms; say that classifications are preserved in passing cells while signed outputs transform as specified; word the gain example on the nominal (1, 1, 2) and the permitted (1, 1, 2.25) triangle. The D10 qualifier was verified (±1/8 against 3/16 in state; −1/4 against 0 on change) | Amended beside the text (V10_README §2.6, D15 (i) and the finding) |
+| 2a | **K7 correction: mathematics confirmed.** Factoring out the positive component gain gives the conservative per-term bound h + γ(\|v\| + h) | — |
+| 2b | **Finding: a small gain rounds away.** (1 + γ_e)(1 + γ_ce) − 1 with γ = 2⁻⁵⁴ on magnitude 2⁵⁴ gave −0.5 ± 0, not −0.5 ± 1 | Fixed: `combined_gain(a, b) = a + b + a·b`. The Generator found the same form in the shared gain and in `change_magnitude`, and fixed both. Regression test fails on `a0bf7ec` |
+| 2c | **Finding: `cycle_closure` indexes before validating the walk**, so an open walk with an out-of-range registration panics | Fixed: walk checked first, also in `cycle_change_closure`, where the order predates 10.3.0. Regression test fails on `a0bf7ec` |
+| 2d | **Compatibility:** the public field `closure_gain` breaks downstream struct literals and exhaustive patterns. Record an explicit decision before choosing the release number | **Owed by Origin** (options in the Generator's report) |
+| 3 | **I-SC-D16: declare, with the interval scope explicit** (one state or one change; no joint calibration witness across registrations). Approve a separate all-cycles check (Bellman–Ford; report a resolved cycle; state the boundary comparisons) | Scope added beside (iii). The check awaits Origin's approval |
+
+**Tests now: 199 (default), 291 (`--features v9`)**, no warnings. The application at `94a89c1` passes 43 against this kernel.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*

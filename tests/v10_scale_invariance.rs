@@ -497,3 +497,44 @@ fn isc_d10_with_an_offset_the_change_can_resolve_while_both_states_hold() {
     assert_eq!(cycle_closure(&s, &r, &cy, 1, 0).unwrap(), (-0.125, 0.1875));
     assert_eq!(cycle_change_closure(&s, &r, &cy, 0, 0).unwrap(), (-0.25, 0.0));
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// The Verifier's probes on 28f39d8 / a0bf7ec (2026-11-23, 39th)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// A small declared gain is not lost. With a gain of 2⁻⁵⁴ on an edge of
+/// magnitude 2⁵⁴ the bound must grow by 1. The product form
+/// (1 + γ_e)(1 + γ_ce) − 1 rounded 1 + 2⁻⁵⁴ to 1 and returned −0.5 ± 0.
+#[test]
+fn z1a_a_small_gain_is_not_rounded_away() {
+    let tiny = 2f64.powi(-54);
+    let big = 2f64.powi(54);
+    assert_eq!(1.0 + tiny, 1.0, "the probe depends on 1 + 2⁻⁵⁴ rounding to 1");
+    let (r, _) = triangle();
+    // Walk from locus 2: e2 against, e0, e1: −A[e2] + A[e0] + A[e1].
+    let walk = vec![(2, -1), (0, 1), (1, 1)];
+    let a = vec![vec![vec![big, -0.5, big]]; 2];
+    let zero = vec![vec![vec![0.0; 3]]; 2];
+    // Declared on the edge, and declared on the entry: both give −0.5 ± 1.
+    for (edge, independent) in [(vec![0.0, 0.0, tiny], vec![vec![0.0; 3]]), (vec![0.0; 3], vec![vec![0.0, 0.0, tiny]])] {
+        let s = EdgeSeries::from_edge_values(a.clone(), zero.clone()).unwrap()
+            .with_run_constant(vec![vec![0.0; 3]], gains(vec![0.0], edge, independent));
+        assert_eq!(cycle_closure(&s, &r, &walk, 0, 0).unwrap(), (-0.5, 1.0));
+    }
+    // The same in a reported change magnitude, through the shared gain.
+    let s = EdgeSeries::from_edge_values(vec![vec![vec![0.0]], vec![vec![big]]], vec![vec![vec![0.0]]; 2]).unwrap()
+        .with_run_constant(vec![vec![0.0]], gains(vec![tiny], vec![0.0], vec![vec![0.0]]));
+    assert_eq!(s.shared_gain[0][0], tiny);
+    assert_eq!(s.change_magnitude(0).1[0][0], 1.0);
+    assert_eq!(combined_gain(tiny, tiny), 2.0 * tiny + tiny * tiny);
+}
+
+/// An open walk is refused before any registration or step is read.
+#[test]
+fn k7_an_open_walk_is_none_whatever_the_registration() {
+    let (r, _) = triangle();
+    let s = EdgeSeries::from_edge_values(vec![vec![vec![1.0, 1.0, 2.0]]; 2], vec![vec![vec![0.0; 3]]; 2]).unwrap();
+    let open = vec![(0, 1), (1, 1)];
+    assert_eq!(cycle_closure(&s, &r, &open, 99, 0), None);
+    assert_eq!(cycle_change_closure(&s, &r, &open, 99, 0), None);
+}

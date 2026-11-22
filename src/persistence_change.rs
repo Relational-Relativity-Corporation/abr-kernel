@@ -278,9 +278,9 @@ impl EdgeSeries {
             for c in 0..k { for e in 0..m { self.da[t][c][e] = self.da_rep[t][c][e] + offset[c][e]; } }
         }
         self.shared_gain = (0..k).map(|c| (0..m)
-            .map(|e| (1.0 + gains.component[c]) * (1.0 + gains.edge[e]) - 1.0).collect()).collect();
+            .map(|e| combined_gain(gains.component[c], gains.edge[e])).collect()).collect();
         self.closure_gain = (0..k).map(|c| (0..m)
-            .map(|e| (1.0 + gains.edge[e]) * (1.0 + gains.independent[c][e]) - 1.0).collect()).collect();
+            .map(|e| combined_gain(gains.edge[e], gains.independent[c][e])).collect()).collect();
         self.mixed_gain = gains.independent;
         self
     }
@@ -308,7 +308,7 @@ impl EdgeSeries {
         let (d, dd) = self.change(s);
         let dm = (0..self.k()).map(|c| (0..self.n_edges())
             .map(|e| {
-                let g = (1.0 + self.shared_gain[c][e]) * (1.0 + self.mixed_gain[c][e]) - 1.0;
+                let g = combined_gain(self.shared_gain[c][e], self.mixed_gain[c][e]);
                 dd[c][e] + g * (d[c][e].abs() + dd[c][e])
             }).collect()).collect();
         (d, dm)
@@ -334,6 +334,12 @@ impl EdgeSeries {
 
     fn is_forced(&self, e: usize, f: usize) -> bool { self.forced_pairs.contains(&(e, f)) }
 }
+
+/// The bound on two gain factors together: (1 + a)(1 + b) − 1 = a + b + a·b.
+/// Computed in the expanded form so that a small gain is not lost: in
+/// floating point, 1 + 2⁻⁵⁴ rounds to 1, and the product form returned 0 for
+/// a declared gain of 2⁻⁵⁴ (the Verifier's probe, 2026-11-23, 39th).
+pub fn combined_gain(a: f64, b: f64) -> f64 { a + b + a * b }
 
 /// Gain bounds on edge-registered values, in three parts (Z1a; corrected
 /// after the Verifier's 10.3.0 review). Each bound in [0, 1).
@@ -710,16 +716,23 @@ fn closure_of(a: &[Vec<f64>], da: &[Vec<f64>], cycle: &[(usize, i8)], c: usize) 
 pub fn cycle_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], t: usize, c: usize)
     -> Option<(f64, f64)>
 {
+    // The walk is checked before any registration is read: an open walk is
+    // `None` whatever `t` is (the Verifier's probe, 39th; 28f39d8 read
+    // `series.a[t]` first and panicked on an out-of-range t).
+    if !is_closed_walk(rel, cycle) { return None; }
     let a = &series.a[t];
-    is_closed_walk(rel, cycle).then(|| closure_of(a, &series.closure_bounds(a, &series.da[t]), cycle, c))
+    Some(closure_of(a, &series.closure_bounds(a, &series.da[t]), cycle, c))
 }
 
 /// Closure of the change over step s. `None` when `cycle` is not a closed walk.
 pub fn cycle_change_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], s: usize, c: usize)
     -> Option<(f64, f64)>
 {
+    // Checked first, as in `cycle_closure` (39th). *Was (10.3.0):* `change(s)`
+    // ran before the check, so an open walk with an out-of-range s panicked.
+    if !is_closed_walk(rel, cycle) { return None; }
     let (d, dd) = series.change(s);
-    is_closed_walk(rel, cycle).then(|| closure_of(&d, &series.closure_bounds(&d, &dd), cycle, c))
+    Some(closure_of(&d, &series.closure_bounds(&d, &dd), cycle, c))
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
