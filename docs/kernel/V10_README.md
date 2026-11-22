@@ -25,6 +25,34 @@ Each item has an ID and rests only on items above it. Read top to bottom, it goe
 
 ---
 
+## The governing statement (Declared, Origin, 2026-11-23, 43rd)
+
+> **Using linear algebraic operators we calculate relation as primitive along with energy, connection, and freedom.**
+
+This statement governs everything in this document and in every application of it. Every item below furthers it, and none may contradict it. It sets the order of the work:
+- **relation** is what is calculated first, as the primitive;
+- **energy, connection and freedom** are calculated along with it, not derived from something else;
+- the means is **linear algebraic operators**.
+
+The two method rules declared beside it (§1.5, 41st: *decompose, do not simplify*; W12, 42nd: *legacy mathematics only where identified as necessary*) say how the statement is kept. A decomposition by linear operators accounts for the whole field. A method outside linear algebra enters only where its necessity for the analysis is stated.
+
+**The V10 forms checked against the statement** (Generator, 2026-11-23, 43rd):
+
+| Form | What it is | Under the statement |
+| --- | --- | --- |
+| K1 A, K5 Δ = A_p | the incidence (difference) operator on relations; change between consecutive registrations | Linear ✓ |
+| K2 B, K8 Ξ, Ξ(B(·)) | accumulation and circulation over declared successors and predecessors | Linear ✓. Computed exactly, rounded once (41st) |
+| K7 closures, cycle basis | a linear functional on the cycle space; its basis from a stated tree | Linear ✓. I-SC-D16 (i) is the linear decomposition |
+| V1 identity, proportional; PC2; PC3; V8 | A[e] − A[f]; the 2×2 minors m_ij(e, f), Δ-minors μ | Linear (identity) and multilinear (minors: 2×2 determinants, the exterior product of two relations) ✓ |
+| V1 sustained | the sign of Ξ(B(A)) | Linear operator, read for sign ✓ |
+| V3 energy | ε = \|A(carrier)\| | The magnitude of a linear operator's output ✓ |
+| Readings at δ (PC1–PC3, V1, V3, K7) | is the operator output resolved against its bound? | A **reading rule** applied to operator output, not an operator. Bounds are propagated as intervals, which need absolute values; they are rounded up, never down (41st) |
+| PC4, κ_δ, Λ̂ | shares and counts | **Declared projections (C)** of readings, not operators (K6) |
+| I-SC-D15 | scales as diagonal linear maps on entries; D14 (ii) as 2×2 mixing matrices | Linear algebra ✓ |
+| I-SC-D16 (iii), "⇐" | difference constraints, negative cycles | **Not linear algebraic.** Consistent with the recommendation to fence it as a declared intersection (OC-LM-1) |
+| Bellman–Ford check | shortest paths | **Not linear algebraic.** Consistent with not pursuing it (41st) |
+| `src/exact.rs` | exact sums and products of the operators' terms | Not an operator: it computes the linear operators without loss (OC-LM-1, item 1) |
+
 ## The relational declaration
 
 Every V10 item furthers these three, and none may contradict them:
@@ -638,6 +666,7 @@ A control run that put "every basis closure holds" in place of "every simple cyc
 | 2026-11-23 (40th) | **Versioning frozen (Origin):** "all versioning frozen to the current version we are working on, which is pre-release; once we have a release, we can move forward with versioning." The package stays `10.3.0` (pre-release) for all further work. So the 39th's compatibility question is settled: `EdgeSeries::closure_gain` stays public, and the break in downstream struct literals and exhaustive patterns of `EdgeSeries` is recorded against `10.3.0`. Every earlier mention of a 10.3.1 or 10.4.0 is superseded. Still owed: declaring I-SC-D15 and I-SC-D16; approving the all-cycles check | Release; versioning |
 | 2026-11-23 (41st) | **Declared by Origin: decompose, do not simplify** ("we are decomposing complex systems but we're not simplifying them"), with the aim restated: to analyze how relation as the primitive and energy, connection and freedom work together in a complex system (§1.5 Method). **Applied first to sums** (Generator): a closure read from different starting loci gave different values, for example 0 instead of −0.5, because f64 addition in sequence dropped a small entry beside a large one. The K7 closures, B, Ξ and Ξ(B(A)) are now exact sums rounded once, and their bounds are rounded up. A resolution is then read only where it holds exactly; at the boundary, a value within one rounding unit above its bound can read as not resolved. Every earlier test passes unchanged; the new tests fail under the earlier arithmetic. **The Generator recommends not pursuing the Bellman–Ford all-cycles check** (Origin to confirm): as a verdict it would stand in for the cycle readings it reduces, which this rule excludes. Closure readings stay per cycle, with the cycles not read reported as *not evaluated*. Remaining rounding points: OC-NUM-1 (Part 7). 204 tests (default), 296 (`v9`) | Method; K7; K8; OC-NUM-1 |
 | 2026-11-23 (42nd) | **Declared by Origin, beside W12:** legacy mathematics is used only where it is specifically identified as necessary for analysis, usually in a domain-specific sense, not a general sense. **Generator's audit of this session's additions** (OC-LM-1): D15 and D16 (i), (ii), (iv) use only the kernel's own forms. The "⇐" direction of D16 (iii) rests on difference-constraint theory with no necessity identified; it is recommended to be fenced as a declared intersection. Exact summation is a general numerical method; its stated necessity is the 41st rule; Origin to confirm. No result changed | W12; OC-LM-1; I-SC-D16 |
+| 2026-11-23 (43rd) | **The governing statement, declared by Origin:** *"Using linear algebraic operators we calculate relation as primitive along with energy, connection, and freedom."* "This is the statement which governs everything we do." Placed at the head of this document, above the relational declaration, with the V10 forms checked against it. Every operator is linear (A, Δ, B, Ξ, K7) or multilinear (the minors). Readings at δ are a rule applied to operator output; shares are declared projections. The two non-linear-algebraic methods proposed in this session, the "⇐" of D16 (iii) and the Bellman–Ford check, are the two already recommended to be fenced or not pursued. Kept at hand in `CLAUDE.md` in both repositories | Governing statement |
 
 ---
 

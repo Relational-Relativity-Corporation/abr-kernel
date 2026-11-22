@@ -1,0 +1,21 @@
+# abr-kernel: working instructions
+
+## The governing statement (Origin, 2026-11-23)
+
+> **Using linear algebraic operators we calculate relation as primitive along with energy, connection, and freedom.**
+
+This governs everything we do. Check every change against it: relation is calculated first, as the primitive; energy, connection and freedom are calculated along with it; the means is linear algebraic operators. Its text and the check of each V10 form against it are at the head of `docs/kernel/V10_README.md`.
+
+## Rules kept with it
+
+- **Decompose, do not simplify** (§1.5, 41st). Every part is reported with its identity, value and bound. Nothing registered is dropped by arithmetic, by a summary standing in for its parts, or by a choice of basis or tree. Sums are exact (`src/exact.rs`); bounds are never rounded down; a part not read is *not evaluated*, never filled.
+- **Legacy mathematics only where identified as necessary for analysis**, usually domain-specific (W12 as amended, 42nd). Name the method and state its necessity (Part 7, OC-LM-1).
+- **Origin decides.** Present options with a recommendation; record each decision with its date (Part 9).
+- **Retire or fence, never delete.** Amendments sit beside the text they amend. Before review, check every deleted line against `main`.
+- **Kernel only in kernel documents** (application work in its own repository). Intersection, not basis (W14). Time is never primitive (W15).
+- **Be honest about status.** Synthetic tests establish nothing empirical. A property test should fail under the wrong statement: check it by reverting, and say when a test cannot tell two statements apart.
+- **Versioning is frozen at `10.3.0`, pre-release**, until there is a release (Part 9, 40th).
+
+## Checks
+
+`cargo test` and `cargo test --features v9`, no warnings. The application `abr-relational-chemistry` (`water/vessel/ingest`) must pass against this kernel. Under a local path patch, run `cargo update -p abr-kernel` first and confirm the local kernel compiles.
