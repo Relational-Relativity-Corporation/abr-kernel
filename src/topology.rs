@@ -199,3 +199,187 @@ pub fn declare_checked(
 pub fn t8_gap(rel: &DeclaredRelations) -> Result<(), DeclarationGap> {
     check_t8(rel, &rel.feedback).map(|_| ()).map_err(DeclarationGap::T8)
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// K7: routes and a cycle basis from a stated spanning tree (10.3.0)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// K7 (Declared, Origin 2026-11-16; general form HB-1, 2026-11-17): a route
+// π = (e₁, …, e_m) is a directed sequence of declared edges; for two routes
+// with the same source and target, A_π = B_π₁(g) − B_π₂(g), which is the
+// cycle closure of π₁ followed by π₂ traversed against its direction. The
+// independent closures are a cycle basis from a **stated** spanning tree:
+// each edge not in the tree (a chord) closes one fundamental cycle with the
+// tree path between its ends. There are m − n + c of them (m edges, n loci,
+// c connected parts). Traversal and sign are orders of analysis (Df2a,
+// OC-K-3a): reversing a cycle negates its closure and changes no reading.
+//
+// Every closed walk's signed edge count is the sum, over chords, of the
+// chord's net count times its fundamental cycle, so its closure is that
+// integer combination of the basis closures, exactly (`express_in_basis`).
+// The tree is declared, not chosen by the kernel: a different stated tree
+// gives a different basis of the same cycle space.
+
+/// A directed route: edges in order, each starting where the last ended.
+pub type Route = Vec<usize>;
+
+/// Routes from one locus to another, up to a stated limit.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RouteEnumeration {
+    pub routes: Vec<Route>,
+    /// False when the limit was reached before every route was listed.
+    pub complete: bool,
+}
+
+/// Every simple directed route (no locus repeated) from `from` to `to`,
+/// listing at most `limit`, sorted shortest first and then by edge order. The
+/// count of routes can grow combinatorially, so the limit is stated by the
+/// caller and `complete` reports whether the list is exhaustive. When it is
+/// not, which routes are listed follows the depth-first order of the declared
+/// edges, not their length. Parallel edges are distinct routes of length one.
+pub fn routes(rel: &DeclaredRelations, from: usize, to: usize, limit: usize) -> RouteEnumeration {
+    assert!(from < rel.n_nodes && to < rel.n_nodes, "route ends must be declared loci");
+    let mut found: Vec<Route> = Vec::new();
+    let mut complete = true;
+    if from != to {
+        let mut on = vec![false; rel.n_nodes];
+        let mut route = Vec::new();
+        fn walk(rel: &DeclaredRelations, v: usize, to: usize, on: &mut Vec<bool>, route: &mut Vec<usize>,
+                found: &mut Vec<Route>, limit: usize, complete: &mut bool) {
+            if v == to { if found.len() < limit { found.push(route.clone()); } else { *complete = false; } return; }
+            on[v] = true;
+            for &e in &rel.out[v] {
+                if !*complete { break; }
+                let w = rel.edges[e].1;
+                if on[w] { continue; }
+                route.push(e);
+                walk(rel, w, to, on, route, found, limit, complete);
+                route.pop();
+            }
+            on[v] = false;
+        }
+        walk(rel, from, to, &mut on, &mut route, &mut found, limit, &mut complete);
+    }
+    found.sort_by(|a, b| a.len().cmp(&b.len()).then(a.cmp(b)));
+    RouteEnumeration { routes: found, complete }
+}
+
+/// True when `route` is a non-empty directed sequence of declared edges.
+pub fn is_route(rel: &DeclaredRelations, route: &[usize]) -> bool {
+    !route.is_empty() && route.iter().all(|&e| e < rel.n_edges())
+        && route.windows(2).all(|w| rel.edges[w[0]].1 == rel.edges[w[1]].0)
+}
+
+/// The closed walk of a K7 two-route closure: π₁ along its direction, then
+/// π₂ against it. `None` unless both are routes with the same source and
+/// target. Its cycle closure is B_π₁(g) − B_π₂(g).
+pub fn two_route_cycle(rel: &DeclaredRelations, p1: &[usize], p2: &[usize]) -> Option<Vec<(usize, i8)>> {
+    if !is_route(rel, p1) || !is_route(rel, p2) { return None; }
+    let ends = |p: &[usize]| (rel.edges[p[0]].0, rel.edges[*p.last().unwrap()].1);
+    if ends(p1) != ends(p2) { return None; }
+    let mut c: Vec<(usize, i8)> = p1.iter().map(|&e| (e, 1)).collect();
+    c.extend(p2.iter().rev().map(|&e| (e, -1)));
+    Some(c)
+}
+
+/// Why a stated spanning tree was refused.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TreeRefusal {
+    EdgeOutOfRange { edge: usize },
+    DuplicateEdge { edge: usize },
+    /// The stated edges close an (undirected) cycle: not a tree.
+    ClosesCycle { edge: usize },
+    /// Loci joined by declared edges but not by the stated tree.
+    DoesNotSpan { loci: (usize, usize) },
+}
+
+/// A cycle basis from a stated spanning tree: one fundamental cycle per chord.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CycleBasis {
+    pub tree: Vec<usize>,
+    /// Edges not in the tree, ascending; `cycles[i]` is closed by `chords[i]`.
+    pub chords: Vec<usize>,
+    /// Signed closed walks, each starting with its chord along its direction.
+    pub cycles: Vec<Vec<(usize, i8)>>,
+}
+
+fn find(p: &mut [usize], v: usize) -> usize { let mut v = v; while p[v] != v { p[v] = p[p[v]]; v = p[v]; } v }
+
+/// The fundamental cycles of a stated spanning tree (or forest, one tree per
+/// connected part). Refused, not repaired, when the stated edges are not a
+/// spanning tree of the declared field.
+pub fn cycle_basis(rel: &DeclaredRelations, tree: &[usize]) -> Result<CycleBasis, Vec<TreeRefusal>> {
+    let mut refusals = Vec::new();
+    let mut parent: Vec<usize> = (0..rel.n_nodes).collect();
+    let mut t_edges: Vec<usize> = Vec::new();
+    for &e in tree {
+        if e >= rel.n_edges() { refusals.push(TreeRefusal::EdgeOutOfRange { edge: e }); continue; }
+        if t_edges.contains(&e) { refusals.push(TreeRefusal::DuplicateEdge { edge: e }); continue; }
+        let (s, t) = rel.edges[e];
+        let (a, b) = (find(&mut parent, s), find(&mut parent, t));
+        if a == b { refusals.push(TreeRefusal::ClosesCycle { edge: e }); continue; }
+        parent[a] = b;
+        t_edges.push(e);
+    }
+    for e in 0..rel.n_edges() {
+        let (s, t) = rel.edges[e];
+        if find(&mut parent, s) != find(&mut parent, t) {
+            let pair = (s.min(t), s.max(t));
+            if !refusals.contains(&TreeRefusal::DoesNotSpan { loci: pair }) {
+                refusals.push(TreeRefusal::DoesNotSpan { loci: pair });
+            }
+        }
+    }
+    if !refusals.is_empty() { return Err(refusals); }
+    // Tree adjacency, undirected, with the sign of travelling each edge.
+    let mut adj: Vec<Vec<(usize, usize, i8)>> = vec![Vec::new(); rel.n_nodes];
+    for &e in &t_edges {
+        let (s, t) = rel.edges[e];
+        adj[s].push((t, e, 1));
+        adj[t].push((s, e, -1));
+    }
+    let tree_path = |from: usize, to: usize| -> Vec<(usize, i8)> {
+        let mut via: Vec<Option<(usize, usize, i8)>> = vec![None; rel.n_nodes];
+        let mut seen = vec![false; rel.n_nodes];
+        seen[from] = true;
+        let mut q = VecDeque::from([from]);
+        while let Some(v) = q.pop_front() {
+            if v == to { break; }
+            for &(w, e, sg) in &adj[v] {
+                if !seen[w] { seen[w] = true; via[w] = Some((v, e, sg)); q.push_back(w); }
+            }
+        }
+        let mut p = Vec::new();
+        let mut u = to;
+        while u != from { let (v, e, sg) = via[u].unwrap(); p.push((e, sg)); u = v; }
+        p.reverse();
+        p
+    };
+    let chords: Vec<usize> = (0..rel.n_edges()).filter(|e| !t_edges.contains(e)).collect();
+    let cycles = chords.iter().map(|&e| {
+        let (s, t) = rel.edges[e];
+        let mut c = vec![(e, 1i8)];
+        c.extend(tree_path(t, s));
+        c
+    }).collect();
+    let mut tree_sorted = t_edges;
+    tree_sorted.sort();
+    Ok(CycleBasis { tree: tree_sorted, chords, cycles })
+}
+
+/// The coefficients of a closed walk in the basis: for each chord, its net
+/// signed count in the walk. The walk's closure equals Σ coefficient ×
+/// fundamental-cycle closure, exactly. `None` when `walk` is not a closed walk.
+pub fn express_in_basis(rel: &DeclaredRelations, basis: &CycleBasis, walk: &[(usize, i8)]) -> Option<Vec<i64>> {
+    if !crate::persistence_change::is_closed_walk(rel, walk) { return None; }
+    Some(basis.chords.iter().map(|&c| walk.iter().filter(|w| w.0 == c).map(|w| w.1 as i64).sum()).collect())
+}
+
+/// The closure of every fundamental cycle of `basis` at registration t in
+/// component c, (value, half-width) each, in chord order. Each holds at δ
+/// when |value| ≤ half-width. On a node-derived series every value is 0 by
+/// identity; on edge-registered values it is a test (K7).
+pub fn basis_closures(series: &crate::persistence_change::EdgeSeries, rel: &DeclaredRelations, basis: &CycleBasis,
+                      t: usize, c: usize) -> Vec<(f64, f64)> {
+    basis.cycles.iter().map(|cy| crate::persistence_change::cycle_closure(series, rel, cy, t, c).unwrap()).collect()
+}

@@ -83,7 +83,7 @@ and `kernel_reference.md` §18. **Origin decided every item on 2026-11-22 (Part 
 | OC-SC-4 | Show that the held minor pattern and the sustained circulation are **independent grades**, by fields realizing all four combinations (held/held, held/reorganizing, reorganizing/held, reorganizing/reorganizing). That would close it as I-SC-D14: two grades read side by side, with the persistence conditions of D1 and D5. *[Done, 10.3.0 (26th): I-SC-D14; `tests/v10_grade_independence.rs`.]* |
 | RPPI-V10 | Specify V10 admission: the §2.0 chain, refusal not repair, and the reverse check (B2), as a kernel-level statement. *Example (application):* the vessel ingest implements all three |
 | T8 | The acyclicity check in `DeclaredRelations`: refuse a cyclic field, or declare feedback loops with provenance, as T8 states. *[Done, 10.3.0 (27th): `topology::check_t8`, read with Origin's 2026-11-07 clarification: cycles admitted as declared feedback loops; self-relations refused. Enforced at the reading entry points (Origin, 28th).]* |
-| K7 | Route enumeration and a cycle basis from a stated spanning tree |
+| K7 | Route enumeration and a cycle basis from a stated spanning tree. *[Done, 10.3.0 (29th): `topology::routes`, `cycle_basis`, `express_in_basis`.]* |
 | `kernel_reference.md` §18 | Correct OC-T-3, OC-S-3 and OC-E-3 to dissolved, and add each disposition decided here |
 
 ---
