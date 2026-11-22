@@ -25,7 +25,7 @@ fn diamond() -> DeclaredRelations { rel(4, vec![(0, 1), (1, 3), (0, 2), (2, 3), 
 
 fn edge_series(a: Vec<Vec<Vec<f64>>>) -> EdgeSeries {
     let da = a.iter().map(|t| t.iter().map(|c| vec![0.0625; c.len()]).collect()).collect();
-    EdgeSeries::from_edge_values(a, da).unwrap()
+    EdgeSeries::from_edge_values_synthetic(a, da).unwrap()
 }
 
 // ── Routes ─────────────────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ fn k7_a_stated_tree_that_is_not_a_spanning_tree_is_refused() {
 fn k7_closure_is_zero_by_identity_on_node_values_and_a_test_on_edge_values() {
     let r = diamond();
     let b = cycle_basis(&r, &[0, 1, 2]).unwrap();
-    let seq: Vec<Registration> = (0..2).map(|t| Registration::new(
+    let seq: Vec<Registration> = (0..2).map(|t| Registration::synthetic(
         NodeField::new(vec![vec![4.0 + t as f64, 3.0, 1.5, 0.0]]), vec![vec![0.0625; 4]])).collect();
     let n = EdgeSeries::from_registrations(&seq, &r).unwrap();
     assert!(basis_closures(&n, &r, &b, 0, 0).iter().all(|(v, _)| *v == 0.0));

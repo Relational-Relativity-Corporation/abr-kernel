@@ -20,7 +20,7 @@ fn chain() -> DeclaredRelations {
 
 fn reg(data: Vec<Vec<f64>>) -> Registration {
     let delta = data.iter().map(|c| vec![0.0; c.len()]).collect();
-    Registration::new(NodeField::new(data), delta)
+    Registration::synthetic(NodeField::new(data), delta)
 }
 
 fn seq() -> Vec<Registration> {
@@ -44,7 +44,7 @@ fn one_registration_is_insufficient_information() {
 
 #[test]
 fn every_form_and_ground_variable_is_evaluated_together_without_parameters() {
-    let cs: Vec<EnergyCarrier> = [5.0, 5.2, 5.5].iter().map(|&v| EnergyCarrier {
+    let cs: Vec<EnergyCarrier> = [5.0, 5.2, 5.5].iter().map(|&v| EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::synthetic(),
         name: "synthetic carrier".into(), unit: "J".into(),
         values: vec![v, 2.0, 2.5], delta: vec![0.0; 3],
     }).collect();

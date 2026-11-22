@@ -21,7 +21,7 @@ fn good() -> Vec<RelationIdentity> {
 }
 
 fn seq() -> Vec<Registration> {
-    (0..2).map(|t| Registration::new(NodeField::new(vec![vec![3.0 + t as f64, 1.0, 0.0]]), vec![vec![0.0625; 3]])).collect()
+    (0..2).map(|t| Registration::synthetic(NodeField::new(vec![vec![3.0 + t as f64, 1.0, 0.0]]), vec![vec![0.0625; 3]])).collect()
 }
 
 #[test]

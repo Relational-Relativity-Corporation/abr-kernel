@@ -53,7 +53,7 @@ fn random_seq(g: &mut Rng, n: usize, run_constant: bool) -> Vec<Registration> {
     let sg: Vec<f64> = (0..k).map(|_| g.gain()).collect();
     let mut out = Vec::new();
     for _ in 0..regs {
-        let r = Registration::new(NodeField::new(x.clone()), delta.clone());
+        let r = Registration::synthetic(NodeField::new(x.clone()), delta.clone());
         out.push(if run_constant { r.with_run_constant(off.clone(), lg.clone(), sg.clone()) } else { r });
         for c in x.iter_mut() { for v in c.iter_mut() { if g.chance() { *v += g.eighth() / 2.0; } } }
     }
@@ -103,7 +103,7 @@ fn prop_b2_every_reading_reverse_checks_to_match_edge_registered() {
         // Shared gains (component, edge) and, in half the cases, independent gains.
         let ind: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| if seed % 4 >= 2 { g.gain() } else { 0.0 }).collect()).collect();
         let gains = EdgeGains { component: vec![0.125; k], edge: vec![0.25; m], independent: ind.clone() };
-        let s = EdgeSeries::from_edge_values(aa.clone(), dd.clone()).unwrap().with_run_constant(off.clone(), gains);
+        let s = EdgeSeries::from_edge_values_synthetic(aa.clone(), dd.clone()).unwrap().with_run_constant(off.clone(), gains);
         let n = check_all(Inputs::Edges { a: &aa, delta: &dd, offset: &off, independent_gain: &ind }, &PersistenceChange::new(&s));
         c += n.1; a += n.2;
     }
@@ -117,7 +117,7 @@ fn worked() -> (DeclaredRelations, Vec<Registration>) {
         vec![EdgeProvenance::Continuation; 4]));
     let seq = (0..3).map(|t| {
         let t = t as f64;
-        Registration::new(NodeField::new(vec![vec![5.0, 3.0 + 0.5 * t, 2.0, 0.0], vec![1.0, 2.0, 4.0 + 0.25 * t * t, 1.0]]),
+        Registration::synthetic(NodeField::new(vec![vec![5.0, 3.0 + 0.5 * t, 2.0, 0.0], vec![1.0, 2.0, 4.0 + 0.25 * t * t, 1.0]]),
             vec![vec![0.0625; 4]; 2])
     }).collect();
     (rel, seq)
@@ -177,7 +177,7 @@ fn b2_inputs_other_than_those_declared_are_a_mismatch() {
     // The same reading checked against a δ wider than the one declared.
     let (rel, seq) = worked();
     let pc = PersistenceChange::new(&EdgeSeries::from_registrations(&seq, &rel).unwrap());
-    let wider: Vec<Registration> = seq.iter().map(|r| Registration::new(r.x.clone(), vec![vec![0.125; 4]; 2])).collect();
+    let wider: Vec<Registration> = seq.iter().map(|r| Registration::synthetic(r.x.clone(), vec![vec![0.125; 4]; 2])).collect();
     let x = pc.relations[1];
     assert_eq!(quantity(reverse_relation(Inputs::Nodes { seq: &wider, rel: &rel }, &x)), "half_width");
 }

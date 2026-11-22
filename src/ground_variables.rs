@@ -294,6 +294,8 @@ pub struct Finding {
 /// run-constant part zero, so a record declared before 10.3.0 reads as before.
 #[derive(Debug, Clone)]
 pub struct Registration {
+    /// The observed range of the chain (OC-RANGE-1, Origin 47th). Default `Human`.
+    pub range: ObservedRange,
     pub x: NodeField,
     /// Repeatability δ[c][i], same shape as `x.data`.
     pub delta: Vec<Vec<f64>>,
@@ -313,9 +315,35 @@ impl Registration {
             "δ must be finite and non-negative");
         assert!(x.data.iter().flatten().chain(delta.iter().flatten()).all(|v| crate::exact::in_exact_range(*v)),
             "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
+        ObservedRange::Human.check(x.data.iter().flatten().zip(delta.iter().flatten()));
+        Registration::admitted(x, delta, ObservedRange::Human)
+    }
+
+    /// A test fixture of the forms, not an observation (OC-RANGE-1, 47th).
+    /// Checked as in `new` except for the observed range.
+    pub fn synthetic(x: NodeField, delta: Vec<Vec<f64>>) -> Self {
+        assert_eq!(delta.len(), x.k, "δ must be declared for every component");
+        assert!(delta.iter().all(|d| d.len() == x.n), "δ must be declared for every node");
+        assert!(delta.iter().flatten().all(|d| d.is_finite() && *d >= 0.0),
+            "δ must be finite and non-negative");
+        assert!(x.data.iter().flatten().chain(delta.iter().flatten()).all(|v| crate::exact::in_exact_range(*v)),
+            "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
+        Registration::admitted(x, delta, ObservedRange::synthetic())
+    }
+
+    /// Declare the chain's own observed range (at most the human one).
+    pub fn with_observed_range(mut self, range: ObservedRange) -> Self {
+        assert!(!matches!(range, ObservedRange::Synthetic { .. }) || matches!(self.range, ObservedRange::Synthetic { .. }),
+            "a registration cannot be made synthetic after admission; use `Registration::synthetic`");
+        range.check(self.x.data.iter().flatten().zip(self.delta.iter().flatten()));
+        self.range = range;
+        self
+    }
+
+    fn admitted(x: NodeField, delta: Vec<Vec<f64>>, range: ObservedRange) -> Self {
         let zero = vec![vec![0.0; x.n]; x.k];
         let k = x.k;
-        Registration { x, delta, offset: zero.clone(), locus_gain: zero, shared_gain: vec![0.0; k] }
+        Registration { range, x, delta, offset: zero.clone(), locus_gain: zero, shared_gain: vec![0.0; k] }
     }
 
     /// Declare the run-constant parts of δ (Z1a). Same shapes as `delta`;
@@ -368,6 +396,86 @@ impl Registration {
     /// True when the run-constant parts are the same as `other`'s.
     pub fn same_run_constant(&self, other: &Registration) -> bool {
         self.offset == other.offset && self.locus_gain == other.locus_gain && self.shared_gain == other.shared_gain
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// The observed range (OC-RANGE-1; Declared, Origin 2026-11-23, 47th)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Origin (46th): "I do not observe that there is an observable difference in
+// that numeric range with respect to phenomena; we need to make it impossible
+// for numbers to be in those ranges unless we are establishing range by
+// comparing to the human reference frame." Origin (47th): the range is
+// declared, the default is the human range, stated unit-free through
+// resolution, with 10²⁰ confirmed.
+//
+// A registered value x with repeatability δ resolves |x| / δ distinctions
+// (its resolvable count, Z2). It lies in the observed range when
+// |x| ≤ N·δ, decided exactly. So δ = 0 admits only x = 0: a non-zero value
+// with no resolution claims infinitely many distinctions, which nothing in
+// the human frame registers. A value outside the range is not a registration
+// and is refused.
+
+/// The human range: at most 10²⁰ distinctions per registration (Declared,
+/// Origin 2026-11-23, 47th). Established by comparison to the human reference
+/// frame, as a declared comparison (C): the finest relative resolution it
+/// registers is about one part in 10¹⁹, in frequency-ratio comparisons of
+/// optical clocks.
+pub const HUMAN_RESOLVABLE_COUNT: f64 = 1e20;
+
+/// The observed range of an observing chain.
+#[derive(Debug, Clone, PartialEq)]
+pub enum ObservedRange {
+    /// The default: at most `HUMAN_RESOLVABLE_COUNT` distinctions.
+    Human,
+    /// A chain that resolves less declares its own count, at most the human
+    /// one, with the comparison that establishes it.
+    Declared { max_resolvable: f64, basis: String },
+    /// A test fixture of the forms, not an observation (47th, option 2).
+    /// Bounded only by the arithmetic range (`exact::in_exact_range`). An
+    /// application reading registered data never declares it.
+    Synthetic { basis: String },
+}
+
+impl ObservedRange {
+    pub fn synthetic() -> Self { ObservedRange::Synthetic { basis: "SYNTHETIC: tests the forms, not an observation".into() } }
+
+    /// A declared range, at most the human one.
+    pub fn declared(max_resolvable: f64, basis: &str) -> Self {
+        assert!(max_resolvable > 0.0 && max_resolvable <= HUMAN_RESOLVABLE_COUNT,
+            "a declared range resolves at most the human range, 10²⁰ distinctions (OC-RANGE-1, 47th)");
+        assert!(!basis.trim().is_empty(), "a declared range states the comparison that establishes it");
+        ObservedRange::Declared { max_resolvable, basis: basis.into() }
+    }
+
+    /// The most distinctions a registration may resolve, or `None` (synthetic).
+    pub fn max_resolvable(&self) -> Option<f64> {
+        match self {
+            ObservedRange::Human => Some(HUMAN_RESOLVABLE_COUNT),
+            ObservedRange::Declared { max_resolvable, .. } => Some(*max_resolvable),
+            ObservedRange::Synthetic { .. } => None,
+        }
+    }
+
+    /// True when x with repeatability δ lies in the range: |x| ≤ N·δ, exactly.
+    pub fn admits(&self, x: f64, delta: f64) -> bool {
+        match self.max_resolvable() {
+            None => true,
+            Some(n) => {
+                let mut room = crate::exact::Expansion::new();
+                room.add_product(n, delta);
+                !crate::exact::exceeds(&crate::exact::Expansion::of(x), &room)
+            }
+        }
+    }
+
+    /// Panics with the finding when any (x, δ) lies outside the range.
+    pub fn check<'a>(&self, pairs: impl IntoIterator<Item = (&'a f64, &'a f64)>) {
+        for (x, d) in pairs {
+            assert!(self.admits(*x, *d),
+                "outside the observed range ({self:?}): |{x:e}| exceeds N·δ with δ = {d:e}, so it is not a registration (OC-RANGE-1)");
+        }
     }
 }
 
@@ -865,6 +973,8 @@ pub struct EnergyCarrier {
     pub values: Vec<f64>,
     /// δ_c at each locus.
     pub delta: Vec<f64>,
+    /// The carrier chain's observed range (OC-RANGE-1, 47th).
+    pub range: ObservedRange,
 }
 
 /// Exchanged energy at one edge and registration.
@@ -890,6 +1000,7 @@ pub fn energy_exchange(c: &EnergyCarrier, rel: &DeclaredRelations) -> Vec<Energy
     assert_eq!(c.delta.len(), rel.n_nodes, "δ_c must be declared at every locus");
     assert!(c.values.iter().all(|v| v.is_finite()), "carrier values must be in D");
     assert!(c.delta.iter().all(|d| d.is_finite() && *d >= 0.0), "δ_c must be finite and non-negative");
+    c.range.check(c.values.iter().zip(&c.delta));
     assert!(c.values.iter().chain(&c.delta).all(|v| crate::exact::in_exact_range(*v)), "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
     // ε = |c[s] − c[t]| rounded once, δ_ε rounded up, the floor decided
     // exactly (OC-NUM-1, 45th).

@@ -93,7 +93,7 @@ fn random_field(r: &mut Rng, pows: &[i32]) -> Field {
         xs.push(x.clone());
         for c in x.iter_mut() { for v in c.iter_mut() { if r.chance() { *v += r.wide(pows); } } }
     }
-    let seq = xs.iter().map(|xt| Registration::new(NodeField::new(xt.clone()), delta.clone())).collect();
+    let seq = xs.iter().map(|xt| Registration::synthetic(NodeField::new(xt.clone()), delta.clone())).collect();
     let xi = xs.iter().map(|t| t.iter().map(|c| c.iter().map(|&v| to_i(v)).collect()).collect()).collect();
     let d = delta.iter().map(|c| c.iter().map(|&v| to_i(v)).collect()).collect();
     Field { rel, seq, x: xi, d }
@@ -216,7 +216,7 @@ fn prop_connection_grades_and_energy_are_exact() {
             }
         }
         // Energy: the first component as a carrier.
-        let carrier = EnergyCarrier { name: "SYNTHETIC".into(), unit: "u".into(),
+        let carrier = EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::synthetic(), name: "SYNTHETIC".into(), unit: "u".into(),
             values: f.seq[0].x.data[0].clone(), delta: f.seq[0].delta[0].clone() };
         for x in energy_exchange(&carrier, &f.rel) {
             let (s, u) = f.rel.edges[x.edge];
@@ -274,7 +274,7 @@ fn a_minor_of_2_to_the_minus_60_is_resolved() {
     // Loci 0, 1, 2; e = 0 → 1, f = 0 → 2; A = x[s] − x[t], so x[1] = −A[e], x[2] = −A[f].
     let r = rel(3, vec![(0, 1), (0, 2)]);
     let x = NodeField::new(vec![vec![0.0, -u, -v], vec![0.0, -1.0, -u]]);
-    let reg = Registration::new(x, vec![vec![0.0; 3]; 2]);
+    let reg = Registration::synthetic(x, vec![vec![0.0; 3]; 2]);
     let p = minor_pattern(&reg, &r).unwrap();
     assert_eq!(p.minors, vec![(0, 1, 0, 1, AtDelta::Resolved(Sign::Positive))]);
     let s = EdgeSeries::from_registrations(&[reg.clone(), reg.clone()], &r).unwrap();

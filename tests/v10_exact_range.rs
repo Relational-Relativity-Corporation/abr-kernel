@@ -38,7 +38,7 @@ fn finding_1_the_subnormal_record_is_refused() {
     let m = f64::from_bits(1);
     let a = vec![vec![vec![m, m], vec![0.25, 1.0]]; 2];
     let d = vec![vec![vec![0.0, 0.0], vec![0.49, 0.49]]; 2];
-    let _ = EdgeSeries::from_edge_values(a, d);
+    let _ = EdgeSeries::from_edge_values_synthetic(a, d);
 }
 
 /// The arithmetic itself refuses the product whose residual underflows,
@@ -78,20 +78,20 @@ fn the_admitted_range_is_zero_or_two_to_the_plus_minus_200() {
 #[test]
 #[should_panic(expected = "outside the range of exact arithmetic")]
 fn a_registration_below_the_range_is_refused() {
-    let _ = Registration::new(NodeField::new(vec![vec![0.0, 2f64.powi(-201)]]), vec![vec![0.0; 2]]);
+    let _ = Registration::synthetic(NodeField::new(vec![vec![0.0, 2f64.powi(-201)]]), vec![vec![0.0; 2]]);
 }
 
 #[test]
 #[should_panic(expected = "outside the range of exact arithmetic")]
 fn a_gain_below_the_range_is_refused() {
-    let r = Registration::new(NodeField::new(vec![vec![0.0, 1.0]]), vec![vec![0.0; 2]]);
+    let r = Registration::synthetic(NodeField::new(vec![vec![0.0, 1.0]]), vec![vec![0.0; 2]]);
     let _ = r.with_run_constant(vec![vec![0.0; 2]], vec![vec![0.0, 2f64.powi(-210)]], vec![0.0]);
 }
 
 #[test]
 #[should_panic(expected = "outside the range of exact arithmetic")]
 fn a_carrier_above_the_range_is_refused() {
-    let c = EnergyCarrier { name: "SYNTHETIC".into(), unit: "u".into(), values: vec![0.0, 2f64.powi(201)], delta: vec![0.0; 2] };
+    let c = EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::synthetic(), name: "SYNTHETIC".into(), unit: "u".into(), values: vec![0.0, 2f64.powi(201)], delta: vec![0.0; 2] };
     let _ = energy_exchange(&c, &rel(2, vec![(0, 1)]));
 }
 
@@ -104,7 +104,7 @@ fn a_carrier_above_the_range_is_refused() {
 #[test]
 fn finding_3_the_sustained_grade_holds_edge_0() {
     let r = rel(4, vec![(0, 1), (1, 2), (2, 3)]);
-    let reg = Registration::new(NodeField::new(vec![vec![0.0, 1.0, 0.0, -2f64.powi(-53)]]),
+    let reg = Registration::synthetic(NodeField::new(vec![vec![0.0, 1.0, 0.0, -2f64.powi(-53)]]),
         vec![vec![0.0, 1.0, 0.0, 2f64.powi(-54)]]);
     let c = connection(&[reg.clone(), reg], &r).unwrap();
     assert!(c.sustained.unwrap().held_edges.contains(&0));
@@ -121,7 +121,7 @@ fn k7_the_pair_is_one_sided_and_the_verdict_is_exact() {
     let cy = vec![(0, 1), (1, 1), (2, -1)];
     let a = vec![vec![vec![1.0, 2f64.powi(-53), 0.0]]; 2];
     let d = vec![vec![vec![1.0, 2f64.powi(-54), 0.0]]; 2];
-    let s = EdgeSeries::from_edge_values(a, d).unwrap();
+    let s = EdgeSeries::from_edge_values_synthetic(a, d).unwrap();
     assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (1.0, (1.0f64).next_up()));
     assert_eq!(cycle_closure_resolved(&s, &r, &cy, 0, 0), Some(true));
     assert_eq!(cycle_change_closure_resolved(&s, &r, &cy, 0, 0), Some(false));
@@ -169,7 +169,7 @@ fn prop_every_reading_inside_the_range_completes() {
         let sg = vec![gain(&mut r), gain(&mut r)];
         let seq: Vec<Registration> = (0..regs).map(|_| {
             let x: Vec<Vec<f64>> = (0..2).map(|_| (0..n).map(|_| r.edge_of_range()).collect()).collect();
-            Registration::new(NodeField::new(x), delta.clone()).with_run_constant(offs.clone(), lg.clone(), sg.clone())
+            Registration::synthetic(NodeField::new(x), delta.clone()).with_run_constant(offs.clone(), lg.clone(), sg.clone())
         }).collect();
         let caught = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             let _ = RelationalField::new(&rel, seq.clone(), None);
@@ -181,7 +181,7 @@ fn prop_every_reading_inside_the_range_completes() {
             let a: Vec<Vec<Vec<f64>>> = (0..regs).map(|_| (0..2).map(|_| (0..m).map(|_| r_edge(seed, m)).collect()).collect()).collect();
             let d: Vec<Vec<Vec<f64>>> = vec![(0..2).map(|_| (0..m).map(|_| r_edge(seed + 1, m).abs()).collect()).collect(); regs];
             let g = EdgeGains { component: vec![2f64.powi(-200), 0.5], edge: vec![0.25; m], independent: vec![vec![2f64.powi(-200); m]; 2] };
-            let es = EdgeSeries::from_edge_values(a, d).unwrap().with_run_constant(vec![vec![2f64.powi(-200); m]; 2], g);
+            let es = EdgeSeries::from_edge_values_synthetic(a, d).unwrap().with_run_constant(vec![vec![2f64.powi(-200); m]; 2], g);
             let _ = PersistenceChange::new(&es);
             let order: Vec<usize> = (0..m).collect();
             let mut part: Vec<usize> = (0..n).collect();

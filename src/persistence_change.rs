@@ -247,6 +247,18 @@ impl EdgeSeries {
     /// edge: the edge-valued registration (ER-1, Declared 2026-11-21). The
     /// relation enters as registered; no node value is constructed.
     pub fn from_edge_values(a: Vec<Vec<Vec<f64>>>, da: Vec<Vec<Vec<f64>>>) -> Result<Self, DeclarationGap> {
+        Self::from_edge_values_in(a, da, crate::ground_variables::ObservedRange::Human)
+    }
+
+    /// A test fixture of the forms, not an observation (OC-RANGE-1, 47th).
+    pub fn from_edge_values_synthetic(a: Vec<Vec<Vec<f64>>>, da: Vec<Vec<Vec<f64>>>) -> Result<Self, DeclarationGap> {
+        Self::from_edge_values_in(a, da, crate::ground_variables::ObservedRange::synthetic())
+    }
+
+    /// Edge values in a declared observed range: each value within N·δ of 0.
+    pub fn from_edge_values_in(a: Vec<Vec<Vec<f64>>>, da: Vec<Vec<Vec<f64>>>, range: crate::ground_variables::ObservedRange)
+        -> Result<Self, DeclarationGap>
+    {
         if a.len() < 2 { return Err(DeclarationGap::NoProcessSequence); }
         assert_eq!(a.len(), da.len(), "δ must be declared for every registration");
         let (k, m) = (a[0].len(), a[0].first().map_or(0, |c| c.len()));
@@ -257,6 +269,7 @@ impl EdgeSeries {
             assert!(at.iter().flatten().all(|v| v.is_finite()), "values must be finite (∈ D)");
             assert!(dt.iter().flatten().all(|d| d.is_finite() && *d >= 0.0), "δ must be finite and non-negative");
             assert!(at.iter().flatten().chain(dt.iter().flatten()).all(|v| crate::exact::in_exact_range(*v)), "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
+            range.check(at.iter().flatten().zip(dt.iter().flatten()));
         }
         if m < 1 { return Err(DeclarationGap::FewerThanTwoEdges); }
         let steps = a.len() - 1;

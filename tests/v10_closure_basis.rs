@@ -94,7 +94,7 @@ fn random_series(r: &mut Rng, k: usize, m: usize) -> EdgeSeries {
         aa.push(v.clone()); dd.push(d.clone());
         for c in v.iter_mut() { for x in c.iter_mut() { if r.chance(4) { *x += r.eighth(-1.0, 1.0); } } }
     }
-    EdgeSeries::from_edge_values(aa, dd).unwrap()
+    EdgeSeries::from_edge_values_synthetic(aa, dd).unwrap()
 }
 
 /// Undirected incidence: (neighbour, edge, sign of travelling it).
@@ -229,7 +229,7 @@ fn prop_isc_d16_every_walk_is_the_chord_combination_in_state_and_change() {
 fn diamond() -> (DeclaredRelations, EdgeSeries) {
     let r = rel(4, vec![(0, 1), (1, 2), (0, 2), (0, 3), (3, 2)]);
     let a = vec![vec![0.375, 0.0, 0.0, 0.0, -0.375]];
-    let s = EdgeSeries::from_edge_values(vec![a.clone(), a], vec![vec![vec![0.125; 5]]; 2]).unwrap();
+    let s = EdgeSeries::from_edge_values_synthetic(vec![a.clone(), a], vec![vec![vec![0.125; 5]]; 2]).unwrap();
     (r, s)
 }
 
@@ -267,7 +267,7 @@ fn near_node_series(r: &mut Rng, rel: &DeclaredRelations) -> EdgeSeries {
         let x: Vec<f64> = (0..rel.n_nodes).map(|_| r.eighth(-2.0, 2.0)).collect();
         vec![rel.edges.iter().map(|&(s, t)| x[s] - x[t] + r.eighth(-0.375, 0.375)).collect()]
     }).collect();
-    EdgeSeries::from_edge_values(a, vec![vec![vec![0.125; rel.n_edges()]]; regs]).unwrap()
+    EdgeSeries::from_edge_values_synthetic(a, vec![vec![vec![0.125; rel.n_edges()]]; regs]).unwrap()
 }
 
 #[test]

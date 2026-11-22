@@ -45,7 +45,7 @@ fn main() {
         let t = t as f64;
         reg(vec![4.0, 2.0 + 0.1 * t, 1.0, 0.0], vec![0.0, 1.0, 3.0 - 1.5 * t, 0.5], 0.05)
     }).collect();
-    let carriers: Vec<EnergyCarrier> = (0..5).map(|t| EnergyCarrier {
+    let carriers: Vec<EnergyCarrier> = (0..5).map(|t| EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::Human,
         name: "synthetic carrier".into(), unit: "J".into(),
         values: vec![10.0, 7.0 + 0.2 * t as f64, 5.0, 1.0], delta: vec![0.1; 4],
     }).collect();

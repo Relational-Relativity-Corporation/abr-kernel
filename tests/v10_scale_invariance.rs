@@ -185,7 +185,7 @@ fn scaled(a: &[Vec<Vec<f64>>], d: &[Vec<Vec<f64>>], f: &[Vec<Vec<f64>>]) -> Edge
         x.iter().zip(f).map(|(xt, ft)| xt.iter().zip(ft).map(|(xc, fc)| xc.iter().zip(fc)
             .map(|(v, l)| v * if abs { l.abs() } else { *l }).collect()).collect()).collect()
     };
-    EdgeSeries::from_edge_values(mul(a, false), mul(d, true)).unwrap()
+    EdgeSeries::from_edge_values_synthetic(mul(a, false), mul(d, true)).unwrap()
 }
 
 /// The classifications of one form, in a fixed order. Signs are not part of
@@ -221,7 +221,7 @@ fn prop_isc_d15_every_cell_of_the_scale_table() {
         let basis = stated_basis(&rel);
         let (a, d) = random_edge_values(r, rel.n_edges());
         let (regs, k, m) = (a.len(), a[0].len(), a[0][0].len());
-        let base = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap();
+        let base = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap();
         for kind in KINDS {
             for over in OVERS {
                 let f = factors(r, kind, over, regs, k, m, false);
@@ -260,7 +260,7 @@ fn prop_isc_d15_negative_factors_reverse_signs_only() {
         let basis = stated_basis(&rel);
         let (a, d) = random_edge_values(r, rel.n_edges());
         let (regs, k, m) = (a.len(), a[0].len(), a[0][0].len());
-        let base = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap();
+        let base = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap();
         for kind in KINDS {
             let f = factors(r, kind, Over::Run, regs, k, m, true);
             let s = scaled(&a, &d, &f);
@@ -311,7 +311,7 @@ fn prop_isc_d15_node_derived_grades_under_component_scales() {
             for c in x.iter_mut() { for v in c.iter_mut() { if r.chance(5) { *v += r.eighth(-2.0, 2.0); } } }
         }
         let build = |f: &dyn Fn(usize, usize, usize) -> f64| -> Vec<Registration> {
-            xs.iter().enumerate().map(|(t, xt)| Registration::new(
+            xs.iter().enumerate().map(|(t, xt)| Registration::synthetic(
                 NodeField::new((0..k).map(|c| (0..n).map(|i| f(t, c, i) * xt[c][i]).collect()).collect()),
                 (0..k).map(|c| (0..n).map(|i| f(t, c, i).abs() * delta[c][i]).collect()).collect())).collect()
         };
@@ -352,20 +352,20 @@ fn isc_d15_worked_counterexamples() {
     let h = 0.0625;
     // PC1, a factor that differs between registrations: A = 1 at both, read
     // as structure; ×1 then ×1.25 gives Δ′ = 0.25 > δΔ′ = 0.140625.
-    let s = EdgeSeries::from_edge_values(vec![vec![vec![1.0]], vec![vec![1.0]]], vec![vec![vec![h]]; 2]).unwrap();
+    let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0]], vec![vec![1.0]]], vec![vec![vec![h]]; 2]).unwrap();
     assert_eq!(relation_changes(&s)[0].reading, Reading::Structure);
-    let s = EdgeSeries::from_edge_values(vec![vec![vec![1.0]], vec![vec![1.25]]], vec![vec![vec![h]], vec![vec![1.25 * h]]]).unwrap();
+    let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0]], vec![vec![1.25]]], vec![vec![vec![h]], vec![vec![1.25 * h]]]).unwrap();
     assert_eq!(relation_changes(&s)[0].reading, Reading::Freedom);
     // A closure, a factor per edge: (1, 1, 2) closes at 0; ×1.25 on e2 gives
     // −0.5 against a half-width of 0.1875 + 0.0625·0.25 = 0.203125.
     let (r, cy) = triangle();
     let d = |f2: f64| vec![vec![vec![h, h, f2 * h]]; 2];
-    let s = EdgeSeries::from_edge_values(vec![vec![vec![1.0, 1.0, 2.0]]; 2], d(1.0)).unwrap();
+    let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0, 1.0, 2.0]]; 2], d(1.0)).unwrap();
     assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.1875));
-    let s = EdgeSeries::from_edge_values(vec![vec![vec![1.0, 1.0, 2.5]]; 2], d(1.25)).unwrap();
+    let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0, 1.0, 2.5]]; 2], d(1.25)).unwrap();
     assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (-0.5, 0.203125));
     // The same closure under one factor for the component: still holds.
-    let s = EdgeSeries::from_edge_values(vec![vec![vec![1.25, 1.25, 2.5]]; 2], d(1.25).iter()
+    let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.25, 1.25, 2.5]]; 2], d(1.25).iter()
         .map(|t| t.iter().map(|c| c.iter().map(|_| 1.25 * h).collect()).collect()).collect()).unwrap();
     let (v, w) = cycle_closure(&s, &r, &cy, 0, 0).unwrap();
     assert!(v.abs() <= w);
@@ -395,14 +395,14 @@ fn z1a_a_gain_per_edge_enters_the_closure_bound() {
     // Registered (1, 1, 2), then (2, 1, 3): closures 0 and 0, change closure 0.
     let a = |f2: f64| vec![vec![vec![1.0, 1.0, 2.0 * f2]], vec![vec![2.0, 1.0, 3.0 * f2]]];
     // The model permits a factor 1.125 on e2: closures −0.25 and −0.375, change −0.125.
-    let truth = EdgeSeries::from_edge_values(a(1.125), zero()).unwrap();
+    let truth = EdgeSeries::from_edge_values_synthetic(a(1.125), zero()).unwrap();
     assert_eq!(cycle_closure(&truth, &r, &cy, 0, 0).unwrap(), (-0.25, 0.0));
     assert_eq!(cycle_change_closure(&truth, &r, &cy, 0, 0).unwrap(), (-0.125, 0.0));
     // Declared as a gain of 1/8 on e2, both the registered values and the
     // values the model permits hold closure.
     let g = || gains(vec![0.0], vec![0.0, 0.0, 0.125], vec![vec![0.0; 3]]);
     for f2 in [1.0, 1.125] {
-        let s = EdgeSeries::from_edge_values(a(f2), zero()).unwrap().with_run_constant(no_offset.clone(), g());
+        let s = EdgeSeries::from_edge_values_synthetic(a(f2), zero()).unwrap().with_run_constant(no_offset.clone(), g());
         for t in 0..2 {
             let (v, h) = cycle_closure(&s, &r, &cy, t, 0).unwrap();
             assert!(v.abs() <= h, "closure at {t} under factor {f2}: {v} against {h}");
@@ -411,16 +411,16 @@ fn z1a_a_gain_per_edge_enters_the_closure_bound() {
         assert!(v.abs() <= h, "change closure under factor {f2}: {v} against {h}");
     }
     // Registered values: h = 0.125·(|2| + 0) = 0.25, and 0.125·|1| on the change.
-    let s = EdgeSeries::from_edge_values(a(1.0), zero()).unwrap().with_run_constant(no_offset.clone(), g());
+    let s = EdgeSeries::from_edge_values_synthetic(a(1.0), zero()).unwrap().with_run_constant(no_offset.clone(), g());
     assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.25));
     assert_eq!(cycle_change_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.125));
     // The same gain declared independent (on the entry) widens the same way.
     let gi = gains(vec![0.0], vec![0.0; 3], vec![vec![0.0, 0.0, 0.125]]);
-    let s = EdgeSeries::from_edge_values(a(1.0), zero()).unwrap().with_run_constant(no_offset.clone(), gi);
+    let s = EdgeSeries::from_edge_values_synthetic(a(1.0), zero()).unwrap().with_run_constant(no_offset.clone(), gi);
     assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.25));
     // A gain per component scales the whole closure: it does not enter.
     let gc = gains(vec![0.125], vec![0.0; 3], vec![vec![0.0; 3]]);
-    let s = EdgeSeries::from_edge_values(a(1.0), zero()).unwrap().with_run_constant(no_offset, gc);
+    let s = EdgeSeries::from_edge_values_synthetic(a(1.0), zero()).unwrap().with_run_constant(no_offset, gc);
     assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.0));
     assert_eq!(cycle_change_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.0));
 }
@@ -452,10 +452,10 @@ fn prop_z1a_declared_gains_never_reverse_a_resolved_closure() {
             let eps = d[t][c][e] * (r.usize(0, 8) as f64 - 4.0) / 4.0;
             fc[c] * fe[e] * fi[c][e] * (a[t][c][e] + eps)
         }).collect()).collect()).collect();
-        let truth = EdgeSeries::from_edge_values(truth, vec![vec![vec![0.0; m]; k]; regs]).unwrap();
-        let declared = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap()
+        let truth = EdgeSeries::from_edge_values_synthetic(truth, vec![vec![vec![0.0; m]; k]; regs]).unwrap();
+        let declared = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap()
             .with_run_constant(vec![vec![0.0; m]; k], gains(gc.clone(), ge.clone(), gi.clone()));
-        let undeclared = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap();
+        let undeclared = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap();
         let same_sign = |x: f64, y: f64| x * y > 0.0;
         for cy in &basis.cycles {
             for c in 0..k {
@@ -491,7 +491,7 @@ fn prop_z1a_declared_gains_never_reverse_a_resolved_closure() {
 #[test]
 fn isc_d10_with_an_offset_the_change_can_resolve_while_both_states_hold() {
     let (r, cy) = triangle();
-    let s = EdgeSeries::from_edge_values(vec![vec![vec![1.0, 1.0, 1.875]], vec![vec![1.0, 1.0, 2.125]]], vec![vec![vec![0.0; 3]]; 2])
+    let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0, 1.0, 1.875]], vec![vec![1.0, 1.0, 2.125]]], vec![vec![vec![0.0; 3]]; 2])
         .unwrap().with_run_constant(vec![vec![0.0625; 3]], gains(vec![0.0], vec![0.0; 3], vec![vec![0.0; 3]]));
     assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (0.125, 0.1875));
     assert_eq!(cycle_closure(&s, &r, &cy, 1, 0).unwrap(), (-0.125, 0.1875));
@@ -517,12 +517,12 @@ fn z1a_a_small_gain_is_not_rounded_away() {
     let zero = vec![vec![vec![0.0; 3]]; 2];
     // Declared on the edge, and declared on the entry: both give −0.5 ± 1.
     for (edge, independent) in [(vec![0.0, 0.0, tiny], vec![vec![0.0; 3]]), (vec![0.0; 3], vec![vec![0.0, 0.0, tiny]])] {
-        let s = EdgeSeries::from_edge_values(a.clone(), zero.clone()).unwrap()
+        let s = EdgeSeries::from_edge_values_synthetic(a.clone(), zero.clone()).unwrap()
             .with_run_constant(vec![vec![0.0; 3]], gains(vec![0.0], edge, independent));
         assert_eq!(cycle_closure(&s, &r, &walk, 0, 0).unwrap(), (-0.5, 1.0));
     }
     // The same in a reported change magnitude, through the shared gain.
-    let s = EdgeSeries::from_edge_values(vec![vec![vec![0.0]], vec![vec![big]]], vec![vec![vec![0.0]]; 2]).unwrap()
+    let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![0.0]], vec![vec![big]]], vec![vec![vec![0.0]]; 2]).unwrap()
         .with_run_constant(vec![vec![0.0]], gains(vec![tiny], vec![0.0], vec![vec![0.0]]));
     assert_eq!(s.shared_gain[0][0], tiny);
     assert_eq!(s.change_magnitude(0).1[0][0], 1.0);
@@ -536,7 +536,7 @@ fn z1a_a_small_gain_is_not_rounded_away() {
 #[test]
 fn k7_an_open_walk_is_none_whatever_the_registration() {
     let (r, _) = triangle();
-    let s = EdgeSeries::from_edge_values(vec![vec![vec![1.0, 1.0, 2.0]]; 2], vec![vec![vec![0.0; 3]]; 2]).unwrap();
+    let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0, 1.0, 2.0]]; 2], vec![vec![vec![0.0; 3]]; 2]).unwrap();
     let open = vec![(0, 1), (1, 1)];
     assert_eq!(cycle_closure(&s, &r, &open, 99, 0), None);
     assert_eq!(cycle_change_closure(&s, &r, &open, 99, 0), None);

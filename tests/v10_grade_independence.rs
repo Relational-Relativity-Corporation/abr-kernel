@@ -35,7 +35,7 @@ fn reg_from_edges(a: &[Vec<f64>]) -> Registration {
         x
     }).collect();
     let (k, n) = (x.len(), x[0].len());
-    Registration::new(NodeField::new(x), vec![vec![1.0 / 32.0; n]; k])
+    Registration::synthetic(NodeField::new(x), vec![vec![1.0 / 32.0; n]; k])
 }
 
 /// The base field F: A_1 = (1, 2, 3, 4), A_2 = (2, 1, 4, 3). Every minor is

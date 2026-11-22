@@ -22,7 +22,7 @@ fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
 
 fn reg(data: Vec<Vec<f64>>, d: f64) -> Registration {
     let (k, n) = (data.len(), data[0].len());
-    Registration::new(NodeField::new(data), vec![vec![d; n]; k])
+    Registration::synthetic(NodeField::new(data), vec![vec![d; n]; k])
 }
 
 fn run_constant(seq: &[Registration], offset: f64, locus_gain: f64, shared_gain: f64) -> Vec<Registration> {
@@ -86,7 +86,7 @@ fn random_seq(r: &mut Rng, n: usize) -> Vec<Registration> {
     let delta: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| r.delta(0.5)).collect()).collect();
     let mut out = Vec::new();
     for _ in 0..regs {
-        out.push(Registration::new(NodeField::new(x.clone()), delta.clone()));
+        out.push(Registration::synthetic(NodeField::new(x.clone()), delta.clone()));
         for c in x.iter_mut() { for v in c.iter_mut() { if r.chance(5) { *v += r.eighth(-2.0, 2.0); } } }
     }
     out
@@ -150,8 +150,8 @@ fn z1a_an_offset_enters_the_state_forms() {
 fn z1a_an_edge_valued_offset_enters_the_state_bound_only() {
     let a = vec![vec![vec![1.0, 2.0]], vec![vec![1.5, 2.0]], vec![vec![2.0, 2.0]]];
     let da = vec![vec![vec![0.0625; 2]]; 3];
-    let base = EdgeSeries::from_edge_values(a.clone(), da.clone()).unwrap();
-    let off = EdgeSeries::from_edge_values(a, da).unwrap().with_run_constant(vec![vec![0.25, 0.25]], EdgeGains::none(1, 2));
+    let base = EdgeSeries::from_edge_values_synthetic(a.clone(), da.clone()).unwrap();
+    let off = EdgeSeries::from_edge_values_synthetic(a, da).unwrap().with_run_constant(vec![vec![0.25, 0.25]], EdgeGains::none(1, 2));
     for s in 0..2 { assert_eq!(base.change(s), off.change(s)); }
     assert_eq!(off.da[0][0][0], 0.3125);
     assert_eq!(off.da_rep, base.da_rep);
@@ -235,7 +235,7 @@ fn z1a_a_gain_bound_of_one_or_more_is_refused() {
 #[test]
 #[should_panic(expected = "a gain bound must lie in [0, 1)")]
 fn z1a_an_edge_gain_bound_of_one_or_more_is_refused() {
-    let s = EdgeSeries::from_edge_values(vec![vec![vec![1.0]], vec![vec![2.0]]], vec![vec![vec![0.0]]; 2]).unwrap();
+    let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0]], vec![vec![2.0]]], vec![vec![vec![0.0]]; 2]).unwrap();
     let _ = s.with_run_constant(vec![vec![0.0]], EdgeGains { component: vec![0.0], edge: vec![0.0], independent: vec![vec![1.5]] });
 }
 
@@ -277,7 +277,7 @@ fn pc_d3_negative_scale_reverses_signs_only() {
             let m = [0.5, 1.0, 2.0][r.usize(0, 2)];
             if c == 0 || r.chance(4) { -m } else { m }
         }).collect();
-        let scaled: Vec<Registration> = seq.iter().map(|g| Registration::new(
+        let scaled: Vec<Registration> = seq.iter().map(|g| Registration::synthetic(
             NodeField::new(g.x.data.iter().zip(&scale).map(|(v, a)| v.iter().map(|x| x * a).collect()).collect()),
             g.delta.iter().zip(&scale).map(|(d, a)| d.iter().map(|x| x * a.abs()).collect()).collect(),
         )).collect();
@@ -407,22 +407,22 @@ fn pc2a(s: &EdgeSeries) -> Vec<(f64, Reading)> {
 #[test]
 fn z1a_the_verifiers_case_an_independent_gain_enters_the_mixing_minor() {
     let zero = vec![vec![vec![0.0; 2]; 2]; 2];
-    let base = EdgeSeries::from_edge_values(verifier_case(1.0), zero.clone()).unwrap();
+    let base = EdgeSeries::from_edge_values_synthetic(verifier_case(1.0), zero.clone()).unwrap();
     assert_eq!(pc2a(&base), vec![(0.0, Reading::Structure)]);
     // A factor 1.125 on one (component, edge) entry moves the minor off zero.
-    let moved = EdgeSeries::from_edge_values(verifier_case(1.125), zero.clone()).unwrap();
+    let moved = EdgeSeries::from_edge_values_synthetic(verifier_case(1.125), zero.clone()).unwrap();
     assert_eq!(pc2a(&moved), vec![(0.125, Reading::Freedom)]);
     // Declared as an independent gain of 1/8 on that entry, neither reads freedom:
     let mut ind = vec![vec![0.0; 2]; 2];
     ind[0][0] = 0.125;
     let g = || EdgeGains { component: vec![0.0; 2], edge: vec![0.0; 2], independent: ind.clone() };
-    let base = EdgeSeries::from_edge_values(verifier_case(1.0), zero.clone()).unwrap().with_run_constant(vec![vec![0.0; 2]; 2], g());
-    let moved = EdgeSeries::from_edge_values(verifier_case(1.125), zero.clone()).unwrap().with_run_constant(vec![vec![0.0; 2]; 2], g());
+    let base = EdgeSeries::from_edge_values_synthetic(verifier_case(1.0), zero.clone()).unwrap().with_run_constant(vec![vec![0.0; 2]; 2], g());
+    let moved = EdgeSeries::from_edge_values_synthetic(verifier_case(1.125), zero.clone()).unwrap().with_run_constant(vec![vec![0.0; 2]; 2], g());
     assert_eq!(pc2a(&base)[0].1, Reading::Structure);
     assert_eq!(pc2a(&moved)[0].1, Reading::Structure);
     // PC1 is unchanged by the declaration.
     let r = |s: &EdgeSeries| PersistenceChange::new(s).relations.iter().map(|x| (x.change, x.half_width, x.reading)).collect::<Vec<_>>();
-    assert_eq!(r(&base), r(&EdgeSeries::from_edge_values(verifier_case(1.0), zero).unwrap()));
+    assert_eq!(r(&base), r(&EdgeSeries::from_edge_values_synthetic(verifier_case(1.0), zero).unwrap()));
 }
 
 #[test]
@@ -431,11 +431,11 @@ fn z1a_a_shared_gain_scales_a_whole_component_or_edge_and_changes_nothing() {
     // The same factor 1.125 on every edge of component 0: the minor stays 0.
     let mut a = verifier_case(1.0);
     for t in 0..2 { for e in 0..2 { a[t][0][e] *= 1.125; } }
-    assert_eq!(pc2a(&EdgeSeries::from_edge_values(a, zero.clone()).unwrap()), vec![(0.0, Reading::Structure)]);
+    assert_eq!(pc2a(&EdgeSeries::from_edge_values_synthetic(a, zero.clone()).unwrap()), vec![(0.0, Reading::Structure)]);
     // The same factor on every component of edge 0: the minor stays 0.
     let mut a = verifier_case(1.0);
     for t in 0..2 { for c in 0..2 { a[t][c][0] *= 1.125; } }
-    assert_eq!(pc2a(&EdgeSeries::from_edge_values(a, zero).unwrap()), vec![(0.0, Reading::Structure)]);
+    assert_eq!(pc2a(&EdgeSeries::from_edge_values_synthetic(a, zero).unwrap()), vec![(0.0, Reading::Structure)]);
 }
 
 fn random_edge_values(r: &mut Rng) -> (Vec<Vec<Vec<f64>>>, Vec<Vec<Vec<f64>>>) {
@@ -470,7 +470,7 @@ fn prop_z1a_shared_component_and_edge_factors_change_no_reading() {
         let fe: Vec<f64> = (0..m).map(|_| [1.0, 1.125, 1.25, 1.5][r.usize(0, 3)]).collect();
         let sc = |x: &Vec<Vec<Vec<f64>>>| x.iter().map(|t| t.iter().enumerate().map(|(c, v)| v.iter().enumerate()
             .map(|(e, y)| y * fc[c] * fe[e]).collect()).collect()).collect::<Vec<Vec<Vec<f64>>>>();
-        let (s0, s1) = (EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap(), EdgeSeries::from_edge_values(sc(&a), sc(&d)).unwrap());
+        let (s0, s1) = (EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap(), EdgeSeries::from_edge_values_synthetic(sc(&a), sc(&d)).unwrap());
         assert_eq!(all_readings(&s0), all_readings(&s1));
     });
 }
@@ -491,9 +491,9 @@ fn prop_z1a_independent_gains_never_reverse_a_resolved_mixing_minor() {
         let sc = |x: &Vec<Vec<Vec<f64>>>| x.iter().map(|t| t.iter().enumerate().map(|(c, v)| v.iter().enumerate()
             .map(|(e, y)| y * fac[c][e]).collect()).collect()).collect::<Vec<Vec<Vec<f64>>>>();
         let gains = || EdgeGains { component: vec![0.0; k], edge: vec![0.0; m], independent: gam.clone() };
-        let declared = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap().with_run_constant(vec![vec![0.0; m]; k], gains());
-        let truth = EdgeSeries::from_edge_values(sc(&a), d.clone()).unwrap();
-        let undeclared = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap();
+        let declared = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap().with_run_constant(vec![vec![0.0; m]; k], gains());
+        let truth = EdgeSeries::from_edge_values_synthetic(sc(&a), d.clone()).unwrap();
+        let undeclared = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap();
         // PC2(a): a minor resolved with the declared bound has the same sign on the scaled values.
         let (pd, pt) = (PersistenceChange::new(&declared), PersistenceChange::new(&truth));
         let pu = PersistenceChange::new(&undeclared);
@@ -526,7 +526,7 @@ fn prop_z1a_independent_gains_never_reverse_a_resolved_mixing_minor() {
             }
         }
         // PC1 and PC2(b): with δ scaled by each entry's factor, unchanged.
-        let truth_scaled_d = EdgeSeries::from_edge_values(sc(&a), sc(&d)).unwrap();
+        let truth_scaled_d = EdgeSeries::from_edge_values_synthetic(sc(&a), sc(&d)).unwrap();
         let p1 = |s: &EdgeSeries| PersistenceChange::new(s).relations.iter().map(|x| x.reading).collect::<Vec<_>>();
         assert_eq!(p1(&undeclared), p1(&truth_scaled_d));
         let p2b = |s: &EdgeSeries| PersistenceChange::new(s).across_steps.map(|cs| cs.readings.iter().map(|x| (x.e, x.f, x.over, x.reading)).collect::<Vec<_>>()).ok();
@@ -547,7 +547,7 @@ fn prop_z1a_independent_gains_never_reverse_a_resolved_mixing_minor() {
 fn z1a_the_verifiers_magnitude_case() {
     let a = vec![vec![vec![0.0]], vec![vec![1.0]]];
     let da = vec![vec![vec![0.0625]]; 2];
-    let s = EdgeSeries::from_edge_values(a, da).unwrap()
+    let s = EdgeSeries::from_edge_values_synthetic(a, da).unwrap()
         .with_run_constant(vec![vec![0.0]], EdgeGains { component: vec![0.125], edge: vec![0.0], independent: vec![vec![0.0]] });
     let (d, dm) = s.change_magnitude(0);
     assert_eq!((d[0][0], s.change(0).1[0][0]), (1.0, 0.125));
@@ -567,7 +567,7 @@ fn prop_z1a_every_gain_bound_covers_the_scaling_model() {
         let (k, m) = (a[0].len(), a[0][0].len());
         let gc: Vec<f64> = (0..k).map(|_| r.delta(0.5)).collect();
         let gi: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.delta(0.5)).collect()).collect();
-        let s = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap()
+        let s = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap()
             .with_run_constant(vec![vec![0.0; m]; k], EdgeGains { component: gc.clone(), edge: vec![0.0; m], independent: gi.clone() });
         for st in 0..s.n_steps() {
             let ((dl, dd), (_, dm)) = (s.change(st), s.change_magnitude(st));
@@ -630,7 +630,7 @@ fn prop_z1a_mixing_minors_hold_under_gain_and_repeatability() {
             .map(|e| d[t][c][e] * (r.usize(0, 4) as f64 - 2.0) / 2.0).collect()).collect()).collect();
         let truth: Vec<Vec<Vec<f64>>> = (0..regs).map(|t| (0..k).map(|c| (0..m)
             .map(|e| fac[c][e] * (a[t][c][e] + eps[t][c][e])).collect()).collect()).collect();
-        let s = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap().with_run_constant(
+        let s = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap().with_run_constant(
             vec![vec![0.0; m]; k], EdgeGains { component: vec![0.0; k], edge: vec![0.0; m], independent: gam.clone() });
         let p = PersistenceChange::new(&s);
         let mnr = |v: &dyn Fn(usize, usize) -> f64, i: usize, j: usize, e: usize, f: usize| v(i, e) * v(j, f) - v(j, e) * v(i, f);

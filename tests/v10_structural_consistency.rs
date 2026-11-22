@@ -22,13 +22,13 @@ fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
 
 fn reg(data: Vec<Vec<f64>>, d: f64) -> Registration {
     let (k, n) = (data.len(), data[0].len());
-    Registration::new(NodeField::new(data), vec![vec![d; n]; k])
+    Registration::synthetic(NodeField::new(data), vec![vec![d; n]; k])
 }
 
 /// Edge-registered series a[t][c][e], uniform δ.
 fn edges(a: Vec<Vec<Vec<f64>>>, d: f64) -> EdgeSeries {
     let da = a.iter().map(|t| t.iter().map(|c| vec![d; c.len()]).collect()).collect();
-    EdgeSeries::from_edge_values(a, da).unwrap()
+    EdgeSeries::from_edge_values_synthetic(a, da).unwrap()
 }
 
 fn all_couplings(s: &EdgeSeries) -> Vec<ChangeCoupling> {
@@ -333,7 +333,7 @@ fn sc_d12_dropping_a_component_changes_no_remaining_reading() {
     let f = evolving_field();
     let r = rel(4, vec![(0, 1), (1, 2), (2, 3), (1, 3)]);
     let one: Vec<Registration> = f.registrations.iter().map(|g| {
-        Registration::new(NodeField::new(vec![g.x.data[0].clone()]), vec![g.delta[0].clone()])
+        Registration::synthetic(NodeField::new(vec![g.x.data[0].clone()]), vec![g.delta[0].clone()])
     }).collect();
     let full = PersistenceChange::new(&EdgeSeries::from_registrations(&f.registrations, &r).unwrap());
     let reduced = PersistenceChange::new(&EdgeSeries::from_registrations(&one, &r).unwrap());

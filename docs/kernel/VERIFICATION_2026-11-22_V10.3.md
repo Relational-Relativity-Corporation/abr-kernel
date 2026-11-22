@@ -318,6 +318,15 @@ Batch 2 is §17, the exact sums, together with this section. Origin decided (Par
 
 **Tests:** `tests/v10_exact_range.rs` (11): each finding as a regression; admission at the range's edges; and a property that no reading of a field drawn from the whole admitted range is refused. **221 (default), 313 (`v9`)**, no warnings. The application at `ee0cf14` passes 43 against this kernel.
 
+
+**Addendum, the observed range (Part 9, 47th).** Origin decided OC-RANGE-1: a registered value is admitted only within its chain's observed range, |x| ≤ N·δ exactly, with N = 10²⁰ (the human range) unless a chain declares a smaller N with its basis. Test fixtures declare themselves synthetic and are bounded only by the arithmetic backstop. To check:
+- the exact boundary decision in `ObservedRange::admits`;
+- that every V10 entry point applies it (`Registration::new`, `with_observed_range`, `EdgeSeries::from_edge_values`, `energy_exchange`);
+- that a registration cannot be made synthetic after admission;
+- the application's test `every_registration_is_held_to_the_human_range`.
+
+**Review this state as batch 2 (§17 to §19):** kernel `claude/vibrant-tesla-2fp7ve` and application `claude/vibrant-tesla-2fp7ve` at the commits that add this addendum and the evening handoff. 232 (default), 324 (`v9`), no warnings; application 44.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*

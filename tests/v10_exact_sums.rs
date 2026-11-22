@@ -98,7 +98,7 @@ fn triangle() -> DeclaredRelations { rel(3, vec![(0, 1), (1, 2), (0, 2)]) }
 fn k7_a_closure_is_the_same_from_every_starting_locus() {
     let r = triangle();
     let big = 2f64.powi(54);
-    let s = EdgeSeries::from_edge_values(vec![vec![vec![big, -0.5, big]]; 2], vec![vec![vec![0.0; 3]]; 2]).unwrap();
+    let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![big, -0.5, big]]; 2], vec![vec![vec![0.0; 3]]; 2]).unwrap();
     // The cycle 0 → 1 → 2 ← 0 read from loci 0, 1 and 2. Before 41st these
     // read 0, 0 and −0.5.
     for w in [vec![(0, 1), (1, 1), (2, -1)], vec![(1, 1), (2, -1), (0, 1)], vec![(2, -1), (0, 1), (1, 1)]] {
@@ -144,7 +144,7 @@ fn prop_closures_are_exact_and_order_free() {
         let d: Vec<Vec<Vec<f64>>> = (0..3).map(|_| vec![(0..m).map(|_| r.int(0, 4) as f64 / 16.0).collect()]).collect();
         let ge: Vec<f64> = (0..m).map(|_| r.int(0, 2) as f64 / 8.0).collect();
         let gi: Vec<f64> = (0..m).map(|_| r.int(0, 2) as f64 / 8.0).collect();
-        let s = EdgeSeries::from_edge_values(a.clone(), d.clone()).unwrap()
+        let s = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap()
             .with_run_constant(vec![vec![0.0; m]], EdgeGains { component: vec![0.125], edge: ge.clone(), independent: vec![gi.clone()] });
         // The gain that differs between edges, (1 + γ_e)(1 + γ_ce) − 1, exactly on the 2⁻¹² grid.
         let g: Vec<i128> = (0..m).map(|e| to_i(ge[e]) + to_i(gi[e]) + to_i(ge[e]) * to_i(gi[e]) / 4096).collect();

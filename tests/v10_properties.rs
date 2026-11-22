@@ -90,7 +90,7 @@ fn random_seq(r: &mut Rng, n: usize, k: (usize, usize), regs: (usize, usize), d_
     let delta: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| r.delta(d_hi)).collect()).collect();
     let mut out = Vec::new();
     for _ in 0..regs {
-        out.push(Registration::new(NodeField::new(x.clone()), delta.clone()));
+        out.push(Registration::synthetic(NodeField::new(x.clone()), delta.clone()));
         for c in x.iter_mut() {
             for v in c.iter_mut() {
                 if r.chance(5) { *v += r.eighth(-2.0, 2.0); }
@@ -115,7 +115,7 @@ fn random_edges(r: &mut Rng, m: (usize, usize), k: (usize, usize), regs: (usize,
             }
         }
     }
-    EdgeSeries::from_edge_values(aa, dd).unwrap()
+    EdgeSeries::from_edge_values_synthetic(aa, dd).unwrap()
 }
 
 fn widen(seq: &[Registration], r: &mut Rng) -> Vec<Registration> {
@@ -125,7 +125,7 @@ fn widen(seq: &[Registration], r: &mut Rng) -> Vec<Registration> {
     let extra: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| r.delta(0.25)).collect()).collect();
     seq.iter().map(|g| {
         let delta = g.delta.iter().zip(&extra).map(|(d, x)| d.iter().zip(x).map(|(a, b)| a + b).collect()).collect();
-        Registration::new(g.x.clone(), delta)
+        Registration::synthetic(g.x.clone(), delta)
     }).collect()
 }
 
@@ -217,7 +217,7 @@ fn pc3_freedom_is_not_monotone_in_delta() {
     ];
     let with = |d: f64| {
         let da = a.iter().map(|t| t.iter().map(|c| vec![d; c.len()]).collect()).collect();
-        arrangement_steps(&EdgeSeries::from_edge_values(a.clone(), da).unwrap()).unwrap()[0].reading
+        arrangement_steps(&EdgeSeries::from_edge_values_synthetic(a.clone(), da).unwrap()).unwrap()[0].reading
     };
     assert_eq!(with(0.0625), Reading::Structure);
     assert_eq!(with(0.25), Reading::Freedom);
@@ -244,7 +244,7 @@ fn prop_pc_d3_offsets_and_rescaling_change_no_reading() {
         let shifted: Vec<Registration> = seq.iter().map(|g| {
             let mut d = g.x.data.clone();
             d[c].iter_mut().for_each(|v| *v += off);
-            Registration::new(NodeField::new(d), g.delta.clone())
+            Registration::synthetic(NodeField::new(d), g.delta.clone())
         }).collect();
         assert_eq!(base, readings(&shifted));
         // Rescale one component by ±2^p (exact), δ by 2^p.
@@ -254,7 +254,7 @@ fn prop_pc_d3_offsets_and_rescaling_change_no_reading() {
             let (mut d, mut dl) = (g.x.data.clone(), g.delta.clone());
             d[c].iter_mut().for_each(|v| *v *= lam);
             dl[c].iter_mut().for_each(|v| *v *= lam.abs());
-            Registration::new(NodeField::new(d), dl)
+            Registration::synthetic(NodeField::new(d), dl)
         }).collect();
         assert_eq!(base, readings(&scaled));
     });
@@ -265,7 +265,7 @@ fn prop_pc_d3_swapping_edges_negates_change_minors() {
     for_all("PC-D3 (edge swap)", |r| {
         let k = r.usize(1, 3);
         let s = random_edges(r, (2, 2), (k, k), (3, 5), 0.5);
-        let swapped = EdgeSeries::from_edge_values(
+        let swapped = EdgeSeries::from_edge_values_synthetic(
             s.a.iter().map(|t| t.iter().map(|c| vec![c[1], c[0]]).collect()).collect(),
             s.da.iter().map(|t| t.iter().map(|c| vec![c[1], c[0]]).collect()).collect()).unwrap();
         let (x, y) = (coupling_across_steps(&s).unwrap(), coupling_across_steps(&swapped).unwrap());
@@ -359,7 +359,7 @@ fn prop_isc_d3_d4_fixed_ratio_or_offset_locks_change() {
             for v in e.iter_mut() { *v += r.eighth(-2.0, 2.0); }
         }
         let da = a.iter().map(|t| t.iter().map(|c| vec![0.0625; c.len()]).collect()).collect();
-        let s = EdgeSeries::from_edge_values(a, da).unwrap();
+        let s = EdgeSeries::from_edge_values_synthetic(a, da).unwrap();
         for lvl in [coupling_across_components(&s), coupling_across_steps(&s)] {
             for x in lvl.unwrap().readings {
                 assert_eq!(x.minor, 0.0);
@@ -399,8 +399,8 @@ fn prop_isc_d6_uniform_rescaling_holds_every_sign() {
         let kappa = 2f64.powi(r.int(-2, 3) as i32);
         let scaled: Vec<Vec<f64>> = base.iter().map(|c| c.iter().map(|v| kappa * v).collect()).collect();
         let zero = vec![vec![0.0; rel.n_nodes]; k];
-        let seq = vec![Registration::new(NodeField::new(base), zero.clone()),
-                       Registration::new(NodeField::new(scaled), zero)];
+        let seq = vec![Registration::synthetic(NodeField::new(base), zero.clone()),
+                       Registration::synthetic(NodeField::new(scaled), zero)];
         let f = RelationalField::new(&rel, seq.clone(), None).unwrap();
         for c in 0..k { for e in 0..rel.n_edges() {
             assert_eq!(f.spatial[1].circulation[c][e], kappa * f.spatial[0].circulation[c][e]);
@@ -424,7 +424,7 @@ fn prop_isc_d7a_same_sign_halves_resolve_the_whole() {
         assert!(h1.abs() > d0 + d1 && h2.abs() > d1 + d2);
         assert!(whole.abs() > d0 + d2 && whole.signum() == sign);
         // And the forms agree.
-        let series = |vals: &[f64], ds: &[f64]| EdgeSeries::from_edge_values(
+        let series = |vals: &[f64], ds: &[f64]| EdgeSeries::from_edge_values_synthetic(
             vals.iter().map(|&x| vec![vec![x]]).collect(), ds.iter().map(|&d| vec![vec![d]]).collect()).unwrap();
         let halves = relation_changes(&series(&v, &[d0, d1, d2]));
         let coarse = relation_changes(&series(&[v[0], v[2]], &[d0, d2]));
@@ -463,7 +463,7 @@ fn prop_energy_readings_invariant_under_carrier_rescaling() {
         let vals: Vec<f64> = (0..rel.n_nodes).map(|_| r.eighth(-4.0, 4.0)).collect();
         let del: Vec<f64> = (0..rel.n_nodes).map(|_| r.delta(0.5)).collect();
         let kappa = 2f64.powi(r.int(-3, 6) as i32);
-        let c = |s: f64| EnergyCarrier { name: "c".into(), unit: "u".into(),
+        let c = |s: f64| EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::synthetic(), name: "c".into(), unit: "u".into(),
             values: vals.iter().map(|v| s * v).collect(), delta: del.iter().map(|d| s * d).collect() };
         let (x, y) = (energy_exchange(&c(1.0), &rel), energy_exchange(&c(kappa), &rel));
         for (p, q) in x.iter().zip(&y) {
@@ -490,7 +490,7 @@ fn prop_isc_d9_coupled_change_is_transitive_exactly() {
             a.push(vec![vec![al * f, f, be * f]]);
             f += r.eighth(-2.0, 2.0);
         }
-        let s = EdgeSeries::from_edge_values(a.clone(), a.iter().map(|t| vec![vec![0.0; 3]; t.len()]).collect()).unwrap();
+        let s = EdgeSeries::from_edge_values_synthetic(a.clone(), a.iter().map(|t| vec![vec![0.0; 3]; t.len()]).collect()).unwrap();
         for x in coupling_across_steps(&s).unwrap().readings {
             assert_eq!(x.minor, 0.0);
             if (x.e, x.f) == (0, 2) { hit(&N); }
@@ -562,7 +562,7 @@ fn prop_isc_d12_readings_are_local_to_their_components() {
         let k = seq[0].x.k;
         let drop = r.usize(0, k - 1);
         let kept: Vec<usize> = (0..k).filter(|&c| c != drop).collect();
-        let reduced_seq: Vec<Registration> = seq.iter().map(|g| Registration::new(
+        let reduced_seq: Vec<Registration> = seq.iter().map(|g| Registration::synthetic(
             NodeField::new(kept.iter().map(|&c| g.x.data[c].clone()).collect()),
             kept.iter().map(|&c| g.delta[c].clone()).collect())).collect();
         let full = PersistenceChange::new(&EdgeSeries::from_registrations(&seq, &rel).unwrap());
@@ -612,7 +612,7 @@ fn prop_isc_d13_gamma_under_coarsening_is_bounded() {
         let mut idx = vec![0];
         for t in 1..n - 1 { if r.chance(4) { idx.push(t); } }
         idx.push(n - 1);
-        let sub = EdgeSeries::from_edge_values(idx.iter().map(|&t| s.a[t].clone()).collect(),
+        let sub = EdgeSeries::from_edge_values_synthetic(idx.iter().map(|&t| s.a[t].clone()).collect(),
                                                idx.iter().map(|&t| s.da[t].clone()).collect()).unwrap();
         let fine = relation_changes(&s);
         let coarse = PersistenceChange::new(&sub).evolution_counts();
@@ -655,7 +655,7 @@ fn prop_isc_d6_resolution_conditions_under_rescaling() {
         let d1: Vec<Vec<f64>> = if scaled_delta {
             d0.iter().map(|c| c.iter().map(|v| kappa * v).collect()).collect()
         } else { d0.clone() };
-        let s = EdgeSeries::from_edge_values(vec![a0.clone(), a1], vec![d0.clone(), d1.clone()]).unwrap();
+        let s = EdgeSeries::from_edge_values_synthetic(vec![a0.clone(), a1], vec![d0.clone(), d1.clone()]).unwrap();
         // (i)
         for x in relation_changes(&s) {
             let cond = (kappa - 1.0).abs() * a0[x.component][x.edge].abs()

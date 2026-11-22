@@ -18,13 +18,13 @@ fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
 
 fn reg(data: Vec<Vec<f64>>, d: f64) -> Registration {
     let (k, n) = (data.len(), data[0].len());
-    Registration::new(NodeField::new(data), vec![vec![d; n]; k])
+    Registration::synthetic(NodeField::new(data), vec![vec![d; n]; k])
 }
 
 /// Edge-registered series: a[t][c][e], uniform δ.
 fn edge_series(a: Vec<Vec<Vec<f64>>>, d: f64) -> EdgeSeries {
     let da = a.iter().map(|t| t.iter().map(|c| vec![d; c.len()]).collect()).collect();
-    EdgeSeries::from_edge_values(a, da).unwrap()
+    EdgeSeries::from_edge_values_synthetic(a, da).unwrap()
 }
 
 /// A chain 0 → 1 → 2 → 3, two components, four registrations. Component 0
@@ -185,7 +185,7 @@ fn pc_d3_offsets_and_rescaling_change_no_reading() {
     // Offset every component at every locus.
     let shifted: Vec<Registration> = seq.iter().map(|g| {
         let data = g.x.data.iter().map(|c| c.iter().map(|v| v + 37.0).collect()).collect();
-        Registration::new(NodeField::new(data), g.delta.clone())
+        Registration::synthetic(NodeField::new(data), g.delta.clone())
     }).collect();
     assert_eq!(base, all_readings(&PersistenceChange::new(&EdgeSeries::from_registrations(&shifted, &r).unwrap())));
     // Rescale component 1 (values and δ) by a negative factor.
@@ -194,7 +194,7 @@ fn pc_d3_offsets_and_rescaling_change_no_reading() {
         let mut delta = g.delta.clone();
         data[1].iter_mut().for_each(|v| *v *= -3.0);
         delta[1].iter_mut().for_each(|d| *d *= 3.0);
-        Registration::new(NodeField::new(data), delta)
+        Registration::synthetic(NodeField::new(data), delta)
     }).collect();
     assert_eq!(base, all_readings(&PersistenceChange::new(&EdgeSeries::from_registrations(&scaled, &r).unwrap())));
 }
@@ -283,7 +283,7 @@ fn energy_carrier_as_a_component_reads_through_the_same_forms() {
     assert!(c.readings.iter().filter(|x| matches!(x.over, ReadingPair::Components { step: 0, .. }))
         .all(|x| x.reading == Reading::Structure));
     // The exchange itself is still read as V3 energy on the carrier.
-    let carriers: Vec<_> = seq.iter().map(|g| abr_kernel::ground_variables::EnergyCarrier {
+    let carriers: Vec<_> = seq.iter().map(|g| abr_kernel::ground_variables::EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::synthetic(),
         name: "carrier".into(), unit: "J".into(), values: g.x.data[1].clone(), delta: vec![0.01; 3],
     }).collect();
     let e = abr_kernel::ground_variables::energy(Some(&carriers), 4, &r).unwrap();
@@ -325,7 +325,7 @@ fn photon_carrier_wavenumber_and_hc_over_lambda_read_identically() {
                [121.5e-9, 101.0e-9, 97.0e-9], [121.5e-9, 101.0e-9, 96.0e-9]];
     let d_lam = 0.05e-9;
     let hc = H_PLANCK * C_DECLARED;
-    let carrier = |scale: f64, t: usize| EnergyCarrier {
+    let carrier = |scale: f64, t: usize| EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::synthetic(),
         name: "photon edge".into(), unit: if scale == 1.0 { "1/m".into() } else { "J (Projected)".into() },
         values: lam[t].iter().map(|l| scale / l).collect(),
         delta: lam[t].iter().map(|&l| mapped_half_width(|x| scale / x, l, d_lam)).collect(),
@@ -341,7 +341,7 @@ fn photon_carrier_wavenumber_and_hc_over_lambda_read_identically() {
     let series = |scale: f64| {
         let seq: Vec<Registration> = (0..4).map(|t| {
             let c = carrier(scale, t);
-            Registration::new(NodeField::new(vec![c.values.clone()]), vec![c.delta.clone()])
+            Registration::synthetic(NodeField::new(vec![c.values.clone()]), vec![c.delta.clone()])
         }).collect();
         PersistenceChange::new(&EdgeSeries::from_registrations(&seq, &r).unwrap())
     };

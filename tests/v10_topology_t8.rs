@@ -212,7 +212,7 @@ mod entry_points {
     fn seq() -> Vec<Registration> {
         (0..3).map(|t| {
             let t = t as f64;
-            Registration::new(NodeField::new(vec![vec![4.0 + t, 3.0, 1.0 - t, 2.0], vec![1.0, 2.0 * t, 0.5, 3.0]]),
+            Registration::synthetic(NodeField::new(vec![vec![4.0 + t, 3.0, 1.0 - t, 2.0], vec![1.0, 2.0 * t, 0.5, 3.0]]),
                 vec![vec![0.0625; 4]; 2])
         }).collect()
     }
@@ -232,7 +232,7 @@ mod entry_points {
         assert!(is_t8(g.freedom.as_ref().unwrap_err()));
         assert!(is_t8(g.connection.as_ref().unwrap_err()));
         assert!(is_t8(g.v2_held_arrangement.as_ref().unwrap_err()));
-        let c: Vec<EnergyCarrier> = (0..3).map(|_| EnergyCarrier {
+        let c: Vec<EnergyCarrier> = (0..3).map(|_| EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::synthetic(),
             name: "SYNTHETIC".into(), unit: "u".into(), values: vec![1.0, 2.0, 3.0, 4.0], delta: vec![0.0625; 4],
         }).collect();
         assert!(is_t8(ground_reading(&s, &r, Some(&c)).energy.as_ref().unwrap_err()));
@@ -256,7 +256,7 @@ mod entry_points {
     #[test]
     fn t8_an_edge_valued_series_declares_no_topology_and_is_not_checked() {
         let a = vec![vec![vec![1.0, 2.0]], vec![vec![2.0, 2.0]]];
-        assert!(EdgeSeries::from_edge_values(a, vec![vec![vec![0.0625; 2]]; 2]).is_ok());
+        assert!(EdgeSeries::from_edge_values_synthetic(a, vec![vec![vec![0.0625; 2]]; 2]).is_ok());
     }
 
     #[test]

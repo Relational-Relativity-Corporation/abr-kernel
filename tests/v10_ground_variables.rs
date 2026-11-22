@@ -25,12 +25,12 @@ fn chain() -> DeclaredRelations {
 /// A registration with uniform δ.
 fn reg(data: Vec<Vec<f64>>, d: f64) -> Registration {
     let delta = data.iter().map(|c| vec![d; c.len()]).collect();
-    Registration::new(NodeField::new(data), delta)
+    Registration::synthetic(NodeField::new(data), delta)
 }
 
 fn carrier(values: Vec<f64>, d: f64) -> EnergyCarrier {
     let n = values.len();
-    EnergyCarrier { name: "synthetic carrier".into(), unit: "J".into(), values, delta: vec![d; n] }
+    EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::synthetic(), name: "synthetic carrier".into(), unit: "J".into(), values, delta: vec![d; n] }
 }
 
 // ── The sequence requirement ──────────────────────────────────────────────
