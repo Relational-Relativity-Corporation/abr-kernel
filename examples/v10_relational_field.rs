@@ -25,10 +25,19 @@ fn reg(c0: Vec<f64>, c1: Vec<f64>, d: f64) -> Registration {
     Registration::new(NodeField::new(vec![c0, c1]), vec![vec![d; n]; 2])
 }
 
+/// Synthetic identities: an id per relation and a basis marked SYNTHETIC.
+fn ids(names: &[&str]) -> Vec<abr_kernel::topology::RelationIdentity> {
+    names.iter().map(|n| abr_kernel::topology::RelationIdentity {
+        id: n.to_string(), basis: "SYNTHETIC: direction declared for the example".into(),
+    }).collect()
+}
+
 fn main() {
     // 0 → 1 → 2 → 3, plus 1 → 3: interior loci 1 and 2.
+    // Each relation is declared with its identity and direction basis (RPPI-V10).
     let rel = DeclaredRelations::from_edges_with_provenance(
-        4, vec![(0, 1), (1, 2), (2, 3), (1, 3)], vec![EdgeProvenance::Continuation; 4]);
+        4, vec![(0, 1), (1, 2), (2, 3), (1, 3)], vec![EdgeProvenance::Continuation; 4])
+        .with_identity(ids(&["r01", "r12", "r23", "r13"]));
 
     // Five registrations. Component 1 at locus 2 moves steadily downward,
     // so some minors cross zero partway through (a reorganization).
@@ -84,7 +93,8 @@ fn main() {
     // Insufficient information and Primary Region.
     println!("one registration: {:?}", RelationalField::new(&rel, seq[..1].to_vec(), None).err());
     let primary = DeclaredRelations::from_edges_with_provenance(
-        4, vec![(0, 1), (2, 3)], vec![EdgeProvenance::Continuation; 2]);
+        4, vec![(0, 1), (2, 3)], vec![EdgeProvenance::Continuation; 2])
+        .with_identity(ids(&["r01", "r23"]));
     let pf = RelationalField::new(&primary, seq[..3].to_vec(), None).unwrap();
     println!("primary-region findings: {:?}", pf.ground.findings());
 }

@@ -13,12 +13,14 @@
 
 #[path = "support/synthetic_feedback.rs"]
 mod synthetic_feedback;
+#[path = "support/synthetic_identity.rs"]
+mod synthetic_identity;
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{operator_b, operator_circulation, DeclaredRelations, EdgeField, EdgeProvenance, NodeField};
 
 fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
     let m = edges.len();
-    DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m])
+    synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m]))
 }
 
 /// The path 0 → 1 → 2 → 3 → 4: a tree, so any edge values are realized by

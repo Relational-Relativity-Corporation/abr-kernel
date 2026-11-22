@@ -11,6 +11,8 @@
 #[path = "support/synthetic_feedback.rs"]
 mod synthetic_feedback;
 
+#[path = "support/synthetic_identity.rs"]
+mod synthetic_identity;
 use abr_kernel::ground_variables::{AtDelta, Registration, Sign};
 use abr_kernel::operators::{DeclaredRelations, EdgeProvenance, NodeField};
 use abr_kernel::persistence_change::*;
@@ -39,7 +41,7 @@ fn random_rel(g: &mut Rng) -> DeclaredRelations {
         let (s, t) = (g.usize(0, n - 1), g.usize(0, n - 1));
         if s != t { break (s, t); }
     }).collect();
-    synthetic_feedback::declare_loops(DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m]))
+    synthetic_feedback::declare_loops(synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m])))
 }
 
 fn random_seq(g: &mut Rng, n: usize, run_constant: bool) -> Vec<Registration> {
@@ -109,8 +111,8 @@ fn prop_b2_every_reading_reverse_checks_to_match_edge_registered() {
 // ── Tampering is a MISMATCH ────────────────────────────────────────────────
 
 fn worked() -> (DeclaredRelations, Vec<Registration>) {
-    let rel = DeclaredRelations::from_edges_with_provenance(4, vec![(0, 1), (1, 2), (2, 3), (0, 1)],
-        vec![EdgeProvenance::Continuation; 4]);
+    let rel = synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(4, vec![(0, 1), (1, 2), (2, 3), (0, 1)],
+        vec![EdgeProvenance::Continuation; 4]));
     let seq = (0..3).map(|t| {
         let t = t as f64;
         Registration::new(NodeField::new(vec![vec![5.0, 3.0 + 0.5 * t, 2.0, 0.0], vec![1.0, 2.0, 4.0 + 0.25 * t * t, 1.0]]),

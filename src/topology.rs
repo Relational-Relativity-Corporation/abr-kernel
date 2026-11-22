@@ -195,6 +195,65 @@ pub fn declare_checked(
     Ok((rel, admitted))
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Relation identity (RPPI-V10 G-1, adopted by Origin 2026-11-22, 31st)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// A provenance label (`EdgeProvenance`) names a class; it does not identify
+// a declared observable relation (RPPI, `v9_specification.md` §2). In V10
+// every declared edge carries its identity and its direction basis: the id
+// by which the record names the relation, and the observable property of the
+// process from which its direction was declared (Df2, T2). A field whose
+// edges do not each carry a non-empty, distinct id and a non-empty basis is
+// refused at every V10 reading entry point. Parallel edges are distinct
+// relations and carry distinct ids (§8, distinctness axiom).
+
+/// The identity and direction basis of one declared relation.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RelationIdentity {
+    /// The record's id for the relation.
+    pub id: String,
+    /// The observable property of the process the direction is declared from.
+    pub basis: String,
+}
+
+/// Why a field's relation identities were refused.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IdentityRefusal {
+    /// No identity declared for the field's edges.
+    NotDeclared,
+    /// Identities declared for a different number of edges.
+    CountMismatch { declared: usize, edges: usize },
+    EmptyId { edge: usize },
+    EmptyBasis { edge: usize },
+    /// Two edges carry the same id: `edge` repeats the id of `first`.
+    DuplicateId { edge: usize, first: usize },
+}
+
+/// The identity check of a declared field.
+pub fn check_identity(rel: &DeclaredRelations) -> Result<(), Vec<IdentityRefusal>> {
+    if rel.identity.is_empty() { return Err(vec![IdentityRefusal::NotDeclared]); }
+    if rel.identity.len() != rel.n_edges() {
+        return Err(vec![IdentityRefusal::CountMismatch { declared: rel.identity.len(), edges: rel.n_edges() }]);
+    }
+    let mut out = Vec::new();
+    for (e, r) in rel.identity.iter().enumerate() {
+        if r.id.trim().is_empty() { out.push(IdentityRefusal::EmptyId { edge: e }); }
+        else if let Some(first) = rel.identity[..e].iter().position(|q| q.id.trim() == r.id.trim()) {
+            out.push(IdentityRefusal::DuplicateId { edge: e, first });
+        }
+        if r.basis.trim().is_empty() { out.push(IdentityRefusal::EmptyBasis { edge: e }); }
+    }
+    if out.is_empty() { Ok(()) } else { Err(out) }
+}
+
+/// Admission of a declared field at a V10 reading entry point: relation
+/// identity (RPPI-V10 G-1), then T8.
+pub fn admit_field(rel: &DeclaredRelations) -> Result<(), DeclarationGap> {
+    check_identity(rel).map_err(DeclarationGap::RelationIdentity)?;
+    t8_gap(rel)
+}
+
 /// T8 at a reading entry point: the field with its own declared feedback.
 pub fn t8_gap(rel: &DeclaredRelations) -> Result<(), DeclarationGap> {
     check_t8(rel, &rel.feedback).map(|_| ()).map_err(DeclarationGap::T8)

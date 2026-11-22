@@ -172,6 +172,9 @@ pub enum DeclarationGap {
     /// no declared feedback edge, or a fault in a feedback declaration
     /// (`topology`; Origin, 2026-11-22, 28th).
     T8(Vec<crate::topology::T8Refusal>),
+    /// A declared edge lacks its identity or direction basis, or two edges
+    /// share an id (RPPI-V10 G-1; Origin, 2026-11-22, 31st).
+    RelationIdentity(Vec<crate::topology::IdentityRefusal>),
 }
 
 impl DeclarationGap {
@@ -205,6 +208,9 @@ impl DeclarationGap {
                  continuing from or arriving at these edges; never reverse an edge",
             DeclarationGap::NoCarrierDeclared =>
                 "declare the energy carrier, its unit, mapping and δ in M (R9a)",
+            DeclarationGap::RelationIdentity(_) =>
+                "declare every relation's identity and the observable property of the process \
+                 its direction is declared from (Df2, T2); a class label is not an identity",
             DeclarationGap::T8(_) =>
                 "remove the self-relation, or declare at least one edge of each named \
                  directed cycle as feedback with its registered basis (T8); never reverse \
@@ -337,7 +343,7 @@ fn check_sequence(seq: &[Registration], rel: &DeclaredRelations) -> Result<(), D
     if seq.len() < 2 {
         return Err(DeclarationGap::NoProcessSequence);
     }
-    crate::topology::t8_gap(rel)?;
+    crate::topology::admit_field(rel)?;
     let k = seq[0].x.k;
     assert!(seq.iter().all(|r| r.x.k == k),
         "every registration must declare the same components");
@@ -823,7 +829,7 @@ pub fn energy(carriers: Option<&[EnergyCarrier]>, n_registrations: usize, rel: &
     -> Result<Energy, DeclarationGap>
 {
     if n_registrations < 2 { return Err(DeclarationGap::NoProcessSequence); }
-    crate::topology::t8_gap(rel)?;
+    crate::topology::admit_field(rel)?;
     let cs = carriers.ok_or(DeclarationGap::NoCarrierDeclared)?;
     assert_eq!(cs.len(), n_registrations, "the carrier must be declared at every registration");
     if rel.n_edges() == 0 { return Err(DeclarationGap::FewerThanTwoEdges); }

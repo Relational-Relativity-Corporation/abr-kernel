@@ -6,14 +6,16 @@
 //! carrier values are [INTERFACE VALUE]s chosen to exercise a code path. These
 //! tests verify the forms; they establish no empirical validity.
 
+#[path = "support/synthetic_identity.rs"]
+mod synthetic_identity;
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{
     operator_a, DeclaredRelations, EdgeProvenance, NodeField,
 };
 
 fn rel(n: usize, edges: &[(usize, usize)]) -> DeclaredRelations {
-    DeclaredRelations::from_edges_with_provenance(
-        n, edges.to_vec(), vec![EdgeProvenance::Continuation; edges.len()])
+    synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(
+        n, edges.to_vec(), vec![EdgeProvenance::Continuation; edges.len()]))
 }
 
 fn chain() -> DeclaredRelations {

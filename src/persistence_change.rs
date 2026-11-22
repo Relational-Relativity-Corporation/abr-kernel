@@ -158,7 +158,7 @@ impl EdgeSeries {
     /// the unshared gain on each end's change.
     pub fn from_registrations(seq: &[Registration], rel: &DeclaredRelations) -> Result<Self, DeclarationGap> {
         if seq.len() < 2 { return Err(DeclarationGap::NoProcessSequence); }
-        crate::topology::t8_gap(rel)?;
+        crate::topology::admit_field(rel)?;
         let k = seq[0].x.k;
         assert!(seq.iter().all(|r| r.x.k == k), "every registration must declare the same components");
         assert!(seq.iter().all(|r| r.x.n == rel.n_nodes), "every registration must cover the declared loci");

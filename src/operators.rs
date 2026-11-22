@@ -539,6 +539,11 @@ pub struct DeclaredRelations {
     /// refuses a field whose directed cycles are not all declared here
     /// (Origin, 2026-11-22, 28th).
     pub feedback: Vec<crate::topology::FeedbackDeclaration>,
+    /// Identity and direction basis per edge (RPPI-V10 G-1; `topology`).
+    /// Empty unless declared with `with_identity`. Every V10 reading entry
+    /// point refuses a field whose edges do not each carry a non-empty,
+    /// distinct id and a non-empty basis (Origin, 2026-11-22, 31st).
+    pub identity: Vec<crate::topology::RelationIdentity>,
 }
 
 impl DeclaredRelations {
@@ -546,6 +551,14 @@ impl DeclaredRelations {
     /// is formed (`topology::t8_gap`), not here: the field is a building block.
     pub fn with_feedback(mut self, feedback: Vec<crate::topology::FeedbackDeclaration>) -> Self {
         self.feedback = feedback;
+        self
+    }
+
+    /// Declare the identity and direction basis of every edge, in edge order
+    /// (RPPI-V10 G-1). Checked where a reading is formed
+    /// (`topology::admit_field`), not here: the field is a building block.
+    pub fn with_identity(mut self, identity: Vec<crate::topology::RelationIdentity>) -> Self {
+        self.identity = identity;
         self
     }
 
@@ -590,7 +603,7 @@ impl DeclaredRelations {
             }
         }
 
-        DeclaredRelations { n_nodes, edges, provenance, out, inc, adj_plus, adj_minus, feedback: Vec::new() }
+        DeclaredRelations { n_nodes, edges, provenance, out, inc, adj_plus, adj_minus, feedback: Vec::new(), identity: Vec::new() }
     }
 
     #[inline] pub fn n_edges(&self) -> usize { self.edges.len() }

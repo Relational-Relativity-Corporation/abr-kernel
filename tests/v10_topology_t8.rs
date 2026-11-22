@@ -5,12 +5,14 @@
 //! [IMPL] SYNTHETIC FIXTURES: declarations are chosen to exercise each rule.
 //! They establish that the check computes as stated, nothing empirical.
 
+#[path = "support/synthetic_identity.rs"]
+mod synthetic_identity;
 use abr_kernel::operators::{DeclaredRelations, EdgeProvenance};
 use abr_kernel::topology::*;
 
 fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
     let m = edges.len();
-    DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m])
+    synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m]))
 }
 
 fn fb(edge: usize) -> FeedbackDeclaration {
@@ -261,6 +263,9 @@ mod entry_points {
     fn t8_declare_checked_carries_its_feedback_onto_the_field() {
         let (r, _) = declare_checked(4, vec![(0, 1), (1, 2), (2, 3), (3, 1)], vec![EdgeProvenance::Continuation; 4], &[fb(3)]).unwrap();
         assert_eq!(r.feedback, vec![fb(3)]);
+        // Identity is declared separately (RPPI-V10 G-1); without it the field is refused.
+        assert!(matches!(EdgeSeries::from_registrations(&seq(), &r).unwrap_err(), DeclarationGap::RelationIdentity(_)));
+        let r = crate::synthetic_identity::identify(r);
         assert!(EdgeSeries::from_registrations(&seq(), &r).is_ok());
     }
 }

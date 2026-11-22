@@ -5,6 +5,8 @@
 //! carrier values are [INTERFACE VALUE]s. These tests verify the forms; they
 //! establish no empirical validity.
 
+#[path = "support/synthetic_identity.rs"]
+mod synthetic_identity;
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{
     operator_a, operator_b, operator_circulation, DeclaredRelations, EdgeProvenance, NodeField,
@@ -12,8 +14,8 @@ use abr_kernel::operators::{
 use abr_kernel::relational_field::*;
 
 fn chain() -> DeclaredRelations {
-    DeclaredRelations::from_edges_with_provenance(
-        3, vec![(0, 1), (1, 2)], vec![EdgeProvenance::Continuation; 2])
+    synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(
+        3, vec![(0, 1), (1, 2)], vec![EdgeProvenance::Continuation; 2]))
 }
 
 fn reg(data: Vec<Vec<f64>>) -> Registration {

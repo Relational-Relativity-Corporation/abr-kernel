@@ -8,6 +8,8 @@
 #[path = "support/synthetic_feedback.rs"]
 mod synthetic_feedback;
 
+#[path = "support/synthetic_identity.rs"]
+mod synthetic_identity;
 use abr_kernel::ground_variables::Registration;
 use abr_kernel::operators::{DeclaredRelations, EdgeProvenance, NodeField};
 use abr_kernel::persistence_change::{cycle_closure, is_closed_walk, EdgeSeries};
@@ -15,7 +17,7 @@ use abr_kernel::topology::*;
 
 fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
     let m = edges.len();
-    DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m])
+    synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m]))
 }
 
 /// 0 → 1 → 3, 0 → 2 → 3, 0 → 3: three routes from 0 to 3.
