@@ -128,36 +128,62 @@ pub enum EdgeOrigin {
 }
 
 /// A declared sequence of edge fields with half-widths.
+///
+/// δ in two parts (Z1a; see `Registration`): `da` is the **state** bound
+/// (repeatability + offset + unshared gain on the value), used by the state
+/// forms (PC3). A change Δ = a[s+1] − a[s] is bounded by the repeatability of
+/// both registrations plus the unshared gain on each end's own change
+/// (`dgain`); offsets cancel in every change and do not enter. A shared gain
+/// changes no classification and enters only `change_magnitude`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct EdgeSeries {
     /// a[t][c][e]
     pub a: Vec<Vec<Vec<f64>>>,
-    /// δA[t][c][e]
+    /// State bound δA[t][c][e].
     pub da: Vec<Vec<Vec<f64>>>,
+    /// Repeatability part of δA[t][c][e] (Z1a).
+    pub da_rep: Vec<Vec<Vec<f64>>>,
+    /// Unshared-gain part of the change bound [step][c][e]: γ_s·|Δx_s| + γ_t·|Δx_t| (Z1a).
+    pub dgain: Vec<Vec<Vec<f64>>>,
+    /// Shared gain bound [c][e], 0 ≤ γ < 1: enters reported change magnitudes only (Z1a).
+    pub shared_gain: Vec<Vec<f64>>,
     pub origin: EdgeOrigin,
     /// Edge pairs whose coupling the declaration fixes (PC-D4).
     pub forced_pairs: Vec<(usize, usize)>,
 }
 
 impl EdgeSeries {
-    /// From node-valued registrations through A, with δA[e] = δ[s] + δ[t].
+    /// From node-valued registrations through A, with δA[e] = δ[s] + δ[t]
+    /// (state bounds, Z1a), and the change bound from the repeatability and
+    /// the unshared gain on each end's change.
     pub fn from_registrations(seq: &[Registration], rel: &DeclaredRelations) -> Result<Self, DeclarationGap> {
         if seq.len() < 2 { return Err(DeclarationGap::NoProcessSequence); }
         let k = seq[0].x.k;
         assert!(seq.iter().all(|r| r.x.k == k), "every registration must declare the same components");
         assert!(seq.iter().all(|r| r.x.n == rel.n_nodes), "every registration must cover the declared loci");
         if rel.n_edges() < 1 { return Err(DeclarationGap::FewerThanTwoEdges); }
+        assert!(seq.iter().all(|r| r.same_run_constant(&seq[0])),
+            "the run-constant parts of δ must be the same in every registration of the run (Z1a)");
         let a = seq.iter().map(|r| operator_a(&r.x, rel, &[]).spatial).collect();
         let da = seq.iter().map(|r| (0..k).map(|c| {
+            rel.edges.iter().map(|&(s, t)| r.state_delta(c, s) + r.state_delta(c, t)).collect()
+        }).collect()).collect();
+        let da_rep = seq.iter().map(|r| (0..k).map(|c| {
             rel.edges.iter().map(|&(s, t)| r.delta[c][s] + r.delta[c][t]).collect()
         }).collect()).collect();
+        let g = &seq[0].locus_gain;
+        let dgain = seq.windows(2).map(|w| (0..k).map(|c| {
+            let dx = |i: usize| (w[1].x.data[c][i] - w[0].x.data[c][i]).abs();
+            rel.edges.iter().map(|&(s, t)| g[c][s] * dx(s) + g[c][t] * dx(t)).collect()
+        }).collect()).collect();
+        let shared_gain = (0..k).map(|c| vec![seq[0].shared_gain[c]; rel.n_edges()]).collect();
         let mut forced_pairs = Vec::new();
         for e in 0..rel.n_edges() {
             for f in (e + 1)..rel.n_edges() {
                 if rel.edges[e] == rel.edges[f] { forced_pairs.push((e, f)); }
             }
         }
-        Ok(EdgeSeries { a, da, origin: EdgeOrigin::NodeDerived, forced_pairs })
+        Ok(EdgeSeries { a, da, da_rep, dgain, shared_gain, origin: EdgeOrigin::NodeDerived, forced_pairs })
     }
 
     /// From a registered value per declared edge and component, with δ per
@@ -175,7 +201,37 @@ impl EdgeSeries {
             assert!(dt.iter().flatten().all(|d| d.is_finite() && *d >= 0.0), "δ must be finite and non-negative");
         }
         if m < 1 { return Err(DeclarationGap::FewerThanTwoEdges); }
-        Ok(EdgeSeries { a, da, origin: EdgeOrigin::EdgeRegistered, forced_pairs: Vec::new() })
+        let steps = a.len() - 1;
+        Ok(EdgeSeries {
+            dgain: vec![vec![vec![0.0; m]; k]; steps],
+            shared_gain: vec![vec![0.0; m]; k],
+            da_rep: da.clone(),
+            a, da, origin: EdgeOrigin::EdgeRegistered, forced_pairs: Vec::new(),
+        })
+    }
+
+    /// Declare run-constant parts for an edge-valued series (Z1a): an offset
+    /// bound per component and edge, entering the state bound only, and a
+    /// gain bound per component and edge. A relation registered as one value
+    /// carries one gain at both its ends, so the gain is shared by that
+    /// relation: it changes no classification (a per-edge factor 1 + γ′ > 0
+    /// preserves every Δ's sign and every minor's sign) and enters only
+    /// `change_magnitude`. Gains in [0, 1).
+    pub fn with_run_constant(mut self, offset: Vec<Vec<f64>>, gain: Vec<Vec<f64>>) -> Self {
+        let (k, m) = (self.k(), self.n_edges());
+        assert!(offset.len() == k && offset.iter().all(|o| o.len() == m),
+            "an offset must be declared for every component and edge");
+        assert!(gain.len() == k && gain.iter().all(|g| g.len() == m),
+            "a gain must be declared for every component and edge");
+        assert!(offset.iter().flatten().all(|o| o.is_finite() && *o >= 0.0),
+            "an offset bound must be finite and non-negative");
+        assert!(gain.iter().flatten().all(|g| g.is_finite() && *g >= 0.0 && *g < 1.0),
+            "a gain bound must lie in [0, 1): a declared gain is strictly positive (Z1a)");
+        for t in 0..self.n_registrations() {
+            for c in 0..k { for e in 0..m { self.da[t][c][e] = self.da_rep[t][c][e] + offset[c][e]; } }
+        }
+        self.shared_gain = gain;
+        self
     }
 
     pub fn n_registrations(&self) -> usize { self.a.len() }
@@ -188,8 +244,18 @@ impl EdgeSeries {
         let d = (0..self.k()).map(|c| (0..self.n_edges())
             .map(|e| self.a[s + 1][c][e] - self.a[s][c][e]).collect()).collect();
         let dd = (0..self.k()).map(|c| (0..self.n_edges())
-            .map(|e| self.da[s + 1][c][e] + self.da[s][c][e]).collect()).collect();
+            .map(|e| self.da_rep[s + 1][c][e] + self.da_rep[s][c][e] + self.dgain[s][c][e]).collect()).collect();
         (d, dd)
+    }
+
+    /// The bound on a reported change magnitude over step s, [c][e]: the
+    /// change bound plus the shared gain on the change, δΔ + γ·|Δ| (Z1a).
+    /// Classifications use `change`; this is for reporting |Δ| only.
+    pub fn change_magnitude(&self, s: usize) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
+        let (d, dd) = self.change(s);
+        let dm = (0..self.k()).map(|c| (0..self.n_edges())
+            .map(|e| dd[c][e] + self.shared_gain[c][e] * d[c][e].abs()).collect()).collect();
+        (d, dm)
     }
 
     fn is_forced(&self, e: usize, f: usize) -> bool { self.forced_pairs.contains(&(e, f)) }

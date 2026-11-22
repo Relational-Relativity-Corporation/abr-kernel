@@ -125,3 +125,14 @@ pub fn circulation_weights(rel: &DeclaredRelations) -> Vec<i64> {
     let outdeg = |v: usize| rel.edges.iter().filter(|e| e.0 == v).count() as i64;
     rel.edges.iter().map(|&(s, t)| indeg(s) - outdeg(t)).collect()
 }
+
+/// Edges whose circulation is **record-boundary-conditioned** (A-3, decided
+/// by Origin 2026-11-22, Part 9, 20th): exactly one of the successor and
+/// predecessor sums is empty. A record boundary cuts an ongoing relation
+/// (Df3), so the missing side is *not registered*, not zero. The empty sum is
+/// taken as 0 (so I-SC-D11's identity holds), and Ξ at such an edge is
+/// reported with this flag and never read as a circulation of zero. An edge
+/// with both sides empty is not formable (IV-3) and is not listed here.
+pub fn boundary_conditioned_edges(rel: &DeclaredRelations) -> Vec<usize> {
+    (0..rel.n_edges()).filter(|&e| rel.succ(e).is_empty() != rel.pred(e).is_empty()).collect()
+}
