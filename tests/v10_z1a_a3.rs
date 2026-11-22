@@ -6,6 +6,8 @@
 //! establish that the forms compute as stated, nothing empirical. Values are
 //! dyadic, so scaling by ±2^k is exact.
 
+#[path = "support/synthetic_feedback.rs"]
+mod synthetic_feedback;
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{DeclaredRelations, EdgeProvenance, NodeField};
 use abr_kernel::persistence_change::*;
@@ -73,7 +75,7 @@ fn random_rel(r: &mut Rng) -> DeclaredRelations {
         let (s, t) = (r.usize(0, n - 1), r.usize(0, n - 1));
         if s != t && !edges.contains(&(s, t)) { edges.push((s, t)); }
     }
-    rel(n, edges)
+    synthetic_feedback::declare_loops(rel(n, edges))
 }
 
 fn random_seq(r: &mut Rng, n: usize) -> Vec<Registration> {
@@ -327,7 +329,12 @@ fn pc_d3_negative_scale_reverses_signs_only() {
 
 /// 0 → 1 → 2 → 3 → 1, and 4 → 5 apart. Edge (0, 1) has a successor and no
 /// predecessor: boundary-conditioned. Edge (4, 5) has neither: not formable.
-fn a3_field() -> DeclaredRelations { rel(6, vec![(0, 1), (1, 2), (2, 3), (3, 1), (4, 5)]) }
+/// The loop 1 → 2 → 3 → 1 is declared feedback at its closing edge (T8).
+fn a3_field() -> DeclaredRelations {
+    rel(6, vec![(0, 1), (1, 2), (2, 3), (3, 1), (4, 5)]).with_feedback(vec![
+        abr_kernel::topology::FeedbackDeclaration { edge: 3, basis: "SYNTHETIC: return relation 3 → 1".into() },
+    ])
+}
 
 #[test]
 fn a3_one_empty_side_is_flagged_both_empty_is_not_formable() {

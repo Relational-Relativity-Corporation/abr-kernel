@@ -534,9 +534,21 @@ pub struct DeclaredRelations {
     pub inc: Vec<Vec<usize>>,             // inc[i]: edges entering node i    (ABR)
     pub adj_plus: Vec<Vec<usize>>,        // adj_plus[e]: edges continuing forward from e (Primary)
     pub adj_minus: Vec<Vec<usize>>,       // adj_minus[e]: edges arriving into source of e (Primary)
+    /// Edges declared feedback, each with its basis (T8; `topology`). Empty
+    /// unless declared with `with_feedback`. Every V10 reading entry point
+    /// refuses a field whose directed cycles are not all declared here
+    /// (Origin, 2026-11-22, 28th).
+    pub feedback: Vec<crate::topology::FeedbackDeclaration>,
 }
 
 impl DeclaredRelations {
+    /// Declare feedback edges with their basis (T8). Checked where a reading
+    /// is formed (`topology::t8_gap`), not here: the field is a building block.
+    pub fn with_feedback(mut self, feedback: Vec<crate::topology::FeedbackDeclaration>) -> Self {
+        self.feedback = feedback;
+        self
+    }
+
     /// Production constructor. Requires explicit provenance for every edge.
     /// Provenance is an admissibility condition — it cannot be manufactured
     /// by a convenience constructor. See test_rel_from_edges() in #[cfg(test)]
@@ -578,7 +590,7 @@ impl DeclaredRelations {
             }
         }
 
-        DeclaredRelations { n_nodes, edges, provenance, out, inc, adj_plus, adj_minus }
+        DeclaredRelations { n_nodes, edges, provenance, out, inc, adj_plus, adj_minus, feedback: Vec::new() }
     }
 
     #[inline] pub fn n_edges(&self) -> usize { self.edges.len() }

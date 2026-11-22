@@ -11,6 +11,8 @@
 //! establish how the forms relate, nothing empirical. Values are dyadic, so
 //! every check is exact.
 
+#[path = "support/synthetic_feedback.rs"]
+mod synthetic_feedback;
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{operator_b, operator_circulation, DeclaredRelations, EdgeField, EdgeProvenance, NodeField};
 
@@ -175,7 +177,7 @@ fn random_rel(r: &mut Rng) -> DeclaredRelations {
         let (s, t) = (r.usize(0, n - 1), r.usize(0, n - 1));
         if s != t && !edges.contains(&(s, t)) { edges.push((s, t)); }
     }
-    rel(n, edges)
+    synthetic_feedback::declare_loops(rel(n, edges))
 }
 
 /// (i) A per-edge scaling λ_e multiplies m_ij(e, f) by λ_e·λ_f; (ii) mixing

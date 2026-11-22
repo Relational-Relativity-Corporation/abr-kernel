@@ -89,6 +89,7 @@ impl RelationalField {
         if registrations.len() < 2 {
             return Err(DeclarationGap::NoProcessSequence);
         }
+        crate::topology::t8_gap(rel)?;
         let k = registrations[0].x.k;
         assert!(registrations.iter().all(|r| r.x.k == k),
             "every registration must declare the same components");

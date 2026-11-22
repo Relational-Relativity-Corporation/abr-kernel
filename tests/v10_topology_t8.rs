@@ -197,3 +197,70 @@ fn reaches(r: &DeclaredRelations, from: usize, to: usize) -> bool {
     }
     false
 }
+
+// ── Enforcement at the reading entry points (Origin, 2026-11-22, 28th) ─────
+
+mod entry_points {
+    use super::*;
+    use abr_kernel::ground_variables::{ground_reading, minor_histories, DeclarationGap, EnergyCarrier, Registration};
+    use abr_kernel::operators::NodeField;
+    use abr_kernel::persistence_change::EdgeSeries;
+    use abr_kernel::relational_field::RelationalField;
+
+    fn seq() -> Vec<Registration> {
+        (0..3).map(|t| {
+            let t = t as f64;
+            Registration::new(NodeField::new(vec![vec![4.0 + t, 3.0, 1.0 - t, 2.0], vec![1.0, 2.0 * t, 0.5, 3.0]]),
+                vec![vec![0.0625; 4]; 2])
+        }).collect()
+    }
+
+    /// 0 → 1 → 2 → 3 → 1: one loop.
+    fn looped() -> DeclaredRelations { rel(4, vec![(0, 1), (1, 2), (2, 3), (3, 1)]) }
+
+    fn is_t8(g: &DeclarationGap) -> bool { matches!(g, DeclarationGap::T8(_)) }
+
+    #[test]
+    fn t8_every_reading_entry_point_refuses_an_undeclared_loop() {
+        let (r, s) = (looped(), seq());
+        assert!(is_t8(&RelationalField::new(&r, s.clone(), None).unwrap_err()));
+        assert!(is_t8(&EdgeSeries::from_registrations(&s, &r).unwrap_err()));
+        assert!(is_t8(&minor_histories(&s, &r).unwrap_err()));
+        let g = ground_reading(&s, &r, None);
+        assert!(is_t8(g.freedom.as_ref().unwrap_err()));
+        assert!(is_t8(g.connection.as_ref().unwrap_err()));
+        assert!(is_t8(g.v2_held_arrangement.as_ref().unwrap_err()));
+        let c: Vec<EnergyCarrier> = (0..3).map(|_| EnergyCarrier {
+            name: "SYNTHETIC".into(), unit: "u".into(), values: vec![1.0, 2.0, 3.0, 4.0], delta: vec![0.0625; 4],
+        }).collect();
+        assert!(is_t8(ground_reading(&s, &r, Some(&c)).energy.as_ref().unwrap_err()));
+        // The refusal names the loop and says what to return to.
+        match EdgeSeries::from_registrations(&s, &r).unwrap_err() {
+            DeclarationGap::T8(v) => assert!(matches!(&v[0], T8Refusal::UndeclaredCycle { cycle } if cycle.len() == 3)),
+            _ => unreachable!(),
+        }
+        assert!(DeclarationGap::T8(vec![]).remedy().contains("feedback"));
+    }
+
+    #[test]
+    fn t8_a_declared_loop_is_read() {
+        let r = looped().with_feedback(vec![fb(3)]);
+        let s = seq();
+        assert!(RelationalField::new(&r, s.clone(), None).is_ok());
+        assert!(EdgeSeries::from_registrations(&s, &r).is_ok());
+        assert!(ground_reading(&s, &r, None).connection.is_ok());
+    }
+
+    #[test]
+    fn t8_an_edge_valued_series_declares_no_topology_and_is_not_checked() {
+        let a = vec![vec![vec![1.0, 2.0]], vec![vec![2.0, 2.0]]];
+        assert!(EdgeSeries::from_edge_values(a, vec![vec![vec![0.0625; 2]]; 2]).is_ok());
+    }
+
+    #[test]
+    fn t8_declare_checked_carries_its_feedback_onto_the_field() {
+        let (r, _) = declare_checked(4, vec![(0, 1), (1, 2), (2, 3), (3, 1)], vec![EdgeProvenance::Continuation; 4], &[fb(3)]).unwrap();
+        assert_eq!(r.feedback, vec![fb(3)]);
+        assert!(EdgeSeries::from_registrations(&seq(), &r).is_ok());
+    }
+}

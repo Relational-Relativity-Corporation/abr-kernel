@@ -29,9 +29,17 @@
 //! refusal returns to the declaration (W5). The observation sequence is not
 //! checked here: its order is the record's (ingest).
 //!
-//! `DeclaredRelations::from_edges_with_provenance` does not run this check;
-//! `declare_checked` constructs and checks together.
+//! **Enforcement (Origin, 2026-11-22, 28th): at the reading entry points.**
+//! `DeclaredRelations::from_edges_with_provenance` stays a building block and
+//! does not run the check. Feedback is declared on the field with
+//! `DeclaredRelations::with_feedback`, and every V10 reading entry point
+//! (`RelationalField::new`, `EdgeSeries::from_registrations`, the ground
+//! readings: connection, minor histories, the first V2 form, energy) refuses
+//! a field that fails T8 with `DeclarationGap::T8`. An edge-valued series
+//! (`EdgeSeries::from_edge_values`) declares no topology and is not checked.
+//! `declare_checked` constructs, declares the feedback and checks together.
 
+use crate::ground_variables::DeclarationGap;
 use crate::operators::{DeclaredRelations, EdgeProvenance};
 use std::collections::VecDeque;
 
@@ -182,7 +190,12 @@ pub fn check_t8(rel: &DeclaredRelations, feedback: &[FeedbackDeclaration]) -> Re
 pub fn declare_checked(
     n_nodes: usize, edges: Vec<(usize, usize)>, provenance: Vec<EdgeProvenance>, feedback: &[FeedbackDeclaration],
 ) -> Result<(DeclaredRelations, T8Admission), Vec<T8Refusal>> {
-    let rel = DeclaredRelations::from_edges_with_provenance(n_nodes, edges, provenance);
+    let rel = DeclaredRelations::from_edges_with_provenance(n_nodes, edges, provenance).with_feedback(feedback.to_vec());
     let admitted = check_t8(&rel, feedback)?;
     Ok((rel, admitted))
+}
+
+/// T8 at a reading entry point: the field with its own declared feedback.
+pub fn t8_gap(rel: &DeclaredRelations) -> Result<(), DeclarationGap> {
+    check_t8(rel, &rel.feedback).map(|_| ()).map_err(DeclarationGap::T8)
 }

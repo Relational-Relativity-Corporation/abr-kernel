@@ -168,6 +168,10 @@ pub enum DeclarationGap {
     NoNeighbourInField,
     /// No energy carrier is declared in M for this domain (R9a, V3a).
     NoCarrierDeclared,
+    /// The declared field fails T8: a self-relation, or a directed cycle with
+    /// no declared feedback edge, or a fault in a feedback declaration
+    /// (`topology`; Origin, 2026-11-22, 28th).
+    T8(Vec<crate::topology::T8Refusal>),
 }
 
 impl DeclarationGap {
@@ -201,6 +205,10 @@ impl DeclarationGap {
                  continuing from or arriving at these edges; never reverse an edge",
             DeclarationGap::NoCarrierDeclared =>
                 "declare the energy carrier, its unit, mapping and δ in M (R9a)",
+            DeclarationGap::T8(_) =>
+                "remove the self-relation, or declare at least one edge of each named \
+                 directed cycle as feedback with its registered basis (T8); never reverse \
+                 an edge to break a cycle (W8)",
         }
     }
 }
@@ -329,6 +337,7 @@ fn check_sequence(seq: &[Registration], rel: &DeclaredRelations) -> Result<(), D
     if seq.len() < 2 {
         return Err(DeclarationGap::NoProcessSequence);
     }
+    crate::topology::t8_gap(rel)?;
     let k = seq[0].x.k;
     assert!(seq.iter().all(|r| r.x.k == k),
         "every registration must declare the same components");
@@ -814,6 +823,7 @@ pub fn energy(carriers: Option<&[EnergyCarrier]>, n_registrations: usize, rel: &
     -> Result<Energy, DeclarationGap>
 {
     if n_registrations < 2 { return Err(DeclarationGap::NoProcessSequence); }
+    crate::topology::t8_gap(rel)?;
     let cs = carriers.ok_or(DeclarationGap::NoCarrierDeclared)?;
     assert_eq!(cs.len(), n_registrations, "the carrier must be declared at every registration");
     if rel.n_edges() == 0 { return Err(DeclarationGap::FewerThanTwoEdges); }
