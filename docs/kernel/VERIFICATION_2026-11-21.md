@@ -222,3 +222,25 @@ the review brief. Any finding from that pass is dispositioned on `main` as
 before: corrected beside the original and logged in Part 9. The release
 commit adds only the version bump, the README update and the separation
 edits; no form, test or reading changed.
+
+## Verifier's second pass (2026-11-22) and disposition — after the merge
+
+The second pass reviewed `5a9e8e3`, the commit before the release commit;
+the Verifier reproduced 121 and 213. The release (`663964a`) had already
+merged by Origin's decision, so every finding is dispositioned on top of
+`main` (session branch restarted from `663964a`).
+
+| Finding | Disposition |
+|---|---|
+| **Z1a's declared rule says run-constant factors cancel in every change.** For y = ax + b the offset cancels, but the gain remains in Δy = aΔx | **Accepted.** A correction is proposed **beside** the declared rule (V10_README Part 7; Part 9, 22nd), with three cases: an offset cancels; a gain shared by a relation and its δ leaves every classification unchanged but enters reported change magnitudes; gains that differ between a relation's ends enter the change bound. It amends a declared rule, so **Origin confirms it**, and the implementation (10.3.0) waits |
+| **I-SC-D8 says "never reorganize"** where its bound rules out only an opposite-sign crossing | **Accepted; corrected beside the original** in §2.6. The code comment already said "crossing" |
+| **The kernel register gives conflicting status signals:** OC-T-3, OC-S-3 and OC-E-3 read OPEN in the §18 status cells before notes saying dissolved, and earlier sections list them as open | **Accepted.** Every closed, dissolved, moved or decided condition now shows its **current status first**, with the earlier status kept as *was:*. This covers §18 (19 rows), the validation record's table (15 rows) and its "Active open conditions" lines, the §15 lists and the `derived_invariants.rs` comments |
+| Class B's moved items match the application register | Confirmed; no change |
+| No kernel source or test lines removed since `8d42fab` | Confirmed |
+
+This commit changes documentation and code comments only: no form, test or
+reading. 121 tests (default), 213 (`--features v9`). On the session branch,
+**not merged**: it awaits Origin's confirmation of the Z1a correction and the
+Verifier's check of these dispositions.
+
+**2026-11-22:** Origin confirmed the Z1a correction and directed these dispositions merged to `main`.

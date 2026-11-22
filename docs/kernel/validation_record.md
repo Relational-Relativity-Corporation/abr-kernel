@@ -339,7 +339,7 @@ M with ε[e] = 0.
 would preclude energy transfer is a framework-level observation — not yet
 formally derived from the kernel (OC-T-3).
 
-**Active open conditions:** OC-T-1, OC-T-2, OC-T-3
+**Active open conditions:** OC-T-1, OC-T-2. *(OC-T-3 dissolved, G1-OC 2026-11-12; listed as active until 2026-11-22.)*
 
 **Support classification:** Derived (from ε[e], τ[v], 𝟙[e]).
 Observed — expression-observed, mechanism-unresolved (Primary Region);
@@ -394,7 +394,7 @@ held — its result depends on edge order when a Δ vector is 0.0 in every
 component, and its tolerance is used in two units. No code change is
 authorized.
 
-**Active open conditions:** OC-S-2, OC-S-3. OC-S-1 closed (2026-09-23).
+**Active open conditions:** none. OC-S-1 closed (2026-09-23); OC-S-3 dissolved (G1-OC, 2026-11-12); OC-S-2 closed (2026-11-22). *(Listed as "OC-S-2, OC-S-3" until 2026-11-22.)*
 
 **Support classification:** Declared condition (Origin, 2026-09-23), read
 from the calculated Δ output. Observed — expression-observed,
@@ -439,7 +439,7 @@ than particle correlations — operator statement identical.
 precludes collective organization is a framework-level observation —
 not yet formally derived from the kernel (OC-E-3).
 
-**Active open conditions:** OC-E-1, OC-E-2, OC-E-3
+**Active open conditions:** none. *(OC-E-3 dissolved, G1-OC 2026-11-12; OC-E-1, OC-E-2 closed 2026-11-22; listed as active until 2026-11-22.)*
 
 **Support classification:** Derived (from 𝟙[e], R antisymmetric output, ε[e]).
 Observed (consequences only — correlated outcomes and bond directionality,
@@ -507,42 +507,42 @@ regions, 78-decade confirmation, VR-Φ-01).
 |---|---|---|---|
 | OC-ι-1 | ι_unit structurally fundamental or instrumentally bounded | Open | VR-ι-01 |
 | OC-ι-2 | Relational inertia ratios — no declared relational origin | Open | VR-ι-01 |
-| OC-ι-3 | δι ~ ι^0.5 scaling — connection to ρ saturation | Open | VR-ι-01 |
+| OC-ι-3 | δι ~ ι^0.5 scaling — connection to ρ saturation | **Closed (2026-11-22): ρ retired; the scaling is a fit (W14)** *(was: Open)* | VR-ι-01 |
 | OC-4 | e_unit structurally fundamental or instrumentally bounded | Open | VR-q-01 |
 | OC-5 | Integer quantization exact at every region or approximation | Open | VR-q-01 |
 | OC-12 | 𝟙[e] = 1 condition — derived from R antisymmetry | Resolved | VR-𝟙-01 |
 | OC-13 | τ[v] ~ 1/E[v] — unified expression | Resolved | VR-τ-01 |
 | OC-θ-1 | Tetrahedral topology → 109.47° | Resolved | VR-θ-01 |
 | OC-θ-2 | Lone pair correction | Resolved | VR-θ-01 |
-| OC-θ-3 | Resonance/partial bond order | Open | VR-θ-01 |
-| OC-θ-5 | Full 3D vector balance N > 4 | Open | VR-θ-01 |
-| OC-Φ-1 | Formal derivation of Φ[v] from operator fixed-point | Pending | VR-Φ-01 |
-| OC-Φ-2 | Region-specific threshold derivation | Pending | VR-Φ-01 |
+| OC-θ-3 | Resonance/partial bond order | **Moved to the application (2026-11-22)** *(was: Open)* | VR-θ-01 |
+| OC-θ-5 | Full 3D vector balance N > 4 | **Moved to the application (2026-11-22)** *(was: Open)* | VR-θ-01 |
+| OC-Φ-1 | Formal derivation of Φ[v] from operator fixed-point | **Closed (2026-11-22): Φ is a declared intersection (W15)** *(was: Pending)* | VR-Φ-01 |
+| OC-Φ-2 | Region-specific threshold derivation | **Closed (2026-11-22): Φ is a declared intersection (W15)** *(was: Pending)* | VR-Φ-01 |
 | OC-Φ-3 | Circadian above primary threshold | Open | VR-Φ-01 |
 | OC-Φ-4 | Φ[v] gradient derivable from Κ[v] | Open | VR-Φ-01 |
 | OC-Φ-5 | J/ψ minimum coherence threshold | Open | VR-Φ-01 |
-| OC-Φ-6 | Observer frame overlap — structural or contingent | Open | VR-Φ-01 |
+| OC-Φ-6 | Observer frame overlap — structural or contingent | **Decided (2026-11-22) with OC-F-1: each record declares its observer** *(was: Open)* | VR-Φ-01 |
 | OC-Φ-7 | He 2s metastable at +7.47 — atomic sub-threshold? | Open | VR-Φ-01 |
 | OC-Φ-8 | Atomic Φ ordering by atomic number — derivable? | Open | VR-Φ-01 |
-| OC-CA-1 | Φ[S] formal derivation from operators | Pending | VR-ΦS-01 |
+| OC-CA-1 | Φ[S] formal derivation from operators | **Closed (2026-11-22): Φ is a declared intersection (W15)** *(was: Pending)* | VR-ΦS-01 |
 | OC-CA-2 | Formal unification of Φ[S] and ε[e] | Pending | VR-ΦS-01 |
 | OC-CA-3 | Derivation of +0.30 decades/relation increment | Open | VR-ΦS-01 |
 | OC-CA-4 | A-T base pair +1.38 decades — derivable from H-bond structure | Open | VR-ΦS-01 |
 | OC-CA-5 | Observer frame at primary/biological Φ overlap | Open | VR-ΦS-01 |
 | OC-18 | Coherence propagation condition | Pending | VR-ΦS-01 |
-| OC-22 | α_r inter-region coupling derivation | Pending | VR-Φ-01 |
-| OC-R-1 | g-factor derivation | Open | derived_invariants.rs |
+| OC-22 | α_r inter-region coupling derivation | **Moved to the application (2026-11-22)** *(was: Pending)* | VR-Φ-01 |
+| OC-R-1 | g-factor derivation | **Closed (2026-11-22): ρ retired** *(was: Open)* | derived_invariants.rs |
 | OC-γ-1 | κ[Atomic] from photon edges — requires paired ι[emitting locus] declaration | Open | VR-γ-01 |
 | OC-γ-2 | N[v] extension across all NIST ASD loci with declared τ_stability | Open program | VR-γ-N-01 |
 | OC-T-1 | Tunneling floor magnitude — formal expression not yet derived. *Restated (W14, 2026-11-21):* where, and at what δ, the exchange floor ε > δ_ε is resolved over a registered carrier (V3); no mechanism posited | Open | VR-T-01 |
 | OC-T-2 | Tunneling at scale — confirm beyond Primary and Atomic regions | Open | VR-T-01 |
-| OC-T-3 | Tunneling necessity — absence precludes energy transfer (framework-level) | Open | VR-T-01 |
+| OC-T-3 | Tunneling necessity — absence precludes energy transfer (framework-level) | **Dissolved (G1-OC, 2026-11-12)** *(was: Open)* | VR-T-01 |
 | OC-S-1 | Kernel boundary criterion — CLOSED 2026-09-23: the boundary is the full-operator admissibility condition, not a numerical threshold | Closed | VR-S-01 |
-| OC-S-2 | Superposition at scale — confirm relational distinguishability of the Δ output beyond the Primary Region | Open | VR-S-01 |
-| OC-S-3 | Superposition necessity — absence of relational distinguishability throughout a declared history precludes self-organization (framework-level) | Open | VR-S-01 |
-| OC-E-1 | Entanglement preservation — derive 𝟙[e]=1 preserved under operator evolution | Open | VR-E-01 |
-| OC-E-2 | Decoherence rate — derive rate at which 𝟙[e]→0 | Open | VR-E-01 |
-| OC-E-3 | Entanglement necessity — 𝟙[e]=0 everywhere precludes collective organization (framework-level) | Open | VR-E-01 |
+| OC-S-2 | Superposition at scale — confirm relational distinguishability of the Δ output beyond the Primary Region | **Closed (2026-11-22): freedom readable at every region (PC)** *(was: Open)* | VR-S-01 |
+| OC-S-3 | Superposition necessity — absence of relational distinguishability throughout a declared history precludes self-organization (framework-level) | **Dissolved (G1-OC, 2026-11-12)** *(was: Open)* | VR-S-01 |
+| OC-E-1 | Entanglement preservation — derive 𝟙[e]=1 preserved under operator evolution | **Closed (2026-11-22): 𝟙 fenced; V10 persistence conditions (PC, I-SC-D5)** *(was: Open)* | VR-E-01 |
+| OC-E-2 | Decoherence rate — derive rate at which 𝟙[e]→0 | **Closed (2026-11-22): a rate in time of a fenced reader (W15)** *(was: Open)* | VR-E-01 |
+| OC-E-3 | Entanglement necessity — 𝟙[e]=0 everywhere precludes collective organization (framework-level) | **Dissolved (G1-OC, 2026-11-12)** *(was: Open)* | VR-E-01 |
 | OC-RE-1 | Downstream derivation — B activation at larger scales is accumulated Primary Region evolution | Open | VR-RE-01 |
 | OC-RE-2 | τ[v] lower bound — no declared region has τ[v] smaller than Primary Region | Open | VR-RE-01 |
 | OC-RE-3 | Evolution rate expression by domain — biological and computational regions | Open | VR-RE-01 |
