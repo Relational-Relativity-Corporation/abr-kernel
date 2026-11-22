@@ -369,11 +369,19 @@
 /// ℏ — reduced Planck constant (J·s).
 /// Observable provenance: spectroscopic frequency-energy measurement.
 /// Used in τ[v] expression as the declared action scale.
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub const HBAR: f64 = 1.054_571_817e-34;
 
 /// e_unit — elementary charge unit (C).
 /// Observable provenance: Millikan oil-drop and subsequent direct measurements.
 /// Used in q[v] = n[v] · e_unit. Integer multiples confirmed cross-region.
+/// Class (W14, 2026-11-21): defined by convention (exact in the SI since 2019). The provenance line above is kept as the record.
 pub const E_UNIT: f64 = 1.602_176_634e-19;
 
 /// ι_unit — declared relational inertia unit (kg). Set to electron ι[v]
@@ -390,6 +398,7 @@ pub const E_UNIT: f64 = 1.602_176_634e-19;
 /// The numerical value carries forward from the measurement record;
 /// the primitive interpretation changes.
 /// Region-specific: what constitutes ι_unit is declared per region through M.
+/// Class (W14, 2026-11-21): fitted (CODATA 2018 adjusted value), not one registration. The provenance line above is kept as the record.
 pub const I_UNIT_ELECTRON: f64 = 9.109_383_701_5e-31;
 
 /// h — full Planck constant (J·s). h = 2π · ℏ.
@@ -400,6 +409,7 @@ pub const I_UNIT_ELECTRON: f64 = 9.109_383_701_5e-31;
 /// The framework-native quantity is ε[e] — what the operators derive from
 /// what M reports. h itself is not a kernel quantity and does not appear
 /// in any operator formula.
+/// Class (W14, 2026-11-21): defined by convention (exact in the SI since 2019). The provenance line above is kept as the record.
 pub const H_PLANCK: f64 = 6.626_070_15e-34;
 
 /// Speed of light — declared measurement reference for M mapping hc/λ (m/s).
@@ -411,6 +421,7 @@ pub const H_PLANCK: f64 = 6.626_070_15e-34;
 /// what M reports. C_DECLARED is not a named framework variable and does
 /// not appear in any operator formula. Do not introduce C_DECLARED into
 /// operator expressions or kernel output.
+/// Class (W14, 2026-11-21): defined by convention (exact since 1983). The provenance line above is kept as the record.
 pub const C_DECLARED: f64 = 2.997_924_58e8;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -534,6 +545,14 @@ pub fn detection_indicator(r_antisymmetric_e: f64, tol: f64) -> f64 {
 //
 // Support: Observed.
 //
+// AMENDED (W14, Origin 2026-11-21, 12th): the registered quantity is λ. hc/λ is a
+// mapping through a construct, declared in M; its output ε is PROJECTED, not
+// Registered or Observed, and is cited as an intersection. For V10 readings
+// the photon-edge carrier is the registered wavenumber 1/λ with its own δ:
+// hc is one constant factor, so every V10 reading is identical either way
+// (PC-D3; tests/v10_persistence_change.rs). hc/λ matters only for a
+// cross-carrier comparison, which must be declared separately (P1.3).
+//
 // ── Input validation note (Verifier, session July 2026) ──────────────────
 // These functions use debug_assert! for input validation — correct for
 // internal kernel use where all inputs are Origin-declared through M.
@@ -555,6 +574,9 @@ pub fn detection_indicator(r_antisymmetric_e: f64, tol: f64) -> f64 {
 /// # Declared admissibility
 /// λ must be traceable to an instrument report through M (spectrometer).
 /// The formula hc/λ is part of M. No additional theoretical assumptions.
+/// *Amended (W14, 2026-11-21):* the output is Projected (R7): a mapping of the
+/// registered λ through a construct, cited as an intersection. V10 readings
+/// use the registered wavenumber 1/λ as the carrier.
 /// This expression is an edge quantity. ι is not declared through M at
 /// the photon locus (A-11 closed); E[v] = ι[v] · κ[region] is not
 /// evaluated at photon edges.
@@ -573,6 +595,13 @@ pub fn epsilon_photon_edge(lambda_m: f64) -> f64 {
 ///
 /// # Arguments
 /// * `lambda_m` — declared wavelength from M (meters)
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub fn tau_photon_edge(lambda_m: f64) -> f64 {
     let eps = epsilon_photon_edge(lambda_m);
     HBAR / eps
@@ -602,6 +631,13 @@ pub fn tau_photon_edge(lambda_m: f64) -> f64 {
 /// # Returns
 /// N[v] — dimensionless count of declared relational intervals within
 /// the measured stability interval.
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub fn n_relational_cycles(tau_stability_s: f64, lambda_m: f64) -> f64 {
     debug_assert!(tau_stability_s > 0.0, "τ_stability must be positive");
     debug_assert!(lambda_m > 0.0, "λ must be positive");
@@ -630,6 +666,13 @@ pub fn n_relational_cycles(tau_stability_s: f64, lambda_m: f64) -> f64 {
 /// # Arguments
 /// * `a_persistence_coupling` — A_persistence[e_coupling]
 /// * `cos_theta` — cos(θ[e_v, e_coupling]): coupling projection.
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub fn tau_v(a_persistence_coupling: f64, cos_theta: f64) -> f64 {
     let denominator = (a_persistence_coupling * cos_theta).abs();
     debug_assert!(
@@ -640,6 +683,13 @@ pub fn tau_v(a_persistence_coupling: f64, cos_theta: f64) -> f64 {
 }
 
 /// τ[v] for the isolated locus case: τ = ℏ / E[v].
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub fn tau_v_isolated(e_v: f64) -> f64 {
     debug_assert!(e_v > 0.0, "E[v] must be positive for an active locus");
     HBAR / e_v
@@ -705,6 +755,13 @@ pub fn equilibrium_bond_angle_deg(n_bonds: usize) -> Option<f64> {
 ///
 /// # Returns
 /// Φ[v] in kg·s.
+// DECLARED INTERSECTION (C), not a kernel reading (Origin, 2026-11-21, 11th;
+// W15). Φ = ι·τ is the product of an inertia (PDG: fitted) and a lifetime
+// projected onto a clock. Time is never primitive; a registered lifetime may be
+// cited as an intersection, and is described as one wherever Φ appears. No
+// invariant is based on it (I-RE's basis stays withdrawn). A lifetime converted
+// from a width through ħ/Γ is computed, not registered, and does not enter (W14).
+// Briefly fenced on the 10th; restored on the 11th.
 pub fn phi_v(iota_v: f64, tau_v: f64) -> f64 {
     debug_assert!(iota_v > 0.0, "ι[v] must be positive — relational inertia ∈ ℝ⁺");
     debug_assert!(tau_v > 0.0, "τ[v] must be positive");
@@ -712,6 +769,13 @@ pub fn phi_v(iota_v: f64, tau_v: f64) -> f64 {
 }
 
 /// log₁₀(Φ[v]) — declared projection for cross-region comparison.
+// DECLARED INTERSECTION (C), not a kernel reading (Origin, 2026-11-21, 11th;
+// W15). Φ = ι·τ is the product of an inertia (PDG: fitted) and a lifetime
+// projected onto a clock. Time is never primitive; a registered lifetime may be
+// cited as an intersection, and is described as one wherever Φ appears. No
+// invariant is based on it (I-RE's basis stays withdrawn). A lifetime converted
+// from a width through ħ/Γ is computed, not registered, and does not enter (W14).
+// Briefly fenced on the 10th; restored on the 11th.
 pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 {
     phi_v(iota_v, tau_v).log10()
 }
@@ -733,6 +797,13 @@ pub fn phi_v_log10(iota_v: f64, tau_v: f64) -> f64 {
 /// # Arguments
 /// * `iota_s` — total relational inertia of declared system S: Σᵢ ι[vᵢ]
 /// * `tau_s` — declared system-level relational progression interval
+// DECLARED INTERSECTION (C), not a kernel reading (Origin, 2026-11-21, 11th;
+// W15). Φ = ι·τ is the product of an inertia (PDG: fitted) and a lifetime
+// projected onto a clock. Time is never primitive; a registered lifetime may be
+// cited as an intersection, and is described as one wherever Φ appears. No
+// invariant is based on it (I-RE's basis stays withdrawn). A lifetime converted
+// from a width through ħ/Γ is computed, not registered, and does not enter (W14).
+// Briefly fenced on the 10th; restored on the 11th.
 pub fn phi_s(iota_s: f64, tau_s: f64) -> f64 {
     debug_assert!(iota_s > 0.0, "ι[S] must be positive");
     debug_assert!(tau_s > 0.0, "τ[S] must be positive");
@@ -740,6 +811,13 @@ pub fn phi_s(iota_s: f64, tau_s: f64) -> f64 {
 }
 
 /// Accumulation condition: Φ[S] > Σᵢ Φ[vᵢ].
+// DECLARED INTERSECTION (C), not a kernel reading (Origin, 2026-11-21, 11th;
+// W15). Φ = ι·τ is the product of an inertia (PDG: fitted) and a lifetime
+// projected onto a clock. Time is never primitive; a registered lifetime may be
+// cited as an intersection, and is described as one wherever Φ appears. No
+// invariant is based on it (I-RE's basis stays withdrawn). A lifetime converted
+// from a width through ħ/Γ is computed, not registered, and does not enter (W14).
+// Briefly fenced on the 10th; restored on the 11th.
 pub fn accumulation_condition(phi_s_val: f64, phi_components: &[f64]) -> bool {
     let sum_components: f64 = phi_components.iter().sum();
     phi_s_val > sum_components
@@ -763,6 +841,10 @@ pub fn accumulation_condition(phi_s_val: f64, phi_components: &[f64]) -> bool {
 // output multiplicity into distinct measurable transitions.
 //
 // Support: Derived. Confirmed 29/52 (VR-J-01 — completion in progress).
+// AMENDED (W14, Origin 2026-11-21, 12th): J values in the comparison tables are
+// assigned by a construct (spin quantum numbers); matching them is a cited
+// intersection (C), not a confirmation. The registered quantity is the count
+// of resolved Zeeman components, where the record resolves them.
 
 /// Compute J[v] = (declared edges at v) / 2.
 /// What the established literature calls spin quantum number.
@@ -844,12 +926,14 @@ mod tests {
 
     // ── τ[v] ─────────────────────────────────────────────────────────────
 
+    #[cfg(feature = "v9")]
     #[test]
     fn tau_v_isolated_case() {
         let tau = tau_v_isolated(1.0);
         assert!((tau - HBAR).abs() < TOL);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn tau_v_parallel_coupling() {
         let a_p = 2.0e-20;
@@ -858,6 +942,7 @@ mod tests {
         assert!((tau_par - tau_iso).abs() < TOL);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn tau_v_near_perpendicular_structure() {
         let a_p = 1.0e-20_f64;
@@ -870,6 +955,7 @@ mod tests {
         assert!((ratio - 1.0 / cos_near_perp).abs() < 0.01);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn tau_v_increases_as_cos_theta_decreases() {
         let a_p = 1.0e-20;
@@ -1000,6 +1086,7 @@ mod tests {
         assert!((epsilon_e(large_delta_iota, 0.0)).abs() < TOL);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn phi_v_uses_tau_from_unified_expression() {
         let iota_v = 1.673e-27_f64;
@@ -1034,6 +1121,7 @@ mod tests {
             "Hα ε[e] must match NIST ASD within 0.01%: got {:.6} eV", eps_ev);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn photon_edge_tau_isolated_case() {
         // τ[v] = ℏ / ε[e] at photon edge.
@@ -1049,6 +1137,7 @@ mod tests {
             "Hα τ[v] must be ~3.5e-16 s: got {:.4e}", tau_direct);
     }
 
+    #[cfg(feature = "v9")]
     #[test]
     fn photon_edge_n_hydrogen_n3() {
         // H n=3 emitting locus (Hα transition).
@@ -1293,6 +1382,13 @@ pub fn tunneling_floor_holds(epsilon_e: f64, tol: f64) -> bool {
 ///
 /// # Returns
 /// true if τ[v] < ∞ (finite, as required by tunneling invariant).
+#[cfg(feature = "v9")]
+// RETIRED FROM V10 (Origin, 2026-11-21, 9th). Time is never primitive (W15): it
+// is a projection labelling steps of relational evolution. A registered time may
+// enter as a declared intersection, but this one is not registered: τ = ħ/ε is
+// computed from energy through a construct (W14), and no registration relates
+// energy to an interval of relational evolution. Behind the V9 fence; numbers it
+// produced are kept only as declared historical comparison.
 pub fn tunneling_tau_bounded(tau_v: f64) -> bool {
     tau_v.is_finite() && tau_v > 0.0
 }
@@ -1546,6 +1642,12 @@ pub fn superposition_resolved(has_interior: bool) -> bool {
 // Support: Derived (from 𝟙[e], R antisymmetric output, ε[e]).
 // Observed (consequences only — correlated measurement outcomes and
 // bond directionality, Primary and Atomic regions).
+//
+// AMENDED (W14, Origin 2026-11-21, 12th): "Confirmed consequences" above is read
+// as cited intersections. For EPR-type pairs the registered quantity is the
+// coincidence counts between detectors at s and t over declared settings; a
+// Bell "violation" compares those counts with a bound derived from a model,
+// so it is an intersection (C), not support for I-E.
 
 /// Entanglement condition: returns true if declared edge e = (s, t)
 /// carries nonzero R antisymmetric output (𝟙[e] = 1).
@@ -1582,6 +1684,12 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 // OC-T-1   Tunneling floor magnitude: derive the quantum boundary component
 //          of Δ(ι)[e] as a function of declared barrier geometry and ε[e].
 //          Currently stated as nonzero; formal expression not yet derived.
+//          RESTATED (W14, Origin 2026-11-21, 12th; the first statement posits an
+//          unregistered mechanism and is kept as the record): for each
+//          declared domain with a registered carrier, at which relations and
+//          at what δ is the exchange floor ε > δ_ε resolved over the
+//          sequence (V3), and how does PC1 on the carrier read there. Read
+//          from registered data; no mechanism is posited.
 //
 // OC-T-2   Tunneling at scale: confirm tunneling floor in declared systems
 //          beyond Primary and Atomic regions — molecular, biological, planetary.
@@ -1654,10 +1762,92 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            (`minor_change_bound`, `step_preserves_sign`).
 //   I-SC-D2  Per minor at δ, freedom and connection are complementary.
 //
+// Derived (Generator, 2026-11-21; tests/v10_structural_consistency.rs):
+//   I-SC-D3  Fixed ratio locks change. If A[f] = λ·A[e] in every component at
+//            s and s+1, then Δ[f] = λ·Δ[e] and every change minor of (e, f)
+//            vanishes in both PC2 families: proportional state with a fixed
+//            ratio implies coupled change. Corollary: if the ratio moves
+//            (λ → λ'), the pair stays proportional in state at each
+//            registration while its change minor is
+//            (λ' − λ)·(Δ_i[e]·A_j[e] − Δ_j[e]·A_i[e]): connected in state,
+//            free in change.
+//   I-SC-D4  Offset locks change without proportional state. If
+//            A[f] = λ·A[e] + c with c fixed over the step, Δ[f] = λ·Δ[e], so
+//            the change minors vanish, while the state minor is
+//            A_i[e]·c_j − A_j[e]·c_i, generally resolved. The coupled-change
+//            grade (PC2) reads a connection the proportional grade (V1) does
+//            not. The converse of I-SC-D3 fails.
+//   I-SC-D5  Circulation is additive over a step. Ξ and B are linear, so
+//            Ξ_{s+1} = Ξ_s + Ξ(B(Δ_s)) exactly. Persistence condition for the
+//            sustained grade: the sign of Ξ cannot change over a step where
+//            |Ξ(B(Δ))| < |Ξ_s|, because a sign changes only through zero
+//            (the circulation counterpart of I-SC-D1; `step_preserves_sign`).
+//   I-SC-D6  Uniform positive rescaling holds every sign. If A_{s+1} = κ·A_s,
+//            κ > 0, every minor scales by κ² and every circulation by κ: the
+//            arrangement (PC3) and the sustained grade are held while every
+//            non-zero relation changes (PC1). Change without reorganization.
+//            CORRECTED (Verifier, 2026-11-21; 17th): the exact-sign statement stands, but "every non-zero relation changes (PC1)" holds for exact values only. At δ: (i) PC1 reads freedom iff |κ − 1|·|A_s[e]| > δA_s[e] + δA_{s+1}[e];
+//            (ii) if δ scales with the values, every PC3 state is held;
+//            (iii) with δ fixed, κ ≥ 1 holds every resolved PC3 state (an unresolved one may resolve) and κ ≤ 1 holds every unresolved one (a resolved one may unresolve);
+//            (iv) never a crossing.
+//            For circulation only the exact sign is claimed.
+//            (tests: sc_d6_rescaling_can_leave_a_relation_unresolved_at_delta,
+//            prop_isc_d6_resolution_conditions_under_rescaling)
+//   I-SC-D7  The declared sequence is part of the reading. Comparing a record
+//            declared with registrations (s, s+1, s+2) and the same record
+//            with s+1 omitted, δΔ_1 + δΔ_2 = δΔ_whole + 2·δA_{s+1}. (a) Halves
+//            resolved with the same sign resolve the whole with that sign.
+//            (b) The whole can be resolved while neither half is. (c) Halves
+//            resolved with opposite signs can cancel to an unresolved whole.
+//            F_δ is therefore not monotone under omitting registrations.
+//   I-SC-D8  A crossing needs change larger than both resolutions. A minor
+//            resolved with opposite signs at s and s+1 has
+//            |Δm| > hw_s + hw_{s+1}, so `minor_change_bound` exceeds
+//            hw_s + hw_{s+1}. Changes small against the arrangement's
+//            declared resolution never produce a crossing.
+//
+//   I-SC-D9  Coupled change is transitive exactly, not at δ. Over one reading
+//            pair, μ(e,f) = 0 exactly when the 2-vectors of change are
+//            parallel; PC2 admits only relations whose change is resolved in
+//            a reading, so a middle relation is non-zero and e ∥ f, f ∥ g give
+//            e ∥ g. At δ two unresolved minors can chain to a resolved one:
+//            connection read at δ does not partition relations into sets.
+//   I-SC-D10 Closure on change. For a signed closed walk, Σ s_e·Δ[e] =
+//            A_cyc(s+1) − A_cyc(s), half-width Σ δΔ[e]. Closure at δ at both
+//            registrations implies closure on the change; not conversely: an
+//            inconsistency fixed over the step cancels. On node-derived
+//            values the closure is 0 by identity (`cycle_closure`,
+//            `cycle_change_closure`, `is_closed_walk`).
+//   I-SC-D11 Total circulation. For any edge field g,
+//            Σ_e Ξ(g)[e] = Σ_f g[f]·(indeg(src f) − outdeg(tgt f)); zero for
+//            every field exactly when every weight is zero
+//            (`relational_field::circulation_weights`).
+//   I-SC-D12 Readings are local to their components. Dropping a component
+//            changes no PC1, PC2 or PC3 reading that does not involve it;
+//            only PC3's evaluated set can shrink. Shares can move either way:
+//            declaring components is not neutral (T5).
+//   I-SC-D13 The counted rate under omitted registrations. A group of
+//            consecutive steps all resolved with one sign merges into a
+//            resolved step (D7(a) by induction:
+//            |ΣΔ| = Σ|Δ| > Σ δΔ ≥ δ_first + δ_last). For any coarsening into
+//            G groups, #(one-sign groups) ≤ Γ_coarse ≤ G.
+//
+// OC-SC-4 (held pattern vs sustained circulation), partly derived: I-SC-D5
+// gives the sustained grade its own persistence condition; I-SC-D6 gives a
+// common sufficient condition (uniform positive rescaling) under which both
+// hold. A general relation between the two is still open.
+//
 // Proposed (framework-level, awaiting observation):
 //   I-SC-1   Condensate-to-plasma axis. Along registrations of one declared
 //            system ordered by increasing held energy, κ_δ (resolved minors
 //            / evaluated minors) does not decrease across phase boundaries.
+//            AMENDED (Origin, 2026-11-21, 7th): structure is persistence,
+//            change is freedom; κ_δ measures how distinct an arrangement is,
+//            not freedom. Restated: along registrations of one declared
+//            system ordered by increasing held energy, F_δ of PC1 (change
+//            resolved at δ; persistence_change.rs) does not decrease across
+//            phase boundaries: the condensate end constrained, the plasma
+//            end free. The first statement is kept above for the record.
 //   I-SC-2   Neither end is reached. At no registered state with at least
 //            two declared components is κ_δ exactly 0 or 1 (G1).
 //   I-SC-3   Identity-grade persistence. Relations registered independently
@@ -1670,7 +1860,11 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //          and I-SC-2.
 // OC-SC-2  Register lattice relations of one material independently at two
 //          sites across temperature to its melting point, to test I-SC-3.
-// OC-SC-3  Declare the mapping from carrier exchange ε = |A(c)| to the
+// OC-SC-3  [Stated in the declared mathematics 2026-11-21 (7th): the carrier
+//          registered at the same loci enters as a component; PC1 on it and
+//          PC2(a) against a structural component read the coupling. Awaits
+//          registered data.] First statement:
+//          Declare the mapping from carrier exchange ε = |A(c)| to the
 //          persistence difference A_p of the declared field (how energy
 //          drives Δm).
 // OC-SC-4  Relation between the minor pattern (held connection) and the

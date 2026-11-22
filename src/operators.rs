@@ -1888,6 +1888,8 @@ mod tests {
     }
 
     // [OBS] Operator chain from declared M mapping hc/λ (Ly-α).
+    // W14 (2026-11-21): λ is the registered value; ε = hc/λ is Projected, not
+    // Observed. Read this fixture as [OBS λ → Projected ε].
     // Source: NIST ASD v5.12, spectrometer-reported λ = 121.567 nm.
     // M mapping: ε[e] = hc/λ (declared M at Atomic Region photon edges).
     // The NodeField carries ε[Ly-α] at node 0 (emitting locus) and 0.0
@@ -1921,6 +1923,8 @@ mod tests {
     }
 
     // [OBS] Same chain for Hα (λ = 656.279 nm, NIST ASD v5.12).
+    // W14 (2026-11-21): λ is the registered value; ε = hc/λ is Projected, not
+    // Observed. Read this fixture as [OBS λ → Projected ε].
     // Demonstrates that the identical operator chain works at a second declared
     // observable with only the M input changing.
     #[test]

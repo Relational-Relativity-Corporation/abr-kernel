@@ -120,6 +120,8 @@ pub struct ObservationalBasis {
 #[derive(Clone, Debug, PartialEq)]
 pub enum KernelFunction {
     /// derived_invariants::epsilon_photon_edge — ε[e] = hc/λ.
+    /// Output class Projected (W14, 2026-11-21): a mapping of the registered λ
+    /// through a construct, cited as an intersection.
     EpsilonPhotonEdge,
 }
 

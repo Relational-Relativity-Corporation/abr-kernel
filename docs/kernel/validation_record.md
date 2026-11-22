@@ -194,6 +194,8 @@ See V4 for full table. Unchanged from V4.
 
 ## VR-τ-01 — Relational Progression Interval τ[v]
 
+> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. *(Wording amended 11th, W15: time is never primitive; a registered time may be cited as an intersection, but this time is computed through a construct, not registered.)* The entry below is kept as the record.
+
 **Quantity:** τ[v] = ℏ / |A_persistence[e_coupling] · cos(θ[e_v, e_coupling])|
 
 **Four special cases confirmed:** See V4 for full table. Unchanged from V4.
@@ -203,6 +205,10 @@ See V4 for full table. Unchanged from V4.
 ---
 
 ## VR-Φ-01 — Coherence Potential Φ[v]
+
+> **Retired from V10 (Origin, 2026-11-21, 10th):** Φ = ι·τ takes a lifetime as input; time is not a variable. Historical comparison only. The entry below is kept as the record.
+>
+> **Amended (11th, W15):** time is never primitive, but a registered lifetime may be cited as a declared intersection. Φ is restored as a declared intersection (C), not a kernel reading and not an observable basis for any invariant. "Confirmed" and "Observed" below are read as "intersection computed". Before citing, each of the 29 loci's lifetime is checked: measured (admissible as intersection) or converted from a width through ħ/Γ (computed, excluded under W14).
 
 **Quantity:** Φ[v] = ι[v] · τ[v]
 
@@ -215,6 +221,10 @@ Formal derivation: OC-Φ-1 pending.
 ---
 
 ## VR-ΦS-01 — Collective Coherence Potential Φ[S]
+
+> **Retired from V10 (Origin, 2026-11-21, 10th):** Φ = ι·τ takes a lifetime as input; time is not a variable. Historical comparison only. The entry below is kept as the record.
+>
+> **Amended (11th, W15):** restored as a declared intersection (C), as for VR-Φ-01.
 
 **Quantity:** Φ[S] = ι[S] · τ[S], where ι[S] = Σᵢ ι[vᵢ]
 
@@ -254,9 +264,13 @@ Formal derivation: OC-CA-1 pending.
 
 **Support classification:** Derived. Observed (Zeeman components).
 
+> **Amended (W14, 2026-11-21):** the J values compared against are assigned by a construct (spin quantum numbers), so the 29/52 matches are cited intersections (C), not confirmations. The registered quantity is the count of resolved Zeeman components, where the record resolves them.
+
 ---
 
 ## VR-γ-01 — Relational Energy Contrast ε[e] at Photon Edges
+
+> **Amended (W14, 2026-11-21):** the registered quantity is λ; ε = hc/λ is Projected (a mapping through a construct), cited as an intersection. "Observed" below applies to λ. Before citing, each λ is classed by source: NIST ASD *Observed* or *Ritz* (calculated from fitted levels; excluded as a registration).
 
 **14 declared Atomic Region transitions confirmed.** See V4 for full table.
 Unchanged from V4.
@@ -267,6 +281,8 @@ Unchanged from V4.
 
 ## VR-γ-τ-01 — Relational Progression Interval τ[v] at Photon Edges
 
+> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. *(Wording amended 11th, W15: time is never primitive; a registered time may be cited as an intersection, but this time is computed through a construct, not registered.)* The entry below is kept as the record.
+
 **12 values confirmed.** See V4 for full table. Unchanged from V4.
 
 **Support classification:** Derived. Observed (ε[e] values from NIST ASD v5.12).
@@ -274,6 +290,8 @@ Unchanged from V4.
 ---
 
 ## VR-γ-N-01 — Relational Cycle Count N[v] at Photon-Emitting Loci
+
+> **Retired from V10 (Origin, 2026-11-21, 9th):** τ = ħ/ε is a time computed from energy; time is not a variable. Historical comparison only. *(Wording amended 11th, W15: time is never primitive; a registered time may be cited as an intersection, but this time is computed through a construct, not registered.)* The entry below is kept as the record.
 
 **H n=3 confirmed:** N = 4.58×10⁶, log₁₀ = 6.66. Unchanged from V4.
 
@@ -410,6 +428,8 @@ Locus-resolved at larger scales (ℛ_M = 1, 𝓜_M = 1).
 No observation directly observes the edge relation. Each observes a
 correlation that is inadmissible without it.
 
+> **Amended (W14, 2026-11-21):** "Confirmed consequences" is read as cited intersections. For EPR-type pairs, the registered quantity is the coincidence counts between detectors at s and t over declared settings. A Bell "violation" compares a combination of those counts with a bound derived from a model; it is a cited intersection (C), not a confirmation.
+
 **Scale and domain invariance:** 𝟙[e]=1 condition identical regardless
 of region. At larger scales expressed through structural relations
 (molecular bonds, gravitational coupling, systemic dependency) rather
@@ -514,7 +534,7 @@ regions, 78-decade confirmation, VR-Φ-01).
 | OC-R-1 | g-factor derivation | Open | derived_invariants.rs |
 | OC-γ-1 | κ[Atomic] from photon edges — requires paired ι[emitting locus] declaration | Open | VR-γ-01 |
 | OC-γ-2 | N[v] extension across all NIST ASD loci with declared τ_stability | Open program | VR-γ-N-01 |
-| OC-T-1 | Tunneling floor magnitude — formal expression not yet derived | Open | VR-T-01 |
+| OC-T-1 | Tunneling floor magnitude — formal expression not yet derived. *Restated (W14, 2026-11-21):* where, and at what δ, the exchange floor ε > δ_ε is resolved over a registered carrier (V3); no mechanism posited | Open | VR-T-01 |
 | OC-T-2 | Tunneling at scale — confirm beyond Primary and Atomic regions | Open | VR-T-01 |
 | OC-T-3 | Tunneling necessity — absence precludes energy transfer (framework-level) | Open | VR-T-01 |
 | OC-S-1 | Kernel boundary criterion — CLOSED 2026-09-23: the boundary is the full-operator admissibility condition, not a numerical threshold | Closed | VR-S-01 |
@@ -574,7 +594,7 @@ Primary Region; three confirmed consequence types. VR-S-01 (Superposition):
 consequences observed as interference patterns and outcome distributions;
 expression-observed, mechanism-unresolved at Primary Region. VR-E-01
 (Entanglement): consequences observed as Bell inequality
-violations and bond directionality; expression-observed,
+violations *(a cited intersection under W14, 2026-11-21: coincidence counts compared with a model-derived bound)* and bond directionality; expression-observed,
 mechanism-unresolved at Primary Region;
 decoherence as admissible test through M. VR-RE-01 (Relational Evolution):
 monotonic τ[v] ordering confirmed across 29 loci spanning 78 decades;

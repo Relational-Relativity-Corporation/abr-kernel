@@ -7,12 +7,19 @@
 //
 // ── Three distinct variables, one relational object (Origin, 2026-11-21) ──
 //
-//   Energy      how much a relation changes.        ε = |A(c)| of the declared carrier c.
-//   Freedom     how many independent ways relations vary.
-//                                                   minors resolved, held through evolution.
-//   Connection  what holds together through evolution.
-//                                                   identity, proportional or sustained grade,
-//                                                   held through evolution.
+//   Energy      what is exchanged across a relation. ε = |A(c)| of the declared carrier c.
+//   Freedom     change permitted: relations changing, and changing independently
+//               (persistence_change.rs, PC1–PC3; Declared 2026-11-21, 7th).
+//   Connection  shared structure: relations held together by a constraint, in
+//               their state (identity, proportional, sustained grades) or in
+//               their change (coupled-change grade, PC2).
+//
+// Amendment (Origin, 2026-11-21, 7th): structure is persistence; change is
+// freedom. The first V2 form below (`freedom`, a minor held resolved) reads a
+// persistent arrangement, which is structure; it is kept unchanged for
+// declared comparison (C). The first wording of energy, "how much a relation
+// changes", is replaced: ε is a difference across a relation, and its change
+// over evolution is read through PC with the carrier as a component.
 //
 // None reduces to another. They are read from the same declared relations and
 // are related as follows:
@@ -57,6 +64,7 @@
 // The frozen V9 readers in `derived_invariants.rs` are unchanged. The forms
 // here supersede them for V10 readings.
 
+use crate::persistence_change::{coupled_change_pairs, EdgeSeries, PersistenceChange};
 use crate::operators::{
     circulation_half_width, operator_a, operator_b, operator_circulation, DeclaredRelations,
     EdgeField, NodeField,
@@ -112,11 +120,12 @@ pub fn product_half_width(x: f64, dx: f64, y: f64, dy: f64) -> f64 {
 /// The three ground variables.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GroundVariable {
-    /// How much a relation changes. Tunneling, I-T.
+    /// What is exchanged across a relation. Tunneling, I-T.
     Energy,
-    /// How many independent ways relations vary. Superposition, I-S.
+    /// Change permitted (PC1–PC3). Superposition, I-S.
     Freedom,
-    /// What holds together through evolution. Entanglement, I-E.
+    /// Shared structure held by a constraint, in state or in change.
+    /// Entanglement, I-E.
     Connection,
 }
 
@@ -132,6 +141,9 @@ pub enum ConnectionGrade {
     /// Persistent circulation: the sign of Ξ(B(A(x)))[e] resolved and the
     /// same through evolution. Needs an interior locus.
     Sustained,
+    /// Relations whose change is locked in proportion wherever it is read
+    /// (PC2). Declared 2026-11-21 (7th).
+    CoupledChange,
 }
 
 /// Why a reading cannot be calculated over the declaration.
@@ -455,12 +467,17 @@ fn pair_histories(h: &MinorHistories) -> Vec<((usize, usize), PairHistory)> {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FREEDOM — superposition (V2)
+// V2, FIRST FORM — superseded for freedom (Origin, 2026-11-21, 7th)
 // ═══════════════════════════════════════════════════════════════════════════
 //
 // A pair of relations is free over the sequence when at least one of its
 // minors is resolved with the same sign at every registration: independent
 // variation persists. F_δ = free pairs / evaluated pairs.
+//
+// Amendment: under structure = persistence, a held state is structure. This
+// form therefore reads a persistent independent arrangement, not freedom.
+// Kept unchanged, carried in GroundReading as `v2_held_arrangement` for
+// declared comparison (C). V10 freedom: persistence_change.rs (PC1–PC3).
 
 /// Freedom over a declared sequence.
 #[derive(Debug, Clone, PartialEq)]
@@ -590,6 +607,8 @@ pub struct Connection {
     pub proportional: Result<Vec<(usize, usize)>, DeclarationGap>,
     /// Sustained grade: persistent circulation.
     pub sustained: Result<Sustained, DeclarationGap>,
+    /// Coupled-change grade: pairs whose change is locked in proportion (PC2).
+    pub coupled_change: Result<Vec<(usize, usize)>, DeclarationGap>,
     /// Pairs whose shared structure reorganized (from the minor histories).
     pub reorganizing_pairs: Vec<(usize, usize)>,
     /// Number of pairs of edges resolved at every registration.
@@ -615,10 +634,13 @@ pub fn connection(seq: &[Registration], rel: &DeclaredRelations) -> Result<Conne
         }
         Err(g) => (Err(g), Vec::new()),
     };
+    let coupled_change = EdgeSeries::from_registrations(seq, rel)
+        .and_then(|s| coupled_change_pairs(&PersistenceChange::new(&s)));
     Ok(Connection {
         identity,
         proportional,
         sustained: sustained(seq, rel),
+        coupled_change,
         reorganizing_pairs,
         evaluated_pairs: n * n.saturating_sub(1) / 2,
         unresolved_edges: unresolved,
@@ -742,8 +764,12 @@ pub fn connected_exchange(energy: &Energy, connection: &Connection) -> Vec<(usiz
 #[derive(Debug, Clone, PartialEq)]
 pub struct GroundReading {
     pub energy: Result<Energy, DeclarationGap>,
-    pub freedom: Result<Freedom, DeclarationGap>,
+    /// Freedom as change permitted (PC1–PC3).
+    pub freedom: Result<PersistenceChange, DeclarationGap>,
     pub connection: Result<Connection, DeclarationGap>,
+    /// The first V2 form (a minor held resolved): a persistent arrangement,
+    /// structure under the 7th amendment. Declared comparison (C) only.
+    pub v2_held_arrangement: Result<Freedom, DeclarationGap>,
 }
 
 /// Read all three over one declared sequence (rule of inclusion, W11).
@@ -752,8 +778,9 @@ pub fn ground_reading(
 ) -> GroundReading {
     GroundReading {
         energy: energy(carriers, seq.len(), rel),
-        freedom: freedom(seq, rel),
+        freedom: EdgeSeries::from_registrations(seq, rel).map(|s| PersistenceChange::new(&s)),
         connection: connection(seq, rel),
+        v2_held_arrangement: freedom(seq, rel),
     }
 }
 
@@ -774,8 +801,10 @@ impl GroundReading {
         }
         match &self.freedom {
             Err(g) => out.push(gap(GroundVariable::Freedom, None, g)),
-            Ok(f) if f.f_delta == 0.0 => out.push(zero(GroundVariable::Freedom, None)),
-            _ => {}
+            Ok(pc) => {
+                for g in pc.gaps() { out.push(gap(GroundVariable::Freedom, None, &g)); }
+                if pc.f_delta() == Some(0.0) { out.push(zero(GroundVariable::Freedom, None)); }
+            }
         }
         match &self.connection {
             Err(g) => out.push(gap(GroundVariable::Connection, None, g)),
@@ -784,7 +813,11 @@ impl GroundReading {
                 let s = Some(ConnectionGrade::Sustained);
                 if let Err(g) = &c.proportional { out.push(gap(GroundVariable::Connection, p, g)); }
                 if let Err(g) = &c.sustained { out.push(gap(GroundVariable::Connection, s, g)); }
+                if let Err(g) = &c.coupled_change {
+                    out.push(gap(GroundVariable::Connection, Some(ConnectionGrade::CoupledChange), g));
+                }
                 let any = !c.identity.is_empty()
+                    || c.coupled_change.as_ref().map_or(false, |v| !v.is_empty())
                     || c.proportional.as_ref().map_or(false, |v| !v.is_empty())
                     || c.sustained.as_ref().map_or(false, |v| !v.held_edges.is_empty());
                 if !any { out.push(zero(GroundVariable::Connection, None)); }

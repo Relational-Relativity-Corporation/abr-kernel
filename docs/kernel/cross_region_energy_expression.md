@@ -36,6 +36,21 @@ through M.
 
 Bounded over D. No claim beyond D.
 
+> **Amended (Origin, 2026-11-21, 9th).** τ_relational = ℏ/E[v], Φ_relational
+> and κ[region] are retired from V10. Time is not a variable, and no
+> registration relates energy to an interval of relational evolution. On PDG
+> inputs κ[Primary] = E/ι = c² is the unit conversion returning itself, and
+> Φ_relational = ℏ/c² for every locus: identities, not readings. Φ_stability
+> (a measured lifetime) is open under the same rule (V10_README Part 7, TIME).
+> **Amended (10th):** Φ_stability is retired from V10 as well: it takes a
+> lifetime as input, and no registered sequence of the locus exists to count
+> steps from. Historical comparison only.
+> **Amended (11th, W15):** time is never primitive, but a registered lifetime
+> may be cited as a declared intersection. Φ_stability is restored as a declared
+> intersection (C), not a kernel reading; ħ/Γ-converted lifetimes are excluded.
+> τ_relational, Φ_relational and κ[region] stay retired (computed through ħ).
+> The text below is kept as the record.
+
 ---
 
 ## Two distinct coherence potentials
