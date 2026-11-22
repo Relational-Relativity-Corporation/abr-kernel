@@ -323,15 +323,6 @@ impl EdgeSeries {
             .map(|e| dv[c][e] + self.mixed_gain[c][e] * (v[c][e].abs() + dv[c][e])).collect()).collect()
     }
 
-    /// Bounds for the terms of a K7 closure: each entry's bound widened by the
-    /// gain that differs between edges, h + γ·(|v| + h) (I-SC-D15 (v)). As in
-    /// `mixed`, h includes any offset bound, so the state closure is
-    /// conservative there.
-    fn closure_bounds(&self, v: &[Vec<f64>], dv: &[Vec<f64>]) -> Vec<Vec<f64>> {
-        (0..self.k()).map(|c| (0..self.n_edges())
-            .map(|e| dv[c][e] + self.closure_gain[c][e] * (v[c][e].abs() + dv[c][e])).collect()).collect()
-    }
-
     fn is_forced(&self, e: usize, f: usize) -> bool { self.forced_pairs.contains(&(e, f)) }
 }
 
@@ -707,9 +698,20 @@ pub fn is_closed_walk(rel: &DeclaredRelations, cycle: &[(usize, i8)]) -> bool {
     at == start
 }
 
-/// Closure value and half-width of `cycle` in component c of field (a, da).
-fn closure_of(a: &[Vec<f64>], da: &[Vec<f64>], cycle: &[(usize, i8)], c: usize) -> (f64, f64) {
-    cycle.iter().fold((0.0, 0.0), |(v, h), &(e, sg)| (v + sg as f64 * a[c][e], h + da[c][e]))
+// Closures are exact sums (Origin, 41st: decompose, do not simplify). The
+// value is one exact signed sum over the walk, rounded once; the bound is one
+// exact sum of the term bounds, each widened by the gain that differs between
+// edges, h + γ·(|v| + h) (I-SC-D15 (vi)), rounded up. A walk's closure is
+// therefore the same whichever locus it starts from (Df2a). *Was (to
+// 6d09e61):* a left-to-right f64 fold, in which the walk 0 → 1 → 2 ← 0 over
+// (2⁵⁴, −0.5, 2⁵⁴) read 0 from two starting loci and −0.5 from the third.
+// As in `mixed`, h includes any offset bound, so the state closure is
+// conservative there.
+
+/// Term bound h + γ·(|v| + h), exactly, into `bound`.
+fn add_term_bound(bound: &mut crate::exact::Expansion, v_abs: &crate::exact::Expansion, h: &crate::exact::Expansion, g: f64) {
+    bound.add_expansion(h);
+    if g != 0.0 { bound.add_times(v_abs, g); bound.add_times(h, g); }
 }
 
 /// Closure at registration t. `None` when `cycle` is not a closed walk.
@@ -720,8 +722,16 @@ pub fn cycle_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usi
     // `None` whatever `t` is (the Verifier's probe, 39th; 28f39d8 read
     // `series.a[t]` first and panicked on an out-of-range t).
     if !is_closed_walk(rel, cycle) { return None; }
-    let a = &series.a[t];
-    Some(closure_of(a, &series.closure_bounds(a, &series.da[t]), cycle, c))
+    use crate::exact::Expansion;
+    let (a, da) = (&series.a[t][c], &series.da[t][c]);
+    let (mut v, mut h) = (Expansion::new(), Expansion::new());
+    for &(e, sg) in cycle {
+        v.add_product(sg as f64, a[e]);
+        let mut ve = Expansion::new(); ve.add(a[e].abs());
+        let mut he = Expansion::new(); he.add(da[e]);
+        add_term_bound(&mut h, &ve, &he, series.closure_gain[c][e]);
+    }
+    Some((v.nearest(), h.up()))
 }
 
 /// Closure of the change over step s. `None` when `cycle` is not a closed walk.
@@ -731,8 +741,19 @@ pub fn cycle_change_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle:
     // Checked first, as in `cycle_closure` (39th). *Was (10.3.0):* `change(s)`
     // ran before the check, so an open walk with an out-of-range s panicked.
     if !is_closed_walk(rel, cycle) { return None; }
-    let (d, dd) = series.change(s);
-    Some(closure_of(&d, &series.closure_bounds(&d, &dd), cycle, c))
+    use crate::exact::Expansion;
+    let (a0, a1) = (&series.a[s][c], &series.a[s + 1][c]);
+    let (mut v, mut h) = (Expansion::new(), Expansion::new());
+    for &(e, sg) in cycle {
+        // Δ[e] exactly, from the two registrations (not the rounded change).
+        let mut de = Expansion::new();
+        de.add(a1[e]); de.add(-a0[e]);
+        v.add_times(&de, sg as f64);
+        let mut he = Expansion::new();
+        he.add(series.da_rep[s + 1][c][e]); he.add(series.da_rep[s][c][e]); he.add(series.dgain[s][c][e]);
+        add_term_bound(&mut h, &de.abs(), &he, series.closure_gain[c][e]);
+    }
+    Some((v.nearest(), h.up()))
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

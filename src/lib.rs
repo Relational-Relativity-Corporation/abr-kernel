@@ -65,6 +65,7 @@
 // was, with its history. See docs/kernel/v10_migration.md.
 pub mod operators;
 pub mod derived_invariants;
+pub mod exact;
 
 // Kernel V9 RPPI admission interface (v9_specification.md §3–§10). Added
 // alongside the frozen V8 modules; operators.rs and derived_invariants.rs are

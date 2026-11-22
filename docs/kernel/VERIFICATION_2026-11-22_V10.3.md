@@ -252,6 +252,28 @@ The `V10_README.md` header still reads package `10.2.0`, which has been stale si
 
 **Tests now: 199 (default), 291 (`--features v9`)**, no warnings. The application at `94a89c1` passes 43 against this kernel.
 
+
+## 17. Batch 2: exact sums, for the Verifier (2026-11-23)
+
+**Why.** Origin declared (Part 9, 41st): *decompose, do not simplify.* Applied to the arithmetic: a K7 closure was a left-to-right f64 sum, so the cycle over (2⁵⁴, −0.5, 2⁵⁴) read −0.5 from one starting locus and 0 from the other two. Traversal is an order of analysis (Df2a), so its order must not change a reading.
+
+**What changed.** `src/exact.rs` keeps sums exactly as non-overlapping partials, as in Shewchuk's method behind Python's `math.fsum`, with products made exact through a fused multiply-add. A value is rounded once to the nearest f64; a bound is rounded up to the smallest f64 at or above it. Applied to `cycle_closure` and `cycle_change_closure` (the change taken from the two registrations, not the rounded Δ), `operator_b` (spatial), `operator_circulation` and `circulation_half_width`. The new `circulation_of_accumulation` and its half-width compute Ξ(B(A)) from A in one exact sum; the sustained grade and `RelationalField` read them.
+
+**To check:**
+1. The guarantee in `exact.rs`: with fl(v) the value rounded to nearest and H the bound rounded up, a resolution |fl(v)| > H implies |v| > h exactly, since rounding is monotone and H ≥ h.
+2. The port of `fsum`'s final rounding, including the half-way case.
+3. `up`, which returns the smallest f64 at or above the exact sum, decided from the sign of the residual expansion.
+4. The coefficients of Ξ(B(·)).
+
+**Tests** (`tests/v10_exact_sums.rs`, 5). Every check is against an exact i128 reference, on dyadic values from 2⁰ to 2⁵⁴:
+- sums and integer combinations;
+- closures from every starting locus, with declared gains: value, minimal upper bound, and resolution read only where it holds exactly;
+- Ξ(B(A)) and its bound.
+
+All five fail when the sums are switched back to sequential f64 addition, and every earlier test passes unchanged.
+
+**Not covered:** the rounding points in OC-NUM-1. **Reproduce:** 204 (default), 296 (`--features v9`), no warnings; the application at `94a89c1` passes 43 against this kernel.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*

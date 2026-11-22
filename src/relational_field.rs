@@ -45,7 +45,7 @@
 // Two registrations are the minimum information, not a guarantee of enough.
 
 use crate::ground_variables::{ground_reading, DeclarationGap, EnergyCarrier, GroundReading, Registration};
-use crate::operators::{operator_a, operator_b, operator_circulation, DeclaredRelations, EdgeField};
+use crate::operators::{operator_a, operator_b, DeclaredRelations, EdgeField};
 
 /// A, B and Ξ at one registration: spatial[c][e] per component and edge.
 #[derive(Debug, Clone, PartialEq)]
@@ -59,7 +59,8 @@ pub struct Forms {
 fn forms_of(a: Vec<Vec<f64>>, rel: &DeclaredRelations) -> Forms {
     let k = a.len();
     let b = operator_b(&EdgeField { spatial: a.clone(), comp: vec![], comp_pairs: vec![], k }, rel).spatial;
-    let circulation = operator_circulation(&b, rel);
+    // From A in one exact sum, not from the rounded B (41st).
+    let circulation = crate::operators::circulation_of_accumulation(&a, rel);
     Forms { a, b, circulation }
 }
 

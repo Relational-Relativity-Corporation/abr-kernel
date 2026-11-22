@@ -65,10 +65,7 @@
 // here supersede them for V10 readings.
 
 use crate::persistence_change::{coupled_change_pairs, EdgeSeries, PersistenceChange};
-use crate::operators::{
-    circulation_half_width, operator_a, operator_b, operator_circulation, DeclaredRelations,
-    EdgeField, NodeField,
-};
+use crate::operators::{operator_a, DeclaredRelations, NodeField};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Resolution
@@ -645,10 +642,10 @@ fn identity_pairs(seq: &[Registration], rel: &DeclaredRelations, held: &[usize])
 fn circulation_signs(r: &Registration, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
     let (a, da) = a_with_half_width(r, rel);
     let k = r.x.k;
-    let b = operator_b(&EdgeField { spatial: a, comp: vec![], comp_pairs: vec![], k }, rel).spatial;
-    let db = operator_b(&EdgeField { spatial: da, comp: vec![], comp_pairs: vec![], k }, rel).spatial;
-    let c = operator_circulation(&b, rel);
-    let dc = circulation_half_width(&db, rel);
+    // Ξ(B(A)) and its bound from A in one exact sum each (41st); *was:* B
+    // rounded, then Ξ of the rounded B.
+    let c = crate::operators::circulation_of_accumulation(&a, rel);
+    let dc = crate::operators::circulation_of_accumulation_half_width(&da, rel);
     (0..rel.n_edges()).map(|e| {
         if rel.succ(e).is_empty() && rel.pred(e).is_empty() { return None; }
         Some((0..k).map(|ci| sign_at_delta(c[ci][e], dc[ci][e])).collect())

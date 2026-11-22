@@ -1066,7 +1066,10 @@ pub fn operator_a(f: &NodeField, rel: &DeclaredRelations, pairs: &[(usize, usize
 pub fn operator_b(g: &EdgeField, rel: &DeclaredRelations) -> EdgeField {
     let spatial = g.spatial.iter().map(|s| {
         (0..rel.n_edges())
-            .map(|e| s[e] + rel.succ(e).iter().map(|&f| s[f]).sum::<f64>())
+            // Exact sum, rounded once (Origin, 41st: decompose, do not
+            // simplify; `exact`). *Was:* left-to-right f64 addition, which
+            // can lose a small entry beside a large one.
+            .map(|e| crate::exact::sum_nearest(std::iter::once(s[e]).chain(rel.succ(e).iter().map(|&f| s[f]))))
             .collect()
     }).collect();
     let comp = g.comp.iter().map(|c| {
@@ -1191,22 +1194,49 @@ pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f6
 // indicator read.
 
 pub fn operator_circulation(g: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+    // One exact sum Σ_succ − Σ_pred, rounded once (41st). *Was:* the two sums
+    // rounded separately and then subtracted.
     g.iter().map(|c| {
-        (0..rel.n_edges()).map(|e| {
-            let fwd: f64 = rel.succ(e).iter().map(|&f| c[f]).sum();
-            let bwd: f64 = rel.pred(e).iter().map(|&p| c[p]).sum();
-            fwd - bwd
-        }).collect()
+        (0..rel.n_edges()).map(|e| crate::exact::combination_nearest(
+            rel.succ(e).iter().map(|&f| (1, c[f])).chain(rel.pred(e).iter().map(|&p| (-1, c[p]))))).collect()
     }).collect()
 }
 
 /// Half-width of Ξ(g) from half-widths dg: Σ_succ dg + Σ_pred dg.
 pub fn circulation_half_width(dg: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+    // Rounded up from the exact sum, so the bound is never below its exact
+    // value (41st; `exact`).
     dg.iter().map(|c| {
         (0..rel.n_edges()).map(|e| {
-            rel.succ(e).iter().chain(rel.pred(e)).map(|&f| c[f]).sum()
+            crate::exact::sum_up(rel.succ(e).iter().chain(rel.pred(e)).map(|&f| c[f]))
         }).collect()
     }).collect()
+}
+
+/// Integer coefficients of Ξ(B(·))[e] over the edges: Ξ(B(g))[e] =
+/// Σ_f coeff[f]·g[f]. Ξ and B are linear, so their composition is one integer
+/// combination of the entries.
+fn circulation_of_accumulation_coefficients(rel: &DeclaredRelations, e: usize, sign_pred: i64) -> Vec<i64> {
+    let mut k = vec![0i64; rel.n_edges()];
+    let mut add_b = |f: usize, w: i64| { k[f] += w; for &h in rel.succ(f) { k[h] += w; } };
+    for &f in rel.succ(e) { add_b(f, 1); }
+    for &p in rel.pred(e) { add_b(p, sign_pred); }
+    k
+}
+
+/// Ξ(B(a)) per component, computed from a in one exact sum and rounded once
+/// (41st). Equal to `operator_circulation(operator_b(a))` in exact
+/// arithmetic, without rounding B first.
+pub fn circulation_of_accumulation(a: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+    let ks: Vec<Vec<i64>> = (0..rel.n_edges()).map(|e| circulation_of_accumulation_coefficients(rel, e, -1)).collect();
+    a.iter().map(|c| ks.iter().map(|k| crate::exact::combination_nearest(k.iter().zip(c).map(|(&w, &v)| (w, v)))).collect()).collect()
+}
+
+/// The half-width of Ξ(B(a)) from da, Σ_succ δB + Σ_pred δB with δB = B(da),
+/// as one exact sum rounded up (41st).
+pub fn circulation_of_accumulation_half_width(da: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+    let ks: Vec<Vec<i64>> = (0..rel.n_edges()).map(|e| circulation_of_accumulation_coefficients(rel, e, 1)).collect();
+    da.iter().map(|c| ks.iter().map(|k| crate::exact::combination_up(k.iter().zip(c).map(|(&w, &v)| (w, v)))).collect()).collect()
 }
 
 // ── Operator E (V4 spatial kernel, unchanged) ─────────────────────────────

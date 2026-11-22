@@ -217,6 +217,14 @@ The V10 variable register (DRAFT, Generator, 2026-11-14). Marks: ✔ defined, �
 - Provider intervals are an interim δ (M3 corners), not Z3. Seek repeated registrations.
 - Check the numerics: a central value outside its own interval means the solver, not the data.
 - Kernel text names a specific system only inside a marked **Example (application)** block (boundary rule, Origin 2026-11-14).
+- **Decompose, do not simplify** (Declared, Origin, 2026-11-23, 41st: *"we are decomposing complex systems but we're not simplifying them"*). The aim is to analyze how relation, as the primitive, and energy, connection and freedom work together in a complex system. A reading divides the field into parts, and the parts must account for the whole. Nothing registered is dropped along the way, whether by arithmetic, by a summary standing in for its readings, or by a choice of basis or tree. In practice:
+  - every part is reported with its identity, value and bound;
+  - a summary is a declared projection (K6), read beside its parts, never in place of them;
+  - a part not read is reported as *not evaluated*, never filled;
+  - a sum of registered entries is exact, rounded once at the end;
+  - a bound is never rounded below its exact value.
+
+  Code: `src/exact.rs`. Rounding points still to bring under this rule are listed in Part 7 (OC-NUM-1).
 
 ---
 
@@ -538,6 +546,22 @@ A control run that put "every basis closure holds" in place of "every simple cyc
 
 ---
 
+- **OC-NUM-1 (Open, Generator, 2026-11-23, 41st): the rounding audit under "decompose, do not simplify".** Exact now (`src/exact.rs`; `tests/v10_exact_sums.rs`):
+  - the K7 closures, in state and on change, and their bounds;
+  - B (spatial);
+  - Ξ, with its bound;
+  - Ξ(B(A)) and its bound, each computed from A in one exact sum, as read by the sustained grade and `RelationalField`.
+
+  Still rounded to nearest at each operation, with no stated guarantee:
+  - A = x[s] − x[t] and δA = δ[s] + δ[t] (`operator_a`, `state_delta`);
+  - Δ and δΔ (`EdgeSeries::change`);
+  - the minors and their product bounds (PC2, PC3, V8; `product_half_width`);
+  - the gain terms in `state_delta`, `dgain`, `mixed` and `change_magnitude`;
+  - the energy exchange and δ_ε;
+  - B's component-pair part (V9 only).
+
+  Each is to be made exact, or stated with its guarantee, with a test against an exact reference. Shares and ratios (PC4, κ_δ, Λ̂) are declared projections; their division is stated, not removed.
+
 # Part 8. Symbols and identifiers to settle
 
 - One meaning each for **E** (operator, E[v], E_δ, E_prior), **D** (domain, value class, delay loci), **σ** (ratio, deviation) *[the ratio is renamed N_δ, 10.3.0, OC-Z-1, leaving σ for the V9 operator and a deviation]*, **C** (projection, C_δ, component pairs), **R** (operator, value class, runs), **ρ** (strength, Spearman), **Σ** (operator, sum).
@@ -605,6 +629,7 @@ A control run that put "every basis closure holds" in place of "every simple cyc
 | 2026-11-23 (38th) | **I-SC-D16 proposed (Generator): closure over a cycle basis.** (i) Every closed walk's closure is the chord combination of the basis closures, exactly, in state and change. (ii) At δ every basis closure can hold while another cycle is resolved, and the count depends on the stated tree. (iii) Every simple cycle holds at δ ⇔ the field is within its bounds of some node difference: the converse of PC-D4, so a resolved closure is what node values could never give. (iv) A walk through a resolved chord can hold. No code change. **Stopping point for the Verifier:** I-SC-D15, the closure correction, the D10 qualifier and I-SC-D16 (verification package §15). 197 tests (default), 289 (`v9`) | I-SC-D16; verification |
 | 2026-11-23 (39th) | **The Verifier's disposition of post-merge batch 1** (at `a0bf7ec`; reproduced 197, 289 and 43, no warnings; both gain tests failed on the old closure bounds; the D16 control failed as intended). (1) **I-SC-D15:** amend before declaring. Done: the rule is scoped to the listed forms, classifications are what is preserved, signed outputs transform as in (iv), and the gain example is worded on the nominal and the permitted triangle. (2) **K7 correction:** mathematics confirmed. 10.3.1 held until two implementation findings were fixed. Done: the small-gain rounding (`combined_gain`, also applied to the shared gain and `change_magnitude`) and the walk check before indexing. The new public field `closure_gain` breaks struct literals, so a **compatibility decision is owed by Origin** before the release number. (3) **I-SC-D16:** the Verifier recommends declaring it with the scope explicit (one state or one change; no joint witness across registrations). Done in the text. The Verifier also recommends a separate all-cycles check by Bellman–Ford, reporting a resolved cycle and stating its boundary comparisons, **for Origin to approve**. Declarations of D15 and D16 remain Origin's. 199 tests (default), 291 (`v9`) | I-SC-D15; I-SC-D16; Z1a; release |
 | 2026-11-23 (40th) | **Versioning frozen (Origin):** "all versioning frozen to the current version we are working on, which is pre-release; once we have a release, we can move forward with versioning." The package stays `10.3.0` (pre-release) for all further work. So the 39th's compatibility question is settled: `EdgeSeries::closure_gain` stays public, and the break in downstream struct literals and exhaustive patterns of `EdgeSeries` is recorded against `10.3.0`. Every earlier mention of a 10.3.1 or 10.4.0 is superseded. Still owed: declaring I-SC-D15 and I-SC-D16; approving the all-cycles check | Release; versioning |
+| 2026-11-23 (41st) | **Declared by Origin: decompose, do not simplify** ("we are decomposing complex systems but we're not simplifying them"), with the aim restated: to analyze how relation as the primitive and energy, connection and freedom work together in a complex system (§1.5 Method). **Applied first to sums** (Generator): a closure read from different starting loci gave different values, for example 0 instead of −0.5, because f64 addition in sequence dropped a small entry beside a large one. The K7 closures, B, Ξ and Ξ(B(A)) are now exact sums rounded once, and their bounds are rounded up. A resolution is then read only where it holds exactly; at the boundary, a value within one rounding unit above its bound can read as not resolved. Every earlier test passes unchanged; the new tests fail under the earlier arithmetic. **The Generator recommends not pursuing the Bellman–Ford all-cycles check** (Origin to confirm): as a verdict it would stand in for the cycle readings it reduces, which this rule excludes. Closure readings stay per cycle, with the cycles not read reported as *not evaluated*. Remaining rounding points: OC-NUM-1 (Part 7). 204 tests (default), 296 (`v9`) | Method; K7; K8; OC-NUM-1 |
 
 ---
 
