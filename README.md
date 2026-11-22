@@ -479,7 +479,7 @@ declared source.
 after testing and review), with worked examples and property tests.
 
 **Declared, not yet implemented (next, 10.3.0):**
-- Z1a (δ in two parts: repeatability and run-constant), with a correction proposed after the Verifier's second pass for Origin to confirm: an offset cancels in every change, but a gain does not (V10_README Part 7);
+- Z1a (δ in two parts: repeatability and run-constant), as corrected after the Verifier's second pass and confirmed by Origin (2026-11-22): an offset cancels in every change, but a gain does not (V10_README Part 7);
 - the A-3 boundary flag;
 - the renames (E6; Κ = connection density; σ → N_δ);
 - the audit's Generator work (OC-SC-4, RPPI-V10 admission, the T8 acyclicity check, K7 enumeration).

@@ -242,3 +242,5 @@ This commit changes documentation and code comments only: no form, test or
 reading. 121 tests (default), 213 (`--features v9`). On the session branch,
 **not merged**: it awaits Origin's confirmation of the Z1a correction and the
 Verifier's check of these dispositions.
+
+**2026-11-22:** Origin confirmed the Z1a correction and directed these dispositions merged to `main`.
