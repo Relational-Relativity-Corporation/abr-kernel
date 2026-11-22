@@ -121,18 +121,24 @@ off by default. V10 work cannot use them by accident: a call does not compile.
 V9 work opts in visibly with `features = ["v9"]`. The code stays where it was,
 with its history. See `docs/kernel/v10_migration.md`.
 
-`cargo test` (V10 only) runs 121 tests:
+`cargo test` (V10 only) runs 179 tests:
 - 35 library;
 - 3 `provenance_demo`;
 - 18 ground variables;
 - 20 persistence and change (PC);
 - 23 property tests (`tests/v10_properties.rs`, 2000 seeded random fields each);
 - 5 relational field;
-- 17 structural consistency (I-SC-D3 to I-SC-D13).
+- 17 structural consistency (I-SC-D3 to I-SC-D13);
+- 14 δ in two parts and the record-boundary flag (`tests/v10_z1a_a3.rs`);
+- 7 grade independence (I-SC-D14);
+- 14 T8 and its enforcement (`tests/v10_topology_t8.rs`);
+- 12 K7 routes and cycle basis (`tests/v10_topology_k7.rs`);
+- 6 reverse check, kernel share (`tests/v10_reverse_check.rs`);
+- 5 relation identity (`tests/v10_relation_identity.rs`).
 
 Building without the `v9` feature is itself a check that no V10 module depends on a fenced element.
 
-`cargo test --features v9` runs all 213 tests:
+`cargo test --features v9` runs all 271 tests:
 - 63 library;
 - 3 `provenance_demo`;
 - 13 diagnostic execution (`tests/diagnostic_exec.rs`);
@@ -141,12 +147,13 @@ Building without the `v9` feature is itself a check that no V10 module depends o
 - 23 property tests;
 - 6 relational field;
 - 17 structural consistency;
+- the 58 V10.3 tests above (14 + 7 + 14 + 12 + 6 + 5);
 - 12 V9 admission (`tests/v9_admission.rs`);
 - 35 V9 conformance (`tests/v9_conformance.rs`);
 - 2 `compile_fail` doctests.
 
-*(Counts at the V10.2 release, package `10.2.0`, 2026-11-22. At the V10.1
-release they were 68 and 153.)* The four
+*(Counts at the V10.3 release, package `10.3.0`, 2026-11-22. At the V10.2
+release they were 121 and 213; at the V10.1 release, 68 and 153.)* The four
 `[V9-REQUIRED]` conformance tests exercise the bounded V9 admission interface
 (see Kernel V9 — RPPI Enforcement Status below). The two V10 tests that compare
 against V9 forms run only here, as declared historical comparisons.
@@ -181,10 +188,10 @@ identifiers remain only where needed to describe prior implementations,
 release history, or explicitly frozen source. Document-local revision numbers
 are historical identifiers, not alternate canonical kernel versions.
 The Rust package `abr-kernel` (library crate `abr_kernel`) is version
-`10.2.0`, the Kernel V10.2 release. Its operator formulas are unchanged from the
+`10.3.0`, the Kernel V10.3 release *(was `10.2.0`, V10.2)*. Its operator formulas are unchanged from the
 frozen V8 implementation (`8.0.0`). V10 adds the `ground_variables`,
-`relational_field` and `persistence_change` modules and the parameter-free
-circulation Ξ.
+`relational_field`, `persistence_change`, `topology` and `reverse_check`
+modules and the parameter-free circulation Ξ.
 
 **Kernel only.** This repository holds kernel items. Work on specific systems
 (the water vessel record, its ingest pipeline, the source-class register, the
@@ -286,6 +293,20 @@ Also:
 The derived properties PC-D1 to PC-D5 and I-SC-D1 to I-SC-D13 are tested by
 worked examples and by property tests over 2000 random fields
 (`tests/v10_properties.rs`).
+
+**`src/topology.rs`** (Kernel V10.3)
+Checks on a declared field, run at every V10 reading entry point
+(`admit_field`): relation identity, an id and a direction basis per edge
+(RPPI-V10 G-1); T8, where a self-relation is refused and a directed cycle is
+admitted only as a declared feedback loop with a stated basis. Also K7: route
+enumeration up to a stated limit, the two-route closure, and a cycle basis
+from a stated spanning tree, with any closed walk's closure as an exact
+combination of the basis closures.
+
+**`src/reverse_check.rs`** (Kernel V10.3)
+The kernel's share of the reverse check (B2, `docs/kernel/rppi_v10.md`):
+rebuilds A from the declared inputs and re-executes a reported PC1, PC2 or
+PC3 reading independently of the forms, returning MATCH or MISMATCH.
 
 **`examples/v10_relational_field.rs`** (Kernel V10)
 End-to-end template using only the public V10 API: declare relations, a
@@ -464,7 +485,19 @@ declared source.
 
 ---
 
-## Kernel V10 — Status at V10.2 (2026-11-22)
+## Kernel V10 — Status at V10.3 (2026-11-22)
+
+**Implemented in 10.3.0** (the "declared, not yet implemented" list of V10.2,
+kept below as written):
+- Z1a, δ in two parts, as corrected, with the gain-sign condition explicit;
+- the A-3 record-boundary flag;
+- the renames E6, E7 and OC-Z-1;
+- OC-SC-4 closed by I-SC-D14 (the held pattern and the sustained circulation are independent grades);
+- T8, enforced at the reading entry points (Origin);
+- K7 routes and cycle basis;
+- RPPI-V10 (Proposed): the admission spec, the kernel share of the reverse check, and relation identity as a kernel input (G-1, adopted by Origin).
+
+*Status at V10.2, as written:*
 
 **Declared and implemented:**
 - Df6 (simultaneity) and the three ground variables;
@@ -490,6 +523,8 @@ relational inertia (P-a to P-f). No registered record has yet been read.
 Item-by-item status: `docs/kernel/V10_README.md` Parts 6, 7 and 9, and
 `docs/kernel/OPEN_CONDITIONS_AUDIT_2026-11-22.md`. RPPI enforcement status below
 is unchanged from V9. RPPI admission for the V10 forms is Generator work.
+*[10.3.0: specified in `docs/kernel/rppi_v10.md` (Proposed), with the kernel
+share of the reverse check and relation identity implemented.]*
 
 ## Kernel V9 — RPPI Enforcement Status
 
@@ -550,6 +585,24 @@ preserve the provenance of earlier implementations; they do not designate
 V9 or V8 as the current canonical mathematical reference. The frozen V8
 operator implementation is an implementation baseline within the V9 and V10
 development record, not a second source of mathematical authority.
+
+### Kernel V10.3 package release (2026-11-22)
+
+- Package `abr-kernel` `10.2.0` → `10.3.0` (Origin decision, V10_README Part 9, 32nd).
+- **Implemented:**
+  - Z1a, δ in two parts (`Registration::with_run_constant`, `EdgeSeries::change_magnitude`, `EdgeSeries::with_run_constant`), with the gain-sign condition;
+  - the A-3 flag (`Sustained.boundary_conditioned`, `boundary_conditioned_edges`);
+  - T8 (`topology::check_t8`), enforced at every V10 reading entry point;
+  - K7 (`topology::routes`, `two_route_cycle`, `cycle_basis`, `express_in_basis`, `basis_closures`);
+  - the reverse check, kernel share (`reverse_check`);
+  - relation identity (`DeclaredRelations::with_identity`, `topology::check_identity`, `admit_field`).
+- **Derived:** I-SC-D14; OC-SC-4 closed.
+- **Renamed** (text and comments, originals kept beside): Φ "coherence density" (E6), Κ "connection density" (E7), σ = extent / δ → N_δ (OC-Z-1).
+- **Specified:** RPPI-V10 admission (`docs/kernel/rppi_v10.md`, Proposed).
+- **Corrected:** the T8 row claimed a check that did not exist.
+- **Breaking for V10 callers.** Every field read through a V10 entry point must declare an identity and a direction basis for each edge, and feedback for each directed cycle; otherwise the reading is refused with `DeclarationGap::RelationIdentity` or `DeclarationGap::T8`. `DeclarationGap` has two new variants, and `Registration`, `EdgeSeries`, `Sustained` and `DeclaredRelations` have new public fields. A record declared only with `Registration::new` reads as before. *Example (application):* the vessel ingest declares each relation's id and basis from its `edges.csv`.
+- **Tests:** 179 (default), 271 (`--features v9`). Kernel fixtures declare synthetic identities and feedback through test-only helpers marked SYNTHETIC. No existing reading changed.
+- **For verification before merge.**
 
 ### Kernel V10.2 package release (2026-11-22)
 
