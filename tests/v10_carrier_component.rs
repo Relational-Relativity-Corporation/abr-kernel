@@ -440,6 +440,47 @@ fn d17_iv_at_delta_a_carrier_mixed_with_structure_never_gains_resolution() {
     assert!(lost > 0 && left > 0 && kept > 0, "lost {lost}, pairs left {left}, kept {kept}");
 }
 
+#[test]
+fn d17_iv_the_one_way_result_belongs_to_the_bound_not_the_field() {
+    // The one-way result above is about resolution, not about structure and
+    // freedom. Over the sequence, relations move from structure to freedom
+    // and back (PC1, step to step, one field). Under the re-declaration,
+    // PC1 on the carrier (a different quantity) and PC3 (two states compared,
+    // PC-D2 as corrected) move both ways. Only the carrier–structure PC2(a)
+    // reading, whose value the mixing leaves fixed and whose bound it widens,
+    // moves one way (the test above).
+    let c = std::sync::Mutex::new([0usize; 6]);
+    for_all("d17_iv_both_ways", |r| {
+        let rel = random_rel(r);
+        let regs = r.usize(3, 5);
+        let f = random_field(r, rel.n_nodes, 2, regs, 0.25);
+        let pf = PersistenceChange::new(&series_of(&f, &rel).1);
+        let pm = PersistenceChange::new(&series_of(&mixed(&f, 1.0, r.eighth(-2.0, 2.0)), &rel).1);
+        let mut g = c.lock().unwrap();
+        let mut tally = |u: Reading, v: Reading, k: usize| match (u, v) {
+            (Reading::Structure, Reading::Freedom) => g[k] += 1,
+            (Reading::Freedom, Reading::Structure) => g[k + 1] += 1,
+            _ => {}
+        };
+        for x in &pf.relations {
+            if let Some(y) = pf.relations.iter().find(|y| y.step == x.step + 1 && y.component == x.component && y.edge == x.edge) {
+                tally(x.reading, y.reading, 0);
+            }
+        }
+        for (u, v) in pf.relations.iter().zip(&pm.relations) {
+            if u.component == 1 { tally(u.reading, v.reading, 2); }
+        }
+        let (af, am) = (pf.arrangement.as_ref().unwrap(), pm.arrangement.as_ref().unwrap());
+        for u in af {
+            if let Some(v) = am.iter().find(|v| (v.step, v.e, v.f, v.i, v.j) == (u.step, u.e, u.f, u.i, u.j)) {
+                tally(u.reading, v.reading, 4);
+            }
+        }
+    });
+    let g = c.into_inner().unwrap();
+    assert!(g.iter().all(|&n| n > 0), "over the sequence {:?}, PC1 on the carrier {:?}, PC3 {:?}", &g[0..2], &g[2..4], &g[4..6]);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // (v) Locked exchange and held arrangement are independent
 // ═══════════════════════════════════════════════════════════════════════════

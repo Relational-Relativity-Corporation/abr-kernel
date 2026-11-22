@@ -345,6 +345,8 @@ Origin directed the session to continue to the derived invariants (batch 2's rev
 
 **Tests:** `tests/v10_carrier_component.rs` (11). **243 (default), 335 (`v9`)**, no warnings. The application passes 44 against this kernel. Kernel `claude/inspiring-darwin-35a5fh` (started from `claude/vibrant-tesla-2fp7ve` at `544990e`).
 
+**Addendum (49th).** D17 (iv) clarified: the one-way result belongs to the bound, not the field, with a test requiring all six directions (structure to freedom and back, over the sequence, for PC1 on the carrier and for PC3 under re-declaration). A Proposed amendment of I-SC-1's scope (prepared constraints declared and held), for Origin. **244 (default), 336 (`v9`)**, no warnings.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*

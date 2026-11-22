@@ -1904,6 +1904,11 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            resolved at δ; persistence_change.rs) does not decrease across
 //            phase boundaries: the condensate end constrained, the plasma
 //            end free. The first statement is kept above for the record.
+//            [Proposed amendment (Generator, 2026-11-23, 49th; Origin to
+//            decide): "one declared system" includes its prepared
+//            constraints, declared and held. Pressure moves the energy at
+//            which freedom becomes evident at boiling; a family across
+//            constraints is a declared comparison (DD-1).]
 //   I-SC-2   Neither end is reached. At no registered state with at least
 //            two declared components is κ_δ exactly 0 or 1 (G1).
 //   I-SC-3   Identity-grade persistence. Relations registered independently
