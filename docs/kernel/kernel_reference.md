@@ -341,6 +341,11 @@ arrangement of declared relationships. A cyclic set of independently declared
 relations — for example a feedback loop between declared loci — is a declared
 relationship, admissible with provenance like any other.
 
+*Kernel V10.3 (2026-11-22): checked by `topology::check_t8` (T8). A
+self-relation is refused; every directed cycle must carry at least one edge
+declared feedback with a stated basis; opposite directions form a 2-cycle and
+need their own basis. See `V10_README.md` T8.*
+
 **Before Δ / Before A.** No transformation that alters pairwise differences
 precedes A or Δ unless declared within M. Admissible: uniform shift, declared
 unit scale. All else requires declaration with preserved and discarded

@@ -101,3 +101,8 @@ pub mod ground_variables;
 pub mod relational_field;
 
 pub mod persistence_change;
+
+// Kernel V10.3 — topology checks on a declared field: T8 (self-relations
+// refused; a directed cycle admitted only as a declared feedback loop with a
+// stated basis) and, with K7, route enumeration and a cycle basis.
+pub mod topology;
