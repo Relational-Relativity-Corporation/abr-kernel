@@ -106,9 +106,9 @@
 //     θ[e]   — B output vector direction
 //
 //   PART II — proposed framework-level invariants (open derivation):
-//     I-T    — tunneling               (open condition OC-T-3)
-//     I-S    — superposition           (OC-S-2, OC-S-3 open; OC-S-1 closed)
-//     I-E    — entanglement            (open condition OC-E-3)
+//     I-T    — tunneling               (OC-T-3 dissolved, G1-OC 2026-11-12; was: open)
+//     I-S    — superposition           (OC-S-3 dissolved 2026-11-12; OC-S-2 closed 2026-11-22; OC-S-1 closed; was: OC-S-2, OC-S-3 open)
+//     I-E    — entanglement            (OC-E-3 dissolved, G1-OC 2026-11-12; was: open)
 //     I-RE   — relational evolution    (open condition OC-RE-1)
 //     Joint necessity preamble         (framework-level observation)
 //
@@ -1694,7 +1694,8 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 // OC-T-2   Tunneling at scale: confirm tunneling floor in declared systems
 //          beyond Primary and Atomic regions — molecular, biological, planetary.
 //
-// OC-T-3   Tunneling necessity: formally derive that the absence of tunneling
+// OC-T-3   [DISSOLVED, G1-OC 2026-11-12; listed open here until 2026-11-22]
+//          Tunneling necessity: formally derive that the absence of tunneling
 //          (infinite barrier geometry at all edges) precludes energy transfer
 //          within D. Currently a framework-level necessity statement.
 //
@@ -1719,7 +1720,7 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //          The observation record at each region is preserved. The condition
 //          to confirm is now stated in framework-native terms.
 //
-// OC-S-3   OPEN — restated under new declaration, 2026-09-23.
+// OC-S-3   [DISSOLVED, G1-OC 2026-11-12; was: OPEN — restated under new declaration, 2026-09-23.]
 //          Previous statement: "Formally derive that rank(Im Δ) = 1 throughout
 //          a declared history precludes self-organization within D."
 //          Restated: formally derive that the absence of relational
@@ -1736,7 +1737,8 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 // OC-E-2   Decoherence rate: derive the rate at which 𝟙[e] → 0 as a
 //          function of declared environmental edge interactions through M.
 //
-// OC-E-3   Entanglement necessity: formally derive that 𝟙[e] = 0 everywhere
+// OC-E-3   [DISSOLVED, G1-OC 2026-11-12; listed open here until 2026-11-22]
+//          Entanglement necessity: formally derive that 𝟙[e] = 0 everywhere
 //          precludes collective organization within D. Currently a
 //          framework-level necessity statement.
 
