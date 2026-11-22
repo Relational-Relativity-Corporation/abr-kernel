@@ -1862,6 +1862,15 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            and per-entry gains (`EdgeSeries::closure_gain`, proposed
 //            correction). Table and tests: V10_README §2.6,
 //            `tests/v10_scale_invariance.rs`.
+//   I-SC-D16 Closure over a cycle basis (Proposed, Generator, 2026-11-23).
+//            (i) A closed walk's closure is Σ n_i·(basis closure i), n_i its
+//            net count of chord i, exactly, in state and on change. (ii) At δ
+//            every basis closure can hold while another cycle is resolved,
+//            and which are resolved depends on the stated tree. (iii) Every
+//            simple cycle holds at δ ⇔ some node field x puts every relation
+//            within its bound of x[s] − x[t] (difference constraints): the
+//            converse of PC-D4. (iv) A walk through a resolved chord can
+//            hold. V10_README §2.6, `tests/v10_closure_basis.rs`.
 //
 // OC-SC-4 (held pattern vs sustained circulation), partly derived: I-SC-D5
 // gives the sustained grade its own persistence condition; I-SC-D6 gives a

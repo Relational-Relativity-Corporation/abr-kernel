@@ -195,22 +195,46 @@ The Verifier named the first two. The Generator found the last two in the same r
 **The Verifier confirmed** the state at `3d8781c` (§13). **Origin directed the merge of both repositories**, with the A-3 summary as applied in §13. Merge order as in §9: the kernel to `main` first; then the application's `Cargo.lock` moved to the new kernel `main`, its tests rerun, and the application merged. Every commit kept.
 
 
-## 15. After the merge: I-SC-D15 and a closure finding (2026-11-23, for the Verifier)
+## 15. After the merge: post-merge batch 1, for the Verifier (2026-11-23)
 
-Not part of the signed-off state (§14). It is recorded here because it corrects 10.3.0 code.
+Not part of the signed-off state (§14). **This is a stopping point.** Origin chose derived invariants first, in the Generator's order. The first two are done, and the second rests on code the first corrects, so they are verified together before the next family (the circulation identities, items 3 and 4) begins.
 
-**Derivation.** I-SC-D15 (Proposed), V10_README §2.6 "I-SC-D15 in full": a scale leaves a form's classification unchanged on every field exactly when it gives each of the form's terms one factor. It is stated as a table of forms against kinds of scale.
+**Reproduce:** kernel branch `claude/vibrant-tesla-2fp7ve` at the commit that adds this section. `cargo test` gives 197 passed and `cargo test --features v9` gives 289, with no warnings. The application at `main` `94a89c1` passes 43 against this kernel with a local patch (run `cargo update -p abr-kernel` under the patch first; check that the local kernel compiles). It declares no gains and uses no closures.
 
-**Finding.** In (vi), applying the table to Z1a shows a gap in the 10.3.0 code. On edge-registered values, a declared per-edge gain (`EdgeGains::edge`) or per-entry gain (`EdgeGains::independent`) did not reach K7 closures (`cycle_closure`, `cycle_change_closure`, and so `basis_closures`). A closure sums one component across edges, so a factor that differs between edges moves it. The §12 disposition ("the shared parts enter `change_magnitude` only") holds for PC1, PC2 and PC3 only.
+**Items** (V10_README §2.6 and Part 9, 37th and 38th):
 
-**Proposed correction (Origin to confirm).** Each closure term's bound becomes h + γ·(|v| + h), with γ = (1 + γ_e)(1 + γ_ce) − 1. A per-component gain does not enter. With no gains declared, nothing changes. The reverse check does not cover closures (RPPI G-3), so nothing there mirrors it.
+| # | Item | Kind | Code change | Tests |
+| --- | --- | --- | --- | --- |
+| 1 | **I-SC-D15**, scale invariance stated whole | Derivation (Proposed) | none | `tests/v10_scale_invariance.rs` |
+| 2 | **K7 closures carry per-edge and per-entry gains** (I-SC-D15 (vi)) | **Correction of 10.3.0 code** (Proposed; Origin to confirm) | `EdgeSeries::closure_gain`; `cycle_closure`, `cycle_change_closure` | same file; the two closure tests failed on the 10.3.0 bound |
+| 3 | **I-SC-D10 qualified**: its implication holds for δ as repeatability alone | Qualifier beside the text | none (comment) | `isc_d10_with_an_offset_…` |
+| 4 | **I-SC-D16**, closure over a cycle basis | Derivation (Proposed) | none | `tests/v10_closure_basis.rs` |
 
-**To check:**
-- the table in §2.6 cell by cell, especially the per-registration column and the sign rule (iv);
-- that the closure widening covers the model: the interval argument in (vi), and `prop_z1a_declared_gains_never_reverse_a_resolved_closure`, which failed on the 10.3.0 bound;
-- the I-SC-D10 qualifier: with an offset declared, the change closure can resolve while both state closures hold.
+**Item 2, the finding.** On edge-registered values, a declared per-edge gain (`EdgeGains::edge`) or per-entry gain (`EdgeGains::independent`) did not reach K7 closures (`cycle_closure`, `cycle_change_closure`, and so `basis_closures`). A closure sums one component across edges, so a factor that differs between edges moves it. The §12 disposition ("the shared parts enter `change_magnitude` only") holds for PC1, PC2 and PC3 only.
 
-**Reproduce:** kernel branch `claude/vibrant-tesla-2fp7ve`. `cargo test` gives 193; `cargo test --features v9` gives 285, with no warnings. The application at `main` `94a89c1` passes 43 against this kernel with a local patch; it declares no gains and uses no closures.
+Example: on a triangle with values (1, 1, 2), a gain of 1/8 declared on the third edge permits 2.25 there. That gives a closure of −0.25, which 10.3.0 read against a bound of 0. **Correction:** each closure term's bound is h + γ·(|v| + h), with γ = (1 + γ_e)(1 + γ_ce) − 1. A per-component gain does not enter. With no gains declared, nothing changes. The reverse check does not cover closures (RPPI G-3), so nothing there mirrors it.
+
+**To check by hand:**
+1. The D15 table, cell by cell. The rule in (i), that one factor per term is equivalent to invariance on every field. The per-registration column (iii) and the sign rule (iv).
+2. The closure widening's interval argument (D15 (vi)). Inner sum Σ s_e (1 + γ′_e)(1 + γ′_ce)(v_e + ε_e), with the component factor taken out as a positive common factor.
+3. The D10 qualifier: with an offset declared, both state closures can hold while the change closure is resolved.
+4. D16 (i): the tree-edge argument for c_w = Σ n_i·c_{C_i}.
+5. D16 (ii): the diamond.
+6. D16 (iii): the difference-constraint equivalence, including the step from closed walks to simple cycles.
+
+**What the tests can and cannot tell apart:**
+- The D15 table test checks every cell both ways: a ✓ cell must hold on all 300 fields, and a ✗ cell must change at least one.
+- The identity and sustained-grade E and X cells are not reachable in code (those grades read node-derived fields only). They rest on the arithmetic and D14(i).
+- The energy row rests on (i) and a single-factor test.
+- D16 (iii) was run with a control: the wrong statement ("every basis closure holds") in place of "every simple cycle holds". The control failed.
+- D16 (ii) and the tree dependence are existence claims. The property test only requires them to occur, on near-node fields. The diamond is the worked case.
+
+**For Origin after the Verifier:**
+- declare or amend I-SC-D15 and I-SC-D16;
+- confirm the closure correction, and whether it ships as 10.3.1;
+- whether the kernel should gain an all-cycles closure test (D16 (iii), by shortest paths).
+
+The `V10_README.md` header still reads package `10.2.0`, which has been stale since 10.3.0.
 
 ---
 

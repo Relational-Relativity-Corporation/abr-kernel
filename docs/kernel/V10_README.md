@@ -326,7 +326,7 @@ HOLD items carried from V8: `are_proportional` is edge-order dependent when a Δ
 
 Code: `src/persistence_change.rs` (`EdgeSeries`, `relation_changes`, `coupling_across_components`, `coupling_across_steps`, `arrangement_steps`, `PersistenceChange`, `coupled_change_pairs`); `GroundReading::freedom` is the PC reading. Drafted as Proposed in `dffee32`; **Declared (Origin, 2026-11-21, 7th).**
 
-## 2.6 Derived structural consistency (I-SC-D3 to I-SC-D14; I-SC-D15 Proposed)
+## 2.6 Derived structural consistency (I-SC-D3 to I-SC-D14; I-SC-D15, I-SC-D16 Proposed)
 
 Mathematical results on the V10 forms (Derived, Generator 2026-11-21; for Verifier review). Each is checked by a worked example in `tests/v10_structural_consistency.rs` and by a property test over 2000 random fields in `tests/v10_properties.rs`, and stated in `derived_invariants.rs` Part II. They establish how the forms relate, nothing empirical.
 
@@ -345,6 +345,7 @@ Mathematical results on the V10 forms (Derived, Generator 2026-11-21; for Verifi
 | **I-SC-D13** | For any coarsening into G groups, #(groups resolved with one sign throughout) ≤ Γ_coarse ≤ G | The counted rate of relational evolution is bounded, not fixed, under omitted registrations |
 | **I-SC-D14** | (i) A per-edge positive scaling A[·][e] → λ_e·A[·][e] multiplies m_ij(e, f) by λ_e·λ_f > 0, so it keeps every minor's sign, while Ξ(B(A)) is linear within a component and mixes neighbouring edges, so it can reverse a circulation. (ii) Mixing two components by a 2×2 matrix R multiplies every minor by det R and maps Ξ(B(A)) to R·Ξ(B(A)). A swap (det −1) reverses every minor and keeps each circulation sign wherever the two components' circulations agree in sign; −swap reverses both; persistence holds both | **The held minor pattern and the sustained circulation are independent grades:** all four combinations (held/held, held/reorganizing, reorganizing/held, reorganizing/reorganizing) occur on one declaration at one δ, so neither implies the other. They are read side by side, each with its own persistence condition (D1, D5). Closes OC-SC-4. `tests/v10_grade_independence.rs` (worked example per case through `minor_histories` and the sustained grade; property test of (i) and (ii) over 2000 random fields) |
 | **I-SC-D15** *(Proposed, Generator, 2026-11-23, 37th)* | **Scale invariance, stated whole.** A scale multiplies each entry by λ[c][e] ≠ 0, value and repeatability bound together. A form keeps its classification on every field exactly when the scale gives every term of the form one common factor. The table below gives, for each form, the kinds of scale it passes | Which readings survive which scales, in one table: PC1 and PC2(b) survive any factor fixed over the run; minors that mix components (PC2(a), PC3) need a separable factor; sums across edges (identity, Ξ, K7 closures) need one factor per component. Collects PC-D3, the gain-sign condition, D6 and D14(i). Applied to Z1a, it finds that K7 closures did not carry declared per-edge or per-entry gains (correction proposed). `tests/v10_scale_invariance.rs` |
+| **I-SC-D16** *(Proposed, Generator, 2026-11-23, 38th)* | **Closure over a cycle basis** (I-SC-D10 with K7). (i) Exactly, in state and on change: a closed walk's closure is Σ n_i·(basis closure i), with n_i the walk's net count of chord i. (ii) At δ, every basis closure can hold while another cycle is resolved, and which basis closures are resolved depends on the stated tree. (iii) Every simple cycle holds at δ exactly when some node field x puts every relation within its bound of x[s] − x[t]. (iv) A walk through the chord of a resolved basis closure can still hold | Exactly (δ = 0), the basis settles every cycle. At δ it does not, so a basis reading is reported with its tree and never as "every cycle closes". A resolved closure is what node values could never give: it is the content of an edge-registered field (ER-1). `tests/v10_closure_basis.rs` |
 
 **OC-SC-4**, the relation between held minor pattern and sustained circulation, is partly derived: D5 gives the sustained grade its own persistence condition, and D6 a common sufficient condition under which both hold. A general relation remains open. **[Closed, 10.3.0, 2026-11-22 (26th): I-SC-D14. The general relation is independence: neither grade implies the other, and they are read side by side. D6 remains a common sufficient condition for both to hold.]**
 
@@ -406,6 +407,45 @@ For a single minor the exact condition is λ_ie·λ_jf = λ_je·λ_if, which eve
 - **I-SC-D10 qualified**, with an offset: the example in the D10 row.
 
 The E and X cells for identity and the sustained grade rest on (i) and D14(i). The energy row rests on (i) and the existing single-factor test, `prop_energy_readings_invariant_under_carrier_rescaling`.
+
+### I-SC-D16 in full (Proposed, Generator, 2026-11-23, 38th)
+
+**Object.** An edge-registered series, a stated spanning tree (one per connected part) and its fundamental cycles C_1 … C_r, one per chord (K7, `cycle_basis`). A closed walk w has signed edge counts c_w(e) (+1 along, −1 against, summed over its occurrences). Its closure on an edge field g is Σ_e c_w(e)·g[e]. Its bound is the sum of the term bounds over its occurrences: δA in state, δΔ on change, each widened by the gains that differ between edges (I-SC-D15 (vi)).
+
+**(i) Exact decomposition.** Let n_i = c_w(chord_i). Then c_w − Σ n_i·c_{C_i} is a cycle vector on tree edges alone, and a tree carries none, so c_w = Σ n_i·c_{C_i}. Hence, for every edge field:
+- in state: closure_w(A_t) = Σ n_i·closure_{C_i}(A_t);
+- on change: closure_w(Δ_s) = Σ n_i·closure_{C_i}(Δ_s) = closure_w(A_{s+1}) − closure_w(A_s) (I-SC-D10).
+
+So |closure_w| ≤ Σ |n_i|·|closure_{C_i}|. If every basis closure holds, |closure_w| ≤ Σ |n_i|·h_{C_i}. `express_in_basis` already gave this for the state value; it now holds and is tested on change too.
+
+**(ii) At δ the basis does not settle every cycle.** Fundamental cycles share tree edges. A walk that combines them can cancel a shared edge's value but not its bound in the sum Σ |n_i|·h_{C_i}. Its own bound counts that edge only where the walk uses it. Worked example, the diamond 0→1→2, 0→2, 0→3→2:
+- every bound is 1/8, with e0 = 3/8, e4 = −3/8 and the rest 0;
+- with tree {e2, e0, e3}, both basis closures hold at their bound (3/8 and −3/8 against 3/8);
+- the outer cycle 0→1→2←3←0 reads 6/8 against its own 4/8, so it is resolved;
+- with tree {e0, e1, e3}, one basis closure is resolved (−6/8 against 4/8).
+
+So the number of resolved basis closures depends on the stated tree. "Every basis closure holds" is a reading of that basis, reported with its tree. It does not mean every cycle closes. At δ = 0 the basis does settle every cycle: all basis closures 0 ⇔ every closure 0.
+
+**(iii) Every cycle holds ⇔ within δ of a node difference.** Every simple cycle holds at δ exactly when there is a node field x with |g[e] − (x[s] − x[t])| ≤ b[e] for every relation. Here b[e] is the term bound the closures use. Proof: these are difference constraints. They are feasible exactly when no cycle of the constraint graph has negative weight, and a cycle traversing w has weight Σ b − closure_w or Σ b + closure_w. A closed walk decomposes into simple cycles whose bounds add, so simple cycles suffice. The same holds on change, with Δ and δΔ.
+
+This is the converse of PC-D4. A node-derived field closes every cycle by identity, and an edge-registered field that holds every closure at δ is consistent at δ with one. **A resolved closure is a reading that no node-derived field could give.** That reading is the content of ER-1. The node field x is a mathematical witness in the proof and in the test. It is never constructed or reported by a reading (§2.0).
+
+**(iv) A failing chord does not fail every walk through it.** closure_w = n_i·closure_{C_i} + Σ_{j≠i} n_j·closure_{C_j}, and the other terms can cancel it. It is sufficient, not necessary, for w to be resolved that |n_i·closure_{C_i}| − Σ_{j≠i} |n_j|·|closure_{C_j}| exceeds w's own bound. In the diamond with tree {e0, e1, e3}, the triangle 0→3→2→0 passes through chord e4, whose basis closure is resolved, and holds: −3/8 against 3/8.
+
+**What it implies for readings.**
+- A closure reading over a basis states its tree.
+- "Every cycle closes at δ" needs every simple cycle, or the equivalent difference-constraint test.
+- A resolved basis closure is itself a resolved cycle, whatever the tree.
+
+The kernel has no all-cycles test yet. One could check (iii) in polynomial time by shortest paths, which is engineering for Origin to decide.
+
+**Tests** (`tests/v10_closure_basis.rs`, 4):
+- **(i)** over 300 random fields and closed walks, with repeated edges allowed: the exact combination in state and change, and D10's difference;
+- **the diamond, worked:** (ii), the tree dependence, (iii) and (iv);
+- **(ii) over 300 near-node fields:** a resolved basis closure always means a resolved cycle. The test requires some fields where the basis holds but a cycle is resolved, and some where the count depends on the tree;
+- **(iii) over 300 fields, some with declared gains:** every simple cycle holds ⇔ a node field fits, in state and change. The node field is found by Bellman–Ford and checked directly. Both sides must occur on fields with cycles.
+
+A control run that put "every basis closure holds" in place of "every simple cycle holds" failed, as it should.
 
 ---
 
@@ -562,6 +602,7 @@ The E and X cells for identity and the sustained grade rest on (i) and D14(i). T
 | 2026-11-22 (35th) | **The Verifier's second 10.3.0 review.** (1) **Gain bounds under the scaling model:** a gain scales the value with its repeatability bound, so every gain term is h + γ·(\|v\| + h); the code had dropped γ·h in `change_magnitude` (the Verifier's case), in the independent-gain widening for PC2(a) and PC3, and in the node-derived per-locus gain (found by the Generator). Corrected in the kernel and the reverse check; covered by a corner test of the model that fails under the old formula. (2) **A-3 summary**, the Verifier's recommendation: flagged edges stay in the per-edge lists; the headline share counts edges with both sides registered; flagged edges are reported apart. Origin to confirm. 186 tests (default), 278 (`v9`) | Z1a; A-3 |
 | 2026-11-22 (36th) | **Verifier sign-off on 10.3.0** at `3d8781c`; **Origin directs the merge of both repositories**, with the A-3 summary as applied (35th). Kernel merged first; the application's `Cargo.lock` then moved to the new kernel `main` and merged. Every commit kept | Release; merge |
 | 2026-11-23 (37th) | **I-SC-D15 proposed (Generator): scale invariance stated whole**, the first derivation of the session, chosen by Origin. (1) One rule: a form keeps its classification exactly when a scale gives each of its terms one factor. It is stated as a table over kinds of scale (per component, per edge, separable, per entry; over the run or per registration; sign). (2) Applied to Z1a, it finds that **K7 closures did not carry declared per-edge or per-entry gains** on edge-registered values. A correction is proposed (`closure_gain`) and applied on the working branch. **Origin to confirm.** (3) **I-SC-D10 qualified:** its implication holds for δ as repeatability alone. With an offset declared, the change can resolve while both states hold. 193 tests (default), 285 (`v9`); application 43 against this kernel, unchanged | I-SC-D15; Z1a; I-SC-D10 |
+| 2026-11-23 (38th) | **I-SC-D16 proposed (Generator): closure over a cycle basis.** (i) Every closed walk's closure is the chord combination of the basis closures, exactly, in state and change. (ii) At δ every basis closure can hold while another cycle is resolved, and the count depends on the stated tree. (iii) Every simple cycle holds at δ ⇔ the field is within its bounds of some node difference: the converse of PC-D4, so a resolved closure is what node values could never give. (iv) A walk through a resolved chord can hold. No code change. **Stopping point for the Verifier:** I-SC-D15, the closure correction, the D10 qualifier and I-SC-D16 (verification package §15). 197 tests (default), 289 (`v9`) | I-SC-D16; verification |
 
 ---
 
