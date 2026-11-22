@@ -190,6 +190,10 @@ The Verifier named the first two. The Generator found the last two in the same r
 
 **Review this state:** kernel `claude/kind-keller-is6bq1` at the commit that adds this section; chemistry unchanged at `9762324`.
 
+## 14. Sign-off and merge (2026-11-22)
+
+**The Verifier confirmed** the state at `3d8781c` (§13). **Origin directed the merge of both repositories**, with the A-3 summary as applied in §13. Merge order as in §9: the kernel to `main` first; then the application's `Cargo.lock` moved to the new kernel `main`, its tests rerun, and the application merged. Every commit kept.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*
