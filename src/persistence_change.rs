@@ -149,6 +149,15 @@ pub enum EdgeOrigin {
 /// scales Δ there by one positive factor (PC1), and over one component the
 /// same entries carry the same factor at both steps (PC2(b)), so neither
 /// classification changes.
+///
+/// **Closures (proposed correction, Generator, 2026-11-23; I-SC-D15 (v);
+/// Origin to confirm).** A K7 closure Σ s_e·A[c][e] sums one component across
+/// edges. A factor per component multiplies the whole sum and changes no
+/// closure. A factor that differs between edges does not, so a gain per edge
+/// and an independent gain both enter the closure bound, as γ·(|v| + h) on
+/// each term (`closure_gain`). *Was (10.3.0):* the shared edge gain entered
+/// `change_magnitude` only, and neither gain reached `cycle_closure` or
+/// `cycle_change_closure`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct EdgeSeries {
     /// a[t][c][e]
@@ -160,13 +169,21 @@ pub struct EdgeSeries {
     /// Unshared-gain part of the change bound [step][c][e]: γ_s·|Δx_s| + γ_t·|Δx_t| (Z1a).
     pub dgain: Vec<Vec<Vec<f64>>>,
     /// Shared gain bound [c][e] (a component factor times an edge factor):
-    /// enters reported change magnitudes only (Z1a).
+    /// enters reported change magnitudes only (Z1a). *Qualified
+    /// (2026-11-23, I-SC-D15 (v)): "only" holds for PC1, PC2 and PC3. Its
+    /// edge part also enters K7 closures, through `closure_gain`.*
     pub shared_gain: Vec<Vec<f64>>,
     /// Independent gain bound [c][e] on edge-registered values: enters the
     /// bound of every minor that mixes components (PC2(a), PC3) and reported
     /// magnitudes. Zero for node-derived series, whose unshared gains are
     /// already in `da` and `dgain`.
     pub mixed_gain: Vec<Vec<f64>>,
+    /// Gain bound [c][e] that differs between the edges of one component:
+    /// (1 + γ_e)(1 + γ_ce) − 1 from the edge and independent parts. Enters the
+    /// bound of every term of a K7 closure (I-SC-D15 (v)). Zero for
+    /// node-derived series, whose closures are 0 by identity and whose
+    /// unshared gains are already in `da` and `dgain`.
+    pub closure_gain: Vec<Vec<f64>>,
     pub origin: EdgeOrigin,
     /// Edge pairs whose coupling the declaration fixes (PC-D4).
     pub forced_pairs: Vec<(usize, usize)>,
@@ -207,7 +224,8 @@ impl EdgeSeries {
             }
         }
         let mixed_gain = vec![vec![0.0; rel.n_edges()]; k];
-        Ok(EdgeSeries { a, da, da_rep, dgain, shared_gain, mixed_gain, origin: EdgeOrigin::NodeDerived, forced_pairs })
+        let closure_gain = mixed_gain.clone();
+        Ok(EdgeSeries { a, da, da_rep, dgain, shared_gain, mixed_gain, closure_gain, origin: EdgeOrigin::NodeDerived, forced_pairs })
     }
 
     /// From a registered value per declared edge and component, with δ per
@@ -230,6 +248,7 @@ impl EdgeSeries {
             dgain: vec![vec![vec![0.0; m]; k]; steps],
             shared_gain: vec![vec![0.0; m]; k],
             mixed_gain: vec![vec![0.0; m]; k],
+            closure_gain: vec![vec![0.0; m]; k],
             da_rep: da.clone(),
             a, da, origin: EdgeOrigin::EdgeRegistered, forced_pairs: Vec::new(),
         })
@@ -260,6 +279,8 @@ impl EdgeSeries {
         }
         self.shared_gain = (0..k).map(|c| (0..m)
             .map(|e| (1.0 + gains.component[c]) * (1.0 + gains.edge[e]) - 1.0).collect()).collect();
+        self.closure_gain = (0..k).map(|c| (0..m)
+            .map(|e| (1.0 + gains.edge[e]) * (1.0 + gains.independent[c][e]) - 1.0).collect()).collect();
         self.mixed_gain = gains.independent;
         self
     }
@@ -300,6 +321,15 @@ impl EdgeSeries {
     fn mixed(&self, v: &[Vec<f64>], dv: &[Vec<f64>]) -> Vec<Vec<f64>> {
         (0..self.k()).map(|c| (0..self.n_edges())
             .map(|e| dv[c][e] + self.mixed_gain[c][e] * (v[c][e].abs() + dv[c][e])).collect()).collect()
+    }
+
+    /// Bounds for the terms of a K7 closure: each entry's bound widened by the
+    /// gain that differs between edges, h + γ·(|v| + h) (I-SC-D15 (v)). As in
+    /// `mixed`, h includes any offset bound, so the state closure is
+    /// conservative there.
+    fn closure_bounds(&self, v: &[Vec<f64>], dv: &[Vec<f64>]) -> Vec<Vec<f64>> {
+        (0..self.k()).map(|c| (0..self.n_edges())
+            .map(|e| dv[c][e] + self.closure_gain[c][e] * (v[c][e].abs() + dv[c][e])).collect()).collect()
     }
 
     fn is_forced(&self, e: usize, f: usize) -> bool { self.forced_pairs.contains(&(e, f)) }
@@ -636,11 +666,19 @@ pub fn coupled_change_pairs(pc: &PersistenceChange) -> Result<Vec<(usize, usize)
 // order of analysis (Df2a); no edge is reversed. The closure at registration
 // t is A_cyc = Σ s_e·A_t[c][e], half-width Σ δA_t[c][e]; it holds at δ when
 // |A_cyc| ≤ its half-width. On a node-derived series it is 0 by identity
-// (PC-D4); only edge-registered values make it a test.
+// (PC-D4); only edge-registered values make it a test. A declared gain that
+// differs between edges (per edge, or per entry) widens each term's bound to
+// h + γ·(|v| + h); a gain per component does not enter (I-SC-D15 (v);
+// proposed correction, 2026-11-23).
 //
 // I-SC-D10 (Derived): the closure of the change Σ s_e·Δ_s[c][e] equals
 // A_cyc(s+1) − A_cyc(s), with half-width Σ δΔ_s[c][e]. If closure holds at δ
-// at both registrations, it holds on the change. The converse fails: an
+// at both registrations, it holds on the change *(qualified, 2026-11-23: when
+// δ is repeatability alone; with a Z1a offset declared, the state bounds
+// carry the offset and the change bound does not, so the change can resolve
+// while both states hold, correctly. Test
+// `isc_d10_with_an_offset_the_change_can_resolve_while_both_states_hold`)*.
+// The converse fails: an
 // inconsistency fixed over the step (a calibration offset around the cycle)
 // cancels in the change. Persistent chain structure (W9) is read in state;
 // change closure reads only what changed.
@@ -672,7 +710,8 @@ fn closure_of(a: &[Vec<f64>], da: &[Vec<f64>], cycle: &[(usize, i8)], c: usize) 
 pub fn cycle_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], t: usize, c: usize)
     -> Option<(f64, f64)>
 {
-    is_closed_walk(rel, cycle).then(|| closure_of(&series.a[t], &series.da[t], cycle, c))
+    let a = &series.a[t];
+    is_closed_walk(rel, cycle).then(|| closure_of(a, &series.closure_bounds(a, &series.da[t]), cycle, c))
 }
 
 /// Closure of the change over step s. `None` when `cycle` is not a closed walk.
@@ -680,7 +719,7 @@ pub fn cycle_change_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle:
     -> Option<(f64, f64)>
 {
     let (d, dd) = series.change(s);
-    is_closed_walk(rel, cycle).then(|| closure_of(&d, &dd, cycle, c))
+    is_closed_walk(rel, cycle).then(|| closure_of(&d, &series.closure_bounds(&d, &dd), cycle, c))
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

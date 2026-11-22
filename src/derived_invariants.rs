@@ -1847,6 +1847,21 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            declaration at one δ (`tests/v10_grade_independence.rs`), so
 //            neither grade implies the other; they are read side by side,
 //            each with its own persistence condition (D1, D5).
+//   I-SC-D15 Scale invariance, stated whole (Proposed, Generator,
+//            2026-11-23). A scale multiplies each entry by λ[c][e] ≠ 0,
+//            value and repeatability bound together. A form keeps its
+//            classification on every field exactly when the scale gives
+//            every term the same factor. So PC1 and PC2(b) pass any factor
+//            fixed over the run. PC2(a), PC3 and the proportional grade need
+//            λ_ie·λ_jf = λ_je·λ_if (separable factors). Identity, the
+//            sustained grade and K7 closures need one factor per component.
+//            State forms also pass a positive factor that differs between
+//            registrations; change forms do not. A negative factor fixed over
+//            the run reverses signs only. For Z1a, a gain of a failing kind
+//            must enter the form's bound: K7 closures now carry the per-edge
+//            and per-entry gains (`EdgeSeries::closure_gain`, proposed
+//            correction). Table and tests: V10_README §2.6,
+//            `tests/v10_scale_invariance.rs`.
 //
 // OC-SC-4 (held pattern vs sustained circulation), partly derived: I-SC-D5
 // gives the sustained grade its own persistence condition; I-SC-D6 gives a

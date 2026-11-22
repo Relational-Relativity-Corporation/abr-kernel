@@ -194,6 +194,24 @@ The Verifier named the first two. The Generator found the last two in the same r
 
 **The Verifier confirmed** the state at `3d8781c` (§13). **Origin directed the merge of both repositories**, with the A-3 summary as applied in §13. Merge order as in §9: the kernel to `main` first; then the application's `Cargo.lock` moved to the new kernel `main`, its tests rerun, and the application merged. Every commit kept.
 
+
+## 15. After the merge: I-SC-D15 and a closure finding (2026-11-23, for the Verifier)
+
+Not part of the signed-off state (§14). It is recorded here because it corrects 10.3.0 code.
+
+**Derivation.** I-SC-D15 (Proposed), V10_README §2.6 "I-SC-D15 in full": a scale leaves a form's classification unchanged on every field exactly when it gives each of the form's terms one factor. It is stated as a table of forms against kinds of scale.
+
+**Finding.** In (vi), applying the table to Z1a shows a gap in the 10.3.0 code. On edge-registered values, a declared per-edge gain (`EdgeGains::edge`) or per-entry gain (`EdgeGains::independent`) did not reach K7 closures (`cycle_closure`, `cycle_change_closure`, and so `basis_closures`). A closure sums one component across edges, so a factor that differs between edges moves it. The §12 disposition ("the shared parts enter `change_magnitude` only") holds for PC1, PC2 and PC3 only.
+
+**Proposed correction (Origin to confirm).** Each closure term's bound becomes h + γ·(|v| + h), with γ = (1 + γ_e)(1 + γ_ce) − 1. A per-component gain does not enter. With no gains declared, nothing changes. The reverse check does not cover closures (RPPI G-3), so nothing there mirrors it.
+
+**To check:**
+- the table in §2.6 cell by cell, especially the per-registration column and the sign rule (iv);
+- that the closure widening covers the model: the interval argument in (vi), and `prop_z1a_declared_gains_never_reverse_a_resolved_closure`, which failed on the 10.3.0 bound;
+- the I-SC-D10 qualifier: with an offset declared, the change closure can resolve while both state closures hold.
+
+**Reproduce:** kernel branch `claude/vibrant-tesla-2fp7ve`. `cargo test` gives 193; `cargo test --features v9` gives 285, with no warnings. The application at `main` `94a89c1` passes 43 against this kernel with a local patch; it declares no gains and uses no closures.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*
