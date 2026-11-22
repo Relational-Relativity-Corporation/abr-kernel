@@ -54,59 +54,68 @@ impl Inputs<'_> {
         match self { Inputs::Nodes { seq, .. } => seq.len(), Inputs::Edges { a, .. } => a.len() }
     }
     /// A at (t, c, e), rebuilt from the inputs.
-    fn a(&self, t: usize, c: usize, e: usize) -> f64 {
+    // Exact re-derivation (OC-NUM-1, 45th), written apart from the forms:
+    // values exact and compared after rounding once, bounds exact and
+    // compared after rounding up, readings decided exactly. *Was:* f64 in
+    // sequence, mirroring the forms' former arithmetic.
+    fn a(&self, t: usize, c: usize, e: usize) -> X {
         match self {
-            Inputs::Nodes { seq, rel } => { let (s, u) = rel.edges[e]; seq[t].x.data[c][s] - seq[t].x.data[c][u] }
-            Inputs::Edges { a, .. } => a[t][c][e],
+            Inputs::Nodes { seq, rel } => { let (s, u) = rel.edges[e]; X::diff(seq[t].x.data[c][s], seq[t].x.data[c][u]) }
+            Inputs::Edges { a, .. } => X::of(a[t][c][e]),
         }
     }
-    /// State bound of A at (t, c, e) (Z1a): repeatability + offset + unshared
-    /// gain on the value, at both ends.
-    fn state_hw(&self, t: usize, c: usize, e: usize) -> f64 {
+    /// The state bound as the forms store it: each locus's exact bound, the
+    /// two ends' sum rounded up.
+    fn state_hw(&self, t: usize, c: usize, e: usize) -> X {
         match self {
             Inputs::Nodes { seq, rel } => {
                 let (s, u) = rel.edges[e];
                 let r = &seq[t];
-                let at = |i: usize| r.delta[c][i] + r.offset[c][i] + r.locus_gain[c][i] * (r.x.data[c][i].abs() + r.delta[c][i]);
-                at(s) + at(u)
+                let at = |i: usize| {
+                    let mut h = X::of(r.delta[c][i]);
+                    h.add(r.offset[c][i]);
+                    h.add_product(r.locus_gain[c][i], r.x.data[c][i].abs());
+                    h.add_product(r.locus_gain[c][i], r.delta[c][i]);
+                    h
+                };
+                X::of(at(s).plus(&at(u)).up())
             }
-            Inputs::Edges { delta, offset, .. } => delta[t][c][e] + offset[c][e],
+            Inputs::Edges { delta, offset, .. } => X::of(sum_up([delta[t][c][e], offset[c][e]])),
         }
     }
-    /// Δ over step s at (c, e) and its change bound (Z1a): repeatability of
-    /// both registrations plus the unshared gain on each end's own change.
-    fn change(&self, s: usize, c: usize, e: usize) -> (f64, f64) {
-        let d = self.a(s + 1, c, e) - self.a(s, c, e);
+    fn change(&self, s: usize, c: usize, e: usize) -> (X, X) {
+        let d = self.a(s + 1, c, e).minus(&self.a(s, c, e));
         let hw = match self {
             Inputs::Nodes { seq, rel } => {
                 let (p, q) = rel.edges[e];
                 let (r0, r1) = (&seq[s], &seq[s + 1]);
-                let rep = r1.delta[c][p] + r1.delta[c][q] + (r0.delta[c][p] + r0.delta[c][q]);
+                // The stored parts, each rounded up as the forms store them.
+                let rep = |r: &Registration| sum_up([r.delta[c][p], r.delta[c][q]]);
                 let g = &r0.locus_gain[c];
-                let dx = |i: usize| (r1.x.data[c][i] - r0.x.data[c][i]).abs() + (r0.delta[c][i] + r1.delta[c][i]);
-                rep + (g[p] * dx(p) + g[q] * dx(q))
+                let dx = |i: usize| X::diff(r1.x.data[c][i], r0.x.data[c][i]).abs().plus(&X::of(r0.delta[c][i])).plus(&X::of(r1.delta[c][i]));
+                let gain = dx(p).times_f64(g[p]).plus(&dx(q).times_f64(g[q])).up();
+                let mut h = X::of(rep(r1)); h.add(rep(r0)); h.add(gain);
+                h
             }
-            Inputs::Edges { delta, .. } => delta[s + 1][c][e] + delta[s][c][e],
+            Inputs::Edges { delta, .. } => { let mut h = X::of(delta[s + 1][c][e]); h.add(delta[s][c][e]); h }
         };
         (d, hw)
     }
-    /// The bound of an entry inside a minor that mixes components: widened by
-    /// the independent gain on the entry's value (edge-registered only).
-    fn mixing(&self, c: usize, e: usize, v: f64, hw: f64) -> f64 {
-        match self { Inputs::Nodes { .. } => hw, Inputs::Edges { independent_gain, .. } => hw + independent_gain[c][e] * (v.abs() + hw) }
+    fn mixing(&self, c: usize, e: usize, v: &X, hw: &X) -> X {
+        match self { Inputs::Nodes { .. } => hw.clone(), Inputs::Edges { independent_gain, .. } => gain_widened(v, hw, independent_gain[c][e]) }
     }
     fn forced(&self, e: usize, f: usize) -> bool {
         match self { Inputs::Nodes { rel, .. } => rel.edges[e] == rel.edges[f], Inputs::Edges { .. } => false }
     }
 }
 
-fn hw_product(x: f64, dx: f64, y: f64, dy: f64) -> f64 { x.abs() * dy + y.abs() * dx + dx * dy }
+use crate::exact::{exceeds, gain_widened, product_bound, sum_up, Expansion as X};
 
-fn at_delta(v: f64, hw: f64) -> AtDelta<Sign> {
-    if v.abs() > hw { AtDelta::Resolved(if v > 0.0 { Sign::Positive } else { Sign::Negative }) } else { AtDelta::NotResolved }
+fn at_delta(v: &X, hw: &X) -> AtDelta<Sign> {
+    if exceeds(v, hw) { AtDelta::Resolved(if v.signum() > 0 { Sign::Positive } else { Sign::Negative }) } else { AtDelta::NotResolved }
 }
 
-fn reading_of(v: f64, hw: f64) -> Reading { if v.abs() > hw { Reading::Freedom } else { Reading::Structure } }
+fn reading_of(v: &X, hw: &X) -> Reading { if exceeds(v, hw) { Reading::Freedom } else { Reading::Structure } }
 
 fn identity_in_range(inp: &Inputs, step_last: usize, comps: &[usize], edges: &[usize]) -> Option<Verdict> {
     if step_last >= inp.regs() { return Some(mismatch("step", step_last, inp.regs() - 1)); }
@@ -119,9 +128,9 @@ fn identity_in_range(inp: &Inputs, step_last: usize, comps: &[usize], edges: &[u
 pub fn reverse_relation(inp: Inputs, x: &RelationChange) -> Verdict {
     if let Some(v) = identity_in_range(&inp, x.step + 1, &[x.component], &[x.edge]) { return v; }
     let (d, hw) = inp.change(x.step, x.component, x.edge);
-    if d != x.change { return mismatch("change", x.change, d); }
-    if hw != x.half_width { return mismatch("half_width", x.half_width, hw); }
-    let r = reading_of(d, hw);
+    if d.nearest() != x.change { return mismatch("change", x.change, d.nearest()); }
+    if hw.up() != x.half_width { return mismatch("half_width", x.half_width, hw.up()); }
+    let r = reading_of(&d, &hw);
     if r != x.reading { return mismatch("reading", x.reading, r); }
     Verdict::Match
 }
@@ -140,20 +149,20 @@ pub fn reverse_coupling(inp: Inputs, x: &ChangeCoupling) -> Verdict {
     if inp.forced(x.e, x.f) { return mismatch("pair admissible (not a declared identity, PC-D4)", true, false); }
     let (xe, xf) = (inp.change(s0, c0, x.e), inp.change(s0, c0, x.f));
     let (ye, yf) = (inp.change(s1, c1, x.e), inp.change(s1, c1, x.f));
-    let moved = |p: (f64, f64), q: (f64, f64)| p.0.abs() > p.1 || q.0.abs() > q.1;
-    if !moved(xe, ye) || !moved(xf, yf) {
+    let moved = |p: &(X, X), q: &(X, X)| exceeds(&p.0, &p.1) || exceeds(&q.0, &q.1);
+    if !moved(&xe, &ye) || !moved(&xf, &yf) {
         return mismatch("edges entered (change resolved in either reading, PC1)", true, false);
     }
-    let minor = xe.0 * yf.0 - ye.0 * xf.0;
+    let minor = xe.0.times(&yf.0).minus(&ye.0.times(&xf.0));
     // A minor across components carries the independent gains; across steps
     // (one component) it does not.
     let mixes = matches!(x.over, ReadingPair::Components { .. });
-    let h = |c: usize, e: usize, p: (f64, f64)| if mixes { inp.mixing(c, e, p.0, p.1) } else { p.1 };
-    let (hxe, hxf, hye, hyf) = (h(c0, x.e, xe), h(c0, x.f, xf), h(c1, x.e, ye), h(c1, x.f, yf));
-    let hw = hw_product(xe.0, hxe, yf.0, hyf) + hw_product(ye.0, hye, xf.0, hxf);
-    if minor != x.minor { return mismatch("minor", x.minor, minor); }
-    if hw != x.half_width { return mismatch("half_width", x.half_width, hw); }
-    let r = reading_of(minor, hw);
+    let h = |c: usize, e: usize, p: &(X, X)| if mixes { inp.mixing(c, e, &p.0, &p.1) } else { p.1.clone() };
+    let (hxe, hxf, hye, hyf) = (h(c0, x.e, &xe), h(c0, x.f, &xf), h(c1, x.e, &ye), h(c1, x.f, &yf));
+    let hw = product_bound(&xe.0, &hxe, &yf.0, &hyf).plus(&product_bound(&ye.0, &hye, &xf.0, &hxf));
+    if minor.nearest() != x.minor { return mismatch("minor", x.minor, minor.nearest()); }
+    if hw.up() != x.half_width { return mismatch("half_width", x.half_width, hw.up()); }
+    let r = reading_of(&minor, &hw);
     if r != x.reading { return mismatch("reading", x.reading, r); }
     Verdict::Match
 }
@@ -163,7 +172,7 @@ pub fn reverse_arrangement(inp: Inputs, x: &ArrangementStep) -> Verdict {
     if let Some(v) = identity_in_range(&inp, x.step + 1, &[x.i, x.j], &[x.e, x.f]) { return v; }
     if x.e >= x.f || x.i >= x.j { return mismatch("index order (e < f, i < j)", (x.e, x.f, x.i, x.j), (x.e, x.f, x.i, x.j)); }
     if inp.forced(x.e, x.f) { return mismatch("pair admissible (not a declared identity, PC-D4)", true, false); }
-    let resolved = |t: usize, e: usize| (0..inp.k()).any(|c| inp.a(t, c, e).abs() > inp.state_hw(t, c, e));
+    let resolved = |t: usize, e: usize| (0..inp.k()).any(|c| exceeds(&inp.a(t, c, e), &inp.state_hw(t, c, e)));
     for &e in &[x.e, x.f] {
         if !(resolved(x.step, e) && resolved(x.step + 1, e)) {
             return mismatch("edge entered (A resolved at both registrations)", true, false);
@@ -171,11 +180,11 @@ pub fn reverse_arrangement(inp: Inputs, x: &ArrangementStep) -> Verdict {
     }
     let state = |t: usize| {
         let a = |c: usize, e: usize| inp.a(t, c, e);
-        let h = |c: usize, e: usize| inp.mixing(c, e, inp.a(t, c, e), inp.state_hw(t, c, e));
+        let h = |c: usize, e: usize| inp.mixing(c, e, &inp.a(t, c, e), &inp.state_hw(t, c, e));
         let (i, j, e, f) = (x.i, x.j, x.e, x.f);
-        let m = a(i, e) * a(j, f) - a(j, e) * a(i, f);
-        let hw = hw_product(a(i, e), h(i, e), a(j, f), h(j, f)) + hw_product(a(j, e), h(j, e), a(i, f), h(i, f));
-        at_delta(m, hw)
+        let m = a(i, e).times(&a(j, f)).minus(&a(j, e).times(&a(i, f)));
+        let hw = product_bound(&a(i, e), &h(i, e), &a(j, f), &h(j, f)).plus(&product_bound(&a(j, e), &h(j, e), &a(i, f), &h(i, f)));
+        at_delta(&m, &hw)
     };
     let (b, a) = (state(x.step), state(x.step + 1));
     if b != x.before { return mismatch("before", x.before, b); }

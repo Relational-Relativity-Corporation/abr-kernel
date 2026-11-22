@@ -102,8 +102,8 @@
 //     or independent of it?). This states OC-SC-3 in the declared mathematics;
 //     the answer comes from registered data.
 
-use crate::ground_variables::{product_half_width, sign_at_delta, AtDelta, DeclarationGap, Registration};
-use crate::operators::{operator_a, DeclaredRelations};
+use crate::ground_variables::{AtDelta, DeclarationGap, Registration};
+use crate::operators::DeclaredRelations;
 
 /// The reading at δ, at every level.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -114,9 +114,11 @@ pub enum Reading {
     Freedom,
 }
 
-fn read(value: f64, half_width: f64) -> Reading {
-    if sign_at_delta(value, half_width).is_resolved() { Reading::Freedom } else { Reading::Structure }
+/// PC's one rule, decided exactly: freedom when |v| > h (OC-NUM-1, 45th).
+fn read_exact(v: &crate::exact::Expansion, h: &crate::exact::Expansion) -> Reading {
+    if crate::exact::exceeds(v, h) { Reading::Freedom } else { Reading::Structure }
 }
+
 
 /// Where the edge values came from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -160,8 +162,13 @@ pub enum EdgeOrigin {
 /// `cycle_change_closure`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct EdgeSeries {
-    /// a[t][c][e]
+    /// a[t][c][e], the nearest f64 to the exact relation value.
     pub a: Vec<Vec<Vec<f64>>>,
+    /// The exact remainder [t][c][e]: the relation value is a + a_lo exactly
+    /// (OC-NUM-1, 2026-11-23, 45th). Node-derived: x[s] − x[t] by two-sum.
+    /// Edge-registered: 0, the registered value being exact. Every change and
+    /// minor is formed from a + a_lo, so no remainder is dropped on the way.
+    pub a_lo: Vec<Vec<Vec<f64>>>,
     /// State bound δA[t][c][e].
     pub da: Vec<Vec<Vec<f64>>>,
     /// Repeatability part of δA[t][c][e] (Z1a).
@@ -202,19 +209,27 @@ impl EdgeSeries {
         if rel.n_edges() < 1 { return Err(DeclarationGap::FewerThanTwoEdges); }
         assert!(seq.iter().all(|r| r.same_run_constant(&seq[0])),
             "the run-constant parts of δ must be the same in every registration of the run (Z1a)");
-        let a = seq.iter().map(|r| operator_a(&r.x, rel, &[]).spatial).collect();
+        // A = x[s] − x[t] held exactly as a + a_lo; every bound rounded up from
+        // its exact value (OC-NUM-1, 45th). *Was:* A rounded and each bound
+        // summed to nearest, which could fall below its exact value.
+        use crate::exact::{two_sum, Expansion};
+        let pairs: Vec<Vec<Vec<(f64, f64)>>> = seq.iter().map(|r| (0..k).map(|c| rel.edges.iter()
+            .map(|&(s, t)| two_sum(r.x.data[c][s], -r.x.data[c][t])).collect()).collect()).collect();
+        let a = pairs.iter().map(|t| t.iter().map(|c| c.iter().map(|p| p.0).collect()).collect()).collect();
+        let a_lo = pairs.iter().map(|t| t.iter().map(|c| c.iter().map(|p| p.1).collect()).collect()).collect();
         let da = seq.iter().map(|r| (0..k).map(|c| {
-            rel.edges.iter().map(|&(s, t)| r.state_delta(c, s) + r.state_delta(c, t)).collect()
+            rel.edges.iter().map(|&(s, t)| r.state_bound(c, s).plus(&r.state_bound(c, t)).up()).collect()
         }).collect()).collect();
         let da_rep = seq.iter().map(|r| (0..k).map(|c| {
-            rel.edges.iter().map(|&(s, t)| r.delta[c][s] + r.delta[c][t]).collect()
+            rel.edges.iter().map(|&(s, t)| Expansion::of(r.delta[c][s]).plus(&Expansion::of(r.delta[c][t])).up()).collect()
         }).collect()).collect();
         let g = &seq[0].locus_gain;
         // Each end's change lies in (1 + γ′)(Δx ± (δ_s + δ_{s+1})): the gain
         // term is γ·(|Δx| + δ_s + δ_{s+1}) per end (35th; *was* γ·|Δx|).
         let dgain = seq.windows(2).map(|w| (0..k).map(|c| {
-            let dx = |i: usize| (w[1].x.data[c][i] - w[0].x.data[c][i]).abs() + (w[0].delta[c][i] + w[1].delta[c][i]);
-            rel.edges.iter().map(|&(s, t)| g[c][s] * dx(s) + g[c][t] * dx(t)).collect()
+            let dx = |i: usize| Expansion::diff(w[1].x.data[c][i], w[0].x.data[c][i]).abs()
+                .plus(&Expansion::of(w[0].delta[c][i])).plus(&Expansion::of(w[1].delta[c][i]));
+            rel.edges.iter().map(|&(s, t)| dx(s).times_f64(g[c][s]).plus(&dx(t).times_f64(g[c][t])).up()).collect()
         }).collect()).collect();
         let shared_gain = (0..k).map(|c| vec![seq[0].shared_gain[c]; rel.n_edges()]).collect();
         let mut forced_pairs = Vec::new();
@@ -225,7 +240,7 @@ impl EdgeSeries {
         }
         let mixed_gain = vec![vec![0.0; rel.n_edges()]; k];
         let closure_gain = mixed_gain.clone();
-        Ok(EdgeSeries { a, da, da_rep, dgain, shared_gain, mixed_gain, closure_gain, origin: EdgeOrigin::NodeDerived, forced_pairs })
+        Ok(EdgeSeries { a, a_lo, da, da_rep, dgain, shared_gain, mixed_gain, closure_gain, origin: EdgeOrigin::NodeDerived, forced_pairs })
     }
 
     /// From a registered value per declared edge and component, with δ per
@@ -249,6 +264,7 @@ impl EdgeSeries {
             shared_gain: vec![vec![0.0; m]; k],
             mixed_gain: vec![vec![0.0; m]; k],
             closure_gain: vec![vec![0.0; m]; k],
+            a_lo: vec![vec![vec![0.0; m]; k]; a.len()],
             da_rep: da.clone(),
             a, da, origin: EdgeOrigin::EdgeRegistered, forced_pairs: Vec::new(),
         })
@@ -275,7 +291,7 @@ impl EdgeSeries {
             .all(|g| g.is_finite() && *g >= 0.0 && *g < 1.0),
             "a gain bound must lie in [0, 1): a declared gain is strictly positive (Z1a)");
         for t in 0..self.n_registrations() {
-            for c in 0..k { for e in 0..m { self.da[t][c][e] = self.da_rep[t][c][e] + offset[c][e]; } }
+            for c in 0..k { for e in 0..m { self.da[t][c][e] = crate::exact::sum_up([self.da_rep[t][c][e], offset[c][e]]); } }
         }
         self.shared_gain = (0..k).map(|c| (0..m)
             .map(|e| combined_gain(gains.component[c], gains.edge[e])).collect()).collect();
@@ -291,12 +307,42 @@ impl EdgeSeries {
     pub fn n_edges(&self) -> usize { self.a[0][0].len() }
 
     /// Δ_s and δΔ_s, [c][e], over step s (registration s to s+1).
+    /// Δ is the exact change rounded once, δΔ its exact bound rounded up
+    /// (OC-NUM-1, 45th). *Was:* a[s+1] − a[s] of rounded values, and δΔ summed
+    /// to nearest.
     pub fn change(&self, s: usize) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
         let d = (0..self.k()).map(|c| (0..self.n_edges())
-            .map(|e| self.a[s + 1][c][e] - self.a[s][c][e]).collect()).collect();
+            .map(|e| self.change_exact(s, c, e).nearest()).collect()).collect();
         let dd = (0..self.k()).map(|c| (0..self.n_edges())
-            .map(|e| self.da_rep[s + 1][c][e] + self.da_rep[s][c][e] + self.dgain[s][c][e]).collect()).collect();
+            .map(|e| self.change_bound_exact(s, c, e).up()).collect()).collect();
         (d, dd)
+    }
+
+    /// The relation value at registration t, exactly: a + a_lo.
+    pub fn entry(&self, t: usize, c: usize, e: usize) -> crate::exact::Expansion {
+        let mut x = crate::exact::Expansion::of(self.a[t][c][e]);
+        if self.a_lo[t][c][e] != 0.0 { x.add(self.a_lo[t][c][e]); }
+        x
+    }
+
+    /// Δ_s[c][e] exactly, from the exact relation values.
+    pub fn change_exact(&self, s: usize, c: usize, e: usize) -> crate::exact::Expansion {
+        self.entry(s + 1, c, e).minus(&self.entry(s, c, e))
+    }
+
+    /// δΔ_s[c][e] exactly, from the stored bounds (each at or above its exact
+    /// value).
+    pub fn change_bound_exact(&self, s: usize, c: usize, e: usize) -> crate::exact::Expansion {
+        let mut h = crate::exact::Expansion::of(self.da_rep[s + 1][c][e]);
+        h.add(self.da_rep[s][c][e]);
+        h.add(self.dgain[s][c][e]);
+        h
+    }
+
+    /// The bound an entry carries into a minor that mixes components: h widened
+    /// by its independent gain, h + γ·(|v| + h), exactly.
+    fn mixed_exact(&self, c: usize, e: usize, v: &crate::exact::Expansion, h: &crate::exact::Expansion) -> crate::exact::Expansion {
+        crate::exact::gain_widened(v, h, self.mixed_gain[c][e])
     }
 
     /// The bound on a reported change magnitude over step s, [c][e]: the
@@ -305,11 +351,11 @@ impl EdgeSeries {
     /// review, 35th: *was* δΔ + γ·|Δ|, which left out γ·δΔ).
     /// Classifications use `change`; this is for reporting |Δ| only.
     pub fn change_magnitude(&self, s: usize) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
-        let (d, dd) = self.change(s);
+        let (d, _) = self.change(s);
         let dm = (0..self.k()).map(|c| (0..self.n_edges())
             .map(|e| {
                 let g = combined_gain(self.shared_gain[c][e], self.mixed_gain[c][e]);
-                dd[c][e] + g * (d[c][e].abs() + dd[c][e])
+                crate::exact::gain_widened(&self.change_exact(s, c, e), &self.change_bound_exact(s, c, e), g).up()
             }).collect()).collect();
         (d, dm)
     }
@@ -318,10 +364,6 @@ impl EdgeSeries {
     /// widened by its independent gain on the entry's value, δ + γ·|v|.
     /// The gain scales the value with its bound: δ + γ·(|v| + δ) (35th; *was*
     /// δ + γ·|v|).
-    fn mixed(&self, v: &[Vec<f64>], dv: &[Vec<f64>]) -> Vec<Vec<f64>> {
-        (0..self.k()).map(|c| (0..self.n_edges())
-            .map(|e| dv[c][e] + self.mixed_gain[c][e] * (v[c][e].abs() + dv[c][e])).collect()).collect()
-    }
 
     fn is_forced(&self, e: usize, f: usize) -> bool { self.forced_pairs.contains(&(e, f)) }
 }
@@ -330,7 +372,13 @@ impl EdgeSeries {
 /// Computed in the expanded form so that a small gain is not lost: in
 /// floating point, 1 + 2⁻⁵⁴ rounds to 1, and the product form returned 0 for
 /// a declared gain of 2⁻⁵⁴ (the Verifier's probe, 2026-11-23, 39th).
-pub fn combined_gain(a: f64, b: f64) -> f64 { a + b + a * b }
+pub fn combined_gain(a: f64, b: f64) -> f64 {
+    // Rounded up from the exact a + b + a·b (OC-NUM-1, 45th).
+    let mut x = crate::exact::Expansion::of(a);
+    x.add(b);
+    x.add_product(a, b);
+    x.up()
+}
 
 /// Gain bounds on edge-registered values, in three parts (Z1a; corrected
 /// after the Verifier's 10.3.0 review). Each bound in [0, 1).
@@ -396,14 +444,17 @@ pub struct RelationChange {
 
 /// PC1 over every relation, component and step.
 pub fn relation_changes(series: &EdgeSeries) -> Vec<RelationChange> {
+    // The reading is decided exactly, from the exact change and bound; the
+    // reported values are the change rounded once and the bound rounded up
+    // (OC-NUM-1, 45th).
     let mut out = Vec::new();
     for s in 0..series.n_steps() {
-        let (d, dd) = series.change(s);
         for c in 0..series.k() {
             for e in 0..series.n_edges() {
+                let (d, h) = (series.change_exact(s, c, e), series.change_bound_exact(s, c, e));
                 out.push(RelationChange {
                     step: s, component: c, edge: e,
-                    change: d[c][e], half_width: dd[c][e], reading: read(d[c][e], dd[c][e]),
+                    change: d.nearest(), half_width: h.up(), reading: read_exact(&d, &h),
                 });
             }
         }
@@ -459,23 +510,38 @@ pub struct Couplings {
     pub forced_pairs: Vec<(usize, usize)>,
 }
 
-/// μ over two readings (x, dx) and (y, dy), each indexed by edge. Edges whose
-/// change is not resolved in either reading persisted (PC1) and enter no pair.
-/// `hx`, `hy` are the bounds used in the minor (widened by independent gains
-/// when the minor mixes components); entry uses the change bounds `x.1`, `y.1`.
-fn couple(series: &EdgeSeries, over: ReadingPair, x: (&[f64], &[f64]), y: (&[f64], &[f64]),
-          hx: &[f64], hy: &[f64], out: &mut Vec<ChangeCoupling>) {
+/// One reading of a change entering a minor, exactly: the change, its PC1
+/// bound (which decides whether the relation enters), and the bound it
+/// carries into the minor (widened by an independent gain where the minor
+/// mixes components).
+struct Entering { v: crate::exact::Expansion, h: crate::exact::Expansion, hm: crate::exact::Expansion }
+
+/// μ over two readings x and y, each indexed by edge. Edges whose change is
+/// not resolved in either reading persisted (PC1) and enter no pair. The
+/// minor and its bound are exact; the reading is decided exactly (OC-NUM-1,
+/// 45th). *Was:* formed in f64 from rounded changes.
+fn couple(series: &EdgeSeries, over: ReadingPair, x: &[Entering], y: &[Entering], out: &mut Vec<ChangeCoupling>) {
+    use crate::exact::{exceeds, product_bound};
     let moved: Vec<usize> = (0..series.n_edges())
-        .filter(|&e| x.0[e].abs() > x.1[e] || y.0[e].abs() > y.1[e]).collect();
+        .filter(|&e| exceeds(&x[e].v, &x[e].h) || exceeds(&y[e].v, &y[e].h)).collect();
     for (n, &e) in moved.iter().enumerate() {
         for &f in &moved[n + 1..] {
             if series.is_forced(e, f) { continue; }
-            let minor = x.0[e] * y.0[f] - y.0[e] * x.0[f];
-            let hw = product_half_width(x.0[e], hx[e], y.0[f], hy[f])
-                + product_half_width(y.0[e], hy[e], x.0[f], hx[f]);
-            out.push(ChangeCoupling { e, f, over, minor, half_width: hw, reading: read(minor, hw) });
+            let minor = x[e].v.times(&y[f].v).minus(&y[e].v.times(&x[f].v));
+            let hw = product_bound(&x[e].v, &x[e].hm, &y[f].v, &y[f].hm)
+                .plus(&product_bound(&y[e].v, &y[e].hm, &x[f].v, &x[f].hm));
+            out.push(ChangeCoupling { e, f, over, minor: minor.nearest(), half_width: hw.up(), reading: read_exact(&minor, &hw) });
         }
     }
+}
+
+/// The readings of component c's change over step s.
+fn entering(series: &EdgeSeries, s: usize, c: usize, mixes: bool) -> Vec<Entering> {
+    (0..series.n_edges()).map(|e| {
+        let (v, h) = (series.change_exact(s, c, e), series.change_bound_exact(s, c, e));
+        let hm = if mixes { series.mixed_exact(c, e, &v, &h) } else { h.clone() };
+        Entering { v, h, hm }
+    }).collect()
 }
 
 /// PC2(a): change minors across components i < j at each step. Needs k ≥ 2.
@@ -484,12 +550,10 @@ pub fn coupling_across_components(series: &EdgeSeries) -> Result<Couplings, Decl
     if series.n_edges() < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
     let mut readings = Vec::new();
     for s in 0..series.n_steps() {
-        let (d, dd) = series.change(s);
-        let hm = series.mixed(&d, &dd);
+        let es: Vec<Vec<Entering>> = (0..series.k()).map(|c| entering(series, s, c, true)).collect();
         for i in 0..series.k() {
             for j in (i + 1)..series.k() {
-                couple(series, ReadingPair::Components { step: s, i, j },
-                    (&d[i], &dd[i]), (&d[j], &dd[j]), &hm[i], &hm[j], &mut readings);
+                couple(series, ReadingPair::Components { step: s, i, j }, &es[i], &es[j], &mut readings);
             }
         }
     }
@@ -503,11 +567,9 @@ pub fn coupling_across_steps(series: &EdgeSeries) -> Result<Couplings, Declarati
     if series.n_edges() < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
     let mut readings = Vec::new();
     for s in 0..series.n_steps() - 1 {
-        let (d0, dd0) = series.change(s);
-        let (d1, dd1) = series.change(s + 1);
         for c in 0..series.k() {
             couple(series, ReadingPair::Steps { component: c, step: s },
-                (&d0[c], &dd0[c]), (&d1[c], &dd1[c]), &dd0[c], &dd1[c], &mut readings);
+                &entering(series, s, c, false), &entering(series, s + 1, c, false), &mut readings);
         }
     }
     Ok(Couplings { readings, forced_pairs: series.forced_pairs.clone() })
@@ -536,15 +598,21 @@ pub struct ArrangementStep {
 pub fn arrangement_steps(series: &EdgeSeries) -> Result<Vec<ArrangementStep>, DeclarationGap> {
     if series.k() < 2 { return Err(DeclarationGap::SingleComponent); }
     if series.n_edges() < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
-    let resolved = |t: usize, e: usize| (0..series.k()).any(|c| series.a[t][c][e].abs() > series.da[t][c][e]);
-    let widened: Vec<Vec<Vec<f64>>> = (0..series.n_registrations())
-        .map(|t| series.mixed(&series.a[t], &series.da[t])).collect();
+    // Exact states (OC-NUM-1, 45th): entries a + a_lo, bounds widened exactly,
+    // each minor's state decided exactly. *Was:* f64 minors of rounded A.
+    use crate::exact::{exceeds, product_bound, Expansion};
+    let n_t = series.n_registrations();
+    let entries: Vec<Vec<Vec<Expansion>>> = (0..n_t).map(|t| (0..series.k()).map(|c|
+        (0..series.n_edges()).map(|e| series.entry(t, c, e)).collect()).collect()).collect();
+    let widened: Vec<Vec<Vec<Expansion>>> = (0..n_t).map(|t| (0..series.k()).map(|c|
+        (0..series.n_edges()).map(|e| series.mixed_exact(c, e, &entries[t][c][e], &Expansion::of(series.da[t][c][e]))).collect()).collect()).collect();
+    let resolved = |t: usize, e: usize| (0..series.k()).any(|c| exceeds(&entries[t][c][e], &Expansion::of(series.da[t][c][e])));
     let state = |t: usize, e: usize, f: usize, i: usize, j: usize| {
-        let (a, da) = (&series.a[t], &widened[t]);
-        let m = a[i][e] * a[j][f] - a[j][e] * a[i][f];
-        let hw = product_half_width(a[i][e], da[i][e], a[j][f], da[j][f])
-            + product_half_width(a[j][e], da[j][e], a[i][f], da[i][f]);
-        sign_at_delta(m, hw)
+        let (a, h) = (&entries[t], &widened[t]);
+        let m = a[i][e].times(&a[j][f]).minus(&a[j][e].times(&a[i][f]));
+        let hw = product_bound(&a[i][e], &h[i][e], &a[j][f], &h[j][f])
+            .plus(&product_bound(&a[j][e], &h[j][e], &a[i][f], &h[i][f]));
+        crate::ground_variables::sign_at_delta_exact(&m, &hw)
     };
     let mut out = Vec::new();
     for s in 0..series.n_steps() {
@@ -723,13 +791,12 @@ pub fn cycle_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usi
     // `series.a[t]` first and panicked on an out-of-range t).
     if !is_closed_walk(rel, cycle) { return None; }
     use crate::exact::Expansion;
-    let (a, da) = (&series.a[t][c], &series.da[t][c]);
+    let da = &series.da[t][c];
     let (mut v, mut h) = (Expansion::new(), Expansion::new());
     for &(e, sg) in cycle {
-        v.add_product(sg as f64, a[e]);
-        let mut ve = Expansion::new(); ve.add(a[e].abs());
-        let mut he = Expansion::new(); he.add(da[e]);
-        add_term_bound(&mut h, &ve, &he, series.closure_gain[c][e]);
+        let ae = series.entry(t, c, e);
+        v.add_times(&ae, sg as f64);
+        add_term_bound(&mut h, &ae.abs(), &Expansion::of(da[e]), series.closure_gain[c][e]);
     }
     Some((v.nearest(), h.up()))
 }
@@ -742,16 +809,12 @@ pub fn cycle_change_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle:
     // ran before the check, so an open walk with an out-of-range s panicked.
     if !is_closed_walk(rel, cycle) { return None; }
     use crate::exact::Expansion;
-    let (a0, a1) = (&series.a[s][c], &series.a[s + 1][c]);
     let (mut v, mut h) = (Expansion::new(), Expansion::new());
     for &(e, sg) in cycle {
         // Δ[e] exactly, from the two registrations (not the rounded change).
-        let mut de = Expansion::new();
-        de.add(a1[e]); de.add(-a0[e]);
+        let de = series.change_exact(s, c, e);
         v.add_times(&de, sg as f64);
-        let mut he = Expansion::new();
-        he.add(series.da_rep[s + 1][c][e]); he.add(series.da_rep[s][c][e]); he.add(series.dgain[s][c][e]);
-        add_term_bound(&mut h, &de.abs(), &he, series.closure_gain[c][e]);
+        add_term_bound(&mut h, &de.abs(), &series.change_bound_exact(s, c, e), series.closure_gain[c][e]);
     }
     Some((v.nearest(), h.up()))
 }

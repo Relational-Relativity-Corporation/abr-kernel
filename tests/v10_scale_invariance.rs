@@ -526,7 +526,10 @@ fn z1a_a_small_gain_is_not_rounded_away() {
         .with_run_constant(vec![vec![0.0]], gains(vec![tiny], vec![0.0], vec![vec![0.0]]));
     assert_eq!(s.shared_gain[0][0], tiny);
     assert_eq!(s.change_magnitude(0).1[0][0], 1.0);
-    assert_eq!(combined_gain(tiny, tiny), 2.0 * tiny + tiny * tiny);
+    // The exact 2⁻⁵³ + 2⁻¹⁰⁸ is not an f64: a bound is rounded up to the next
+    // f64 above 2⁻⁵³ (OC-NUM-1, 45th). *Was:* `2.0 * tiny + tiny * tiny`,
+    // the nearest f64, 2⁻⁵³, which lies below the exact bound.
+    assert_eq!(combined_gain(tiny, tiny), (2.0 * tiny).next_up());
 }
 
 /// An open walk is refused before any registration or step is read.

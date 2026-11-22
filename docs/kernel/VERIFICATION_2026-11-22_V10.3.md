@@ -274,6 +274,35 @@ All five fail when the sums are switched back to sequential f64 addition, and ev
 
 **Not covered:** the rounding points in OC-NUM-1. **Reproduce:** 204 (default), 296 (`--features v9`), no warnings; the application at `94a89c1` passes 43 against this kernel.
 
+
+## 18. Batch 2, completed: every reading exact (2026-11-23, for the Verifier)
+
+Batch 2 is §17, the exact sums, together with this section. Origin decided (Part 9, 44th): the "⇐" direction of D16 (iii) is fenced as a declared intersection; exact summation is confirmed as necessary; the Bellman–Ford check is dropped. The governing statement (43rd) heads V10_README.
+
+**What changed (OC-NUM-1, 45th).**
+- The relation value A = x[s] − x[t] is held exactly: `EdgeSeries::a_lo` sits beside the rounded `a`, from two-sum.
+- Every change, minor, identity difference, Ξ(B(A)), closure and `RelationalField` form is computed exactly from those values.
+- Stored bounds are rounded up from their exact values: state, repeatability, gain terms, `combined_gain`, δ_ε.
+- Bounds formed from them are exact sums, rounded up when reported.
+- Readings are decided exactly: `read_exact`, `sign_at_delta_exact`, `ExactField`.
+- The reverse check is rewritten exactly, apart from the forms.
+- In the application (`water/vessel/ingest`), both reverse checks are re-derived exactly through `pc1_exact`.
+
+**To check:**
+1. The guarantee: a resolution is read only where the exact value exceeds its exact bound. The only possible loss is a value between the exact bound and the bound built from stored parts rounded up.
+2. `Expansion::times` and `product_bound`.
+3. That `exact_field` and `EdgeSeries::from_registrations` store the same state bound, and the reverse check mirrors it.
+4. That `RelationalField`'s persistence forms are formed from the two registrations' x, not from rounded A.
+
+**What the tests can and cannot tell apart** (`tests/v10_exact_readings.rs`, against an exact i128 reference):
+- PC1, PC2, the V1 identity and sustained grades, the energy floor, and the forms all fail on the earlier arithmetic.
+- The PC3 property passes on both; the worked minor 2⁻⁶⁰ (exact positive, f64 zero) is what separates them.
+- One earlier assertion changed: `combined_gain(2⁻⁵⁴, 2⁻⁵⁴)` is now rounded up.
+
+**Merge order:** the application uses the kernel's `exact` module, so the kernel merges first, then the application's lockfile moves.
+
+**Reproduce:** kernel `claude/vibrant-tesla-2fp7ve`: 210 (default), 302 (`v9`), no warnings. Application `claude/vibrant-tesla-2fp7ve` against it with a local patch: 43, no warnings.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*

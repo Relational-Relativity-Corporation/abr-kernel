@@ -1216,7 +1216,7 @@ pub fn circulation_half_width(dg: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<V
 /// Integer coefficients of Ξ(B(·))[e] over the edges: Ξ(B(g))[e] =
 /// Σ_f coeff[f]·g[f]. Ξ and B are linear, so their composition is one integer
 /// combination of the entries.
-fn circulation_of_accumulation_coefficients(rel: &DeclaredRelations, e: usize, sign_pred: i64) -> Vec<i64> {
+pub fn circulation_of_accumulation_coefficients(rel: &DeclaredRelations, e: usize, sign_pred: i64) -> Vec<i64> {
     let mut k = vec![0i64; rel.n_edges()];
     let mut add_b = |f: usize, w: i64| { k[f] += w; for &h in rel.succ(f) { k[h] += w; } };
     for &f in rel.succ(e) { add_b(f, 1); }

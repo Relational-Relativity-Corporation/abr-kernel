@@ -45,7 +45,7 @@
 // Two registrations are the minimum information, not a guarantee of enough.
 
 use crate::ground_variables::{ground_reading, DeclarationGap, EnergyCarrier, GroundReading, Registration};
-use crate::operators::{operator_a, operator_b, DeclaredRelations, EdgeField};
+use crate::operators::{DeclaredRelations, NodeField};
 
 /// A, B and Ξ at one registration: spatial[c][e] per component and edge.
 #[derive(Debug, Clone, PartialEq)]
@@ -56,12 +56,37 @@ pub struct Forms {
     pub circulation: Vec<Vec<f64>>,
 }
 
-fn forms_of(a: Vec<Vec<f64>>, rel: &DeclaredRelations) -> Forms {
-    let k = a.len();
-    let b = operator_b(&EdgeField { spatial: a.clone(), comp: vec![], comp_pairs: vec![], k }, rel).spatial;
-    // From A in one exact sum, not from the rounded B (41st).
-    let circulation = crate::operators::circulation_of_accumulation(&a, rel);
-    Forms { a, b, circulation }
+/// A, B and Ξ of Σ_r w_r·A(x_r), each from the registered node values in one
+/// exact sum, rounded once (OC-NUM-1, 45th). One registration with w = 1
+/// gives the forms at that registration; (current, +1), (prior, −1) gives the
+/// persistence forms over the step. *Was:* A rounded, A_p as the difference
+/// of rounded A, and B and Ξ from those (41st: Ξ from rounded A).
+fn forms_of(xs: &[(&NodeField, f64)], rel: &DeclaredRelations) -> Forms {
+    use crate::exact::Expansion;
+    let k = xs[0].0.k;
+    let exact_a: Vec<Vec<Expansion>> = (0..k).map(|c| rel.edges.iter().map(|&(s, t)| {
+        let mut v = Expansion::new();
+        for (x, w) in xs { v.add_product(*w, x.data[c][s]); v.add_product(-*w, x.data[c][t]); }
+        v
+    }).collect()).collect();
+    let combine = |c: usize, coeff: &[i64]| {
+        let mut v = Expansion::new();
+        for (f, &kf) in coeff.iter().enumerate() { if kf != 0 { v.add_times(&exact_a[c][f], kf as f64); } }
+        v.nearest()
+    };
+    let m = rel.n_edges();
+    let b_coeff: Vec<Vec<i64>> = (0..m).map(|e| {
+        let mut w = vec![0i64; m];
+        w[e] += 1;
+        for &f in rel.succ(e) { w[f] += 1; }
+        w
+    }).collect();
+    let xi_coeff: Vec<Vec<i64>> = (0..m).map(|e| crate::operators::circulation_of_accumulation_coefficients(rel, e, -1)).collect();
+    Forms {
+        a: exact_a.iter().map(|c| c.iter().map(|v| v.nearest()).collect()).collect(),
+        b: (0..k).map(|c| b_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
+        circulation: (0..k).map(|c| xi_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
+    }
 }
 
 /// A relational field: one declared intersection with an ongoing relational
@@ -98,15 +123,12 @@ impl RelationalField {
             "every registration must cover the declared loci");
 
         let spatial: Vec<Forms> = registrations.iter()
-            .map(|r| forms_of(operator_a(&r.x, rel, &[]).spatial, rel))
+            .map(|r| forms_of(&[(&r.x, 1.0)], rel))
             .collect();
-        let persistence: Vec<Forms> = spatial.windows(2).map(|w| {
-            // The prior is the earlier registration (Df2); never a substitute.
-            let a_p = (0..k).map(|c| {
-                w[1].a[c].iter().zip(&w[0].a[c]).map(|(cur, pri)| cur - pri).collect()
-            }).collect();
-            forms_of(a_p, rel)
-        }).collect();
+        // The prior is the earlier registration (Df2); never a substitute.
+        let persistence: Vec<Forms> = registrations.windows(2)
+            .map(|w| forms_of(&[(&w[1].x, 1.0), (&w[0].x, -1.0)], rel))
+            .collect();
         let ground = ground_reading(&registrations, rel, carriers);
         Ok(RelationalField { registrations, spatial, persistence, ground })
     }

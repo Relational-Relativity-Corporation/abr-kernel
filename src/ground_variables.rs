@@ -65,7 +65,7 @@
 // here supersede them for V10 readings.
 
 use crate::persistence_change::{coupled_change_pairs, EdgeSeries, PersistenceChange};
-use crate::operators::{operator_a, DeclaredRelations, NodeField};
+use crate::operators::{DeclaredRelations, NodeField};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Resolution
@@ -95,6 +95,17 @@ impl<T> AtDelta<T> {
 }
 
 /// Sign of `value` resolved at `half_width`: resolved when |value| > half_width.
+pub fn sign_at_delta_exact(value: &crate::exact::Expansion, half_width: &crate::exact::Expansion) -> AtDelta<Sign> {
+    // The sign of an exact value at an exact bound (OC-NUM-1, 45th).
+    assert!(half_width.signum() >= 0, "δ must be declared and non-negative");
+    if crate::exact::exceeds(value, half_width) {
+        AtDelta::Resolved(if value.signum() > 0 { Sign::Positive } else { Sign::Negative })
+    } else {
+        AtDelta::NotResolved
+    }
+}
+
+/// Sign of `value` resolved at `half_width`: resolved when |value| > half_width.
 pub fn sign_at_delta(value: f64, half_width: f64) -> AtDelta<Sign> {
     assert!(half_width.is_finite() && half_width >= 0.0,
         "δ must be declared, finite and non-negative");
@@ -107,7 +118,9 @@ pub fn sign_at_delta(value: f64, half_width: f64) -> AtDelta<Sign> {
 
 /// Half-width of x·y over [x ± dx] and [y ± dy]: |x|·dy + |y|·dx + dx·dy.
 pub fn product_half_width(x: f64, dx: f64, y: f64, dy: f64) -> f64 {
-    x.abs() * dy + y.abs() * dx + dx * dy
+    // Rounded up from the exact bound (OC-NUM-1, 45th).
+    use crate::exact::{product_bound, Expansion};
+    product_bound(&Expansion::of(x), &Expansion::of(dx), &Expansion::of(y), &Expansion::of(dy)).up()
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -332,7 +345,20 @@ impl Registration {
     /// from x is at most δ + γ·(|x| + δ) (corrected after the Verifier's
     /// second 10.3.0 review, 35th; *was* δ + γ·|x|).
     pub fn state_delta(&self, c: usize, i: usize) -> f64 {
-        self.delta[c][i] + self.offset[c][i] + self.locus_gain[c][i] * (self.x.data[c][i].abs() + self.delta[c][i])
+        // Rounded up from the exact bound (OC-NUM-1, 45th; *was* summed to nearest).
+        self.state_bound(c, i).up()
+    }
+
+    /// The state bound at locus i of component c, exactly:
+    /// δ + offset + γ_i·(|x| + δ).
+    pub fn state_bound(&self, c: usize, i: usize) -> crate::exact::Expansion {
+        use crate::exact::Expansion;
+        let mut h = Expansion::of(self.delta[c][i]);
+        h.add(self.offset[c][i]);
+        let mut g = Expansion::of(self.x.data[c][i].abs());
+        g.add(self.delta[c][i]);
+        h.add_times(&g, self.locus_gain[c][i]);
+        h
     }
 
     /// True when the run-constant parts are the same as `other`'s.
@@ -356,16 +382,6 @@ fn check_sequence(seq: &[Registration], rel: &DeclaredRelations) -> Result<(), D
     Ok(())
 }
 
-/// A(x) and δ_A for one registration. δ_A is the **state** bound (Z1a):
-/// repeatability, offset and unshared gain at both ends.
-fn a_with_half_width(r: &Registration, rel: &DeclaredRelations) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
-    let a = operator_a(&r.x, rel, &[]).spatial;
-    let da = (0..r.x.k)
-        .map(|c| rel.edges.iter().map(|&(s, t)| r.state_delta(c, s) + r.state_delta(c, t)).collect())
-        .collect();
-    (a, da)
-}
-
 /// True when at least one declared locus is the target of one edge and the
 /// source of another (T7).
 pub fn has_interior(rel: &DeclaredRelations) -> bool {
@@ -375,6 +391,36 @@ pub fn has_interior(rel: &DeclaredRelations) -> bool {
 /// True when edge e's A vector is resolved at δ in at least one component.
 pub fn edge_resolved(a: &[Vec<f64>], da: &[Vec<f64>], e: usize) -> bool {
     (0..a.len()).any(|c| a[c][e].abs() > da[c][e])
+}
+
+/// A registration's relation values held exactly, with their state bounds
+/// rounded up (OC-NUM-1, 45th): a[c][e] = x[s] − x[t] as an exact expansion,
+/// da[c][e] at or above the exact state bound at both ends.
+/// δ_A is the **state** bound (Z1a): repeatability, offset and unshared gain
+/// at both ends. *Replaces `a_with_half_width` (to 45th), which returned A
+/// rounded and δ_A summed to nearest.*
+struct ExactField { a: Vec<Vec<crate::exact::Expansion>>, da: Vec<Vec<f64>> }
+
+fn exact_field(r: &Registration, rel: &DeclaredRelations) -> ExactField {
+    use crate::exact::Expansion;
+    let a = (0..r.x.k).map(|c| rel.edges.iter().map(|&(s, t)| Expansion::diff(r.x.data[c][s], r.x.data[c][t])).collect()).collect();
+    let da = (0..r.x.k).map(|c| rel.edges.iter().map(|&(s, t)| r.state_bound(c, s).plus(&r.state_bound(c, t)).up()).collect()).collect();
+    ExactField { a, da }
+}
+
+impl ExactField {
+    fn resolved(&self, e: usize) -> bool {
+        (0..self.a.len()).any(|c| crate::exact::exceeds(&self.a[c][e], &crate::exact::Expansion::of(self.da[c][e])))
+    }
+    /// The sign of m_ij(e, f) at δ, decided exactly.
+    fn minor_at_delta(&self, e: usize, f: usize, i: usize, j: usize) -> AtDelta<Sign> {
+        use crate::exact::{product_bound, Expansion};
+        let a = &self.a;
+        let h = |c: usize, e: usize| Expansion::of(self.da[c][e]);
+        let m = a[i][e].times(&a[j][f]).minus(&a[j][e].times(&a[i][f]));
+        let hw = product_bound(&a[i][e], &h(i, e), &a[j][f], &h(j, f)).plus(&product_bound(&a[j][e], &h(j, e), &a[i][f], &h(i, f)));
+        sign_at_delta_exact(&m, &hw)
+    }
 }
 
 /// How a reading behaves over the declared sequence.
@@ -419,13 +465,20 @@ pub fn history(readings: &[AtDelta<Sign>]) -> History {
 
 /// The minor m_ij(e, f) over an edge field a[c][e].
 pub fn minor(a: &[Vec<f64>], e: usize, f: usize, i: usize, j: usize) -> f64 {
-    a[i][e] * a[j][f] - a[j][e] * a[i][f]
+    // The exact minor of the given values, rounded once (OC-NUM-1, 45th).
+    let mut m = crate::exact::Expansion::new();
+    m.add_product(a[i][e], a[j][f]);
+    m.add_product(-a[j][e], a[i][f]);
+    m.nearest()
 }
 
 /// Half-width of m_ij(e, f) from the half-widths da[c][e].
 pub fn minor_half_width(a: &[Vec<f64>], da: &[Vec<f64>], e: usize, f: usize, i: usize, j: usize) -> f64 {
-    product_half_width(a[i][e], da[i][e], a[j][f], da[j][f])
-        + product_half_width(a[j][e], da[j][e], a[i][f], da[i][f])
+    // Rounded up from the exact bound (OC-NUM-1, 45th).
+    use crate::exact::{product_bound, Expansion};
+    let x = |c: usize, e: usize| Expansion::of(a[c][e]);
+    let h = |c: usize, e: usize| Expansion::of(da[c][e]);
+    product_bound(&x(i, e), &h(i, e), &x(j, f), &h(j, f)).plus(&product_bound(&x(j, e), &h(j, e), &x(i, f), &h(i, f))).up()
 }
 
 /// Bound on the change of m_ij(e, f) over one step, from the prior edge field
@@ -433,8 +486,14 @@ pub fn minor_half_width(a: &[Vec<f64>], da: &[Vec<f64>], e: usize, f: usize, i: 
 /// |Δm| ≤ |a_ie·Δa_jf| + |Δa_ie·a_jf| + |Δa_ie·Δa_jf|
 ///      + |a_je·Δa_if| + |Δa_je·a_if| + |Δa_je·Δa_if|.
 pub fn minor_change_bound(a: &[Vec<f64>], a_p: &[Vec<f64>], e: usize, f: usize, i: usize, j: usize) -> f64 {
-    let t = |x: f64, dx: f64, y: f64, dy: f64| (x * dy).abs() + (dx * y).abs() + (dx * dy).abs();
-    t(a[i][e], a_p[i][e], a[j][f], a_p[j][f]) + t(a[j][e], a_p[j][e], a[i][f], a_p[i][f])
+    // Rounded up from the exact sum (OC-NUM-1, 45th).
+    let mut b = crate::exact::Expansion::new();
+    for (x, dx, y, dy) in [(a[i][e], a_p[i][e], a[j][f], a_p[j][f]), (a[j][e], a_p[j][e], a[i][f], a_p[i][f])] {
+        b.add_product(x.abs(), dy.abs());
+        b.add_product(dx.abs(), y.abs());
+        b.add_product(dx.abs(), dy.abs());
+    }
+    b.up()
 }
 
 /// Persistence condition (Derived): a minor cannot change sign over a step
@@ -469,16 +528,15 @@ impl MinorPattern {
 pub fn minor_pattern(r: &Registration, rel: &DeclaredRelations) -> Result<MinorPattern, DeclarationGap> {
     if r.x.k < 2 { return Err(DeclarationGap::SingleComponent); }
     if rel.n_edges() < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
-    let (a, da) = a_with_half_width(r, rel);
+    let x = exact_field(r, rel);
     let (resolved, unresolved): (Vec<usize>, Vec<usize>) =
-        (0..rel.n_edges()).partition(|&e| edge_resolved(&a, &da, e));
+        (0..rel.n_edges()).partition(|&e| x.resolved(e));
     let mut minors = Vec::new();
     for (n, &e) in resolved.iter().enumerate() {
         for &f in &resolved[n + 1..] {
             for i in 0..r.x.k {
                 for j in (i + 1)..r.x.k {
-                    let m = minor(&a, e, f, i, j);
-                    minors.push((e, f, i, j, sign_at_delta(m, minor_half_width(&a, &da, e, f, i, j))));
+                    minors.push((e, f, i, j, x.minor_at_delta(e, f, i, j)));
                 }
             }
         }
@@ -506,9 +564,9 @@ pub fn minor_histories(seq: &[Registration], rel: &DeclaredRelations) -> Result<
     check_sequence(seq, rel)?;
     let patterns: Vec<MinorPattern> =
         seq.iter().map(|r| minor_pattern(r, rel)).collect::<Result<_, _>>()?;
-    let fields: Vec<_> = seq.iter().map(|r| a_with_half_width(r, rel)).collect();
+    let fields: Vec<ExactField> = seq.iter().map(|r| exact_field(r, rel)).collect();
     let unresolved: Vec<usize> = (0..rel.n_edges())
-        .filter(|&e| fields.iter().any(|(a, da)| !edge_resolved(a, da, e)))
+        .filter(|&e| fields.iter().any(|x| !x.resolved(e)))
         .collect();
     let held: Vec<usize> = (0..rel.n_edges()).filter(|e| !unresolved.contains(e)).collect();
     if held.len() < 2 { return Err(DeclarationGap::NoResolvedPair); }
@@ -518,9 +576,7 @@ pub fn minor_histories(seq: &[Registration], rel: &DeclaredRelations) -> Result<
         for &f in &held[n + 1..] {
             for i in 0..k {
                 for j in (i + 1)..k {
-                    let readings: Vec<AtDelta<Sign>> = fields.iter().map(|(a, da)| {
-                        sign_at_delta(minor(a, e, f, i, j), minor_half_width(a, da, e, f, i, j))
-                    }).collect();
+                    let readings: Vec<AtDelta<Sign>> = fields.iter().map(|x| x.minor_at_delta(e, f, i, j)).collect();
                     minors.push((e, f, i, j, history(&readings)));
                 }
             }
@@ -623,12 +679,14 @@ pub fn freedom(seq: &[Registration], rel: &DeclaredRelations) -> Result<Freedom,
 
 /// Identity grade: pairs whose difference is not resolved throughout.
 fn identity_pairs(seq: &[Registration], rel: &DeclaredRelations, held: &[usize]) -> Vec<(usize, usize)> {
-    let fields: Vec<_> = seq.iter().map(|r| a_with_half_width(r, rel)).collect();
+    // A[e] − A[f] and its bound, exactly (OC-NUM-1, 45th).
+    use crate::exact::{exceeds, Expansion};
+    let fields: Vec<ExactField> = seq.iter().map(|r| exact_field(r, rel)).collect();
     let mut out = Vec::new();
     for (n, &e) in held.iter().enumerate() {
         for &f in &held[n + 1..] {
-            let same = fields.iter().all(|(a, da)| {
-                (0..a.len()).all(|c| (a[c][e] - a[c][f]).abs() <= da[c][e] + da[c][f])
+            let same = fields.iter().all(|x| {
+                (0..x.a.len()).all(|c| !exceeds(&x.a[c][e].minus(&x.a[c][f]), &Expansion::of(x.da[c][e]).plus(&Expansion::of(x.da[c][f]))))
             });
             if same { out.push((e, f)); }
         }
@@ -640,15 +698,22 @@ fn identity_pairs(seq: &[Registration], rel: &DeclaredRelations, held: &[usize])
 /// component, through the parameter-free circulation operator. `None` where
 /// the edge has no neighbour in the field (IV-3).
 fn circulation_signs(r: &Registration, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
-    let (a, da) = a_with_half_width(r, rel);
+    // Ξ(B(A(x))) from the exact relation values in one exact sum (45th), so no
+    // rounding of A enters; its bound from the state bounds (rounded up) in
+    // one exact sum, rounded up. *Was (41st):* from A rounded once; before
+    // that, B rounded and Ξ of it.
+    use crate::exact::Expansion;
+    let x = exact_field(r, rel);
     let k = r.x.k;
-    // Ξ(B(A)) and its bound from A in one exact sum each (41st); *was:* B
-    // rounded, then Ξ of the rounded B.
-    let c = crate::operators::circulation_of_accumulation(&a, rel);
-    let dc = crate::operators::circulation_of_accumulation_half_width(&da, rel);
+    let dc = crate::operators::circulation_of_accumulation_half_width(&x.da, rel);
     (0..rel.n_edges()).map(|e| {
         if rel.succ(e).is_empty() && rel.pred(e).is_empty() { return None; }
-        Some((0..k).map(|ci| sign_at_delta(c[ci][e], dc[ci][e])).collect())
+        let w = crate::operators::circulation_of_accumulation_coefficients(rel, e, -1);
+        Some((0..k).map(|ci| {
+            let mut v = Expansion::new();
+            for (f, &kf) in w.iter().enumerate() { if kf != 0 { v.add_times(&x.a[ci][f], kf as f64); } }
+            sign_at_delta_exact(&v, &Expansion::of(dc[ci][e]))
+        }).collect())
     }).collect()
 }
 
@@ -738,9 +803,9 @@ pub struct Connection {
 pub fn connection(seq: &[Registration], rel: &DeclaredRelations) -> Result<Connection, DeclarationGap> {
     check_sequence(seq, rel)?;
     if rel.n_edges() < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
-    let fields: Vec<_> = seq.iter().map(|r| a_with_half_width(r, rel)).collect();
+    let fields: Vec<ExactField> = seq.iter().map(|r| exact_field(r, rel)).collect();
     let unresolved: Vec<usize> = (0..rel.n_edges())
-        .filter(|&e| fields.iter().any(|(a, da)| !edge_resolved(a, da, e)))
+        .filter(|&e| fields.iter().any(|x| !x.resolved(e)))
         .collect();
     let held: Vec<usize> = (0..rel.n_edges()).filter(|e| !unresolved.contains(e)).collect();
     let n = held.len();
@@ -815,11 +880,13 @@ pub fn energy_exchange(c: &EnergyCarrier, rel: &DeclaredRelations) -> Vec<Energy
     assert_eq!(c.delta.len(), rel.n_nodes, "δ_c must be declared at every locus");
     assert!(c.values.iter().all(|v| v.is_finite()), "carrier values must be in D");
     assert!(c.delta.iter().all(|d| d.is_finite() && *d >= 0.0), "δ_c must be finite and non-negative");
-    let a = operator_a(&NodeField::new(vec![c.values.clone()]), rel, &[]).spatial;
+    // ε = |c[s] − c[t]| rounded once, δ_ε rounded up, the floor decided
+    // exactly (OC-NUM-1, 45th).
+    use crate::exact::{exceeds, Expansion};
     rel.edges.iter().enumerate().map(|(e, &(s, t))| {
-        let epsilon = a[0][e].abs();
-        let delta_epsilon = c.delta[s] + c.delta[t];
-        EnergyExchange { edge: e, epsilon, delta_epsilon, floor_resolved: epsilon > delta_epsilon }
+        let d = Expansion::diff(c.values[s], c.values[t]);
+        let h = Expansion::of(c.delta[s]).plus(&Expansion::of(c.delta[t]));
+        EnergyExchange { edge: e, epsilon: d.abs().nearest(), delta_epsilon: h.up(), floor_resolved: exceeds(&d, &h) }
     }).collect()
 }
 

@@ -134,6 +134,50 @@ impl Expansion {
     }
 }
 
+/// a + b = hi + lo exactly, with hi = fl(a + b) (Knuth's two-sum).
+pub fn two_sum(a: f64, b: f64) -> (f64, f64) {
+    let hi = a + b;
+    let bb = hi - a;
+    (hi, (a - (hi - bb)) + (b - bb))
+}
+
+impl Expansion {
+    /// The exact value x.
+    pub fn of(x: f64) -> Self { let mut e = Expansion::new(); e.add(x); e }
+    /// a − b exactly.
+    pub fn diff(a: f64, b: f64) -> Self { let mut e = Expansion::of(a); e.add(-b); e }
+    /// −self.
+    pub fn neg(&self) -> Self { Expansion { partials: self.partials.iter().map(|p| -p).collect() } }
+    /// self + o exactly.
+    pub fn plus(&self, o: &Expansion) -> Self { let mut e = self.clone(); e.add_expansion(o); e }
+    /// self − o exactly.
+    pub fn minus(&self, o: &Expansion) -> Self { self.plus(&o.neg()) }
+    /// self · o exactly: every pair of partials through `add_product`.
+    pub fn times(&self, o: &Expansion) -> Self {
+        let mut e = Expansion::new();
+        for &p in &self.partials { for &q in &o.partials { e.add_product(p, q); } }
+        e
+    }
+    /// self · g exactly.
+    pub fn times_f64(&self, g: f64) -> Self { let mut e = Expansion::new(); e.add_times(self, g); e }
+}
+
+/// |v| > h, decided exactly.
+pub fn exceeds(v: &Expansion, h: &Expansion) -> bool { v.abs().minus(h).signum() > 0 }
+
+/// The bound on x·y over [x ± hx] and [y ± hy], |x|·hy + |y|·hx + hx·hy,
+/// exactly (the product bound of V2, PC2, PC3).
+pub fn product_bound(x: &Expansion, hx: &Expansion, y: &Expansion, hy: &Expansion) -> Expansion {
+    x.abs().times(hy).plus(&y.abs().times(hx)).plus(&hx.times(hy))
+}
+
+/// A gain bound γ on an entry with value v and bound h: h + γ·(|v| + h),
+/// exactly (Z1a under the scaling model).
+pub fn gain_widened(v: &Expansion, h: &Expansion, g: f64) -> Expansion {
+    if g == 0.0 { return h.clone(); }
+    h.plus(&v.abs().plus(h).times_f64(g))
+}
+
 /// The exact sum of `xs`, rounded once to the nearest f64.
 pub fn sum_nearest(xs: impl IntoIterator<Item = f64>) -> f64 {
     let mut s = Expansion::new();
