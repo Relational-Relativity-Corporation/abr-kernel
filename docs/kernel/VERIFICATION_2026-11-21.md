@@ -134,7 +134,8 @@ whether its text survives in the added lines:
 - **No registered data.** OC-SC-1 to OC-SC-4 (OC-SC-4 partly derived) and the I-SC-1 to I-SC-3 claims await the vessel record. Its declaration is still a draft, in `abr-relational-chemistry`.
 - **`validation_record_v4.md` is missing** from the repository and its history. The tables behind VR-γ-01, VR-Φ-01, VR-J-01, VR-ε-01 and VR-τ-01 cannot be classed or checked until it is recovered.
 - **Still open:** G1-K (pending Verifier); A-3 (empty sums); the acyclicity check (T8); K7 route enumeration and cycle basis; RPPI-V10; and the rest of V10_README Part 7.
-- **Version:** the manifest is already `10.1.0`. The open decision is whether to bump from there for the merge (Origin's decision).
+- *As first written:* "**Not bumped:** the package version (still `10.1.0`; Origin's decision)."
+  *Corrected after Verifier review:* **Version:** the manifest is already `10.1.0`. The open decision is whether to bump from there for the merge (Origin's decision).
 - **Stale:** the landing page in `.github` (not attached to this session).
 
 ## 8. For Origin after verification
@@ -162,3 +163,53 @@ Both packages stay in review, per the Verifier, until these dispositions are che
 |---|---|---|
 | `f811e6d` | `PersistenceChange::step_profile`: structure and freedom counts per step at every level, a declared summary (C) for following readings along an energy order (Part 9 entry 18) | `step_profile_partitions_every_level_by_step`. Default build 118 tests, with `v9` 210 |
 | `(this commit)` | `PersistenceChange::relation_transitions` (Origin's criterion: freedom becomes evident, or persistent structure becomes evident, per relation; `min_hold` declared; compared with the last held state). Part 9 entry 19 | 2 fixtures and `prop_relation_transitions_alternate_and_hold`. Default build 121 tests, with `v9` 213 |
+
+
+---
+
+# Second pass — 2026-11-22
+
+**Review this state:** `abr-kernel` branch `claude/kind-keller-is6bq1` at
+**`94afa6d`**, plus the commit that adds this section. The first pass
+reviewed up to `8d42fab`. Six commits since then: `340b98b` (dispositions of
+the first pass), `f811e6d`, `38bde35`, `8cdb216`, `eb25383`, `94afa6d`.
+
+## Reproduce
+
+```bash
+git checkout claude/kind-keller-is6bq1
+cargo test                                  # expect 121 passed, 0 failed
+cargo test --features v9                    # expect 213 passed, 0 failed
+cargo run --example v10_relational_field    # runs to completion
+```
+
+Reproduced from a clean build by the Generator on 2026-11-22. No warnings.
+
+## What is new since the first pass
+
+| Commit | Item | Status | What to check |
+|---|---|---|---|
+| `340b98b` | First-pass dispositions: I-SC-D6 corrected with resolution conditions, and its fixture and property test; the third changed test listed; the restoration wording corrected | Correction | That the corrected D6 is stated for PC1 and PC3 only, and claims exact signs only for circulation |
+| `f811e6d` | `PersistenceChange::step_profile` (Part 9, 18th) | Declared summary (C) | That it adds no reading: per-step counts sum to the totals at every level |
+| `8cdb216` | `PersistenceChange::relation_transitions`: Origin's criterion, freedom or persistent structure becomes evident (19th) | Declared (Origin) | That a new state must hold `min_hold` steps and differ from the **last held** state, so a returning fluctuation is not a transition; the property test's exact equality with reading changes at `min_hold` = 1 |
+| `eb25383` | Z1a proposed: δ in two parts | Then Proposed; **declared on 2026-11-22** (20th) | The argument: a run-constant offset or factor cancels in every change (PC-D3) |
+| `94afa6d` | **Open conditions audit decided** (`OPEN_CONDITIONS_AUDIT_2026-11-22.md`; Part 9, 20th) | Declared (Origin) | That each closure's reason holds (class A); that the §18 register now matches Part 7 (OC-T-3, OC-S-3, OC-E-3 had read OPEN); that the moved items appear in the application repository (`OPEN_ITEMS_FROM_KERNEL.md`) |
+
+## Declared but not yet implemented (disclosed, not an omission)
+
+- **Z1a:** the code still takes one δ per value. Until it is implemented, a run-constant uncertainty declared into δ widens every change bound.
+- **A-3:** the code still evaluates an empty sum as 0 **without** the record-boundary flag.
+- **The renames** (E6; Κ = connection density; σ → N_δ): not yet applied.
+- **Generator work** from the audit: OC-SC-4 (independence of the grades), RPPI-V10, the T8 acyclicity check, K7 enumeration.
+
+These are the next increment, planned as 10.3.0 with a review of its own.
+**10.2.0** is the version decided for the merge of this state, after this pass.
+
+## Provenance check since the first pass
+
+Every line deleted since `8d42fab` was checked mechanically against all
+added lines in the repository:
+
+- **Code:** no line lost; **no test assertion removed or weakened.**
+- **Canonical text** (`V10_README.md`, `kernel_reference.md`): nothing lost. Every decision is appended beside its item.
+- **Replaced:** `README.md`'s test counts (they describe the current suite) and three lines of this package. One of these ("Not bumped") had been replaced outright and is now restored beside its correction above. The other two are kept as quoted first wordings.
