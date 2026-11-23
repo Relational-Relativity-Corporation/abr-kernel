@@ -398,6 +398,18 @@ Origin declared §2.7 and adopted option 2 of I-SC-D17 (iii) (Part 9, 57th).
 
 **Tests:** `tests/v10_declared_ground.rs` (7); D17's tests updated to the decided grade, with the fenced grade checked for comparison. **258 (default), 350 (`v9`)**, no warnings; application 45, including `the_record_forms_a_declared_field_with_all_three_variables` (the vessel under §2.7).
 
+
+## 24. Energy removed, and the simulated bench (2026-11-23, 58th, for the Verifier)
+
+- **Kernel:** `TransferSite::Leaving` (validated like `Entering`; context on relations ending at the locus; test on a declared whole field). The ground record is now indexed, not searched; the indexing is asserted in debug builds, and every earlier test holds.
+- **Application:** `water/vessel/SIMULATION_DECLARATION.md` (declared before the first run), `ingest/src/sim.rs`, and the records `sim/F1`, `sim/H1`, with their reading `sim/READING.txt`. To check:
+  - the model's energy account (residual below 10⁻⁶ J);
+  - that the ingest reads the simulated files like any record;
+  - the two code corrections recorded after the first run;
+  - that no declared parameter was changed after seeing the output.
+
+259 (default), 351 (`v9`), no warnings; application 46 + 1.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*
