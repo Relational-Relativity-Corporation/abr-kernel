@@ -64,7 +64,7 @@
 // The frozen V9 readers in `derived_invariants.rs` are unchanged. The forms
 // here supersede them for V10 readings.
 
-use crate::persistence_change::{coupled_change_pairs, EdgeSeries, PersistenceChange};
+use crate::persistence_change::{coupled_change_pairs, forced_only_pairs, EdgeSeries, PersistenceChange};
 use crate::operators::{DeclaredRelations, NodeField};
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -809,7 +809,7 @@ fn identity_pairs(seq: &[Registration], rel: &DeclaredRelations, held: &[usize])
 /// Sustained grade at one registration: sign of Ξ(B(A(x)))[e] at δ per
 /// component, through the parameter-free circulation operator. `None` where
 /// the edge has no neighbour in the field (IV-3).
-fn circulation_signs(r: &Registration, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
+pub(crate) fn circulation_signs(r: &Registration, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
     // Ξ(B(A(x))) from the exact relation values in one exact sum (45th), so no
     // rounding of A enters; its bound from the state bounds (rounded up) in
     // one exact sum, rounded up. *Was (41st):* from A rounded once; before
@@ -911,6 +911,9 @@ pub struct Connection {
     pub sustained: Result<Sustained, DeclarationGap>,
     /// Coupled-change grade: pairs whose change is locked in proportion (PC2).
     pub coupled_change: Result<Vec<(usize, usize)>, DeclarationGap>,
+    /// Pairs whose every PC2 reading was forced by the bound (I-SC-D17
+    /// (iii)): reported apart, never read as coupled change (57th).
+    pub coupled_change_forced: Result<Vec<(usize, usize)>, DeclarationGap>,
     /// Pairs whose shared structure reorganized (from the minor histories).
     pub reorganizing_pairs: Vec<(usize, usize)>,
     /// Number of pairs of edges resolved at every registration.
@@ -936,13 +939,15 @@ pub fn connection(seq: &[Registration], rel: &DeclaredRelations) -> Result<Conne
         }
         Err(g) => (Err(g), Vec::new()),
     };
-    let coupled_change = EdgeSeries::from_registrations(seq, rel)
-        .and_then(|s| coupled_change_pairs(&PersistenceChange::new(&s)));
+    let pc = EdgeSeries::from_registrations(seq, rel).map(|s| PersistenceChange::new(&s));
+    let coupled_change = pc.clone().and_then(|p| coupled_change_pairs(&p));
+    let coupled_change_forced = pc.and_then(|p| forced_only_pairs(&p));
     Ok(Connection {
         identity,
         proportional,
         sustained: sustained(seq, rel),
         coupled_change,
+        coupled_change_forced,
         reorganizing_pairs,
         evaluated_pairs: n * n.saturating_sub(1) / 2,
         unresolved_edges: unresolved,

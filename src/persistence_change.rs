@@ -516,6 +516,12 @@ pub struct ChangeCoupling {
     pub minor: f64,
     pub half_width: f64,
     pub reading: Reading,
+    /// One of the two readings holds at PC1 on both edges, so the minor is
+    /// forced to structure by its bound (I-SC-D17 (iii)): the ratio-0 case of
+    /// "locked", not evidence of coupling. Kept as a reading and in PC4's
+    /// shares; the coupled-change grade needs at least one unforced reading
+    /// (Origin, 2026-11-23, 57th: option 2).
+    pub forced: bool,
 }
 
 /// PC2 readings, with the pairs the declaration fixes listed apart.
@@ -546,7 +552,10 @@ fn couple(series: &EdgeSeries, over: ReadingPair, x: &[Entering], y: &[Entering]
             let minor = x[e].v.times(&y[f].v).minus(&y[e].v.times(&x[f].v));
             let hw = product_bound(&x[e].v, &x[e].hm, &y[f].v, &y[f].hm)
                 .plus(&product_bound(&y[e].v, &y[e].hm, &x[f].v, &x[f].hm));
-            out.push(ChangeCoupling { e, f, over, minor: minor.nearest(), half_width: hw.up(), reading: read_exact(&minor, &hw) });
+            // Forced: one reading holds at PC1 on both edges (57th).
+            let moved = |r: &[Entering]| exceeds(&r[e].v, &r[e].h) || exceeds(&r[f].v, &r[f].h);
+            let forced = !(moved(x) && moved(y));
+            out.push(ChangeCoupling { e, f, over, minor: minor.nearest(), half_width: hw.up(), reading: read_exact(&minor, &hw), forced });
         }
     }
 }
@@ -719,15 +728,49 @@ impl PersistenceChange {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// Pairs whose change is locked in proportion at every reading pair where the
-/// pair is evaluated (PC2, either family), and evaluated at least once: shared
-/// structure in change. Pairs fixed by the declaration are excluded (PC-D4).
-/// A gap only when neither family can be formed.
+/// pair is evaluated (PC2, either family), with **at least one evaluated
+/// reading not forced** (both readings change on e or f): shared structure in
+/// change. Pairs fixed by the declaration are excluded (PC-D4). A gap only
+/// when neither family can be formed.
+///
+/// *Amended (Origin, 2026-11-23, 57th: option 2 of I-SC-D17 (iii)).* A pair
+/// whose every evaluated reading is forced is not read as coupled: the bound
+/// forced each reading, so nothing shows its changes locked. Such pairs are
+/// reported apart (`forced_only_pairs`). *Was (7th):* every pair whose
+/// evaluated readings all read structure, kept as
+/// `coupled_change_pairs_including_forced`.
 pub fn coupled_change_pairs(pc: &PersistenceChange) -> Result<Vec<(usize, usize)>, DeclarationGap> {
+    let all = coupled_change_pairs_including_forced(pc)?;
+    let forced = forced_only_pairs(pc)?;
+    Ok(all.into_iter().filter(|p| !forced.contains(p)).collect())
+}
+
+/// Pairs whose every evaluated PC2 reading is forced (I-SC-D17 (iii)):
+/// reported apart from the coupled-change grade, never read as connection in
+/// change (57th). A gap only when neither family can be formed.
+pub fn forced_only_pairs(pc: &PersistenceChange) -> Result<Vec<(usize, usize)>, DeclarationGap> {
+    let families = families(pc)?;
+    let mut pairs: Vec<(usize, usize)> = families.iter().flat_map(|f| f.readings.iter().map(|x| (x.e, x.f))).collect();
+    pairs.sort();
+    pairs.dedup();
+    Ok(pairs.into_iter().filter(|&(e, f)| families.iter().flat_map(|c| c.readings.iter())
+        .filter(|x| (x.e, x.f) == (e, f)).all(|x| x.forced)).collect())
+}
+
+fn families(pc: &PersistenceChange) -> Result<Vec<&Couplings>, DeclarationGap> {
     let families: Vec<&Couplings> =
         [&pc.across_components, &pc.across_steps].into_iter().filter_map(|f| f.as_ref().ok()).collect();
     if families.is_empty() {
         return Err(pc.across_components.as_ref().err().cloned().unwrap_or(DeclarationGap::SingleComponent));
     }
+    Ok(families)
+}
+
+/// *Fenced (57th):* the coupled-change grade as declared on the 7th: every
+/// pair whose evaluated PC2 readings all read structure, forced or not. Kept
+/// for declared comparison (C); not a V10 reading since the 57th.
+pub fn coupled_change_pairs_including_forced(pc: &PersistenceChange) -> Result<Vec<(usize, usize)>, DeclarationGap> {
+    let families = families(pc)?;
     let mut pairs: Vec<(usize, usize)> =
         families.iter().flat_map(|f| f.readings.iter().map(|x| (x.e, x.f))).collect();
     pairs.sort();

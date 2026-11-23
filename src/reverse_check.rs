@@ -164,6 +164,10 @@ pub fn reverse_coupling(inp: Inputs, x: &ChangeCoupling) -> Verdict {
     if hw.up() != x.half_width { return mismatch("half_width", x.half_width, hw.up()); }
     let r = reading_of(&minor, &hw);
     if r != x.reading { return mismatch("reading", x.reading, r); }
+    // Forced (57th): one reading holds at PC1 on both edges.
+    let held_both = |p: &(X, X), q: &(X, X)| !exceeds(&p.0, &p.1) && !exceeds(&q.0, &q.1);
+    let forced = held_both(&xe, &xf) || held_both(&ye, &yf);
+    if forced != x.forced { return mismatch("forced (one reading held on both edges, I-SC-D17 (iii))", x.forced, forced); }
     Verdict::Match
 }
 

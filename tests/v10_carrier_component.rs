@@ -184,14 +184,14 @@ fn d17_iii_worked_energy_flows_while_structure_holds_reads_locked() {
 }
 
 #[test]
-fn d17_iii_case_for_origin_the_coupled_change_grade_met_by_a_held_reading() {
+fn d17_iii_the_coupled_change_grade_is_not_met_by_forced_readings() {
     // Two registrations, two components. The structure holds everywhere; the
     // carrier's exchange changes by (1, 5) on the two edges. PC2(a) is the
     // only family (n = 2), and its one reading is forced to structure by
-    // (iii). The field's coupled-change grade (V1) as it stands reads the
-    // pair as connected in change. Recorded as it is, for Origin (48th):
-    // this test states the current behaviour, and changes if the grade is
-    // amended.
+    // (iii). *Decided (Origin, 57th: option 2):* the reading is flagged
+    // forced, the coupled-change grade does not hold the pair, and the pair
+    // is reported apart. *Was (48th, "case for Origin"):* the grade read the
+    // pair as connected in change; the fenced grade still does.
     let values = vec![vec![vec![0.0, 1.0, 3.0], vec![0.0, 0.0, 0.0]], vec![vec![0.0, 1.0, 3.0], vec![0.0, -1.0, -6.0]]];
     let w = whole(&rel(3, vec![(0, 1), (1, 2)]), Declared::repeatability(values, vec![vec![1.0 / 64.0; 3]; 2]));
     assert_eq!((w.pc1(0, 0, 0), w.pc1(0, 0, 1)), (Reading::Structure, Reading::Structure));
@@ -199,7 +199,10 @@ fn d17_iii_case_for_origin_the_coupled_change_grade_met_by_a_held_reading() {
     assert!(w.freedom().across_steps.is_err());
     assert_eq!(across(&w).readings.len(), 1);
     assert_eq!(across(&w).readings[0].reading, Reading::Structure);
-    assert_eq!(w.connection().coupled_change.as_ref().unwrap(), &vec![(0, 1)]);
+    assert!(across(&w).readings[0].forced);
+    assert!(w.connection().coupled_change.as_ref().unwrap().is_empty());
+    assert_eq!(w.connection().coupled_change_forced.as_ref().unwrap(), &vec![(0, 1)]);
+    assert_eq!(coupled_change_pairs_including_forced(w.freedom()).unwrap(), vec![(0, 1)], "the fenced grade, for comparison");
 }
 
 /// The two readings (step, component) a change minor is formed over.
@@ -220,6 +223,7 @@ fn tally_iii(pc: &PersistenceChange, g: &mut [usize; 3]) -> Vec<(usize, usize)> 
         for x in &fam.readings {
             let moved = |(st, c): (usize, usize)| pc1(st, c, x.e) == Reading::Freedom || pc1(st, c, x.f) == Reading::Freedom;
             let [p, q] = readings_of(x.over);
+            assert_eq!(x.forced, !(moved(p) && moved(q)), "the kernel's forced flag is (iii)'s condition");
             if x.reading == Reading::Freedom {
                 assert!(moved(p) && moved(q), "a resolved minor needs change in both readings");
                 g[0] += 1;
@@ -248,18 +252,25 @@ fn d17_iii_a_change_minor_resolves_only_where_each_reading_changes() {
         let w = whole(&rel, enumerated_declared(r, &rel, k, regs, 0.25, z, z));
         let mut g = counts.lock().unwrap();
         let forced = tally_iii(w.freedom(), &mut g.0);
-        if let Ok(cc) = &w.connection().coupled_change {
-            let all_forced = |p: &(usize, usize)| {
-                let n = [&w.freedom().across_components, &w.freedom().across_steps].iter()
-                    .filter_map(|f| f.as_ref().ok()).flat_map(|f| f.readings.iter()).filter(|x| (x.e, x.f) == *p).count();
-                n > 0 && forced.iter().filter(|q| *q == p).count() == n
-            };
-            g.1 += cc.iter().filter(|p| all_forced(p)).count();
+        let all_forced = |p: &(usize, usize)| {
+            let n = [&w.freedom().across_components, &w.freedom().across_steps].iter()
+                .filter_map(|f| f.as_ref().ok()).flat_map(|f| f.readings.iter()).filter(|x| (x.e, x.f) == *p).count();
+            n > 0 && forced.iter().filter(|q| *q == p).count() == n
+        };
+        // The decided grade (57th): no coupled pair is met by forced readings
+        // alone; those pairs are reported apart, and the fenced grade (7th)
+        // still counts them.
+        if let (Ok(cc), Ok(fo)) = (&w.connection().coupled_change, &w.connection().coupled_change_forced) {
+            assert!(cc.iter().all(|p| !all_forced(p)));
+            assert!(fo.iter().all(|p| all_forced(p)));
+            let old = coupled_change_pairs_including_forced(w.freedom()).unwrap();
+            g.1 += old.iter().filter(|p| all_forced(p)).count();
+            assert_eq!(old.iter().filter(|p| all_forced(p)).count(), fo.iter().filter(|p| old.contains(p)).count());
         }
     });
     let ([resolved, forced, locked], vacuous) = counts.into_inner().unwrap();
     assert!(resolved > 0 && forced > 0 && locked > 0, "resolved {resolved}, forced {forced}, locked {locked}");
-    assert!(vacuous > 0, "coupled-change pairs met by forced readings alone occur in whole fields");
+    assert!(vacuous > 0, "pairs the fenced grade met by forced readings alone occur in whole fields, and are reported apart");
 }
 
 /// What is not evaluated on an edge-registered series, and why (W11; option

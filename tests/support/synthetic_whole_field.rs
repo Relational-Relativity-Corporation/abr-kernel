@@ -214,3 +214,58 @@ pub fn mixed(d: &Declared, a: f64, b: f64) -> Declared {
     delta[c] = d.delta[c].iter().zip(&d.delta[0]).map(|(&x, &j)| a.abs() * x + b.abs() * j).collect();
     Declared::repeatability(values, delta)
 }
+
+// ── Declared fields (§2.7, Origin 57th) ────────────────────────────────────
+
+use abr_kernel::domain::{
+    ComponentRole, ConnectionDeclaration, Constraint, DeclaredField, DomainDeclaration, EnergyExpression,
+    EnergyParticipation, EnergyTransfer, FreedomDeclaration, Participation,
+};
+
+/// The registrations of a declaration, with every declared part of δ.
+pub fn registrations(d: &Declared) -> Vec<Registration> {
+    let k = d.k();
+    d.values.iter().map(|v| {
+        let g = Registration::synthetic(NodeField::new(v.clone()), d.delta.clone());
+        if d.any_run_constant() { g.with_run_constant(d.offset.clone(), d.gain.clone(), vec![0.0; k]) } else { g }
+    }).collect()
+}
+
+/// The domain declaration of a synthetic field: components 0 … k − 2
+/// structural, the last the held carrier (declared once), the given
+/// transfers, and the ordering; connection over every declared relation, with
+/// the given constraints.
+pub fn domain(d: &Declared, held: bool, transfers: Vec<EnergyTransfer>, constraints: Vec<Constraint>) -> DomainDeclaration {
+    let k = d.k();
+    let mut energy: Vec<EnergyExpression> = Vec::new();
+    if held {
+        energy.push(EnergyExpression::Held { component: k - 1, name: "SYNTHETIC carrier".into(), unit: "synthetic".into(),
+            participation: EnergyParticipation::Supplied });
+    }
+    energy.extend(transfers.into_iter().map(EnergyExpression::Transferred));
+    if !energy.is_empty() { energy.push(EnergyExpression::Ordering { basis: "SYNTHETIC: registration index".into() }); }
+    let components = (0..k).map(|c| (format!("SYNTHETIC component {c}"),
+        if held && c == k - 1 { ComponentRole::EnergyHeld } else { ComponentRole::Structural })).collect();
+    DomainDeclaration {
+        energy,
+        freedom: FreedomDeclaration { components, basis: "SYNTHETIC: one fixture over common loci".into(),
+            prepared_constraints: vec!["SYNTHETIC: none".into()], participation: Participation::Received },
+        connection: ConnectionDeclaration { basis: "SYNTHETIC: the declared relations".into(), constraints,
+            participation: Participation::Received },
+    }
+}
+
+/// A declared whole field.
+pub fn declared(rel: &DeclaredRelations, d: &Declared, decl: DomainDeclaration) -> DeclaredField {
+    DeclaredField::new(rel, registrations(d), decl).expect("the declared field forms")
+}
+
+/// A transfer over the steps of `d`, registered at `site`, values on a
+/// dyadic grid.
+pub fn transfer(r: &mut Seeds, site: abr_kernel::domain::TransferSite, steps: usize) -> EnergyTransfer {
+    let mut values = vec![r.eighth(0.0, 3.0)];
+    for _ in 1..steps { let x = *values.last().unwrap(); values.push(if r.selects(4) { x + r.eighth(-1.0, 1.0) } else { x }); }
+    EnergyTransfer { name: "SYNTHETIC transfer".into(), unit: "synthetic".into(), site, values,
+        delta: (0..steps).map(|_| r.delta(0.5)).collect(), gain: if r.selects(3) { 1.0 / 16.0 } else { 0.0 },
+        mapping: None, participation: EnergyParticipation::Supplied, range: ObservedRange::synthetic() }
+}

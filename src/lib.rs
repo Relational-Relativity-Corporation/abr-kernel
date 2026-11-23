@@ -113,3 +113,9 @@ pub mod topology;
 // fields and re-execute the form independently of the code that produced
 // it, returning MATCH or MISMATCH (`docs/kernel/rppi_v10.md`).
 pub mod reverse_check;
+
+// Kernel V10.3 — §2.7, the declared ground (Origin, 2026-11-23, 57th): the
+// domain declaration (R9a) mapping energy, freedom and connection in the
+// system; the declared field formed from it; the ground record with all three
+// variables for every relation, component and step.
+pub mod domain;
