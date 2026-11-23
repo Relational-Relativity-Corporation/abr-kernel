@@ -362,6 +362,21 @@ Origin decided W16 (a) with three names (Part 9, 52nd) and directed that the ide
 
 **Tests:** `tests/v10_persistence_reversal.rs` (5). **249 (default), 341 (`v9`)**, no warnings.
 
+
+## 22. The D17 and D18 tests on whole fields (2026-11-23, 53rd, for the Verifier)
+
+Origin asked whether any test leaves out a variable. Tonight's did: each claim was checked on one variable, against W11 and Df6. Reworked:
+- **Fixture** `tests/support/synthetic_whole_field.rs`: every test forms `RelationalField::new` with the carrier declared to energy from the carrier component, so A, B, Ξ, their persistence forms, energy, freedom and connection are evaluated together. `inclusion` asserts every variable is read and every gap named among the field's findings. Z1a parts are on some fields.
+- **Claims read from the field's parts:** energy exchanges, PC1–PC3, couplings, the sustained, proportional and coupled-change grades. The imbalance states (from `spatial[t].circulation` and the state bounds) are asserted equal to the field's own sustained grade.
+- **Edge-registered series** (closure; independent gains): through the kernel's own closures and PC levels, with what is not evaluated named (option (b); OC-WF-1).
+
+**To check:**
+1. That the fixture's series is the one the field reads (asserted: its A equals the field's spatial A).
+2. The finding that the carrier is declared twice (D17 (i), "Reworked on whole fields").
+3. The control: narrowing the relations to one fails all four D18 property tests.
+
+**Not yet audited:** the V10 tests written before the 53rd (OC-TEST-1). **251 (default), 343 (`v9`)**, no warnings.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*

@@ -13,6 +13,7 @@ This governs everything we do. Check every change against it: relation is calcul
 - **Origin decides.** Present options with a recommendation; record each decision with its date (Part 9).
 - **Retire or fence, never delete.** Amendments sit beside the text they amend. Before review, check every deleted line against `main`.
 - **Kernel only in kernel documents** (application work in its own repository). Intersection, not basis (W14). Time is never primitive (W15).
+- **Tests read the whole field** (Origin, 53rd; Df6, W11). A test of a V10 claim forms a whole relational field (`RelationalField::new`, with the carrier declared), so every variable is evaluated together, and reads the claim from the parts that field reports. Every variable not read is named as a gap. Where the kernel forms no whole field (edge-registered series, OC-WF-1), the test names what is not evaluated. Never test one variable's expression on its own. Shared fixture: `tests/support/synthetic_whole_field.rs`.
 - **Be honest about status.** Synthetic tests establish nothing empirical. A property test should fail under the wrong statement: check it by reverting, and say when a test cannot tell two statements apart.
 - **Versioning is frozen at `10.3.0`, pre-release**, until there is a release (Part 9, 40th).
 
