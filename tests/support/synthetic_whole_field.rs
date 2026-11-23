@@ -177,7 +177,14 @@ pub fn whole(rel: &DeclaredRelations, d: Declared) -> Whole {
 /// grade that could not be formed appears among the field's findings with its
 /// gap. Returns the gaps.
 pub fn inclusion(w: &Whole) -> Vec<DeclarationGap> {
-    let g = &w.field.ground;
+    inclusion_of(&w.field)
+}
+
+/// The rule of inclusion on any whole field, however its relations were
+/// registered (59th): energy, freedom and connection each formed, every level
+/// or grade not formed named among the findings. Returns the gaps.
+pub fn inclusion_of(field: &RelationalField) -> Vec<DeclarationGap> {
+    let g = &field.ground;
     let findings: Vec<Finding> = g.findings();
     let named = |gap: &DeclarationGap| findings.iter().any(|f| f.gap.as_ref() == Some(gap));
     let mut gaps = Vec::new();
@@ -268,4 +275,24 @@ pub fn transfer(r: &mut Seeds, site: abr_kernel::domain::TransferSite, steps: us
     EnergyTransfer { name: "SYNTHETIC transfer".into(), unit: "synthetic".into(), site, values,
         delta: (0..steps).map(|_| r.delta(0.5)).collect(), gain: if r.selects(3) { 1.0 / 16.0 } else { 0.0 },
         mapping: None, participation: EnergyParticipation::Supplied, range: ObservedRange::synthetic() }
+}
+
+// ── Relations registered directly (relation as primitive, Origin 59th) ────
+
+use abr_kernel::ground_variables::RelationCarrier;
+
+/// A whole field formed from registrations of the relations themselves
+/// (`RelationalField::from_relations`): a[t][c][e] with δ[t][c][e], the
+/// carrier registered across the relations, and the rule of inclusion
+/// asserted. No locus value is constructed.
+pub fn whole_of_relations(rel: &DeclaredRelations, series: EdgeSeries, carrier: &RelationCarrier) -> RelationalField {
+    let field = RelationalField::from_relations(rel, series, Some(carrier)).expect("the relational field forms");
+    assert!(!field.locus_registered(), "no locus value is constructed");
+    inclusion_of(&field);
+    field
+}
+
+/// A synthetic carrier registered across the relations.
+pub fn relation_carrier(a: Vec<Vec<f64>>, da: Vec<Vec<f64>>) -> RelationCarrier {
+    RelationCarrier { name: "SYNTHETIC carrier".into(), unit: "synthetic".into(), a, da, range: ObservedRange::synthetic() }
 }

@@ -511,24 +511,58 @@ pub fn edge_resolved(a: &[Vec<f64>], da: &[Vec<f64>], e: usize) -> bool {
 /// δ_A is the **state** bound (Z1a): repeatability, offset and unshared gain
 /// at both ends. *Replaces `a_with_half_width` (to 45th), which returned A
 /// rounded and δ_A summed to nearest.*
-struct ExactField { a: Vec<Vec<crate::exact::Expansion>>, da: Vec<Vec<f64>> }
+///
+/// *Amended (Origin, 2026-11-23, 59th: relation is primitive):* an
+/// `ExactField` is one registration **of the relations**. It is formed from
+/// a registration of the relations (`exact_field_of`, from an `EdgeSeries`),
+/// and a registration at the loci is one way of forming it (`exact_field`).
+/// Two gain bounds are carried with it for relations registered directly
+/// (Z1a): `mixed` enters every minor that mixes components, and `closure`
+/// every sum of one component across relations (identity, Ξ). Both are 0 for
+/// relations formed from loci, whose unshared gains are already in `da`.
+struct ExactField {
+    a: Vec<Vec<crate::exact::Expansion>>,
+    da: Vec<Vec<f64>>,
+    mixed: Vec<Vec<f64>>,
+    closure: Vec<Vec<f64>>,
+}
 
 fn exact_field(r: &Registration, rel: &DeclaredRelations) -> ExactField {
     use crate::exact::Expansion;
     let a = (0..r.x.k).map(|c| rel.edges.iter().map(|&(s, t)| Expansion::diff(r.x.data[c][s], r.x.data[c][t])).collect()).collect();
     let da = (0..r.x.k).map(|c| rel.edges.iter().map(|&(s, t)| r.state_bound(c, s).plus(&r.state_bound(c, t)).up()).collect()).collect();
-    ExactField { a, da }
+    let zero = vec![vec![0.0; rel.n_edges()]; r.x.k];
+    ExactField { a, da, mixed: zero.clone(), closure: zero }
+}
+
+/// Registration t of the relations, exactly as the series holds it (59th).
+fn exact_field_of(s: &EdgeSeries, t: usize) -> ExactField {
+    let (k, m) = (s.k(), s.n_edges());
+    ExactField {
+        a: (0..k).map(|c| (0..m).map(|e| s.entry(t, c, e)).collect()).collect(),
+        da: s.da[t].clone(),
+        mixed: s.mixed_gain.clone(),
+        closure: s.closure_gain.clone(),
+    }
 }
 
 impl ExactField {
+    /// The bound an entry carries into a minor that mixes components.
+    fn mixed_bound(&self, c: usize, e: usize) -> crate::exact::Expansion {
+        crate::exact::gain_widened(&self.a[c][e], &crate::exact::Expansion::of(self.da[c][e]), self.mixed[c][e])
+    }
+    /// The bound an entry carries into a sum of one component across relations.
+    fn closure_bound(&self, c: usize, e: usize) -> crate::exact::Expansion {
+        crate::exact::gain_widened(&self.a[c][e], &crate::exact::Expansion::of(self.da[c][e]), self.closure[c][e])
+    }
     fn resolved(&self, e: usize) -> bool {
         (0..self.a.len()).any(|c| crate::exact::exceeds(&self.a[c][e], &crate::exact::Expansion::of(self.da[c][e])))
     }
     /// The sign of m_ij(e, f) at δ, decided exactly.
     fn minor_at_delta(&self, e: usize, f: usize, i: usize, j: usize) -> AtDelta<Sign> {
-        use crate::exact::{product_bound, Expansion};
+        use crate::exact::product_bound;
         let a = &self.a;
-        let h = |c: usize, e: usize| Expansion::of(self.da[c][e]);
+        let h = |c: usize, e: usize| self.mixed_bound(c, e);
         let m = a[i][e].times(&a[j][f]).minus(&a[j][e].times(&a[i][f]));
         let hw = product_bound(&a[i][e], &h(i, e), &a[j][f], &h(j, f)).plus(&product_bound(&a[j][e], &h(j, e), &a[i][f], &h(i, f)));
         sign_at_delta_exact(&m, &hw)
@@ -640,20 +674,33 @@ impl MinorPattern {
 pub fn minor_pattern(r: &Registration, rel: &DeclaredRelations) -> Result<MinorPattern, DeclarationGap> {
     if r.x.k < 2 { return Err(DeclarationGap::SingleComponent); }
     if rel.n_edges() < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
-    let x = exact_field(r, rel);
+    Ok(pattern_of(&exact_field(r, rel)))
+}
+
+/// The minor pattern P(F) at registration t of the relations (59th). A
+/// building block, as `minor_pattern`.
+pub fn minor_pattern_of(series: &EdgeSeries, t: usize) -> Result<MinorPattern, DeclarationGap> {
+    if series.k() < 2 { return Err(DeclarationGap::SingleComponent); }
+    if series.n_edges() < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
+    Ok(pattern_of(&exact_field_of(series, t)))
+}
+
+/// The minor pattern of one registration of the relations (59th).
+fn pattern_of(x: &ExactField) -> MinorPattern {
+    let (k, m) = (x.a.len(), x.a[0].len());
     let (resolved, unresolved): (Vec<usize>, Vec<usize>) =
-        (0..rel.n_edges()).partition(|&e| x.resolved(e));
+        (0..m).partition(|&e| x.resolved(e));
     let mut minors = Vec::new();
     for (n, &e) in resolved.iter().enumerate() {
         for &f in &resolved[n + 1..] {
-            for i in 0..r.x.k {
-                for j in (i + 1)..r.x.k {
+            for i in 0..k {
+                for j in (i + 1)..k {
                     minors.push((e, f, i, j, x.minor_at_delta(e, f, i, j)));
                 }
             }
         }
     }
-    Ok(MinorPattern { minors, unresolved_edges: unresolved })
+    MinorPattern { minors, unresolved_edges: unresolved }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -672,17 +719,30 @@ pub struct MinorHistories {
 }
 
 /// Minor histories over a declared sequence of at least two registrations.
+///
+/// *Amended (59th):* the relations are formed from the loci
+/// (`EdgeSeries::from_registrations`) and read by `minor_histories_of`.
 pub fn minor_histories(seq: &[Registration], rel: &DeclaredRelations) -> Result<MinorHistories, DeclarationGap> {
     check_sequence(seq, rel)?;
-    let patterns: Vec<MinorPattern> =
-        seq.iter().map(|r| minor_pattern(r, rel)).collect::<Result<_, _>>()?;
-    let fields: Vec<ExactField> = seq.iter().map(|r| exact_field(r, rel)).collect();
-    let unresolved: Vec<usize> = (0..rel.n_edges())
+    if seq[0].x.k < 2 { return Err(DeclarationGap::SingleComponent); }
+    if rel.n_edges() < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
+    minor_histories_of(&EdgeSeries::from_registrations(seq, rel)?)
+}
+
+/// Minor histories over a declared sequence of registrations of the
+/// relations (relation as primitive, Origin, 2026-11-23, 59th).
+pub fn minor_histories_of(series: &EdgeSeries) -> Result<MinorHistories, DeclarationGap> {
+    if series.n_registrations() < 2 { return Err(DeclarationGap::NoProcessSequence); }
+    let (k, m) = (series.k(), series.n_edges());
+    if k < 2 { return Err(DeclarationGap::SingleComponent); }
+    if m < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
+    let fields: Vec<ExactField> = (0..series.n_registrations()).map(|t| exact_field_of(series, t)).collect();
+    let patterns: Vec<MinorPattern> = fields.iter().map(pattern_of).collect();
+    let unresolved: Vec<usize> = (0..m)
         .filter(|&e| fields.iter().any(|x| !x.resolved(e)))
         .collect();
-    let held: Vec<usize> = (0..rel.n_edges()).filter(|e| !unresolved.contains(e)).collect();
+    let held: Vec<usize> = (0..m).filter(|e| !unresolved.contains(e)).collect();
     if held.len() < 2 { return Err(DeclarationGap::NoResolvedPair); }
-    let k = seq[0].x.k;
     let mut minors = Vec::new();
     for (n, &e) in held.iter().enumerate() {
         for &f in &held[n + 1..] {
@@ -753,7 +813,15 @@ pub struct Freedom {
 }
 
 pub fn freedom(seq: &[Registration], rel: &DeclaredRelations) -> Result<Freedom, DeclarationGap> {
-    let h = minor_histories(seq, rel)?;
+    freedom_from(minor_histories(seq, rel)?)
+}
+
+/// The first V2 form over registrations of the relations (59th).
+pub fn freedom_of(series: &EdgeSeries) -> Result<Freedom, DeclarationGap> {
+    freedom_from(minor_histories_of(series)?)
+}
+
+fn freedom_from(h: MinorHistories) -> Result<Freedom, DeclarationGap> {
     let pairs = pair_histories(&h);
     let free_pairs: Vec<(usize, usize)> =
         pairs.iter().filter(|p| p.1 == PairHistory::Free).map(|p| p.0).collect();
@@ -790,15 +858,16 @@ pub fn freedom(seq: &[Registration], rel: &DeclaredRelations) -> Result<Freedom,
 // a reading (Method; W10).
 
 /// Identity grade: pairs whose difference is not resolved throughout.
-fn identity_pairs(seq: &[Registration], rel: &DeclaredRelations, held: &[usize]) -> Vec<(usize, usize)> {
+/// *Amended (59th):* read from the registrations of the relations; each
+/// bound carries its closure gain (0 for relations formed from loci).
+fn identity_pairs(fields: &[ExactField], held: &[usize]) -> Vec<(usize, usize)> {
     // A[e] − A[f] and its bound, exactly (OC-NUM-1, 45th).
-    use crate::exact::{exceeds, Expansion};
-    let fields: Vec<ExactField> = seq.iter().map(|r| exact_field(r, rel)).collect();
+    use crate::exact::exceeds;
     let mut out = Vec::new();
     for (n, &e) in held.iter().enumerate() {
         for &f in &held[n + 1..] {
             let same = fields.iter().all(|x| {
-                (0..x.a.len()).all(|c| !exceeds(&x.a[c][e].minus(&x.a[c][f]), &Expansion::of(x.da[c][e]).plus(&Expansion::of(x.da[c][f]))))
+                (0..x.a.len()).all(|c| !exceeds(&x.a[c][e].minus(&x.a[c][f]), &x.closure_bound(c, e).plus(&x.closure_bound(c, f))))
             });
             if same { out.push((e, f)); }
         }
@@ -814,9 +883,17 @@ pub(crate) fn circulation_signs(r: &Registration, rel: &DeclaredRelations) -> Ve
     // rounding of A enters; its bound from the state bounds (rounded up) in
     // one exact sum, rounded up. *Was (41st):* from A rounded once; before
     // that, B rounded and Ξ of it.
+    circulation_signs_exact(&exact_field(r, rel), rel)
+}
+
+/// The sustained grade's signs at one registration of the relations (59th).
+pub(crate) fn circulation_signs_of(series: &EdgeSeries, t: usize, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
+    circulation_signs_exact(&exact_field_of(series, t), rel)
+}
+
+fn circulation_signs_exact(x: &ExactField, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
     use crate::exact::Expansion;
-    let x = exact_field(r, rel);
-    let k = r.x.k;
+    let k = x.a.len();
     // The bound is kept exact through the decision and never rounded first
     // (the Verifier's batch-2 finding 3, 46th). *Was (45th):* rounded up before
     // the comparison, so on 0 → 1 → 2 → 3 with x = [0, 1, 0, −2⁻⁵³],
@@ -829,7 +906,8 @@ pub(crate) fn circulation_signs(r: &Registration, rel: &DeclaredRelations) -> Ve
         Some((0..k).map(|ci| {
             let (mut v, mut h) = (Expansion::new(), Expansion::new());
             for (f, &kf) in w.iter().enumerate() { if kf != 0 { v.add_times(&x.a[ci][f], kf as f64); } }
-            for (f, &kf) in wb.iter().enumerate() { if kf != 0 { h.add_product(kf as f64, x.da[ci][f]); } }
+            // Each term's bound carries its closure gain (59th; 0 from loci).
+            for (f, &kf) in wb.iter().enumerate() { if kf != 0 { h.add_times(&x.closure_bound(ci, f), kf as f64); } }
             sign_at_delta_exact(&v, &h)
         }).collect())
     }).collect()
@@ -863,10 +941,10 @@ pub struct Sustained {
     pub share_held_all: f64,
 }
 
-fn sustained(seq: &[Registration], rel: &DeclaredRelations) -> Result<Sustained, DeclarationGap> {
+fn sustained(series: &EdgeSeries, rel: &DeclaredRelations) -> Result<Sustained, DeclarationGap> {
     if !has_interior(rel) { return Err(DeclarationGap::PrimaryRegion); }
-    let signs: Vec<_> = seq.iter().map(|r| circulation_signs(r, rel)).collect();
-    let k = seq[0].x.k;
+    let signs: Vec<_> = (0..series.n_registrations()).map(|t| circulation_signs_of(series, t, rel)).collect();
+    let k = series.k();
     let (mut held, mut reorg, mut nf) = (Vec::new(), Vec::new(), Vec::new());
     for e in 0..rel.n_edges() {
         if signs[0][e].is_none() { nf.push(e); continue; }
@@ -921,17 +999,30 @@ pub struct Connection {
     pub unresolved_edges: Vec<usize>,
 }
 
+///
+/// *Amended (59th):* the relations are formed from the loci and read by
+/// `connection_of`.
 pub fn connection(seq: &[Registration], rel: &DeclaredRelations) -> Result<Connection, DeclarationGap> {
     check_sequence(seq, rel)?;
     if rel.n_edges() < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
-    let fields: Vec<ExactField> = seq.iter().map(|r| exact_field(r, rel)).collect();
+    connection_of(&EdgeSeries::from_registrations(seq, rel)?, rel)
+}
+
+/// Connection over a declared sequence of registrations of the relations,
+/// by grade (relation as primitive, Origin, 2026-11-23, 59th).
+pub fn connection_of(series: &EdgeSeries, rel: &DeclaredRelations) -> Result<Connection, DeclarationGap> {
+    if series.n_registrations() < 2 { return Err(DeclarationGap::NoProcessSequence); }
+    crate::topology::admit_field(rel)?;
+    assert_eq!(series.n_edges(), rel.n_edges(), "the series must register every declared relation");
+    if rel.n_edges() < 2 { return Err(DeclarationGap::FewerThanTwoEdges); }
+    let fields: Vec<ExactField> = (0..series.n_registrations()).map(|t| exact_field_of(series, t)).collect();
     let unresolved: Vec<usize> = (0..rel.n_edges())
         .filter(|&e| fields.iter().any(|x| !x.resolved(e)))
         .collect();
     let held: Vec<usize> = (0..rel.n_edges()).filter(|e| !unresolved.contains(e)).collect();
     let n = held.len();
-    let identity = identity_pairs(seq, rel, &held);
-    let (proportional, reorganizing_pairs) = match minor_histories(seq, rel) {
+    let identity = identity_pairs(&fields, &held);
+    let (proportional, reorganizing_pairs) = match minor_histories_of(series) {
         Ok(h) => {
             let ps = pair_histories(&h);
             (Ok(ps.iter().filter(|p| p.1 == PairHistory::Proportional).map(|p| p.0).collect()),
@@ -939,13 +1030,13 @@ pub fn connection(seq: &[Registration], rel: &DeclaredRelations) -> Result<Conne
         }
         Err(g) => (Err(g), Vec::new()),
     };
-    let pc = EdgeSeries::from_registrations(seq, rel).map(|s| PersistenceChange::new(&s));
-    let coupled_change = pc.clone().and_then(|p| coupled_change_pairs(&p));
-    let coupled_change_forced = pc.and_then(|p| forced_only_pairs(&p));
+    let pc = PersistenceChange::new(series);
+    let coupled_change = coupled_change_pairs(&pc);
+    let coupled_change_forced = forced_only_pairs(&pc);
     Ok(Connection {
         identity,
         proportional,
-        sustained: sustained(seq, rel),
+        sustained: sustained(series, rel),
         coupled_change,
         coupled_change_forced,
         reorganizing_pairs,
@@ -1056,6 +1147,63 @@ pub fn energy(carriers: Option<&[EnergyCarrier]>, n_registrations: usize, rel: &
     })
 }
 
+/// An energy carrier registered **across the declared relations** (relation
+/// as primitive, Origin, 2026-11-23, 59th; ER-1). The registered value at a
+/// relation is what is exchanged across it, signed in the relation's declared
+/// direction; no value at a locus is constructed. `a[t][e]`, `da[t][e]`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RelationCarrier {
+    pub name: String,
+    pub unit: String,
+    pub a: Vec<Vec<f64>>,
+    pub da: Vec<Vec<f64>>,
+    /// The carrier chain's observed range (OC-RANGE-1, 47th).
+    pub range: ObservedRange,
+}
+
+impl RelationCarrier {
+    /// A carrier at the loci, formed into its relations: A(c)[e] = c[s] − c[t]
+    /// and δ = δ_c[s] + δ_c[t]. The special case (59th): a carrier declared at
+    /// loci is read through the relations it forms. `a` is the nearest f64 to
+    /// the exact difference; the locus path itself (`energy`) decides the
+    /// floor from the exact difference.
+    pub fn from_loci(carriers: &[EnergyCarrier], rel: &DeclaredRelations) -> Self {
+        use crate::exact::Expansion;
+        for c in carriers {
+            assert_eq!(c.values.len(), rel.n_nodes, "carrier must be declared at every locus");
+            assert_eq!(c.delta.len(), rel.n_nodes, "δ_c must be declared at every locus");
+        }
+        let a = carriers.iter().map(|c| rel.edges.iter().map(|&(s, t)| Expansion::diff(c.values[s], c.values[t]).nearest()).collect()).collect();
+        let da = carriers.iter().map(|c| rel.edges.iter().map(|&(s, t)| Expansion::of(c.delta[s]).plus(&Expansion::of(c.delta[t])).up()).collect()).collect();
+        RelationCarrier { name: carriers[0].name.clone(), unit: carriers[0].unit.clone(), a, da, range: carriers[0].range.clone() }
+    }
+}
+
+/// Energy over a sequence of registrations of the relations: ε[e] = |a[e]|,
+/// δ_ε[e] = δa[e], the floor ε > δ_ε decided exactly (V3; I-SC-D17 (i)).
+pub fn energy_of_relations(carrier: Option<&RelationCarrier>, n_registrations: usize, rel: &DeclaredRelations)
+    -> Result<Energy, DeclarationGap>
+{
+    use crate::exact::{exceeds, Expansion};
+    if n_registrations < 2 { return Err(DeclarationGap::NoProcessSequence); }
+    crate::topology::admit_field(rel)?;
+    let c = carrier.ok_or(DeclarationGap::NoCarrierDeclared)?;
+    assert!(c.a.len() == n_registrations && c.da.len() == n_registrations, "the carrier must be registered at every registration");
+    assert!(c.a.iter().chain(&c.da).all(|r| r.len() == rel.n_edges()), "the carrier must be registered across every declared relation");
+    assert!(c.a.iter().flatten().all(|v| v.is_finite()), "carrier values must be in D");
+    assert!(c.da.iter().flatten().all(|d| d.is_finite() && *d >= 0.0), "δ must be finite and non-negative");
+    assert!(c.a.iter().flatten().chain(c.da.iter().flatten()).all(|v| crate::exact::in_exact_range(*v)), "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
+    c.range.check(c.a.iter().flatten().zip(c.da.iter().flatten()));
+    if rel.n_edges() == 0 { return Err(DeclarationGap::FewerThanTwoEdges); }
+    let exchanges: Vec<Vec<EnergyExchange>> = c.a.iter().zip(&c.da).map(|(at, dt)| at.iter().zip(dt).enumerate().map(|(e, (&v, &h))| {
+        let (v, h) = (Expansion::of(v), Expansion::of(h));
+        EnergyExchange { edge: e, epsilon: v.abs().nearest(), delta_epsilon: h.up(), floor_resolved: exceeds(&v, &h) }
+    }).collect()).collect();
+    let total = exchanges.len() * rel.n_edges();
+    let resolved = exchanges.iter().flatten().filter(|x| x.floor_resolved).count();
+    Ok(Energy { carrier: c.name.clone(), unit: c.unit.clone(), share_resolved: resolved as f64 / total as f64, exchanges })
+}
+
 /// Connected exchange (V3b): edges whose circulation is held (sustained grade)
 /// and whose tunneling floor is resolved at every registration, with ε at
 /// each registration.
@@ -1095,6 +1243,21 @@ pub fn ground_reading(
         freedom: EdgeSeries::from_registrations(seq, rel).map(|s| PersistenceChange::new(&s)),
         connection: connection(seq, rel),
         v2_held_arrangement: freedom(seq, rel),
+    }
+}
+
+/// Read all three over one declared sequence of registrations of the
+/// relations (relation as primitive, Origin, 2026-11-23, 59th). Energy is
+/// read from a carrier registered across the relations; connection and
+/// freedom from the relations themselves.
+pub fn ground_reading_of_relations(
+    series: &EdgeSeries, rel: &DeclaredRelations, carrier: Option<&RelationCarrier>,
+) -> GroundReading {
+    GroundReading {
+        energy: energy_of_relations(carrier, series.n_registrations(), rel),
+        freedom: Ok(PersistenceChange::new(series)),
+        connection: connection_of(series, rel),
+        v2_held_arrangement: freedom_of(series),
     }
 }
 
