@@ -380,6 +380,24 @@ Origin asked whether any test leaves out a variable. Tonight's did: each claim w
 
 **Addendum (54th), W17.** "Random" is not used: every fixture is an enumerated field from a declared seed. Earlier uses in this record are kept as written and read as *enumerated*. The test code is renamed; no reading or test changed. 251 (default), 343 (`v9`).
 
+
+## 23. §2.7 in code, and coupled change option 2 (2026-11-23, 57th, for the Verifier)
+
+Origin declared §2.7 and adopted option 2 of I-SC-D17 (iii) (Part 9, 57th).
+
+**To check:**
+1. **`ChangeCoupling::forced`** is exactly I-SC-D17 (iii)'s condition: one reading holds at PC1 on both edges. The test asserts it on every reading of whole fields. The reverse check re-derives it.
+2. **`coupled_change_pairs`** needs one unforced reading; `forced_only_pairs` lists the rest; the fenced grade equals their union with the decided grade.
+3. **`src/domain.rs`:**
+   - refusal on every mismatch between a declaration and its registrations;
+   - held energy read from the component's state bound with every Z1a part, against the 10.3.0 `EnergyCarrier` path, which differs on some fields;
+   - a transfer's per-step resolution and change, and the gain entering magnitudes only (scale invariance tested);
+   - each record's three states derived from its parts;
+   - `persistence_boundaries`: a reversal always carries freedom among its relations, and beginnings and endings occur without it.
+4. **What is not done:** a whole field over edge-registered structural components (OC-WF-1, narrowed); band location, which is the application's.
+
+**Tests:** `tests/v10_declared_ground.rs` (7); D17's tests updated to the decided grade, with the fenced grade checked for comparison. **258 (default), 350 (`v9`)**, no warnings; application 44.
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*
