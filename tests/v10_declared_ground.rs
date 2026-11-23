@@ -281,3 +281,34 @@ fn every_reversal_boundary_has_freedom_among_its_relations() {
     assert!(g.iter().all(|row| row[0] > 0 && row[1] > 0 && row[2] > 0),
         "imbalance, arrangement: reversed / began held / ended held / with freedom: {g:?}");
 }
+
+#[test]
+fn worked_energy_leaving_a_locus_into_a_sink_outside_the_field() {
+    // Energy removed (58th): a transfer out of locus 2 into a named sink.
+    // Each record of a relation ending at locus 2 carries it as context at
+    // its target; energy at every relation is not registered there, named.
+    let rel = rel(3, vec![(0, 1), (1, 2), (0, 2)]);
+    let values = vec![
+        vec![vec![2.0, 1.0, 0.5], vec![1.0, 1.0, 1.0]],
+        vec![vec![1.5, 0.75, 0.0], vec![1.0, 1.0, 1.0]],
+        vec![vec![1.0, 0.5, -0.5], vec![1.0, 1.0, 1.0]],
+    ];
+    let d = Declared::repeatability(values, vec![vec![1.0 / 32.0; 3]; 2]);
+    let sink = EnergyTransfer { name: "SYNTHETIC energy removed".into(), unit: "pulses".into(),
+        site: TransferSite::Leaving { locus: 2, sink: "SYNTHETIC metered sink".into() },
+        values: vec![3.0, 3.0], delta: vec![0.5, 0.5], gain: 0.0, mapping: None,
+        participation: EnergyParticipation::Removed, range: ObservedRange::synthetic() };
+    let df = declared(&rel, &d, domain(&d, false, vec![sink], vec![]));
+    for s in 0..2 {
+        for e in 0..3 {
+            let rec = df.record(e, 0, s);
+            assert_eq!(rec.energy.leaving_at_target.len(), (rel.edges[e].1 == 2) as usize);
+            assert!(rec.energy.entering_at_source.is_empty());
+            assert!(matches!(&rec.energy.state, State::NotEvaluated(w) if w.contains("present by ground (G1)")));
+        }
+    }
+    assert_eq!(df.energy.transfers[0].participation, EnergyParticipation::Removed);
+    let off = EnergyTransfer { site: TransferSite::Leaving { locus: 3, sink: "SYNTHETIC".into() }, ..df.declaration.energy.iter()
+        .find_map(|x| if let EnergyExpression::Transferred(t) = x { Some(t.clone()) } else { None }).unwrap() };
+    assert!(matches!(DeclaredField::new(&rel, registrations(&d), domain(&d, false, vec![off], vec![])).unwrap_err(), DomainRefusal::Transfer(_)));
+}

@@ -61,6 +61,9 @@ pub enum TransferSite {
     /// Into a declared locus from a source outside the field (for example a
     /// supply meter): the source is named, not a locus.
     Entering { locus: usize, source: String },
+    /// Out of a declared locus into a sink outside the field (for example a
+    /// metered cooler): the sink is named, not a locus (58th).
+    Leaving { locus: usize, sink: String },
 }
 
 /// Energy transferred across a relation, registered per step (ER-1). The
@@ -240,6 +243,9 @@ pub struct EnergyEntry {
     /// Transfers entering this relation's source locus over s: context, at
     /// the locus, not at the relation.
     pub entering_at_source: Vec<(usize, Read)>,
+    /// Transfers leaving this relation's target locus over s, into a sink
+    /// outside the field: context, at the locus (58th).
+    pub leaving_at_target: Vec<(usize, Read)>,
     pub state: State,
 }
 
@@ -345,7 +351,7 @@ fn validate(d: &DomainDeclaration, rel: &DeclaredRelations, k: usize, n_t: usize
             if !t.values.iter().zip(&t.delta).all(|(v, d)| t.range.admits(*v, *d)) { return bad("outside the observed range (OC-RANGE-1)"); }
             match &t.site {
                 TransferSite::Edge(e) if *e >= rel.n_edges() => return bad("not a declared relation"),
-                TransferSite::Entering { locus, .. } if *locus >= rel.n_nodes => return bad("not a declared locus"),
+                TransferSite::Entering { locus, .. } | TransferSite::Leaving { locus, .. } if *locus >= rel.n_nodes => return bad("not a declared locus"),
                 _ => {}
             }
         }
@@ -409,6 +415,9 @@ fn records(d: &DomainDeclaration, field: &RelationalField, s: &EdgeSeries, en: &
                 let entering_at_source: Vec<(usize, Read)> = en.transfers.iter().enumerate()
                     .filter(|(_, t)| matches!(&t.site, TransferSite::Entering { locus, .. } if *locus == rel.edges[e].0))
                     .map(|(i, t)| (i, t.per_step[st])).collect();
+                let leaving_at_target: Vec<(usize, Read)> = en.transfers.iter().enumerate()
+                    .filter(|(_, t)| matches!(&t.site, TransferSite::Leaving { locus, .. } if *locus == rel.edges[e].1))
+                    .map(|(i, t)| (i, t.per_step[st])).collect();
                 let energy_state = if held.is_empty() && transfer.is_empty() {
                     State::NotEvaluated(if d.energy.is_empty() {
                         "no energy expression declared (R9a, W11)".into()
@@ -466,7 +475,7 @@ fn records(d: &DomainDeclaration, field: &RelationalField, s: &EdgeSeries, en: &
                 };
                 out.push(GroundRecord {
                     edge: e, component: c, step: st,
-                    energy: EnergyEntry { held, transfer, entering_at_source, state: energy_state },
+                    energy: EnergyEntry { held, transfer, entering_at_source, leaving_at_target, state: energy_state },
                     freedom: FreedomEntry { pc1: p1, pc2, pc3, state: freedom_state },
                     connection: ConnectionEntry { imbalance, identity, proportional, coupled_change, coupled_change_forced,
                         sustained_held, boundary_conditioned, constraints, state: connection_state },
