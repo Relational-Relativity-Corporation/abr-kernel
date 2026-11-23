@@ -396,7 +396,7 @@ Origin declared §2.7 and adopted option 2 of I-SC-D17 (iii) (Part 9, 57th).
    - `persistence_boundaries`: a reversal always carries freedom among its relations, and beginnings and endings occur without it.
 4. **What is not done:** a whole field over edge-registered structural components (OC-WF-1, narrowed); band location, which is the application's.
 
-**Tests:** `tests/v10_declared_ground.rs` (7); D17's tests updated to the decided grade, with the fenced grade checked for comparison. **258 (default), 350 (`v9`)**, no warnings; application 44.
+**Tests:** `tests/v10_declared_ground.rs` (7); D17's tests updated to the decided grade, with the fenced grade checked for comparison. **258 (default), 350 (`v9`)**, no warnings; application 45, including `the_record_forms_a_declared_field_with_all_three_variables` (the vessel under §2.7).
 
 ---
 
