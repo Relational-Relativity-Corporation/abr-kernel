@@ -424,6 +424,62 @@ pub const H_PLANCK: f64 = 6.626_070_15e-34;
 /// Class (W14, 2026-11-21): defined by convention (exact since 1983). The provenance line above is kept as the record.
 pub const C_DECLARED: f64 = 2.997_924_58e8;
 
+// ── The Planck step: a declared projection at the Primary Region ─────────
+//
+// Origin (2026-11-23, 60th, 62nd, 63rd): at the Primary Region the pace of
+// relational progression is most dense, *"densely clustered relational state
+// changes, in other words Planck time"*; admitted under option (i), 63rd.
+//
+// What this is: the time projection that labels the step density of
+// relational state change at the Primary Region (W15 as amended, 63rd).
+// t_P = √(ħG/c⁵), with ħ = h/2π and c defined by convention, and G fitted.
+// What it is not: a registration (it lies far outside the human observed
+// range, OC-RANGE-1: the finest registered time is about 10⁻¹⁸ s); an input
+// to any kernel form; an ordering of a sequence (T6); or a basis for any
+// reading or invariant. It is classed Projected (W14) and is cited only as a
+// declared comparison (C). Legacy mathematics (W12): the dimensional
+// combination of ħ, G and c, with its necessity stated by Origin (63rd).
+
+/// G — Newtonian constant of gravitation (m³·kg⁻¹·s⁻²), CODATA 2018.
+/// Class (W14): fitted (CODATA 2018 adjusted value from torsion-balance and
+/// atom-interferometry measurements), relative standard uncertainty 2.2×10⁻⁵.
+/// Enters D only inside the declared projection `planck_step`.
+pub const G_DECLARED: f64 = 6.674_30e-11;
+
+/// Relative standard uncertainty of `G_DECLARED` (CODATA 2018).
+pub const G_DECLARED_REL_UNCERTAINTY: f64 = 2.2e-5;
+
+/// A value placed in D through a construct: classed Projected (W14), cited
+/// only as a declared comparison (C), never a registration or a form input.
+#[derive(Debug, Clone, PartialEq)]
+pub struct DeclaredProjection {
+    pub name: &'static str,
+    pub value: f64,
+    /// Half-width from the inputs' stated uncertainty, with an allowance for
+    /// the rounding of the computation; never below either.
+    pub half_width: f64,
+    pub unit: &'static str,
+    pub class: &'static str,
+    pub basis: &'static str,
+}
+
+/// The Planck step t_P = √(ħG/c⁵): the time projection labelling the step
+/// density of relational state change at the Primary Region (Origin, 63rd).
+/// Its half-width is t_P·u_r(G)/2 (ħ and c are exact), plus 10⁻¹⁴·t_P for
+/// the rounding of the five operations, each within 2⁻⁵³ relative.
+pub fn planck_step() -> DeclaredProjection {
+    let hbar = H_PLANCK / (2.0 * std::f64::consts::PI);
+    let value = (hbar * G_DECLARED / C_DECLARED.powi(5)).sqrt();
+    DeclaredProjection {
+        name: "Planck step (time projection), Primary Region",
+        value,
+        half_width: value * (G_DECLARED_REL_UNCERTAINTY / 2.0 + 1e-14),
+        unit: "s",
+        class: "Projected (W14); declared comparison (C); outside the human observed range (OC-RANGE-1)",
+        basis: "Origin 2026-11-23 (60th, 62nd, 63rd): densely clustered relational state changes at the Primary Region; t_P = sqrt(hbar G / c^5), h and c by convention, G fitted (CODATA 2018)",
+    }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // ── PART I — CONFIRMED DERIVED INVARIANTS ─────────────────────────────────
 // ── LAYER 3 DERIVED QUANTITIES ─────────────────────────────────────────────
