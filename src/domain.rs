@@ -320,7 +320,11 @@ impl DeclaredField {
 
     /// The record for (e, c, s).
     pub fn record(&self, e: usize, c: usize, s: usize) -> &GroundRecord {
-        self.records.iter().find(|r| r.edge == e && r.component == c && r.step == s).expect("every (e, c, s) has a record")
+        // Records are listed by step, then component, then edge.
+        let (k, m) = (self.series.k(), self.relations.n_edges());
+        let r = &self.records[(s * k + c) * m + e];
+        debug_assert!(r.edge == e && r.component == c && r.step == s);
+        r
     }
 
     /// Energy not evaluated anywhere: true when no expression is declared.
@@ -400,7 +404,38 @@ fn records(d: &DomainDeclaration, field: &RelationalField, s: &EdgeSeries, en: &
     let conn = field.ground.connection.as_ref().ok();
     let imb: Vec<Vec<Option<Vec<AtDelta<Sign>>>>> = field.registrations.iter()
         .map(|r| crate::ground_variables::circulation_signs(r, rel)).collect();
-    let pc1 = |st: usize, c: usize, e: usize| pc.relations.iter().find(|x| x.step == st && x.component == c && x.edge == e).unwrap().reading;
+    // Indexed once (no reading changes): `relation_changes` lists step, then
+    // component, then edge, so (st, c, e) is at st·k·m + c·m + e.
+    let ix = |st: usize, c: usize, e: usize| (st * k + c) * m + e;
+    debug_assert!(pc.relations.iter().enumerate().all(|(n, x)| ix(x.step, x.component, x.edge) == n));
+    let pc1 = |st: usize, c: usize, e: usize| pc.relations[ix(st, c, e)].reading;
+    let mut pc2_at = vec![(0usize, 0usize, 0usize); (n_t - 1) * k * m];
+    for fam in [&pc.across_components, &pc.across_steps] {
+        let Ok(fam) = fam else { continue };
+        for x in &fam.readings {
+            let at: Vec<(usize, usize)> = match x.over {
+                ReadingPair::Components { step, i, j } => vec![(step, i), (step, j)],
+                ReadingPair::Steps { component, step } => vec![(step, component)],
+            };
+            for (st, c) in at {
+                for e in [x.e, x.f] {
+                    let v = &mut pc2_at[ix(st, c, e)];
+                    if x.reading == Reading::Freedom { v.0 += 1 } else { v.1 += 1; if x.forced { v.2 += 1 } }
+                }
+            }
+        }
+    }
+    let mut pc3_at = vec![(0usize, 0usize); (n_t - 1) * k * m];
+    if let Ok(arr) = &pc.arrangement {
+        for x in arr {
+            for c in [x.i, x.j] {
+                for e in [x.e, x.f] {
+                    let v = &mut pc3_at[ix(x.step, c, e)];
+                    if x.reading == Reading::Freedom { v.0 += 1 } else { v.1 += 1 }
+                }
+            }
+        }
+    }
     let in_pair = |p: &(usize, usize), e: usize| p.0 == e || p.1 == e;
     let mut out = Vec::with_capacity(m * k * (n_t - 1));
     for st in 0..n_t - 1 {
@@ -429,24 +464,7 @@ fn records(d: &DomainDeclaration, field: &RelationalField, s: &EdgeSeries, en: &
                     State::Active
                 } else { State::NotedAsStructure };
                 // ── Freedom ────────────────────────────────────────────────
-                let mut pc2 = (0, 0, 0);
-                for fam in [&pc.across_components, &pc.across_steps] {
-                    let Ok(fam) = fam else { continue };
-                    for x in fam.readings.iter().filter(|x| x.e == e || x.f == e) {
-                        let involves = match x.over {
-                            ReadingPair::Components { step, i, j } => step == st && (i == c || j == c),
-                            ReadingPair::Steps { component, step } => step == st && component == c,
-                        };
-                        if !involves { continue; }
-                        if x.reading == Reading::Freedom { pc2.0 += 1 } else { pc2.1 += 1; if x.forced { pc2.2 += 1 } }
-                    }
-                }
-                let mut pc3 = (0, 0);
-                if let Ok(arr) = &pc.arrangement {
-                    for x in arr.iter().filter(|x| x.step == st && (x.e == e || x.f == e) && (x.i == c || x.j == c)) {
-                        if x.reading == Reading::Freedom { pc3.0 += 1 } else { pc3.1 += 1 }
-                    }
-                }
+                let (pc2, pc3) = (pc2_at[ix(st, c, e)], pc3_at[ix(st, c, e)]);
                 let p1 = pc1(st, c, e);
                 let freedom_state = if p1 == Reading::Freedom || pc2.0 > 0 || pc3.0 > 0 { State::Active } else { State::NotedAsStructure };
                 // ── Connection ─────────────────────────────────────────────
