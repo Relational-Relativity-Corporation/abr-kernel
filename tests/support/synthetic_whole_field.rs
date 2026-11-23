@@ -37,11 +37,17 @@ pub fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
 }
 
 // ── Self-contained generator (SplitMix64), as in v10_properties ────────────
+//
+// Enumerated, never random (Origin, 2026-11-23, 54th; W17). Field n of a
+// property is generated from seed n (0 … CASES − 1) by SplitMix64, on dyadic
+// grids of values and bounds. The family is declared by the generator, the
+// seed range and the grids; each field is reproducible exactly, and nothing
+// is left to chance. `Seeds::selects` is a seed-determined selection.
 
 pub const CASES: u64 = 300;
 
-pub struct Rng(pub u64);
-impl Rng {
+pub struct Seeds(pub u64);
+impl Seeds {
     pub fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -53,18 +59,18 @@ impl Rng {
     pub fn usize(&mut self, lo: usize, hi: usize) -> usize { self.int(lo as i64, hi as i64) as usize }
     pub fn eighth(&mut self, lo: f64, hi: f64) -> f64 { self.int((lo * 8.0) as i64, (hi * 8.0) as i64) as f64 / 8.0 }
     pub fn delta(&mut self, hi: f64) -> f64 { self.int(0, (hi * 16.0) as i64) as f64 / 16.0 }
-    pub fn chance(&mut self, p_in_8: u64) -> bool { self.next() % 8 < p_in_8 }
+    pub fn selects(&mut self, p_in_8: u64) -> bool { self.next() % 8 < p_in_8 }
 }
 
-pub fn for_all(name: &str, salt: u64, prop: impl Fn(&mut Rng)) {
+pub fn for_all(name: &str, salt: u64, prop: impl Fn(&mut Seeds)) {
     for seed in 0..CASES {
-        let mut r = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ salt);
+        let mut r = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ salt);
         let caught = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| prop(&mut r)));
         if caught.is_err() { panic!("property {name} failed at seed {seed}"); }
     }
 }
 
-pub fn random_rel(r: &mut Rng) -> DeclaredRelations {
+pub fn enumerated_rel(r: &mut Seeds) -> DeclaredRelations {
     let n = r.usize(3, 5);
     let m = r.usize(n, 7.min(n * (n - 1) / 2));
     let mut edges: Vec<(usize, usize)> = Vec::new();
@@ -104,20 +110,20 @@ impl Declared {
     }
 }
 
-/// A random declaration over `rel`: k components (the last the carrier),
+/// An enumerated declaration over `rel`, from the seed: k components (the last the carrier),
 /// `regs` registrations, values moving by small dyadic steps.
-pub fn random_declared(r: &mut Rng, rel: &DeclaredRelations, k: usize, regs: usize, d_hi: f64,
+pub fn enumerated_declared(r: &mut Seeds, rel: &DeclaredRelations, k: usize, regs: usize, d_hi: f64,
                        z1a: bool, z1a_on_carrier: bool) -> Declared {
     let n = rel.n_nodes;
     let mut values = vec![(0..k).map(|_| (0..n).map(|_| r.eighth(-3.0, 3.0)).collect::<Vec<_>>()).collect::<Vec<_>>()];
     for _ in 1..regs {
         let prev = values.last().unwrap().clone();
-        values.push(prev.iter().map(|row| row.iter().map(|&x| if r.chance(4) { x + r.eighth(-1.0, 1.0) } else { x }).collect()).collect());
+        values.push(prev.iter().map(|row| row.iter().map(|&x| if r.selects(4) { x + r.eighth(-1.0, 1.0) } else { x }).collect()).collect());
     }
     let delta = (0..k).map(|_| (0..n).map(|_| r.delta(d_hi)).collect()).collect();
     let on = |c: usize| z1a && (c + 1 < k || z1a_on_carrier);
-    let offset = (0..k).map(|c| (0..n).map(|_| if on(c) && r.chance(3) { r.delta(0.25) } else { 0.0 }).collect()).collect();
-    let gain = (0..k).map(|c| (0..n).map(|_| if on(c) && r.chance(3) { 1.0 / 16.0 } else { 0.0 }).collect()).collect();
+    let offset = (0..k).map(|c| (0..n).map(|_| if on(c) && r.selects(3) { r.delta(0.25) } else { 0.0 }).collect()).collect();
+    let gain = (0..k).map(|c| (0..n).map(|_| if on(c) && r.selects(3) { 1.0 / 16.0 } else { 0.0 }).collect()).collect();
     Declared { values, delta, offset, gain }
 }
 

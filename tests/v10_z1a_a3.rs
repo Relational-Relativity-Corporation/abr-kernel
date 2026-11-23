@@ -45,8 +45,8 @@ fn exercised(c: &AtomicUsize, name: &str) {
     assert!(c.load(Relaxed) > 0, "property {name} was never exercised: the generator is vacuous");
 }
 
-struct Rng(u64);
-impl Rng {
+struct Seeds(u64);
+impl Seeds {
     fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -58,18 +58,18 @@ impl Rng {
     fn usize(&mut self, lo: usize, hi: usize) -> usize { self.int(lo as i64, hi as i64) as usize }
     fn eighth(&mut self, lo: f64, hi: f64) -> f64 { self.int((lo * 8.0) as i64, (hi * 8.0) as i64) as f64 / 8.0 }
     fn delta(&mut self, hi: f64) -> f64 { self.int(0, (hi * 16.0) as i64) as f64 / 16.0 }
-    fn chance(&mut self, p_in_8: u64) -> bool { self.next() % 8 < p_in_8 }
+    fn selects(&mut self, p_in_8: u64) -> bool { self.next() % 8 < p_in_8 }
 }
 
-fn for_all(name: &str, prop: impl Fn(&mut Rng)) {
+fn for_all(name: &str, prop: impl Fn(&mut Seeds)) {
     for seed in 0..CASES {
-        let mut r = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x5A5A);
+        let mut r = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x5A5A);
         let caught = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| prop(&mut r)));
         if caught.is_err() { panic!("property {name} failed at seed {seed}"); }
     }
 }
 
-fn random_rel(r: &mut Rng) -> DeclaredRelations {
+fn enumerated_rel(r: &mut Seeds) -> DeclaredRelations {
     let n = r.usize(3, 6);
     let m = r.usize(2, 8.min(n * (n - 1)));
     let mut edges: Vec<(usize, usize)> = Vec::new();
@@ -80,14 +80,14 @@ fn random_rel(r: &mut Rng) -> DeclaredRelations {
     synthetic_feedback::declare_loops(rel(n, edges))
 }
 
-fn random_seq(r: &mut Rng, n: usize) -> Vec<Registration> {
+fn enumerated_seq(r: &mut Seeds, n: usize) -> Vec<Registration> {
     let (k, regs) = (r.usize(2, 3), r.usize(3, 5));
     let mut x: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| r.eighth(-4.0, 4.0)).collect()).collect();
     let delta: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| r.delta(0.5)).collect()).collect();
     let mut out = Vec::new();
     for _ in 0..regs {
         out.push(Registration::synthetic(NodeField::new(x.clone()), delta.clone()));
-        for c in x.iter_mut() { for v in c.iter_mut() { if r.chance(5) { *v += r.eighth(-2.0, 2.0); } } }
+        for c in x.iter_mut() { for v in c.iter_mut() { if r.selects(5) { *v += r.eighth(-2.0, 2.0); } } }
     }
     out
 }
@@ -207,8 +207,8 @@ fn z1a_an_unshared_gain_enters_the_state_bound_on_the_value() {
 #[test]
 fn z1a_a_shared_gain_changes_no_classification_and_enters_magnitudes() {
     for_all("z1a_shared_gain", |r| {
-        let rl = random_rel(r);
-        let seq = random_seq(r, rl.n_nodes);
+        let rl = enumerated_rel(r);
+        let seq = enumerated_seq(r, rl.n_nodes);
         let gamma = r.int(1, 15) as f64 / 16.0;
         let gained = run_constant(&seq, 0.0, 0.0, gamma);
         let (a, b) = (EdgeSeries::from_registrations(&seq, &rl).unwrap(), EdgeSeries::from_registrations(&gained, &rl).unwrap());
@@ -270,12 +270,12 @@ fn pc_d3_negative_scale_reverses_signs_only() {
     static ARR: AtomicUsize = AtomicUsize::new(0);
     static SUST: AtomicUsize = AtomicUsize::new(0);
     for_all("negative_scale", |r| {
-        let rl = random_rel(r);
-        let seq = random_seq(r, rl.n_nodes);
+        let rl = enumerated_rel(r);
+        let seq = enumerated_seq(r, rl.n_nodes);
         let k = seq[0].x.k;
         let scale: Vec<f64> = (0..k).map(|c| {
             let m = [0.5, 1.0, 2.0][r.usize(0, 2)];
-            if c == 0 || r.chance(4) { -m } else { m }
+            if c == 0 || r.selects(4) { -m } else { m }
         }).collect();
         let scaled: Vec<Registration> = seq.iter().map(|g| Registration::synthetic(
             NodeField::new(g.x.data.iter().zip(&scale).map(|(v, a)| v.iter().map(|x| x * a).collect()).collect()),
@@ -374,11 +374,11 @@ fn a3_a_chain_is_boundary_conditioned_at_both_ends() {
 }
 
 #[test]
-fn a3_the_flag_agrees_with_the_sustained_grade_on_random_fields() {
+fn a3_the_flag_agrees_with_the_sustained_grade_on_enumerated_fields() {
     static FLAGGED: AtomicUsize = AtomicUsize::new(0);
     for_all("a3_flag", |r| {
-        let rl = random_rel(r);
-        let seq = random_seq(r, rl.n_nodes);
+        let rl = enumerated_rel(r);
+        let seq = enumerated_seq(r, rl.n_nodes);
         let flagged = boundary_conditioned_edges(&rl);
         for &e in &flagged { assert!(rl.succ(e).is_empty() != rl.pred(e).is_empty()); }
         if let Ok(Ok(s)) = ground_reading(&seq, &rl, None).connection.map(|c| c.sustained) {
@@ -438,14 +438,14 @@ fn z1a_a_shared_gain_scales_a_whole_component_or_edge_and_changes_nothing() {
     assert_eq!(pc2a(&EdgeSeries::from_edge_values_synthetic(a, zero).unwrap()), vec![(0.0, Reading::Structure)]);
 }
 
-fn random_edge_values(r: &mut Rng) -> (Vec<Vec<Vec<f64>>>, Vec<Vec<Vec<f64>>>) {
+fn enumerated_edge_values(r: &mut Seeds) -> (Vec<Vec<Vec<f64>>>, Vec<Vec<Vec<f64>>>) {
     let (m, k, regs) = (r.usize(2, 5), r.usize(2, 3), r.usize(3, 4));
     let mut v: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.eighth(-4.0, 4.0)).collect()).collect();
     let d: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.delta(0.25)).collect()).collect();
     let (mut aa, mut dd) = (Vec::new(), Vec::new());
     for _ in 0..regs {
         aa.push(v.clone()); dd.push(d.clone());
-        for c in v.iter_mut() { for x in c.iter_mut() { if r.chance(5) { *x += r.eighth(-2.0, 2.0); } } }
+        for c in v.iter_mut() { for x in c.iter_mut() { if r.selects(5) { *x += r.eighth(-2.0, 2.0); } } }
     }
     (aa, dd)
 }
@@ -464,7 +464,7 @@ fn all_readings(s: &EdgeSeries) -> String {
 #[test]
 fn prop_z1a_shared_component_and_edge_factors_change_no_reading() {
     for_all("z1a_shared_factors", |r| {
-        let (a, d) = random_edge_values(r);
+        let (a, d) = enumerated_edge_values(r);
         let (k, m) = (a[0].len(), a[0][0].len());
         let fc: Vec<f64> = (0..k).map(|_| [1.0, 1.125, 1.25, 1.5][r.usize(0, 3)]).collect();
         let fe: Vec<f64> = (0..m).map(|_| [1.0, 1.125, 1.25, 1.5][r.usize(0, 3)]).collect();
@@ -483,7 +483,7 @@ fn prop_z1a_independent_gains_never_reverse_a_resolved_mixing_minor() {
     static RESOLVED: AtomicUsize = AtomicUsize::new(0);
     static WOULD_FLIP: AtomicUsize = AtomicUsize::new(0);
     for_all("z1a_independent_gains", |r| {
-        let (a, d) = random_edge_values(r);
+        let (a, d) = enumerated_edge_values(r);
         let (k, m) = (a[0].len(), a[0][0].len());
         let gam: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| [0.125, 0.25, 0.5][r.usize(0, 2)]).collect()).collect();
         // γ′ a multiple of γ/4 in [−γ, γ], the same over the run (run-constant).
@@ -563,7 +563,7 @@ fn prop_z1a_every_gain_bound_covers_the_scaling_model() {
     static N: AtomicUsize = AtomicUsize::new(0);
     for_all("z1a_scaling_model", |r| {
         // Edge-registered: magnitude and the mixing widening.
-        let (a, d) = random_edge_values(r);
+        let (a, d) = enumerated_edge_values(r);
         let (k, m) = (a[0].len(), a[0][0].len());
         let gc: Vec<f64> = (0..k).map(|_| r.delta(0.5)).collect();
         let gi: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.delta(0.5)).collect()).collect();
@@ -581,8 +581,8 @@ fn prop_z1a_every_gain_bound_covers_the_scaling_model() {
             } }
         }
         // Node-derived: the state and change bounds with per-locus gains.
-        let rl = random_rel(r);
-        let seq = random_seq(r, rl.n_nodes);
+        let rl = enumerated_rel(r);
+        let seq = enumerated_seq(r, rl.n_nodes);
         let (kk, n) = (seq[0].x.k, seq[0].x.n);
         let lg: Vec<Vec<f64>> = (0..kk).map(|_| (0..n).map(|_| r.delta(0.5)).collect()).collect();
         let seq: Vec<Registration> = seq.into_iter().map(|g| g.with_run_constant(vec![vec![0.0; n]; kk], lg.clone(), vec![0.0; kk])).collect();
@@ -622,7 +622,7 @@ fn prop_z1a_mixing_minors_hold_under_gain_and_repeatability() {
     static N2: AtomicUsize = AtomicUsize::new(0);
     static N3: AtomicUsize = AtomicUsize::new(0);
     for_all("z1a_mixing_full_model", |r| {
-        let (a, d) = random_edge_values(r);
+        let (a, d) = enumerated_edge_values(r);
         let (regs, k, m) = (a.len(), a[0].len(), a[0][0].len());
         let gam: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| [0.0, 0.125, 0.25, 0.5][r.usize(0, 3)]).collect()).collect();
         let fac: Vec<Vec<f64>> = gam.iter().map(|gc| gc.iter().map(|g| 1.0 + g * (r.usize(0, 8) as f64 - 4.0) / 4.0).collect()).collect();

@@ -126,7 +126,7 @@ with its history. See `docs/kernel/v10_migration.md`.
 - 3 `provenance_demo`;
 - 18 ground variables;
 - 20 persistence and change (PC);
-- 23 property tests (`tests/v10_properties.rs`, 2000 seeded random fields each);
+- 23 property tests (`tests/v10_properties.rs`, 2000 enumerated fields each *(was: seeded random; W17)*);
 - 5 relational field;
 - 17 structural consistency (I-SC-D3 to I-SC-D13);
 - 21 δ in two parts and the record-boundary flag (`tests/v10_z1a_a3.rs`);
@@ -176,7 +176,7 @@ The invariant tests against registered data (I-SC, OC-SC-1 to OC-SC-4) are next.
 three kernel findings, all accepted and dispositioned; the second-pass brief is
 in `docs/kernel/VERIFICATION_2026-11-21.md`. The release was merged before that
 pass by Origin's decision; its findings will be dispositioned on `main`. Every
-count above was reproduced from a clean build. All tests are synthetic or random
+count above was reproduced from a clean build. All tests are synthetic *(was: synthetic or random; W17: enumerated, never random)*
 fields: they establish that the forms compute as declared and that the derived
 results hold over the forms, nothing empirical.
 ---
@@ -291,7 +291,7 @@ Also:
 - cycle closure in state and on change (K7 / HB-1).
 
 The derived properties PC-D1 to PC-D5 and I-SC-D1 to I-SC-D13 are tested by
-worked examples and by property tests over 2000 random fields
+worked examples and by property tests over 2000 enumerated fields *(was: random; W17)*
 (`tests/v10_properties.rs`).
 
 **`src/topology.rs`** (Kernel V10.3)
@@ -620,7 +620,7 @@ development record, not a second source of mathematical authority.
   - `relational_field::circulation_weights`;
   - `GroundReading::freedom` now the PC reading, with `v2_held_arrangement`;
   - `ConnectionGrade::CoupledChange`.
-- **Derived:** I-SC-D3 to I-SC-D13; property tests over 2000 random fields each.
+- **Derived:** I-SC-D3 to I-SC-D13; property tests over 2000 enumerated fields *(was: random; W17)* each.
 - **Audits:** the W14 audit (quantum constructs; §13.1 constants classed); the open-conditions audit (all items decided or dispositioned).
 - **Tests:** 121 (default), 213 (`--features v9`). Three existing tests changed their expected findings under PC. Each change is stated in the test and in the verification package.
 - **Merged to `main` with every commit kept,** before the Verifier's second pass, by Origin's decision.

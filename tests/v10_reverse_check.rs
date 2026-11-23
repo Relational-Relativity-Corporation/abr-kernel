@@ -18,8 +18,8 @@ use abr_kernel::operators::{DeclaredRelations, EdgeProvenance, NodeField};
 use abr_kernel::persistence_change::*;
 use abr_kernel::reverse_check::*;
 
-struct Rng(u64);
-impl Rng {
+struct Seeds(u64);
+impl Seeds {
     fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -31,10 +31,10 @@ impl Rng {
     fn eighth(&mut self) -> f64 { (self.next() % 65) as f64 / 8.0 - 4.0 }
     fn delta(&mut self) -> f64 { (self.next() % 9) as f64 / 16.0 }
     fn gain(&mut self) -> f64 { (self.next() % 4) as f64 / 8.0 }
-    fn chance(&mut self) -> bool { self.next() % 8 < 5 }
+    fn selects(&mut self) -> bool { self.next() % 8 < 5 }
 }
 
-fn random_rel(g: &mut Rng) -> DeclaredRelations {
+fn enumerated_rel(g: &mut Seeds) -> DeclaredRelations {
     let n = g.usize(3, 6);
     let m = g.usize(2, 8);
     let edges: Vec<(usize, usize)> = (0..m).map(|_| loop {
@@ -44,7 +44,7 @@ fn random_rel(g: &mut Rng) -> DeclaredRelations {
     synthetic_feedback::declare_loops(synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m])))
 }
 
-fn random_seq(g: &mut Rng, n: usize, run_constant: bool) -> Vec<Registration> {
+fn enumerated_seq(g: &mut Seeds, n: usize, run_constant: bool) -> Vec<Registration> {
     let (k, regs) = (g.usize(2, 3), g.usize(3, 5));
     let mut x: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| g.eighth()).collect()).collect();
     let delta: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| g.delta()).collect()).collect();
@@ -55,7 +55,7 @@ fn random_seq(g: &mut Rng, n: usize, run_constant: bool) -> Vec<Registration> {
     for _ in 0..regs {
         let r = Registration::synthetic(NodeField::new(x.clone()), delta.clone());
         out.push(if run_constant { r.with_run_constant(off.clone(), lg.clone(), sg.clone()) } else { r });
-        for c in x.iter_mut() { for v in c.iter_mut() { if g.chance() { *v += g.eighth() / 2.0; } } }
+        for c in x.iter_mut() { for v in c.iter_mut() { if g.selects() { *v += g.eighth() / 2.0; } } }
     }
     out
 }
@@ -75,10 +75,10 @@ fn check_all(inp: Inputs, pc: &PersistenceChange) -> (usize, usize, usize) {
 fn prop_b2_every_reading_reverse_checks_to_match_node_derived() {
     let (mut r, mut c, mut a) = (0, 0, 0);
     for seed in 0..1500u64 {
-        let mut g = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x1D1D);
-        let rel = random_rel(&mut g);
+        let mut g = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x1D1D);
+        let rel = enumerated_rel(&mut g);
         let rc = seed % 2 == 1;
-        let seq = random_seq(&mut g, rel.n_nodes, rc);
+        let seq = enumerated_seq(&mut g, rel.n_nodes, rc);
         let pc = PersistenceChange::new(&EdgeSeries::from_registrations(&seq, &rel).unwrap());
         let n = check_all(Inputs::Nodes { seq: &seq, rel: &rel }, &pc);
         r += n.0; c += n.1; a += n.2;
@@ -90,7 +90,7 @@ fn prop_b2_every_reading_reverse_checks_to_match_node_derived() {
 fn prop_b2_every_reading_reverse_checks_to_match_edge_registered() {
     let (mut c, mut a) = (0, 0);
     for seed in 0..1500u64 {
-        let mut g = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x2E2E);
+        let mut g = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x2E2E);
         let (m, k, regs) = (g.usize(2, 6), g.usize(2, 3), g.usize(3, 5));
         let mut v: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| g.eighth()).collect()).collect();
         let d: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| g.delta()).collect()).collect();
@@ -98,7 +98,7 @@ fn prop_b2_every_reading_reverse_checks_to_match_edge_registered() {
         let (mut aa, mut dd) = (Vec::new(), Vec::new());
         for _ in 0..regs {
             aa.push(v.clone()); dd.push(d.clone());
-            for cv in v.iter_mut() { for x in cv.iter_mut() { if g.chance() { *x += g.eighth() / 2.0; } } }
+            for cv in v.iter_mut() { for x in cv.iter_mut() { if g.selects() { *x += g.eighth() / 2.0; } } }
         }
         // Shared gains (component, edge) and, in half the cases, independent gains.
         let ind: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| if seed % 4 >= 2 { g.gain() } else { 0.0 }).collect()).collect();

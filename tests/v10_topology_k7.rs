@@ -141,8 +141,8 @@ fn k7_a_closed_walk_is_the_chord_combination_of_the_basis() {
 
 // ── Properties ─────────────────────────────────────────────────────────────
 
-struct Rng(u64);
-impl Rng {
+struct Seeds(u64);
+impl Seeds {
     fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -154,7 +154,7 @@ impl Rng {
     fn eighth(&mut self) -> f64 { (self.next() % 65) as f64 / 8.0 - 4.0 }
 }
 
-fn random_rel(g: &mut Rng, n: (usize, usize), m: (usize, usize)) -> DeclaredRelations {
+fn enumerated_rel(g: &mut Seeds, n: (usize, usize), m: (usize, usize)) -> DeclaredRelations {
     let n = g.usize(n.0, n.1);
     let m = g.usize(m.0, m.1);
     let edges: Vec<(usize, usize)> = (0..m).map(|_| loop {
@@ -164,8 +164,8 @@ fn random_rel(g: &mut Rng, n: (usize, usize), m: (usize, usize)) -> DeclaredRela
     synthetic_feedback::declare_loops(rel(n, edges))
 }
 
-/// A random spanning forest: edges in a random order, kept when they join parts.
-fn random_tree(g: &mut Rng, r: &DeclaredRelations) -> (Vec<usize>, usize) {
+/// An enumerated spanning forest: edges in a seed-declared order, kept when they join parts.
+fn enumerated_tree(g: &mut Seeds, r: &DeclaredRelations) -> (Vec<usize>, usize) {
     let mut order: Vec<usize> = (0..r.n_edges()).collect();
     for i in (1..order.len()).rev() { let j = g.usize(0, i); order.swap(i, j); }
     let mut p: Vec<usize> = (0..r.n_nodes).collect();
@@ -183,8 +183,8 @@ fn random_tree(g: &mut Rng, r: &DeclaredRelations) -> (Vec<usize>, usize) {
 fn prop_k7_routes_match_brute_force() {
     let mut checked = 0;
     for seed in 0..1500u64 {
-        let mut g = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x4B4B);
-        let r = random_rel(&mut g, (2, 4), (1, 8));
+        let mut g = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x4B4B);
+        let r = enumerated_rel(&mut g, (2, 4), (1, 8));
         let (from, to) = (g.usize(0, r.n_nodes - 1), g.usize(0, r.n_nodes - 1));
         let e = routes(&r, from, to, 10_000);
         assert!(e.complete);
@@ -221,9 +221,9 @@ fn prop_k7_routes_match_brute_force() {
 fn prop_k7_basis_size_and_exact_chord_combination() {
     let (mut walks, mut cross) = (0, 0);
     for seed in 0..1500u64 {
-        let mut g = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x6D6D);
-        let r = random_rel(&mut g, (2, 6), (1, 9));
-        let (tree, parts) = random_tree(&mut g, &r);
+        let mut g = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x6D6D);
+        let r = enumerated_rel(&mut g, (2, 6), (1, 9));
+        let (tree, parts) = enumerated_tree(&mut g, &r);
         let b = cycle_basis(&r, &tree).unwrap();
         assert_eq!(b.cycles.len(), r.n_edges() + parts - r.n_nodes, "seed {seed}");
         assert!(b.cycles.iter().zip(&b.chords).all(|(c, &ch)| is_closed_walk(&r, c) && c[0] == (ch, 1)));
@@ -235,14 +235,14 @@ fn prop_k7_basis_size_and_exact_chord_combination() {
             let combined: f64 = coef.iter().zip(&base).map(|(k, (v, _))| *k as f64 * v).sum();
             assert_eq!(cycle_closure(&s, &r, w, 0, 0).unwrap().0, combined, "seed {seed}");
         };
-        // Two-route walks between a random pair of loci.
+        // Two-route walks between a seed-selected pair of loci.
         let (from, to) = (g.usize(0, r.n_nodes - 1), g.usize(0, r.n_nodes - 1));
         let rs = routes(&r, from, to, 50).routes;
         for i in 0..rs.len() { for j in 0..rs.len() {
             check(&two_route_cycle(&r, &rs[i], &rs[j]).unwrap()); walks += 1;
         } }
         // Another stated tree's fundamental cycles, in this basis.
-        let (tree2, _) = random_tree(&mut g, &r);
+        let (tree2, _) = enumerated_tree(&mut g, &r);
         for c in cycle_basis(&r, &tree2).unwrap().cycles { check(&c); cross += 1; }
     }
     assert!(walks > 300 && cross > 300, "vacuous: {walks} walks, {cross} cross-basis cycles");

@@ -44,7 +44,7 @@ use abr_kernel::ground_variables::{history, sign_at_delta_exact, AtDelta, Histor
 use abr_kernel::operators::{circulation_of_accumulation_coefficients, circulation_of_accumulation_half_width, DeclaredRelations};
 use abr_kernel::persistence_change::*;
 use std::sync::Mutex;
-use wf::{for_all, random_declared, random_rel, rel, whole, Declared, Rng, Whole};
+use wf::{for_all, enumerated_declared, enumerated_rel, rel, whole, Declared, Seeds, Whole};
 
 fn reversed(a: AtDelta<Sign>, b: AtDelta<Sign>) -> bool {
     matches!((a, b), (AtDelta::Resolved(x), AtDelta::Resolved(y)) if x != y)
@@ -115,10 +115,10 @@ fn agrees_with_the_sustained_grade(w: &Whole, st: &[Vec<Vec<Option<AtDelta<Sign>
 fn d18_persistent_imbalance_reverses_only_with_freedom_among_its_relations() {
     let tally = Mutex::new(Tally::default());
     for_all("d18_imbalance", 0xD18, |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let (k, regs) = (r.usize(2, 3), r.usize(2, 4));
-        let z = r.chance(4);
-        let w = whole(&rel, random_declared(r, &rel, k, regs, 0.25, z, z));
+        let z = r.selects(4);
+        let w = whole(&rel, enumerated_declared(r, &rel, k, regs, 0.25, z, z));
         let st = imbalance_states(&w);
         agrees_with_the_sustained_grade(&w, &st);
         let mut g = tally.lock().unwrap();
@@ -175,10 +175,10 @@ fn d18_persistent_arrangement_reverses_only_with_freedom_at_its_entries() {
     // reversal.
     let tally = Mutex::new(Tally::default());
     for_all("d18_arrangement", 0xD18, |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let (k, regs) = (r.usize(2, 3), r.usize(2, 4));
-        let z = r.chance(4);
-        let w = whole(&rel, random_declared(r, &rel, k, regs, 0.25, z, z));
+        let z = r.selects(4);
+        let w = whole(&rel, enumerated_declared(r, &rel, k, regs, 0.25, z, z));
         tally_arrangement(w.freedom(), &mut tally.lock().unwrap());
     });
     tally.into_inner().unwrap().require("persistent arrangement");
@@ -199,17 +199,17 @@ const NOT_EVALUATED_ON_EDGE_REGISTERED: [(&str, &str); 3] = [
 
 /// Edge-registered series with declared offsets and, on some, gains of every
 /// kind. Every PC level is read on it (`PersistenceChange::new`).
-fn edge_series(r: &mut Rng, k: usize, m: usize, regs: usize) -> EdgeSeries {
+fn edge_series(r: &mut Seeds, k: usize, m: usize, regs: usize) -> EdgeSeries {
     let mut a = vec![(0..k).map(|_| (0..m).map(|_| r.eighth(-3.0, 3.0)).collect::<Vec<_>>()).collect::<Vec<_>>()];
     for _ in 1..regs {
         let p = a.last().unwrap().clone();
-        a.push(p.iter().map(|row| row.iter().map(|&x| if r.chance(4) { x + r.eighth(-1.0, 1.0) } else { x }).collect()).collect());
+        a.push(p.iter().map(|row| row.iter().map(|&x| if r.selects(4) { x + r.eighth(-1.0, 1.0) } else { x }).collect()).collect());
     }
     let rep: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.delta(0.25)).collect()).collect();
     let da = (0..regs).map(|_| rep.clone()).collect();
-    let offset: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| if r.chance(3) { r.delta(0.25) } else { 0.0 }).collect()).collect();
-    let g = |r: &mut Rng| if r.chance(2) { 1.0 / 16.0 } else { 0.0 };
-    let gains = if r.chance(4) {
+    let offset: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| if r.selects(3) { r.delta(0.25) } else { 0.0 }).collect()).collect();
+    let g = |r: &mut Seeds| if r.selects(2) { 1.0 / 16.0 } else { 0.0 };
+    let gains = if r.selects(4) {
         EdgeGains { component: (0..k).map(|_| g(r)).collect(), edge: (0..m).map(|_| g(r)).collect(),
             independent: (0..k).map(|_| (0..m).map(|_| g(r)).collect()).collect() }
     } else { EdgeGains::none(k, m) };
@@ -257,7 +257,7 @@ fn d18_persistent_closure_reverses_only_with_freedom_on_its_walk() {
 fn d18_persistent_arrangement_on_edge_registered_series_with_gains() {
     let tally = Mutex::new(Tally::default());
     for_all("d18_arrangement_edge", 0xD18, |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let (k, regs) = (r.usize(2, 3), r.usize(2, 4));
         tally_arrangement(&PersistenceChange::new(&edge_series(r, k, rel.n_edges(), regs)), &mut tally.lock().unwrap());
     });

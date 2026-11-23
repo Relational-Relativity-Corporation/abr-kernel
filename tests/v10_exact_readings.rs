@@ -31,8 +31,8 @@ fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
 }
 
 const CASES: u64 = 200;
-struct Rng(u64);
-impl Rng {
+struct Seeds(u64);
+impl Seeds {
     fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -46,9 +46,9 @@ impl Rng {
     fn wide(&mut self, pows: &[i32]) -> f64 { let p = pows[self.usize(0, pows.len() - 1)]; self.int(-8, 8) as f64 * 2f64.powi(p) / 8.0 }
     fn delta(&mut self) -> f64 { self.int(0, 4) as f64 / 16.0 }
 }
-fn for_all(name: &str, prop: impl Fn(&mut Rng)) {
+fn for_all(name: &str, prop: impl Fn(&mut Seeds)) {
     for seed in 0..CASES {
-        let mut r = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x45);
+        let mut r = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x45);
         let caught = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| prop(&mut r)));
         if caught.is_err() { panic!("property {name} failed at seed {seed}"); }
     }
@@ -76,7 +76,7 @@ const SUMS: [i32; 3] = [0, 30, 56];
 /// while the scaled i128 products stay below 2¹⁰⁰. For minors.
 const PRODUCTS: [i32; 3] = [0, 12, 25];
 
-fn random_field(r: &mut Rng, pows: &[i32]) -> Field {
+fn enumerated_field(r: &mut Seeds, pows: &[i32]) -> Field {
     let n = r.usize(3, 5);
     let m = r.usize(n - 1, 6.min(n * (n - 1)));
     let mut edges: Vec<(usize, usize)> = Vec::new();
@@ -91,14 +91,14 @@ fn random_field(r: &mut Rng, pows: &[i32]) -> Field {
     let mut x: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| r.wide(pows)).collect()).collect();
     for _ in 0..r.usize(3, 4) {
         xs.push(x.clone());
-        for c in x.iter_mut() { for v in c.iter_mut() { if r.chance() { *v += r.wide(pows); } } }
+        for c in x.iter_mut() { for v in c.iter_mut() { if r.selects() { *v += r.wide(pows); } } }
     }
     let seq = xs.iter().map(|xt| Registration::synthetic(NodeField::new(xt.clone()), delta.clone())).collect();
     let xi = xs.iter().map(|t| t.iter().map(|c| c.iter().map(|&v| to_i(v)).collect()).collect()).collect();
     let d = delta.iter().map(|c| c.iter().map(|&v| to_i(v)).collect()).collect();
     Field { rel, seq, x: xi, d }
 }
-impl Rng { fn chance(&mut self) -> bool { self.next() % 8 < 5 } }
+impl Seeds { fn selects(&mut self) -> bool { self.next() % 8 < 5 } }
 
 impl Field {
     fn a(&self, t: usize, c: usize, e: usize) -> i128 { let (s, u) = self.rel.edges[e]; self.x[t][c][s] - self.x[t][c][u] }
@@ -113,7 +113,7 @@ fn pb(x: i128, hx: i128, y: i128, hy: i128) -> i128 { x.abs() * hy + y.abs() * h
 fn prop_pc1_is_exact() {
     let lossy = Mutex::new(0usize);
     for_all("exact PC1", |r| {
-        let f = random_field(r, &SUMS);
+        let f = enumerated_field(r, &SUMS);
         let s = EdgeSeries::from_registrations(&f.seq, &f.rel).unwrap();
         for x in relation_changes(&s) {
             let (d, h) = (f.dlt(x.step, x.component, x.edge), f.ddlt(x.component, x.edge));
@@ -133,7 +133,7 @@ fn prop_pc1_is_exact() {
 fn prop_pc2_is_exact() {
     let lossy = Mutex::new(0usize);
     for_all("exact PC2", |r| {
-        let f = random_field(r, &PRODUCTS);
+        let f = enumerated_field(r, &PRODUCTS);
         let s = EdgeSeries::from_registrations(&f.seq, &f.rel).unwrap();
         for cs in [coupling_across_components(&s), coupling_across_steps(&s)] {
             let Ok(cs) = cs else { continue };
@@ -163,7 +163,7 @@ fn prop_pc2_is_exact() {
 fn prop_pc3_states_are_exact() {
     let states = Mutex::new(0usize);
     for_all("exact PC3", |r| {
-        let f = random_field(r, &PRODUCTS);
+        let f = enumerated_field(r, &PRODUCTS);
         let s = EdgeSeries::from_registrations(&f.seq, &f.rel).unwrap();
         let Ok(arr) = arrangement_steps(&s) else { return };
         let state = |t: usize, e: usize, g: usize, i: usize, j: usize| {
@@ -185,7 +185,7 @@ fn prop_pc3_states_are_exact() {
 fn prop_connection_grades_and_energy_are_exact() {
     let checked = Mutex::new(0usize);
     for_all("exact V1, V3", |r| {
-        let f = random_field(r, &SUMS);
+        let f = enumerated_field(r, &SUMS);
         let n_t = f.seq.len();
         let m = f.rel.n_edges();
         let resolved = |t: usize, e: usize| (0..2).any(|c| f.a(t, c, e).abs() > f.da(c, e));
@@ -234,7 +234,7 @@ fn prop_connection_grades_and_energy_are_exact() {
 fn prop_relational_field_forms_are_exact() {
     let lossy = Mutex::new(0usize);
     for_all("exact forms", |r| {
-        let f = random_field(r, &SUMS);
+        let f = enumerated_field(r, &SUMS);
         let rf = RelationalField::new(&f.rel, f.seq.clone(), None).unwrap();
         let m = f.rel.n_edges();
         let check = |forms: &abr_kernel::relational_field::Forms, val: &dyn Fn(usize, usize) -> i128| {
@@ -259,7 +259,7 @@ fn prop_relational_field_forms_are_exact() {
     assert!(lossy.into_inner().unwrap() > 0, "A_p from rounded A never differed: the fixture does not test exactness");
 }
 
-/// The PC3 property above passes on the earlier arithmetic too: on random
+/// The PC3 property above passes on the earlier arithmetic too: on enumerated
 /// fields no exact minor and its f64 counterpart fall on different sides of
 /// their bound. This case does. With A[0][e] = A[1][f] = 1 + 2⁻³⁰,
 /// A[1][e] = 1 and A[0][f] = 1 + 2⁻²⁹, the exact minor is

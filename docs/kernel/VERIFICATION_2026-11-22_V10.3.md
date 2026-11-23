@@ -377,6 +377,9 @@ Origin asked whether any test leaves out a variable. Tonight's did: each claim w
 
 **Not yet audited:** the V10 tests written before the 53rd (OC-TEST-1). **251 (default), 343 (`v9`)**, no warnings.
 
+
+**Addendum (54th), W17.** "Random" is not used: every fixture is an enumerated field from a declared seed. Earlier uses in this record are kept as written and read as *enumerated*. The test code is renamed; no reading or test changed. 251 (default), 343 (`v9`).
+
 ---
 
 *Metatron Dynamics, Inc. Kernel V10.3.*

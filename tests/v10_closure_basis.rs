@@ -37,8 +37,8 @@ fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
 
 const CASES: u64 = 300;
 
-struct Rng(u64);
-impl Rng {
+struct Seeds(u64);
+impl Seeds {
     fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -50,18 +50,18 @@ impl Rng {
     fn usize(&mut self, lo: usize, hi: usize) -> usize { self.int(lo as i64, hi as i64) as usize }
     fn eighth(&mut self, lo: f64, hi: f64) -> f64 { self.int((lo * 8.0) as i64, (hi * 8.0) as i64) as f64 / 8.0 }
     fn delta(&mut self, hi: f64) -> f64 { self.int(0, (hi * 16.0) as i64) as f64 / 16.0 }
-    fn chance(&mut self, p_in_8: u64) -> bool { self.next() % 8 < p_in_8 }
+    fn selects(&mut self, p_in_8: u64) -> bool { self.next() % 8 < p_in_8 }
 }
 
-fn for_all(name: &str, prop: impl Fn(&mut Rng)) {
+fn for_all(name: &str, prop: impl Fn(&mut Seeds)) {
     for seed in 0..CASES {
-        let mut r = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0xD16);
+        let mut r = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0xD16);
         let caught = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| prop(&mut r)));
         if caught.is_err() { panic!("property {name} failed at seed {seed}"); }
     }
 }
 
-fn random_rel(r: &mut Rng) -> DeclaredRelations {
+fn enumerated_rel(r: &mut Seeds) -> DeclaredRelations {
     let n = r.usize(3, 5);
     let m = r.usize(n, 7.min(n * (n - 1)));
     let mut edges: Vec<(usize, usize)> = Vec::new();
@@ -85,14 +85,14 @@ fn stated_basis(rel: &DeclaredRelations, order: &[usize]) -> CycleBasis {
     cycle_basis(rel, &tree).expect("a spanning forest of the declared field")
 }
 
-fn random_series(r: &mut Rng, k: usize, m: usize) -> EdgeSeries {
+fn enumerated_series(r: &mut Seeds, k: usize, m: usize) -> EdgeSeries {
     let regs = r.usize(2, 4);
     let mut v: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.eighth(-3.0, 3.0)).collect()).collect();
     let d: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.delta(0.25)).collect()).collect();
     let (mut aa, mut dd) = (Vec::new(), Vec::new());
     for _ in 0..regs {
         aa.push(v.clone()); dd.push(d.clone());
-        for c in v.iter_mut() { for x in c.iter_mut() { if r.chance(4) { *x += r.eighth(-1.0, 1.0); } } }
+        for c in v.iter_mut() { for x in c.iter_mut() { if r.selects(4) { *x += r.eighth(-1.0, 1.0); } } }
     }
     EdgeSeries::from_edge_values_synthetic(aa, dd).unwrap()
 }
@@ -107,9 +107,9 @@ fn incidence(rel: &DeclaredRelations) -> Vec<Vec<(usize, usize, i8)>> {
     adj
 }
 
-/// A random closed walk: a random walk of up to `len` steps from a locus with
+/// An enumerated closed walk: a seed-selected walk of up to `len` steps from a locus with
 /// a relation, then the shortest way back. Edges may repeat.
-fn random_walk(r: &mut Rng, rel: &DeclaredRelations, len: usize) -> Vec<(usize, i8)> {
+fn enumerated_walk(r: &mut Seeds, rel: &DeclaredRelations, len: usize) -> Vec<(usize, i8)> {
     let adj = incidence(rel);
     let starts: Vec<usize> = (0..rel.n_nodes).filter(|&v| !adj[v].is_empty()).collect();
     let v0 = starts[r.usize(0, starts.len() - 1)];
@@ -187,13 +187,13 @@ fn holds((v, h): (f64, f64)) -> bool { v.abs() <= h }
 fn prop_isc_d16_every_walk_is_the_chord_combination_in_state_and_change() {
     let walks = Mutex::new(0usize);
     for_all("I-SC-D16 (i)", |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let order: Vec<usize> = (0..rel.n_edges()).collect();
         let basis = stated_basis(&rel, &order);
         let k = r.usize(1, 2);
-        let s = random_series(r, k, rel.n_edges());
+        let s = enumerated_series(r, k, rel.n_edges());
         for _ in 0..4 {
-            let w = random_walk(r, &rel, 8);
+            let w = enumerated_walk(r, &rel, 8);
             let n = express_in_basis(&rel, &basis, &w).expect("a closed walk");
             for c in 0..k {
                 for t in 0..s.n_registrations() {
@@ -261,7 +261,7 @@ fn isc_d16_the_basis_does_not_settle_every_cycle_and_depends_on_the_tree() {
 
 /// Fields near a node difference, where closures sit near their bounds:
 /// g[e] = x[s] − x[t] + a deviation up to 3/8, every bound 1/8.
-fn near_node_series(r: &mut Rng, rel: &DeclaredRelations) -> EdgeSeries {
+fn near_node_series(r: &mut Seeds, rel: &DeclaredRelations) -> EdgeSeries {
     let regs = r.usize(2, 3);
     let a: Vec<Vec<Vec<f64>>> = (0..regs).map(|_| {
         let x: Vec<f64> = (0..rel.n_nodes).map(|_| r.eighth(-2.0, 2.0)).collect();
@@ -274,7 +274,7 @@ fn near_node_series(r: &mut Rng, rel: &DeclaredRelations) -> EdgeSeries {
 fn prop_isc_d16_basis_holding_does_not_imply_every_cycle_holds() {
     let (gap, tree_dep) = (Mutex::new(0usize), Mutex::new(0usize));
     for_all("I-SC-D16 (ii)", |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let s = near_node_series(r, &rel);
         let order: Vec<usize> = (0..rel.n_edges()).collect();
         let rev: Vec<usize> = order.iter().rev().copied().collect();
@@ -302,12 +302,12 @@ fn prop_isc_d16_basis_holding_does_not_imply_every_cycle_holds() {
 fn prop_isc_d16_every_cycle_holds_exactly_when_a_node_field_fits() {
     let (fits, fails) = (Mutex::new(0usize), Mutex::new(0usize));
     for_all("I-SC-D16 (iii)", |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let m = rel.n_edges();
-        let mut s = if r.chance(4) { near_node_series(r, &rel) } else { random_series(r, 1, m) };
+        let mut s = if r.selects(4) { near_node_series(r, &rel) } else { enumerated_series(r, 1, m) };
         // Some fields with declared gains, so the widened closure bound is the one tested.
-        if r.chance(3) {
-            let pick = |r: &mut Rng| [0.0, 0.125, 0.25][r.usize(0, 2)];
+        if r.selects(3) {
+            let pick = |r: &mut Seeds| [0.0, 0.125, 0.25][r.usize(0, 2)];
             let g = EdgeGains { component: vec![pick(r)], edge: (0..m).map(|_| pick(r)).collect(), independent: vec![(0..m).map(|_| pick(r)).collect()] };
             s = s.with_run_constant(vec![vec![0.0; m]], g);
         }

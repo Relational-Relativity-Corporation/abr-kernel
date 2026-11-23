@@ -15,8 +15,8 @@
 //!
 //! Each kind is either the same at every registration (run) or may differ
 //! between registrations (reg). The statement is `invariant` below. Every
-//! cell marked invariant is checked to hold on every random field. Every cell
-//! marked not invariant must be *exercised*: some random field must change
+//! cell marked invariant is checked to hold on every enumerated field. Every cell
+//! marked not invariant must be *exercised*: some enumerated field must change
 //! its classification. So the test fails if a cell is misstated either way.
 //!
 //! The same mechanism also settles the Z1a gain bounds for K7 closures
@@ -47,8 +47,8 @@ fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
 
 const CASES: u64 = 300;
 
-struct Rng(u64);
-impl Rng {
+struct Seeds(u64);
+impl Seeds {
     fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -60,19 +60,19 @@ impl Rng {
     fn usize(&mut self, lo: usize, hi: usize) -> usize { self.int(lo as i64, hi as i64) as usize }
     fn eighth(&mut self, lo: f64, hi: f64) -> f64 { self.int((lo * 8.0) as i64, (hi * 8.0) as i64) as f64 / 8.0 }
     fn delta(&mut self, hi: f64) -> f64 { self.int(0, (hi * 16.0) as i64) as f64 / 16.0 }
-    fn chance(&mut self, p_in_8: u64) -> bool { self.next() % 8 < p_in_8 }
+    fn selects(&mut self, p_in_8: u64) -> bool { self.next() % 8 < p_in_8 }
 }
 
-fn for_all(name: &str, prop: impl Fn(&mut Rng)) {
+fn for_all(name: &str, prop: impl Fn(&mut Seeds)) {
     for seed in 0..CASES {
-        let mut r = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0xD15);
+        let mut r = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0xD15);
         let caught = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| prop(&mut r)));
         if caught.is_err() { panic!("property {name} failed at seed {seed}"); }
     }
 }
 
-/// A random field with cycles: distinct directed edges, no self-relation.
-fn random_rel(r: &mut Rng) -> DeclaredRelations {
+/// An enumerated field with cycles: distinct directed edges, no self-relation.
+fn enumerated_rel(r: &mut Seeds) -> DeclaredRelations {
     let n = r.usize(3, 5);
     let m = r.usize(n, 8.min(n * (n - 1)));
     let mut edges: Vec<(usize, usize)> = Vec::new();
@@ -97,14 +97,14 @@ fn stated_basis(rel: &DeclaredRelations) -> CycleBasis {
 }
 
 /// Edge values [t][c][e] and repeatability bounds, two or three components.
-fn random_edge_values(r: &mut Rng, m: usize) -> (Vec<Vec<Vec<f64>>>, Vec<Vec<Vec<f64>>>) {
+fn enumerated_edge_values(r: &mut Seeds, m: usize) -> (Vec<Vec<Vec<f64>>>, Vec<Vec<Vec<f64>>>) {
     let (k, regs) = (r.usize(2, 3), r.usize(3, 4));
     let mut v: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.eighth(-4.0, 4.0)).collect()).collect();
     let d: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| r.delta(0.25)).collect()).collect();
     let (mut aa, mut dd) = (Vec::new(), Vec::new());
     for _ in 0..regs {
         aa.push(v.clone()); dd.push(d.clone());
-        for c in v.iter_mut() { for x in c.iter_mut() { if r.chance(5) { *x += r.eighth(-2.0, 2.0); } } }
+        for c in v.iter_mut() { for x in c.iter_mut() { if r.selects(5) { *x += r.eighth(-2.0, 2.0); } } }
     }
     (aa, dd)
 }
@@ -155,15 +155,15 @@ fn invariant(form: Form, kind: Kind, over: Over) -> bool {
 
 const FACTORS: [f64; 6] = [0.5, 0.75, 1.0, 1.125, 1.25, 2.0];
 
-fn draw(r: &mut Rng, signed: bool) -> f64 {
+fn draw(r: &mut Seeds, signed: bool) -> f64 {
     let v = FACTORS[r.usize(0, FACTORS.len() - 1)];
-    if signed && r.chance(3) { -v } else { v }
+    if signed && r.selects(3) { -v } else { v }
 }
 
 /// Factors [t][c][e] of one kind. A negative factor is a declared mapping
 /// (W14), drawn only over the run: its sign is the same at every registration.
-fn factors(r: &mut Rng, kind: Kind, over: Over, regs: usize, k: usize, m: usize, signed: bool) -> Vec<Vec<Vec<f64>>> {
-    let one = |r: &mut Rng| -> Vec<Vec<f64>> {
+fn factors(r: &mut Seeds, kind: Kind, over: Over, regs: usize, k: usize, m: usize, signed: bool) -> Vec<Vec<Vec<f64>>> {
+    let one = |r: &mut Seeds| -> Vec<Vec<f64>> {
         let fc: Vec<f64> = (0..k).map(|_| draw(r, signed)).collect();
         let fe: Vec<f64> = (0..m).map(|_| draw(r, signed)).collect();
         let mut f = vec![vec![0.0; m]; k];
@@ -217,9 +217,9 @@ fn prop_isc_d15_every_cell_of_the_scale_table() {
     let changed = Mutex::new(vec![0usize; 48]);
     let tried = Mutex::new(vec![0usize; 48]);
     for_all("I-SC-D15 table", |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let basis = stated_basis(&rel);
-        let (a, d) = random_edge_values(r, rel.n_edges());
+        let (a, d) = enumerated_edge_values(r, rel.n_edges());
         let (regs, k, m) = (a.len(), a[0].len(), a[0][0].len());
         let base = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap();
         for kind in KINDS {
@@ -256,9 +256,9 @@ fn prop_isc_d15_every_cell_of_the_scale_table() {
 fn prop_isc_d15_negative_factors_reverse_signs_only() {
     let flipped = Mutex::new(0usize);
     for_all("I-SC-D15 signed", |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let basis = stated_basis(&rel);
-        let (a, d) = random_edge_values(r, rel.n_edges());
+        let (a, d) = enumerated_edge_values(r, rel.n_edges());
         let (regs, k, m) = (a.len(), a[0].len(), a[0][0].len());
         let base = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap();
         for kind in KINDS {
@@ -301,14 +301,14 @@ fn prop_isc_d15_negative_factors_reverse_signs_only() {
 fn prop_isc_d15_node_derived_grades_under_component_scales() {
     let (coupled_moved, locus_moved) = (Mutex::new(0usize), Mutex::new(0usize));
     for_all("I-SC-D15 node grades", |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let (k, regs, n) = (r.usize(2, 3), r.usize(3, 4), rel.n_nodes);
         let mut x: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| r.eighth(-4.0, 4.0)).collect()).collect();
         let delta: Vec<Vec<f64>> = (0..k).map(|_| (0..n).map(|_| r.delta(0.25)).collect()).collect();
         let mut xs = Vec::new();
         for _ in 0..regs {
             xs.push(x.clone());
-            for c in x.iter_mut() { for v in c.iter_mut() { if r.chance(5) { *v += r.eighth(-2.0, 2.0); } } }
+            for c in x.iter_mut() { for v in c.iter_mut() { if r.selects(5) { *v += r.eighth(-2.0, 2.0); } } }
         }
         let build = |f: &dyn Fn(usize, usize, usize) -> f64| -> Vec<Registration> {
             xs.iter().enumerate().map(|(t, xt)| Registration::synthetic(
@@ -425,7 +425,7 @@ fn z1a_a_gain_per_edge_enters_the_closure_bound() {
     assert_eq!(cycle_change_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.0));
 }
 
-/// Over random fields: the values the model permits are
+/// Over enumerated fields: the values the model permits are
 /// (1 + γ′_c)(1 + γ′_e)(1 + γ′_ce)·(v + ε), each γ′ within its declared bound
 /// and fixed over the run, and |ε| within the repeatability bound at each
 /// registration. Every closure the declared series reads as resolved has the
@@ -435,16 +435,16 @@ fn z1a_a_gain_per_edge_enters_the_closure_bound() {
 fn prop_z1a_declared_gains_never_reverse_a_resolved_closure() {
     let (resolved, would_flip) = (Mutex::new(0usize), Mutex::new(0usize));
     for_all("Z1a closures", |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let basis = stated_basis(&rel);
-        let (a, d) = random_edge_values(r, rel.n_edges());
+        let (a, d) = enumerated_edge_values(r, rel.n_edges());
         let (regs, k, m) = (a.len(), a[0].len(), a[0][0].len());
-        let pick = |r: &mut Rng| [0.0, 0.125, 0.25][r.usize(0, 2)];
+        let pick = |r: &mut Seeds| [0.0, 0.125, 0.25][r.usize(0, 2)];
         let gc: Vec<f64> = (0..k).map(|_| pick(r)).collect();
         let ge: Vec<f64> = (0..m).map(|_| pick(r)).collect();
         let gi: Vec<Vec<f64>> = (0..k).map(|_| (0..m).map(|_| pick(r)).collect()).collect();
         // γ′ a multiple of γ/4 in [−γ, γ]; ε a multiple of h/4 in [−h, h].
-        let prime = |r: &mut Rng, g: f64| 1.0 + g * (r.usize(0, 8) as f64 - 4.0) / 4.0;
+        let prime = |r: &mut Seeds, g: f64| 1.0 + g * (r.usize(0, 8) as f64 - 4.0) / 4.0;
         let fc: Vec<f64> = gc.iter().map(|&g| prime(r, g)).collect();
         let fe: Vec<f64> = ge.iter().map(|&g| prime(r, g)).collect();
         let fi: Vec<Vec<f64>> = gi.iter().map(|gr| gr.iter().map(|&g| prime(r, g)).collect()).collect();

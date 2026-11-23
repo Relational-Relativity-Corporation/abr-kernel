@@ -28,8 +28,8 @@ fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
 }
 
 const CASES: u64 = 300;
-struct Rng(u64);
-impl Rng {
+struct Seeds(u64);
+impl Seeds {
     fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -42,9 +42,9 @@ impl Rng {
     /// A dyadic value m·2^p/8, with p from {0, 20, 40, 54}: mixed magnitudes.
     fn wide(&mut self) -> f64 { let p = [0, 20, 40, 54][self.usize(0, 3)]; self.int(-8, 8) as f64 * 2f64.powi(p) / 8.0 }
 }
-fn for_all(name: &str, prop: impl Fn(&mut Rng)) {
+fn for_all(name: &str, prop: impl Fn(&mut Seeds)) {
     for seed in 0..CASES {
-        let mut r = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0xE5);
+        let mut r = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0xE5);
         let caught = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| prop(&mut r)));
         if caught.is_err() { panic!("property {name} failed at seed {seed}"); }
     }
@@ -106,7 +106,7 @@ fn k7_a_closure_is_the_same_from_every_starting_locus() {
     }
 }
 
-fn random_rel(r: &mut Rng) -> DeclaredRelations {
+fn enumerated_rel(r: &mut Seeds) -> DeclaredRelations {
     let n = r.usize(3, 5);
     let m = r.usize(n, 7.min(n * (n - 1)));
     let mut edges: Vec<(usize, usize)> = Vec::new();
@@ -128,7 +128,7 @@ fn forest(rel: &DeclaredRelations) -> Vec<usize> {
     tree
 }
 
-/// Over random fields with mixed magnitudes and declared gains: every
+/// Over enumerated fields with mixed magnitudes and declared gains: every
 /// rotation of every basis cycle reads the same value and bound, in state
 /// and on change; the value is the exact sum rounded once; the bound is at or
 /// above the exact bound and the smallest f64 that is; and a resolution is
@@ -137,7 +137,7 @@ fn forest(rel: &DeclaredRelations) -> Vec<usize> {
 fn prop_closures_are_exact_and_order_free() {
     let (lossy, resolved) = (Mutex::new(0usize), Mutex::new(0usize));
     for_all("exact closures", |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let basis = cycle_basis(&rel, &forest(&rel)).unwrap();
         let m = rel.n_edges();
         let a: Vec<Vec<Vec<f64>>> = (0..3).map(|_| vec![(0..m).map(|_| r.wide()).collect()]).collect();
@@ -187,7 +187,7 @@ fn prop_closures_are_exact_and_order_free() {
 fn prop_circulation_of_accumulation_is_exact() {
     let lossy = Mutex::new(0usize);
     for_all("exact Ξ(B(A))", |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let m = rel.n_edges();
         let a: Vec<Vec<f64>> = vec![(0..m).map(|_| r.wide()).collect()];
         let da: Vec<Vec<f64>> = vec![(0..m).map(|_| r.int(0, 4) as f64 / 16.0).collect()];

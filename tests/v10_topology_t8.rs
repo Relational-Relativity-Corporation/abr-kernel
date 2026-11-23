@@ -117,8 +117,8 @@ fn t8_declare_checked_constructs_and_checks_together() {
 
 // ── Property: admitted exactly when the field less its feedback is acyclic ──
 
-struct Rng(u64);
-impl Rng {
+struct Seeds(u64);
+impl Seeds {
     fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -146,7 +146,7 @@ fn acyclic(r: &DeclaredRelations, keep: &dyn Fn(usize) -> bool) -> bool {
 fn prop_t8_admits_exactly_when_the_residual_is_acyclic() {
     let (mut admitted, mut refused) = (0, 0);
     for seed in 0..3000u64 {
-        let mut g = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x7E7E);
+        let mut g = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x7E7E);
         let n = g.usize(2, 6);
         let m = g.usize(1, 9);
         let edges: Vec<(usize, usize)> = (0..m).map(|_| loop {

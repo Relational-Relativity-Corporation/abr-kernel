@@ -154,11 +154,11 @@ fn isc_d14_all_four_combinations_occur() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// The two laws, over random fields (exact)
+// The two laws, over enumerated fields (exact)
 // ═══════════════════════════════════════════════════════════════════════════
 
-struct Rng(u64);
-impl Rng {
+struct Seeds(u64);
+impl Seeds {
     fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -171,7 +171,7 @@ impl Rng {
     fn eighth(&mut self) -> f64 { self.int(-32, 32) as f64 / 8.0 }
 }
 
-fn random_rel(r: &mut Rng) -> DeclaredRelations {
+fn enumerated_rel(r: &mut Seeds) -> DeclaredRelations {
     let n = r.usize(3, 6);
     let m = r.usize(2, 8.min(n * (n - 1)));
     let mut edges: Vec<(usize, usize)> = Vec::new();
@@ -188,8 +188,8 @@ fn random_rel(r: &mut Rng) -> DeclaredRelations {
 #[test]
 fn prop_isc_d14_scaling_and_mixing_laws() {
     for seed in 0..2000u64 {
-        let mut r = Rng(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x3C3C);
-        let rl = random_rel(&mut r);
+        let mut r = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x3C3C);
+        let rl = enumerated_rel(&mut r);
         let m = rl.n_edges();
         let a: Vec<Vec<f64>> = (0..2).map(|_| (0..m).map(|_| r.eighth()).collect()).collect();
         let lam: Vec<f64> = (0..m).map(|_| [0.25, 0.5, 1.0, 2.0, 4.0][r.usize(0, 4)]).collect();

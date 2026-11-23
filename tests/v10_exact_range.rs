@@ -129,8 +129,8 @@ fn k7_the_pair_is_one_sided_and_the_verdict_is_exact() {
 
 // ── Inside the range, nothing is refused ──────────────────────────────────
 
-struct Rng(u64);
-impl Rng {
+struct Seeds(u64);
+impl Seeds {
     fn next(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
@@ -152,7 +152,7 @@ impl Rng {
 #[test]
 fn prop_every_reading_inside_the_range_completes() {
     for seed in 0..200u64 {
-        let mut r = Rng(seed ^ 0x46);
+        let mut r = Seeds(seed ^ 0x46);
         let n = r.usize(3, 5);
         let mut edges: Vec<(usize, usize)> = Vec::new();
         while edges.len() < n + 1 {
@@ -163,7 +163,7 @@ fn prop_every_reading_inside_the_range_completes() {
         let m = rel.n_edges();
         let regs = 3;
         let delta: Vec<Vec<f64>> = (0..2).map(|_| (0..n).map(|_| r.edge_of_range().abs()).collect()).collect();
-        let gain = |r: &mut Rng| [0.0, 2f64.powi(-200), 0.5][r.usize(0, 2)];
+        let gain = |r: &mut Seeds| [0.0, 2f64.powi(-200), 0.5][r.usize(0, 2)];
         let lg: Vec<Vec<f64>> = (0..2).map(|_| (0..n).map(|_| gain(&mut r)).collect()).collect();
         let offs: Vec<Vec<f64>> = (0..2).map(|_| (0..n).map(|_| r.edge_of_range().abs()).collect()).collect();
         let sg = vec![gain(&mut r), gain(&mut r)];
@@ -197,6 +197,6 @@ fn prop_every_reading_inside_the_range_completes() {
 
 /// A deterministic in-range value for the edge-registered part.
 fn r_edge(seed: u64, m: usize) -> f64 {
-    let mut r = Rng(seed.wrapping_mul(31).wrapping_add(m as u64));
+    let mut r = Seeds(seed.wrapping_mul(31).wrapping_add(m as u64));
     r.edge_of_range()
 }

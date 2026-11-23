@@ -45,7 +45,7 @@ mod wf;
 use abr_kernel::exact::{exceeds, Expansion};
 use abr_kernel::persistence_change::*;
 use std::sync::Mutex;
-use wf::{for_all, mixed, random_declared, random_rel, rel, whole, Declared, Whole};
+use wf::{for_all, mixed, enumerated_declared, enumerated_rel, rel, whole, Declared, Whole};
 
 fn across(w: &Whole) -> &Couplings { w.freedom().across_components.as_ref().unwrap() }
 
@@ -71,10 +71,10 @@ fn d17_i_the_energy_floor_is_the_state_reading_of_the_carrier_component() {
     // alone. A finding for Origin (I-SC-D17 (i), 53rd).
     let counts = Mutex::new([0usize; 3]);
     for_all("d17_i", 0xD17, |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let (k, regs) = (r.usize(2, 3), r.usize(2, 4));
-        let rc = r.chance(4);
-        let w = whole(&rel, random_declared(r, &rel, k, regs, 0.5, rc, rc));
+        let rc = r.selects(4);
+        let w = whole(&rel, enumerated_declared(r, &rel, k, regs, 0.5, rc, rc));
         let (c, energy) = (w.carrier(), w.field.ground.energy.as_ref().unwrap());
         let mut g = counts.lock().unwrap();
         for t in 0..regs {
@@ -127,10 +127,10 @@ fn d17_ii_a_resolved_change_of_exchange_is_pc1_freedom_not_conversely() {
     // ε and δ_ε from the field's energy; PC1 from the field's freedom.
     let counts = Mutex::new((0usize, 0usize));
     for_all("d17_ii", 0xD17, |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let regs = r.usize(2, 4);
-        let rc = r.chance(4);
-        let w = whole(&rel, random_declared(r, &rel, 2, regs, 0.5, rc, rc));
+        let rc = r.selects(4);
+        let w = whole(&rel, enumerated_declared(r, &rel, 2, regs, 0.5, rc, rc));
         let (c, x) = (w.carrier(), &w.field.ground.energy.as_ref().unwrap().exchanges);
         let mut g = counts.lock().unwrap();
         for st in 0..regs - 1 {
@@ -242,10 +242,10 @@ fn d17_iii_a_change_minor_resolves_only_where_each_reading_changes() {
     // every reading is forced (the finding for Origin, in whole fields).
     let counts = Mutex::new(([0usize; 3], 0usize));
     for_all("d17_iii", 0xD17, |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let (k, regs) = (r.usize(2, 3), r.usize(3, 4));
-        let z = r.chance(4);
-        let w = whole(&rel, random_declared(r, &rel, k, regs, 0.25, z, z));
+        let z = r.selects(4);
+        let w = whole(&rel, enumerated_declared(r, &rel, k, regs, 0.25, z, z));
         let mut g = counts.lock().unwrap();
         let forced = tally_iii(w.freedom(), &mut g.0);
         if let Ok(cc) = &w.connection().coupled_change {
@@ -278,12 +278,12 @@ fn d17_iii_on_edge_registered_series_with_independent_gains() {
     assert_eq!(NOT_EVALUATED_ON_EDGE_REGISTERED.len(), 3);
     let counts = Mutex::new([0usize; 3]);
     for_all("d17_iii_edge", 0xD17, |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let (k, regs) = (r.usize(2, 3), r.usize(3, 4));
-        let w = whole(&rel, random_declared(r, &rel, k, regs, 0.25, false, false));
+        let w = whole(&rel, enumerated_declared(r, &rel, k, regs, 0.25, false, false));
         let m = rel.n_edges();
         let gains = EdgeGains { component: vec![0.0; k], edge: vec![0.0; m],
-            independent: (0..k).map(|_| (0..m).map(|_| if r.chance(3) { 1.0 / 16.0 } else { 0.0 }).collect()).collect() };
+            independent: (0..k).map(|_| (0..m).map(|_| if r.selects(3) { 1.0 / 16.0 } else { 0.0 }).collect()).collect() };
         let s = EdgeSeries::from_edge_values_synthetic(w.series.a.clone(), w.series.da.clone()).unwrap()
             .with_run_constant(vec![vec![0.0; m]; k], gains);
         let pc = PersistenceChange::new(&s);
@@ -306,9 +306,9 @@ fn d17_iv_exactly_the_carrier_structure_minor_is_a_property_of_their_plane() {
     // change on some fields when b ≠ 0. The structure's readings do not.
     let moved = Mutex::new((0usize, 0usize));
     for_all("d17_iv_exact", 0xD17, |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let regs = r.usize(2, 4);
-        let d = random_declared(r, &rel, 2, regs, 0.0, false, false);
+        let d = enumerated_declared(r, &rel, 2, regs, 0.0, false, false);
         let (a, b) = (*[1.0, -1.0, 2.0, 0.5, -3.0].get(r.usize(0, 4)).unwrap(), r.eighth(-2.0, 2.0));
         let (wf_, wg) = (whole(&rel, d.clone()), whole(&rel, mixed(&d, a, b)));
         let (xf, xg) = (carrier_structure(&wf_), carrier_structure(&wg));
@@ -345,9 +345,9 @@ fn d17_iv_at_delta_a_carrier_mixed_with_structure_never_gains_resolution() {
     // fields: 40 moved freedom → structure, none structure → freedom.
     let counts = Mutex::new((0usize, 0usize, 0usize));
     for_all("d17_iv_delta", 0xD17, |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let regs = r.usize(2, 4);
-        let d = random_declared(r, &rel, 2, regs, 0.25, false, false);
+        let d = enumerated_declared(r, &rel, 2, regs, 0.25, false, false);
         let wf_ = whole(&rel, d.clone());
         let a = *[1.0, -1.0, 2.0, 0.5].get(r.usize(0, 3)).unwrap();
         let ws = whole(&rel, mixed(&d, a, 0.0));
@@ -384,9 +384,9 @@ fn d17_iv_the_one_way_result_belongs_to_the_bound_not_the_field() {
     // moves one way (the test above). Whole fields throughout.
     let c = Mutex::new([0usize; 6]);
     for_all("d17_iv_both_ways", 0xD17, |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let regs = r.usize(3, 5);
-        let d = random_declared(r, &rel, 2, regs, 0.25, false, false);
+        let d = enumerated_declared(r, &rel, 2, regs, 0.25, false, false);
         let (wf_, wm) = (whole(&rel, d.clone()), whole(&rel, mixed(&d, 1.0, r.eighth(-2.0, 2.0))));
         let (pf, pm) = (wf_.freedom(), wm.freedom());
         let mut g = c.lock().unwrap();
@@ -462,9 +462,9 @@ fn d17_v_d3_and_d4_with_components_and_edges_exchanged() {
     // (the minor is 0).
     use abr_kernel::ground_variables::{sign_at_delta_exact, AtDelta};
     for_all("d17_v", 0xD17, |r| {
-        let rel = random_rel(r);
+        let rel = enumerated_rel(r);
         let regs = r.usize(2, 4);
-        let base = random_declared(r, &rel, 1, regs, 0.0, false, false);
+        let base = enumerated_declared(r, &rel, 1, regs, 0.0, false, false);
         let n = rel.n_nodes;
         let (l, k): (f64, Vec<f64>) = (r.eighth(-2.0, 2.0), (0..n).map(|_| r.eighth(-2.0, 2.0)).collect());
         let ka: Vec<f64> = rel.edges.iter().map(|&(s, t)| k[s] - k[t]).collect();
