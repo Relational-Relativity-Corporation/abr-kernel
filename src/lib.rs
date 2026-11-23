@@ -119,3 +119,7 @@ pub mod reverse_check;
 // system; the declared field formed from it; the ground record with all three
 // variables for every relation, component and step.
 pub mod domain;
+
+// §2.9, the geometry of relations (Proposed, 69th): angle, step angle,
+// relative phase, read exactly from the registered relations.
+pub mod geometry;
