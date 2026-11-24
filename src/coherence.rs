@@ -1,6 +1,6 @@
 // coherence.rs — Metatron Dynamics, Inc. Kernel V10.
 // §2.10, the window and the present reading (Proposed, Generator, 2026-11-24,
-// 73rd). Bounded over D. No claim beyond D.
+// 73rd; W5, the accumulated radial graph, Origin, 74th). Bounded over D. No claim beyond D.
 //
 // Origin (73rd): "if you have an understanding of the energy freedom and
 // connection present in a system represented by relation as primitive you can
@@ -326,6 +326,215 @@ pub fn coherence(field: &RelationalField, window: &WindowReading, directions: &[
 /// discrete reading of freedom remaining among the declared candidates.
 pub fn anticipated(readings: &[CandidateReading]) -> Vec<&str> {
     readings.iter().filter(|r| r.coherent).map(|r| r.label.as_str()).collect()
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// W5: the accumulated radial graph of every element (Origin, 2026-11-24, 74th)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Origin (74th): "a radial graph around each of the elements of a system as
+// information is input to the elements the graph behavior changes degrees of
+// freedom energy and connection shape the relationships as relational
+// progression advances. The window bearing on the point of prediction is
+// informed by all of the information which precedes it."
+//
+// The element is a locus; its radial graph is its star: every relation
+// incident on it, leaving it (Out) or arriving at it (In), read inside the
+// whole field. Through registration t (steps 0 … t − 1), each spoke carries
+// what has accumulated, from the record boundary (Df3: a boundary cut into an
+// ongoing relation, not a beginning) to t:
+//
+//   freedom and structure  per component, the count of steps the spoke's
+//                          change read freedom and read structure (PC1), and
+//                          its current run: the reading at step t − 1 and the
+//                          number of consecutive steps ending there with it;
+//   energy                 the exact sum of the exchanged energy ε over
+//                          registrations 0 … t (V3, each ε as V3 reports it),
+//                          its bound summed and rounded up, and the count of
+//                          registrations with the floor resolved;
+//   connection             for each pair of spokes, the count of PC2 readings
+//                          (both families) within steps 0 … t − 1 that read
+//                          coupled (structure, not forced), independent
+//                          (freedom), and forced (reported apart, 57th).
+//
+// Every input updates every spoke of every graph, in one pass (Df3). Nothing
+// is removed and nothing is weighted: there is no decay and no learning rate
+// (operator parameters are retired from V10). Recency is read as structure,
+// the current run, beside the full counts. W1 is the strictest selection from
+// W5: the spoke components held over every step.
+//
+// For a discrete system the spokes are channels (§2.8 (2d)): `ChannelRecord`
+// counts each channel taken from each element, a count of registered events
+// admitted at δ = 0 (68th), with the step it was last taken.
+
+use crate::persistence_change::ReadingPair;
+
+/// Whether a spoke leaves the element or arrives at it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Orientation { Out, In }
+
+/// The reading at the latest step and the number of consecutive steps ending
+/// there with the same reading.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Run { pub reading: Reading, pub length: usize }
+
+/// One component of one spoke, accumulated.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SpokeComponent {
+    pub component: usize,
+    pub held_steps: usize,
+    pub changed_steps: usize,
+    /// `None` through registration 0: no step yet.
+    pub run: Option<Run>,
+}
+
+/// Energy exchanged along a spoke, accumulated over registrations 0 … t.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AccumulatedEnergy {
+    pub registrations: usize,
+    /// Σ ε, one exact sum of the reported ε, rounded once.
+    pub sum: f64,
+    /// Σ δ_ε, rounded up.
+    pub bound: f64,
+    /// Registrations with the floor ε > δ_ε resolved.
+    pub floor_resolved: usize,
+}
+
+/// One spoke of an element's radial graph.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Spoke {
+    pub edge: usize,
+    pub orientation: Orientation,
+    pub components: Vec<SpokeComponent>,
+    /// `Err` with the gap when energy is not read on the field.
+    pub energy: Result<AccumulatedEnergy, DeclarationGap>,
+}
+
+/// Connection between two spokes of one element, accumulated.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SpokePair {
+    pub e: usize,
+    pub f: usize,
+    pub coupled: usize,
+    pub independent: usize,
+    /// Forced by the bound (57th): reported apart, not read as coupled.
+    pub forced: usize,
+}
+
+/// The radial graph of one element through registration `through`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RadialGraph {
+    pub locus: usize,
+    pub through: usize,
+    /// Steps accumulated: `through`.
+    pub steps: usize,
+    pub spokes: Vec<Spoke>,
+    /// `Err` with the gap when PC2 cannot be formed on the field.
+    pub pairs: Result<Vec<SpokePair>, DeclarationGap>,
+}
+
+fn pair_step(p: ReadingPair) -> usize {
+    // The latest step a PC2 reading uses.
+    match p { ReadingPair::Components { step, .. } => step, ReadingPair::Steps { step, .. } => step + 1 }
+}
+
+/// The radial graph of every element through registration `through`, from the
+/// whole field's own readings (PC1 and PC2 from its freedom, ε from its
+/// energy). Needs the relations' loci: the declared relations of the field.
+pub fn radial_graphs(field: &RelationalField, rel: &crate::operators::DeclaredRelations, through: usize)
+    -> Result<Vec<RadialGraph>, DeclarationGap>
+{
+    use crate::exact::Expansion;
+    let s = &field.relations;
+    assert!(through < s.n_registrations(), "through a registration of the field");
+    assert_eq!(rel.n_edges(), s.n_edges(), "the declared relations of the field");
+    let pc = field.ground.freedom.as_ref().map_err(|g| g.clone())?;
+    let k = s.k();
+
+    let spoke = |e: usize, orientation: Orientation| -> Spoke {
+        let components = (0..k).map(|c| {
+            let rs: Vec<Reading> = (0..through).map(|st| pc.relations.iter()
+                .find(|r| r.step == st && r.edge == e && r.component == c).expect("PC1 at every step").reading).collect();
+            let held_steps = rs.iter().filter(|&&r| r == Reading::Structure).count();
+            let run = rs.last().map(|&last| Run { reading: last, length: rs.iter().rev().take_while(|&&r| r == last).count() });
+            SpokeComponent { component: c, held_steps, changed_steps: rs.len() - held_steps, run }
+        }).collect();
+        let energy = field.ground.energy.as_ref().map_err(|g| g.clone()).map(|en| {
+            let (mut v, mut h, mut resolved) = (Expansion::new(), Expansion::new(), 0);
+            for t in 0..=through {
+                let x = &en.exchanges[t][e];
+                v.add(x.epsilon);
+                h.add(x.delta_epsilon);
+                if x.floor_resolved { resolved += 1; }
+            }
+            AccumulatedEnergy { registrations: through + 1, sum: v.nearest(), bound: h.up(), floor_resolved: resolved }
+        });
+        Spoke { edge: e, orientation, components, energy }
+    };
+
+    let couplings: Result<Vec<_>, DeclarationGap> = match (&pc.across_components, &pc.across_steps) {
+        (Err(a), Err(_)) => Err(a.clone()),
+        (a, b) => Ok(a.iter().chain(b.iter()).flat_map(|x| x.readings.iter().copied()).collect()),
+    };
+
+    Ok((0..rel.n_nodes).map(|v| {
+        let mut spokes = Vec::new();
+        for (e, &(src, tgt)) in rel.edges.iter().enumerate() {
+            if src == v { spokes.push(spoke(e, Orientation::Out)); }
+            if tgt == v { spokes.push(spoke(e, Orientation::In)); }
+        }
+        let pairs = couplings.as_ref().map_err(|g| g.clone()).map(|cs| {
+            let mut edges: Vec<usize> = spokes.iter().map(|x| x.edge).collect();
+            edges.sort();
+            edges.dedup();
+            let mut out = Vec::new();
+            for (i, &e) in edges.iter().enumerate() {
+                for &f in &edges[i + 1..] {
+                    let (mut coupled, mut independent, mut forced) = (0, 0, 0);
+                    for r in cs.iter().filter(|r| r.e == e && r.f == f && pair_step(r.over) < through) {
+                        if r.forced { forced += 1; }
+                        else if r.reading == Reading::Structure { coupled += 1; }
+                        else { independent += 1; }
+                    }
+                    out.push(SpokePair { e, f, coupled, independent, forced });
+                }
+            }
+            out
+        });
+        RadialGraph { locus: v, through, steps: through, spokes, pairs }
+    }).collect())
+}
+
+/// Channels taken from each element (§2.8 (2d)): counts of registered events,
+/// admitted at δ = 0 (68th), each with the step it was last taken. Every
+/// event is kept; nothing is removed or weighted.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ChannelRecord {
+    pub basis: String,
+    pub n_channels: usize,
+    /// (element, channel) for every registered event, in order.
+    pub events: Vec<(usize, usize)>,
+    counts: Vec<Vec<usize>>,
+    last: Vec<Vec<Option<usize>>>,
+}
+
+impl ChannelRecord {
+    pub fn new(n_elements: usize, n_channels: usize, basis: &str) -> Self {
+        assert!(!basis.trim().is_empty(), "the channels are declared with their basis");
+        ChannelRecord { basis: basis.into(), n_channels, events: Vec::new(),
+            counts: vec![vec![0; n_channels]; n_elements], last: vec![vec![None; n_channels]; n_elements] }
+    }
+    /// Register one event: from `element`, channel `channel` taken.
+    pub fn register(&mut self, element: usize, channel: usize) {
+        assert!(element < self.counts.len() && channel < self.n_channels, "a declared element and channel");
+        self.last[element][channel] = Some(self.events.len());
+        self.counts[element][channel] += 1;
+        self.events.push((element, channel));
+    }
+    /// The element's radial graph over channels: (channel, count, last event index).
+    pub fn graph(&self, element: usize) -> Vec<(usize, usize, Option<usize>)> {
+        (0..self.n_channels).map(|c| (c, self.counts[element][c], self.last[element][c])).collect()
+    }
 }
 
 #[cfg(test)]

@@ -259,3 +259,125 @@ fn a_declared_field_anticipates_the_coherent_continuations() {
     let arrival = coherence(&f, &w, &dirs, &cands[2..3]).unwrap();
     assert!(!arrival[0].coherent);
 }
+
+// ── W5: the accumulated radial graph (Origin, 74th) ────────────────────────
+
+use abr_kernel::coherence::{radial_graphs, ChannelRecord, Orientation, Run};
+
+/// The field's own PC1 reading at (step, component, edge).
+fn pc1_of(f: &RelationalField, st: usize, c: usize, e: usize) -> Reading {
+    f.ground.freedom.as_ref().unwrap().relations.iter().find(|x| x.step == st && x.edge == e && x.component == c).unwrap().reading
+}
+
+/// 5. Every input reshapes every graph, and nothing is removed: through each
+/// registration, every spoke of every element adds exactly that step's
+/// reading to its counts, its run follows the readings, its energy adds that
+/// registration's ε, and every relation appears in exactly two graphs.
+#[test]
+fn every_input_reshapes_every_graph_and_nothing_is_removed() {
+    for_all("radial graph accumulation", 0x74_01, |r| {
+        let x = enumerated(r);
+        let f = field_of(&x.a, x.d);
+        let rel = triangle();
+        let en = f.ground.energy.as_ref().expect("energy is read");
+        let pc = f.ground.freedom.as_ref().unwrap();
+        let regs = x.a.len();
+        let mut prev = radial_graphs(&f, &rel, 0).unwrap();
+        for g in &prev { for sp in &g.spokes { for c in &sp.components { assert_eq!((c.held_steps, c.changed_steps, c.run), (0, 0, None)); } } }
+        for t in 1..regs {
+            let now = radial_graphs(&f, &rel, t).unwrap();
+            let mut appearances = vec![0usize; M];
+            for (g, gp) in now.iter().zip(&prev) {
+                assert_eq!(g.spokes.iter().map(|s| (s.edge, s.orientation)).collect::<Vec<_>>(),
+                           gp.spokes.iter().map(|s| (s.edge, s.orientation)).collect::<Vec<_>>(), "the same spokes");
+                for (sp, spp) in g.spokes.iter().zip(&gp.spokes) {
+                    appearances[sp.edge] += 1;
+                    let (src, tgt) = rel.edges[sp.edge];
+                    assert_eq!(g.locus, if sp.orientation == Orientation::Out { src } else { tgt });
+                    for (c, cp) in sp.components.iter().zip(&spp.components) {
+                        let reading = pc1_of(&f, t - 1, c.component, sp.edge);
+                        let held = (reading == Reading::Structure) as usize;
+                        assert_eq!((c.held_steps, c.changed_steps), (cp.held_steps + held, cp.changed_steps + 1 - held), "one step added, none removed");
+                        let length = (0..t).rev().take_while(|&st| pc1_of(&f, st, c.component, sp.edge) == reading).count();
+                        assert_eq!(c.run, Some(Run { reading, length }));
+                    }
+                    let (e, ep) = (sp.energy.as_ref().unwrap(), spp.energy.as_ref().unwrap());
+                    assert_eq!(e.sum, ep.sum + en.exchanges[t][sp.edge].epsilon, "this registration's energy added");
+                    assert_eq!(e.registrations, t + 1);
+                }
+                // Connection between spokes: every PC2 reading within the steps, counted once.
+                let pairs = g.pairs.as_ref().unwrap();
+                for p in pairs {
+                    let all: Vec<_> = pc.across_components.iter().chain(pc.across_steps.iter()).flat_map(|c| c.readings.iter())
+                        .filter(|q| q.e == p.e && q.f == p.f && match q.over {
+                            abr_kernel::persistence_change::ReadingPair::Components { step, .. } => step < t,
+                            abr_kernel::persistence_change::ReadingPair::Steps { step, .. } => step + 1 < t,
+                        }).collect();
+                    assert_eq!(p.coupled + p.independent + p.forced, all.len());
+                    assert_eq!(p.forced, all.iter().filter(|q| q.forced).count());
+                }
+            }
+            assert_eq!(appearances, vec![2; M], "every relation in two graphs: leaving one element, arriving at another");
+            prev = now;
+        }
+    });
+}
+
+/// 6. W1 is the strictest selection from W5: the spoke components held over
+/// every step are exactly the window's PC1 held constraints.
+#[test]
+fn w1_is_the_strictest_selection_of_w5() {
+    for_all("W1 within W5", 0x74_02, |r| {
+        let x = enumerated(r);
+        let f = field_of(&x.a, x.d);
+        let w = window_reading(&f, &[]).unwrap();
+        let gs = radial_graphs(&f, &triangle(), x.a.len() - 1).unwrap();
+        let mut from_w5: Vec<(usize, HeldKind)> = gs.iter().flat_map(|g| g.spokes.iter())
+            .filter(|s| s.orientation == Orientation::Out)
+            .flat_map(|s| s.components.iter().filter(|c| c.held_steps == w.steps).map(move |c| (s.edge, HeldKind::Relation { component: c.component })))
+            .collect();
+        from_w5.sort_by_key(|h| format!("{h:?}"));
+        let mut from_w1 = held_set(&w); from_w1.sort_by_key(|h| format!("{h:?}"));
+        assert_eq!(from_w5, from_w1);
+    });
+}
+
+/// 7. Recency is read as the run, never as a weight. Two fields with the same
+/// counts in a different order: the counts agree, the runs do not.
+#[test]
+fn recency_is_read_as_the_run_not_a_weight() {
+    // Relation 0, component 0: (A) changes at step 0, then held twice;
+    // (B) held twice, then changes at step 2. Everything else held.
+    let base = |v0: [f64; 4]| -> Vec<Vec<Vec<f64>>> {
+        v0.iter().map(|&v| vec![vec![v, 0.0, 0.0], vec![1.0, 1.0, 1.0]]).collect()
+    };
+    let fa = field_of(&base([0.0, 1.0, 1.0, 1.0]), 0.125);
+    let fb = field_of(&base([0.0, 0.0, 0.0, 1.0]), 0.125);
+    let read = |f: &RelationalField| radial_graphs(f, &triangle(), 3).unwrap()[0].spokes[0].components[0];
+    let (a, b) = (read(&fa), read(&fb));
+    assert_eq!((a.held_steps, a.changed_steps), (2, 1));
+    assert_eq!((b.held_steps, b.changed_steps), (2, 1), "the same counts");
+    assert_eq!(a.run, Some(Run { reading: Reading::Structure, length: 2 }));
+    assert_eq!(b.run, Some(Run { reading: Reading::Freedom, length: 1 }), "the latest change read as the run");
+}
+
+/// 8. Channels taken from each element accumulate every event (§2.8 (2d)).
+#[test]
+fn channels_accumulate_every_event() {
+    for_all("channel record", 0x74_03, |r| {
+        let (n_el, n_ch) = (r.usize(1, 5), r.usize(1, 6));
+        let mut rec = ChannelRecord::new(n_el, n_ch, "SYNTHETIC: channels declared for the test");
+        let events: Vec<(usize, usize)> = (0..r.usize(0, 40)).map(|_| (r.usize(0, n_el - 1), r.usize(0, n_ch - 1))).collect();
+        for &(el, ch) in &events { rec.register(el, ch); }
+        assert_eq!(rec.events, events, "every event kept, in order");
+        let mut total = 0;
+        for el in 0..n_el {
+            for (ch, count, last) in rec.graph(el) {
+                assert_eq!(count, events.iter().filter(|&&e| e == (el, ch)).count());
+                assert_eq!(last, events.iter().rposition(|&e| e == (el, ch)));
+                total += count;
+            }
+        }
+        assert_eq!(total, events.len());
+    });
+}
