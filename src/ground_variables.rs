@@ -436,10 +436,22 @@ pub enum ObservedRange {
     /// Bounded only by the arithmetic range (`exact::in_exact_range`). An
     /// application reading registered data never declares it.
     Synthetic { basis: String },
+    /// Counts of registered events (§2.8 item 2, Origin, 2026-11-23, 68th):
+    /// an exact count is a reading, admitted at δ = 0 at any integer value
+    /// 0 … 2⁵³, with its basis (OC-RANGE-1 amended beside its text). A value
+    /// with δ > 0 is read in the human range. *Implemented 2026-11-24, for
+    /// fields of counts (§2.10 W5); the 68th amendment was in the text only.*
+    Counts { basis: String },
 }
 
 impl ObservedRange {
     pub fn synthetic() -> Self { ObservedRange::Synthetic { basis: "SYNTHETIC: tests the forms, not an observation".into() } }
+
+    /// Counts of registered events, with their basis (68th).
+    pub fn counts(basis: &str) -> Self {
+        assert!(!basis.trim().is_empty(), "a count states what it counts (68th)");
+        ObservedRange::Counts { basis: basis.into() }
+    }
 
     /// A declared range, at most the human one.
     pub fn declared(max_resolvable: f64, basis: &str) -> Self {
@@ -452,7 +464,7 @@ impl ObservedRange {
     /// The most distinctions a registration may resolve, or `None` (synthetic).
     pub fn max_resolvable(&self) -> Option<f64> {
         match self {
-            ObservedRange::Human => Some(HUMAN_RESOLVABLE_COUNT),
+            ObservedRange::Human | ObservedRange::Counts { .. } => Some(HUMAN_RESOLVABLE_COUNT),
             ObservedRange::Declared { max_resolvable, .. } => Some(*max_resolvable),
             ObservedRange::Synthetic { .. } => None,
         }
@@ -460,6 +472,10 @@ impl ObservedRange {
 
     /// True when x with repeatability δ lies in the range: |x| ≤ N·δ, exactly.
     pub fn admits(&self, x: f64, delta: f64) -> bool {
+        if let (ObservedRange::Counts { .. }, true) = (self, delta == 0.0) {
+            // An exact count: a non-negative integer, exactly representable.
+            return x >= 0.0 && x.fract() == 0.0 && x <= 9_007_199_254_740_992.0;
+        }
         match self.max_resolvable() {
             None => true,
             Some(n) => {
