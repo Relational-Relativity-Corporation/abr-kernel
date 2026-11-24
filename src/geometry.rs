@@ -29,7 +29,7 @@
 //       (beating), and its sign is the sense of the drift
 //   G4  (in the text) frequency is read at a declared scale: a step equal to a
 //       period reads held (I-SC-D19 (ii))
-//   G6  (Proposed, 70th) a relation against a declared direction n over its
+//   G6  (Proposed, 70th; declared as a form, 72nd) a relation against a declared direction n over its
 //       components: the held part n·u (the inner product, term by term, one
 //       exact sum: the balance, §2.8 item 2a) and the exchange per plane,
 //       n_i·u_j − n_j·u_i (the area of n and u). Over a step, read on the
@@ -167,7 +167,8 @@ pub fn relative_phases(s: &EdgeSeries, step: usize) -> Result<Vec<RelativePhase>
 // G6: held part and exchange against a declared direction (Proposed,
 // Generator, 2026-11-24, 70th; Origin: "Let's go back to this at the primary
 // region because that's where we were seeing consequences of energy and
-// geometry")
+// geometry"). Declared as a form, Origin, 2026-11-24, 72nd: the record, not
+// the region, chooses the energy reading (V10_README §2.9, G6 decision)
 // ═══════════════════════════════════════════════════════════════════════════
 //
 // The direction n is declared, never registered: it states how each

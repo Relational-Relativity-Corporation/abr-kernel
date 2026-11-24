@@ -1,4 +1,4 @@
-//! §2.9 G6 (Proposed, 70th): a relation against a declared direction n over
+//! §2.9 G6 (Proposed, 70th; declared as a form, 72nd): a relation against a declared direction n over
 //! its components. The held part n·u (inner product, term by term, one exact
 //! sum: the balance) and the exchange per plane n_i·u_j − n_j·u_i (the area of
 //! n and u). Read from a whole field (`field.relations`), with every variable
