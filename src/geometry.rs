@@ -29,6 +29,15 @@
 //       (beating), and its sign is the sense of the drift
 //   G4  (in the text) frequency is read at a declared scale: a step equal to a
 //       period reads held (I-SC-D19 (ii))
+//   G6  (Proposed, 70th) a relation against a declared direction n over its
+//       components: the held part n·u (the inner product, term by term, one
+//       exact sum: the balance, §2.8 item 2a) and the exchange per plane,
+//       n_i·u_j − n_j·u_i (the area of n and u). Over a step, read on the
+//       change Δ = A_{s+1} − A_s: a held part held at δ is a balance held
+//       (connection as shared balance, item 2b), and a resolved exchange is
+//       carrier moved between components, its sign the sense (toward j
+//       positive). Nothing is dropped: for every component c,
+//       |n|²·u_c = (n·u)·n_c + Σ_j n_j·(n_j·u_c − n_c·u_j), exactly
 //
 // Words (W16): "rotation" and "oscillation" are labels beside the object, the
 // angle between consecutive states of a relation.
@@ -152,4 +161,103 @@ pub fn relative_phases(s: &EdgeSeries, step: usize) -> Result<Vec<RelativePhase>
         out.push(RelativePhase { step, e, f, i, j, drift: PlaneValue::of(&dv, &dh) });
     }}}
     Ok(out)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// G6: held part and exchange against a declared direction (Proposed,
+// Generator, 2026-11-24, 70th; Origin: "Let's go back to this at the primary
+// region because that's where we were seeing consequences of energy and
+// geometry")
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// The direction n is declared, never registered: it states how each
+// component counts toward the balance, with its basis (for components in one
+// unit counting equally, n = (1, …, 1)). It enters exactly, with no bound.
+// Gains (Z1a): the held part and the exchange both add terms from different
+// components, which can carry different run-constant factors, so every entry
+// takes every declared gain (as the inner product of G1, G2).
+
+/// A declared direction over the components, with its basis (G6).
+#[derive(Debug, Clone, PartialEq)]
+pub struct DeclaredDirection {
+    pub n: Vec<f64>,
+    pub basis: String,
+}
+
+impl DeclaredDirection {
+    pub fn new(n: Vec<f64>, basis: &str) -> Self {
+        assert!(!basis.trim().is_empty(), "a declared direction states its basis");
+        assert!(n.iter().all(|x| x.is_finite() && crate::exact::in_exact_range(*x)),
+            "a declared direction is finite and within the range of exact arithmetic (OC-NUM-1)");
+        assert!(n.iter().any(|&x| x != 0.0), "a declared direction is not zero");
+        DeclaredDirection { n, basis: basis.into() }
+    }
+}
+
+/// G6 for relation e: the held part and the exchange against n, at one
+/// registration (`registration: Some(t)`) or on the change over a step
+/// (`step: Some(s)`).
+#[derive(Debug, Clone, PartialEq)]
+pub struct HeldAndExchange {
+    pub registration: Option<usize>,
+    pub step: Option<usize>,
+    pub e: usize,
+    /// n_c·u_c for every component c, in component order.
+    pub terms: Vec<PlaneValue>,
+    /// Σ_c n_c·u_c, one exact sum with the sum of the term bounds.
+    pub held: PlaneValue,
+    /// (i, j, n_i·u_j − n_j·u_i) for every plane i < j.
+    pub exchange: Vec<(usize, usize, PlaneValue)>,
+}
+
+fn held_and_exchange(u: &[(Expansion, Expansion)], n: &[f64]) -> (Vec<PlaneValue>, PlaneValue, Vec<(usize, usize, PlaneValue)>) {
+    let zero = Expansion::new();
+    let nx: Vec<Expansion> = n.iter().map(|&x| Expansion::of(x)).collect();
+    let term = |c: usize| (nx[c].times(&u[c].0), product_bound(&nx[c], &zero, &u[c].0, &u[c].1));
+    let mut hv = Expansion::new();
+    let mut hh = Expansion::new();
+    let mut terms = Vec::new();
+    for c in 0..u.len() {
+        let (v, h) = term(c);
+        hv.add_expansion(&v);
+        hh.add_expansion(&h);
+        terms.push(PlaneValue::of(&v, &h));
+    }
+    let exchange = planes(u.len()).into_iter().map(|(i, j)| {
+        let v = nx[i].times(&u[j].0).minus(&nx[j].times(&u[i].0));
+        let h = product_bound(&nx[i], &zero, &u[j].0, &u[j].1).plus(&product_bound(&nx[j], &zero, &u[i].0, &u[i].1));
+        (i, j, PlaneValue::of(&v, &h))
+    }).collect();
+    (terms, PlaneValue::of(&hv, &hh), exchange)
+}
+
+fn check_direction(s: &EdgeSeries, n: &DeclaredDirection) -> Result<(), DeclarationGap> {
+    need(s, 1)?;
+    assert_eq!(n.n.len(), s.k(), "the direction is declared over every component");
+    Ok(())
+}
+
+/// G6 at registration t, for every relation.
+pub fn held_exchange(s: &EdgeSeries, t: usize, n: &DeclaredDirection) -> Result<Vec<HeldAndExchange>, DeclarationGap> {
+    check_direction(s, n)?;
+    Ok((0..s.n_edges()).map(|e| {
+        let u: Vec<_> = (0..s.k()).map(|c| entry(s, t, c, e, all_gains(s, c, e))).collect();
+        let (terms, held, exchange) = held_and_exchange(&u, &n.n);
+        HeldAndExchange { registration: Some(t), step: None, e, terms, held, exchange }
+    }).collect())
+}
+
+/// G6 on the change over step s (registration s to s + 1), for every
+/// relation: Δ_c = A_{s+1} − A_s exactly, with the sum of the two bounds.
+pub fn step_held_exchange(s: &EdgeSeries, step: usize, n: &DeclaredDirection) -> Result<Vec<HeldAndExchange>, DeclarationGap> {
+    check_direction(s, n)?;
+    Ok((0..s.n_edges()).map(|e| {
+        let u: Vec<_> = (0..s.k()).map(|c| {
+            let (v0, h0) = entry(s, step, c, e, all_gains(s, c, e));
+            let (v1, h1) = entry(s, step + 1, c, e, all_gains(s, c, e));
+            (v1.minus(&v0), h1.plus(&h0))
+        }).collect();
+        let (terms, held, exchange) = held_and_exchange(&u, &n.n);
+        HeldAndExchange { registration: None, step: Some(step), e, terms, held, exchange }
+    }).collect())
 }
