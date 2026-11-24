@@ -123,3 +123,8 @@ pub mod domain;
 // §2.9, the geometry of relations (Proposed, 69th): angle, step angle,
 // relative phase, read exactly from the registered relations.
 pub mod geometry;
+
+// §2.10, the window and the present reading (Proposed, 73rd): held readings
+// over the window as constraints on the next change, the freedom they leave
+// (rank by minors, exactly), and the coherence of a candidate next step.
+pub mod coherence;
