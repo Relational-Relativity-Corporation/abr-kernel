@@ -8,6 +8,8 @@ Origin, 59th: we calculate relation as primitive alongside energy, connection an
 
 **The foundations** (Origin, 59th): (1) relation is primitive; (2) energy, connection and freedom are observable in all data (tunneling, entanglement, superposition); (3) the direction of relational evolution is mono-directional and never stops; its pace is dictated by the scale at which the analysis is directed.
 
+**Observation** (Origin, 71st, 2026-11-24): *"observation reduces to those 3 variables and a primitive apparently. You're observing and calculating specific relations within the relational system."* Relativity to a declaration is the relational primitive, not a limit.
+
 This governs everything we do. Check every change against it: relation is calculated first, as the primitive; energy, connection and freedom are calculated along with it; the means is linear algebraic operators. Its text and the check of each V10 form against it are at the head of `docs/kernel/V10_README.md`.
 
 ## Rules kept with it
