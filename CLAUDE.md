@@ -10,6 +10,8 @@ Origin, 59th: we calculate relation as primitive alongside energy, connection an
 
 **Observation** (Origin, 71st, 2026-11-24): *"observation reduces to those 3 variables and a primitive apparently. You're observing and calculating specific relations within the relational system."* Relativity to a declaration is the relational primitive, not a limit.
 
+**What the kernel addresses** (Origin, 95th, 2026-11-25): *"at its core the kernel is about information nothing more. Specifically how information is observed and processed."* The process is kept separate from the domains it is applied to; domain mathematics is not expected to be invariant. External and legacy examples may confirm the kernel's mathematics, *"clearly labeled as such"*: label in the first line, domain and source, the kernel relationship confirmed, and never a basis. The readback of relations at their loci (K9, 96th) is admitted: its halves (leaving, entering) are the reading, never a locus state, every direction kept.
+
 This governs everything we do. Check every change against it: relation is calculated first, as the primitive; energy, connection and freedom are calculated along with it; the means is linear algebraic operators. Its text and the check of each V10 form against it are at the head of `docs/kernel/V10_README.md`.
 
 ## Rules kept with it
