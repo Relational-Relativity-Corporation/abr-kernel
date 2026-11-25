@@ -917,13 +917,17 @@ fn circulation_signs_exact(x: &ExactField, rel: &DeclaredRelations) -> Vec<Optio
     // 1 + 2⁻⁵² instead of its bound 1 + 2⁻⁵⁴, and the held edge was omitted.
     (0..rel.n_edges()).map(|e| {
         if rel.succ(e).is_empty() && rel.pred(e).is_empty() { return None; }
-        let w = crate::operators::circulation_of_accumulation_coefficients(rel, e, -1);
-        let wb = crate::operators::circulation_of_accumulation_coefficients(rel, e, 1);
+        // Only the relations B joins to e (92nd). *Was:* the coefficient
+        // vectors over every relation; the nonzero terms are the same.
+        let w = crate::operators::circulation_of_accumulation_terms(rel, e, -1);
+        let wb = crate::operators::circulation_of_accumulation_terms(rel, e, 1);
+        crate::work::terms(w.len() + wb.len());
         Some((0..k).map(|ci| {
             let (mut v, mut h) = (Expansion::new(), Expansion::new());
-            for (f, &kf) in w.iter().enumerate() { if kf != 0 { v.add_times(&x.a[ci][f], kf as f64); } }
+            crate::work::terms(w.len() + wb.len());
+            for &(f, kf) in &w { v.add_times(&x.a[ci][f], kf as f64); }
             // Each term's bound carries its closure gain (59th; 0 from loci).
-            for (f, &kf) in wb.iter().enumerate() { if kf != 0 { h.add_times(&x.closure_bound(ci, f), kf as f64); } }
+            for &(f, kf) in &wb { h.add_times(&x.closure_bound(ci, f), kf as f64); }
             sign_at_delta_exact(&v, &h)
         }).collect())
     }).collect()

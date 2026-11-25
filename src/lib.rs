@@ -128,3 +128,12 @@ pub mod geometry;
 // over the window as constraints on the next change, the freedom they leave
 // (rank by minors, exactly), and the coherence of a candidate next step.
 pub mod coherence;
+
+// The work of forming the operator readings, counted exactly (Origin,
+// 2026-11-25, 92nd): it grows with the relations and their neighbours.
+pub mod work;
+
+// The derivation of every part a relational field reports: an operator
+// reading, or legacy mathematics with its provenance, its description in
+// relation to the operators and its necessity (Origin, 2026-11-25, 92nd).
+pub mod derivation;

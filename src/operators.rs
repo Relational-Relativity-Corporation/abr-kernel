@@ -1224,6 +1224,41 @@ pub fn circulation_of_accumulation_coefficients(rel: &DeclaredRelations, e: usiz
     k
 }
 
+/// The same coefficients, listed by the relations they touch (Origin,
+/// 2026-11-25, 92nd): Ξ(B(g))[e] = Σ (f, w) w·g[f] over the relations f that
+/// B joins to e's successors and predecessors, each listed once, zeros
+/// omitted, in increasing f. Equal entry for entry to the nonzero entries of
+/// `circulation_of_accumulation_coefficients`, which is kept beside it; that
+/// form visits every relation for every e, so the work of forming Ξ grew with
+/// the square of the relations. This form visits only e's neighbourhood.
+pub fn circulation_of_accumulation_terms(rel: &DeclaredRelations, e: usize, sign_pred: i64) -> Vec<(usize, i64)> {
+    let mut t: Vec<(usize, i64)> = Vec::new();
+    let mut add_b = |f: usize, w: i64| { t.push((f, w)); for &h in rel.succ(f) { t.push((h, w)); } };
+    for &f in rel.succ(e) { add_b(f, 1); }
+    for &p in rel.pred(e) { add_b(p, sign_pred); }
+    merged_terms(t)
+}
+
+/// The coefficients of B(g)[e] = g[e] + Σ_succ g[f], listed by the relations
+/// they touch, each once, zeros omitted, in increasing f (92nd).
+pub fn accumulation_terms(rel: &DeclaredRelations, e: usize) -> Vec<(usize, i64)> {
+    let mut t = vec![(e, 1i64)];
+    for &f in rel.succ(e) { t.push((f, 1)); }
+    merged_terms(t)
+}
+
+/// Each relation once, its coefficients summed exactly (integers), zeros
+/// omitted, in increasing order of relation.
+fn merged_terms(mut t: Vec<(usize, i64)>) -> Vec<(usize, i64)> {
+    t.sort_unstable_by_key(|x| x.0);
+    let mut out: Vec<(usize, i64)> = Vec::with_capacity(t.len());
+    for (f, w) in t {
+        match out.last_mut() { Some(last) if last.0 == f => last.1 += w, _ => out.push((f, w)) }
+    }
+    out.retain(|x| x.1 != 0);
+    out
+}
+
 /// Ξ(B(a)) per component, computed from a in one exact sum and rounded once
 /// (41st). Equal to `operator_circulation(operator_b(a))` in exact
 /// arithmetic, without rounding B first.

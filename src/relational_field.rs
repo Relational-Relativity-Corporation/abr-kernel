@@ -102,25 +102,35 @@ fn forms_of(xs: &[(&NodeField, f64)], rel: &DeclaredRelations) -> Forms {
 /// over step t. For relations formed from loci this equals `forms_of` exactly.
 fn forms_of_relations(series: &EdgeSeries, ts: &[(usize, f64)], rel: &DeclaredRelations) -> Forms {
     use crate::exact::Expansion;
+    use crate::work::terms;
     let k = series.k();
     let exact_a: Vec<Vec<Expansion>> = (0..k).map(|c| (0..rel.n_edges()).map(|e| {
         let mut v = Expansion::new();
+        terms(ts.len());
         for &(t, w) in ts { v.add_times(&series.entry(t, c, e), w); }
         v
     }).collect()).collect();
-    let combine = |c: usize, coeff: &[i64]| {
+    // Each relation's B and Ξ visit only the relations B joins to it (92nd).
+    // *Was:* a coefficient vector over every relation for every e, so the
+    // work grew with the square of the relations; the nonzero coefficients,
+    // and so every exact sum and every value, are the same.
+    let combine = |c: usize, coeff: &[(usize, i64)]| {
         let mut v = Expansion::new();
-        for (f, &kf) in coeff.iter().enumerate() { if kf != 0 { v.add_times(&exact_a[c][f], kf as f64); } }
+        terms(coeff.len());
+        for &(f, kf) in coeff { v.add_times(&exact_a[c][f], kf as f64); }
         v.nearest()
     };
     let m = rel.n_edges();
-    let b_coeff: Vec<Vec<i64>> = (0..m).map(|e| {
-        let mut w = vec![0i64; m];
-        w[e] += 1;
-        for &f in rel.succ(e) { w[f] += 1; }
+    let b_coeff: Vec<Vec<(usize, i64)>> = (0..m).map(|e| {
+        let w = crate::operators::accumulation_terms(rel, e);
+        terms(w.len());
         w
     }).collect();
-    let xi_coeff: Vec<Vec<i64>> = (0..m).map(|e| crate::operators::circulation_of_accumulation_coefficients(rel, e, -1)).collect();
+    let xi_coeff: Vec<Vec<(usize, i64)>> = (0..m).map(|e| {
+        let w = crate::operators::circulation_of_accumulation_terms(rel, e, -1);
+        terms(w.len());
+        w
+    }).collect();
     Forms {
         a: exact_a.iter().map(|c| c.iter().map(|v| v.nearest()).collect()).collect(),
         b: (0..k).map(|c| b_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
