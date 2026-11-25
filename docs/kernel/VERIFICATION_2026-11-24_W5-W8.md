@@ -36,7 +36,7 @@ Ordered by Origin under `docs/process/Verification_pass_protocol.md`; prepared b
 | `abr-relational-ai` @ `1e82fe3` | `text-anticipation/tests/kernel_use.rs` | The 10 tests of the kernel's use (90th) |
 | `abr-relational-ai` @ `1e82fe3` | `text-anticipation/README.md` | The record of the application work and its results |
 
-**Excluded:** the generating code in `text-anticipation` (`src/route.rs`, `src/subject.rs`, `src/connect.rs`, `src/words.rs`, `src/kinds.rs`, `src/kfield.rs`, `src/bin/*`), except for whether the records disclose that it does not call the kernel (Question 4). All other kernel code is unchanged since 10.3.0.
+**Excluded:** the generating code in `text-anticipation` (`src/route.rs`, `src/subject.rs`, `src/connect.rs`, `src/words.rs`, `src/kinds.rs`, `src/kfield.rs`, `src/bin/*`), except for whether the records disclose that it does not call the kernel (Question 4). *[Corrected after the pass (2026-11-25): Question 5.]* All other kernel code is unchanged since 10.3.0.
 
 **Declared assumptions:** the kernel at `f603a16` (which `text-anticipation/Cargo.toml` pins) and at `ecf52c7` have identical source code. Since `f603a16`, only `docs/` changed. This can be checked with `git diff --stat f603a16 ecf52c7 -- src tests`.
 
@@ -109,7 +109,7 @@ Restore afterwards: `git checkout -- src` in `abr-kernel`, remove the patch, and
 2. **Declaration → tests (comprehensive without being overly restrictive).** Do the 10 tests in `kernel_use.rs` establish what each claims: relation as primitive; linearity of A, B, Ξ; B from A and Ξ from B; freedom, connection and energy as the kernel defines them from the relations; all four in one formation (Df6); provenance; one direction? Is anything claimed but not tested, tested only trivially, or over-restrictive (fixing implementation detail rather than a property)? Do the fixtures exercise the cases claimed (the "can tell" assertions)?
 3. **Implementation → execution.** Do the suites pass as stated, and does each deliberate break in §5 fail the test stated?
 4. **Declaration → implementation (kernel).** Does `ObservedRange::Counts` implement the 68th exactly: non-negative integers to 2⁵³ admitted at δ = 0, the human range for δ > 0, the human range itself unchanged?
-5. **Validation record → claim.** Do Part 9 entries 73rd–90th and `text-anticipation/README.md` report the work accurately: what was built, what was measured, what was decided by Origin and what was taken as decided "for correction", and above all that **the generating code (`route.rs`, `subject.rs`, `both`, `steer`, `split` and the others) never called the kernel** (stated in the 84th and the 90th)? Is any result presented as more than it is?
+5. **Validation record → claim.** Do Part 9 entries 73rd–90th and `text-anticipation/README.md` report the work accurately: what was built, what was measured, what was decided by Origin and what was taken as decided "for correction", and above all that **the generating code (`route.rs`, `subject.rs`, `both`, `steer`, `split` and the others) never called the kernel** (stated in the 84th and the 90th)? *[Corrected after the pass (2026-11-25, the Verifier): too broad. The earlier choosers did not use Kernel V10 field readings to select continuations; `kread` calls the kernel after the choice, to read it.]* Is any result presented as more than it is?
 
 ## 8. Evidence discipline (protocol §7)
 
