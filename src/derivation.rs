@@ -67,6 +67,12 @@ pub fn legacy_in_use() -> &'static [Derivation] {
     LEGACY_IN_USE
 }
 
+/// Rules in use at the code layer, derived from the operators and the
+/// declaration, which no part reports by name (93rd).
+pub fn rules_in_use() -> &'static [Derivation] {
+    RULES_IN_USE
+}
+
 /// The derivation of a reported part, if one is declared.
 pub fn of_part(name: &str) -> Option<&'static Derivation> {
     REGISTER.iter().find(|(n, _)| *n == name).map(|(_, d)| d)
@@ -206,7 +212,7 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("Components.i", Id { what: "the first component of a PC2(a) reading" }),
     ("Components.j", Id { what: "the second component of a PC2(a) reading" }),
     ("ChangeCoupling.minor", Op { operators: &[A], reads: &[Fr, Con], form: "μ = x_e·y_f − y_e·x_f on two changes A_p, exact, rounded once" }),
-    ("ChangeCoupling.half_width", Rule { of: &[A], reads: &[Fr, Con], rule: "the minor's bound from its four entries' bounds (interval product bounds), rounded up" }),
+    ("ChangeCoupling.half_width", Rule { of: &[A], reads: &[Fr, Con], rule: "the minor's bound from its four entries' bounds: the product bound, legacy mathematics with its necessity (93rd; `legacy_in_use`), rounded up" }),
     ("ChangeCoupling.reading", Rule { of: &[A], reads: &[Fr, Con], rule: "PC2 at δ: freedom where the minor exceeds its bound (independent change), structure where it does not (change locked in proportion)" }),
     ("ChangeCoupling.forced", Rule { of: &[A], reads: &[Con], rule: "the reading is forced to structure by its bound (I-SC-D17 (iii)): reported apart, never read as coupled change (57th)" }),
     ("Couplings.forced_pairs", Id { what: "the pairs the declaration fixes (PC-D4), listed apart from the readings" }),
@@ -255,10 +261,30 @@ static LEGACY_IN_USE: &[Derivation] = &[
         in_relation_to_operators: "adds no form, input or construct: it computes the sums A, B and Ξ (and the minors and bounds) are defined by, without loss, so a sum does not depend on the order of its terms (Df2a); each value is rounded once",
         necessity: Some("the 41st rule, decompose, do not simplify: without it a closure depends on traversal order. Confirmed necessary by Origin (44th; OC-LM-1, item 1)"),
     },
+    // *Was (92nd):* one entry, "interval bounds (outward rounding, absolute
+    // values in product bounds)", its necessity stated by the Generator and
+    // left for Origin. Split by Origin (93rd): the bounds through A, B and Ξ
+    // and the gain widening are rules (`RULES_IN_USE`); only the product
+    // bound is legacy.
     Derivation::Legacy {
-        method: "interval bounds (outward rounding, absolute values in product bounds)",
-        provenance: "interval arithmetic (Moore, 1966), as used throughout the readings at δ: |a|·δb + |b|·δa + δa·δb for a product, rounded up. `src/exact.rs` (product_bound, gain_widened)",
-        in_relation_to_operators: "not an operator: it carries each registered bound through A, B, Ξ and the minors, so every reading is decided against the bound of its own operator output; the absolute values are on bounds and on ε = |A(c)| only",
-        necessity: Some("the 41st rule: every part is reported with its bound, and bounds are never rounded down. Stated by the Generator from that rule (92nd); for Origin to confirm, as exact summation was at the 44th"),
+        method: "product bounds of the minors (interval arithmetic for a product)",
+        provenance: "interval arithmetic (Moore, 1966): over [x ± δx] and [y ± δy], |x·y − x₀·y₀| ≤ |x₀|·δy + |y₀|·δx + δx·δy. `exact::product_bound`",
+        in_relation_to_operators: "the bound of a bilinear form of A: a 2×2 minor m_ij(e, f) = A_i[e]·A_j[f] − A_j[e]·A_i[f] multiplies two relations, and the second-order term δx·δy has no counterpart in A, B or Ξ, whose bounds are linear in δ",
+        necessity: Some("the 41st rule (every part reported with its bound, never rounded down), only as long as the minors are read: the proportional grade, the V2 first form, PC2 and PC3. Declared by Origin (93rd); if those readings are fenced from the point of analysis, the necessity narrows to them"),
+    },
+];
+
+/// Rules at the code layer derived from the operators and the declaration
+/// (Origin, 2026-11-25, 93rd).
+static RULES_IN_USE: &[Derivation] = &[
+    Derivation::Rule {
+        of: &[A, B, Xi],
+        reads: &[Rel, En, Con, Fr],
+        rule: "bounds through A, B and Ξ: each is an integer combination of relations, Σ w_f·g_f, and its bound is Σ |w_f|·δ_f, the operator with the signs of its coefficients dropped, applied to the bounds (the triangle inequality). δA = δ[s] + δ[t]; the change bound δ_t + δ_{t+1}; the bound of Ξ(B(A)) is |Ξ|∘|B| applied to δA, term by term, so it equals the operator with the signs dropped wherever no relation enters with opposite signs, and is wider where one cancels in the value (never below; `tests/v10_derivation.rs`, 5). Rounded up, never down (41st)",
+    },
+    Derivation::Rule {
+        of: &[A],
+        reads: &[Rel, Con, Fr],
+        rule: "gain widening (Z1a): a declared run-constant gain γ carried into a bound, h + γ·(|v| + h), exactly, rounded up. `exact::gain_widened`. The gain is declared, never fitted",
     },
 ];

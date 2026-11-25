@@ -25,7 +25,8 @@ mod support;
 
 use std::cell::RefCell;
 
-use abr_kernel::derivation::{check, legacy_in_use, register, reported_names, underived, Derivation};
+use abr_kernel::derivation::{check, legacy_in_use, register, reported_names, rules_in_use, underived, Derivation};
+use abr_kernel::operators::circulation_of_accumulation_terms;
 use abr_kernel::ground_variables::RelationCarrier;
 use abr_kernel::relational_field::RelationalField;
 use support::*;
@@ -105,4 +106,55 @@ fn the_checks_can_tell() {
     assert!(check(&legacy("a source", "", Some("stated"))).is_err(), "relation to the operators");
     assert!(check(&legacy("a source", "from A", None)).is_err(), "necessity");
     assert!(check(&Derivation::Operator { operators: &[], reads: &[abr_kernel::derivation::Reads::Relation], form: "f" }).is_err());
+}
+
+/// 4. The bounds, as split by Origin (93rd): the only legacy mathematics in
+/// the bounds is the product bound of the minors; the bounds through A, B and
+/// Ξ and the gain widening are rules derived from the operators and the
+/// declaration. The legacy methods in use are exactly exact summation and the
+/// product bound, and the product bound's necessity names the minors it
+/// exists for.
+#[test]
+fn the_bounds_are_split_as_the_93rd_declares() {
+    let methods: Vec<&str> = legacy_in_use().iter().map(|d| match d {
+        Derivation::Legacy { method, .. } => *method, _ => "not legacy" }).collect();
+    assert_eq!(methods.len(), 2, "legacy methods in use: {methods:?}");
+    assert!(methods[0].starts_with("exact summation"), "{methods:?}");
+    assert!(methods[1].starts_with("product bounds"), "{methods:?}");
+    match &legacy_in_use()[1] {
+        Derivation::Legacy { necessity: Some(n), .. } => assert!(n.contains("minors"), "the necessity names the minors: {n}"),
+        d => panic!("the product bound is legacy with its necessity: {d:?}"),
+    }
+    let rules: Vec<&str> = rules_in_use().iter().map(|d| match d {
+        Derivation::Rule { rule, .. } => *rule, _ => "not a rule" }).collect();
+    assert_eq!(rules.len(), 2, "rules in use: {rules:?}");
+    assert!(rules[0].starts_with("bounds through A, B and Ξ"), "{rules:?}");
+    assert!(rules[1].starts_with("gain widening"), "{rules:?}");
+    for d in rules_in_use() { if let Err(why) = check(d) { panic!("{d:?}: {why}"); } }
+}
+
+/// 5. The bound of Ξ(B(A)) is |Ξ|∘|B| applied to δ: on every declared field
+/// of the family, its coefficient on each relation is never below the
+/// magnitude of Ξ(B)'s own coefficient, and exceeds it by an even number, by
+/// twice the times that relation enters with opposite signs and cancels in
+/// the value. Equal where no relation enters both ways (93rd).
+#[test]
+fn the_bound_of_xi_is_its_operators_with_the_signs_dropped() {
+    let (equal, wider) = (RefCell::new(0usize), RefCell::new(0usize));
+    for_all("derivation: the bound of Xi", 0x93_01, |r| {
+        let rel = enumerated_rel(r);
+        for e in 0..rel.n_edges() {
+            let value = circulation_of_accumulation_terms(&rel, e, -1);
+            let bound = circulation_of_accumulation_terms(&rel, e, 1);
+            let at = |t: &[(usize, i64)], f: usize| t.iter().find(|x| x.0 == f).map_or(0, |x| x.1);
+            for f in 0..rel.n_edges() {
+                let (v, b) = (at(&value, f), at(&bound, f));
+                assert!(b >= v.abs(), "relation {f} in Ξ[{e}]: bound {b} below |{v}|");
+                assert_eq!((b - v.abs()) % 2, 0, "relation {f} in Ξ[{e}]");
+                if b == v.abs() { *equal.borrow_mut() += 1 } else { *wider.borrow_mut() += 1 }
+            }
+        }
+    });
+    assert!(*equal.borrow() > 0, "the bound equals the operator with the signs dropped somewhere");
+    assert!(*wider.borrow() > 0, "and is wider where a relation cancels in the value: the family reaches both");
 }
