@@ -24,6 +24,18 @@ This governs everything we do. Check every change against it: relation is calcul
 - **Be honest about status.** Synthetic tests establish nothing empirical. A property test should fail under the wrong statement: check it by reverting, and say when a test cannot tell two statements apart.
 - **Versioning is frozen at `10.3.0`, pre-release**, until there is a release (Part 9, 40th).
 
+## The kernel produces every reading (Origin, 84th, 90th)
+
+- **No output the kernel did not produce.** In application work, every reading that informs a result (relation, energy, connection, freedom, B, Ξ, the grades) comes from the kernel's `RelationalField`. A chooser reads only a report made from a kernel field (`KernelReport` in `abr-relational-ai/text-anticipation/src/afield.rs`).
+- **Where the kernel cannot produce a reading, it is a named gap, or a kernel addition.** It is never a stand-in computed in the application. If the kernel is too slow, fix the kernel; do not work around it.
+- **Do not reach for familiar methods and describe them in V10's vocabulary** (counts, suffix indices, co-occurrence, cosine, n-grams). That is what went wrong from the 73rd to the 89th: see the 84th, the 90th and `docs/process/HANDOFF_2026-11-25.md` §4.
+- **Tests first, each shown to fail,** in the application and, through a local path patch, in the kernel. Then build until they pass.
+- **Settle the mapping with Origin before code:** nodes, edges, node values, carriers, orders. Write it down and have it declared.
+- **Label plainly:** any result not produced by the kernel says so in its first line.
+- **The self-continuing field (85th):** the input is the entire field; output is registered into the same field, with its provenance, never as a weight; one direction, never stopping, nothing cut; the chooser's window is a scope of analysis, never a boundary of the field.
+
+**Start here:** `docs/process/HANDOFF_2026-11-25.md`, then Part 9 from the 72nd.
+
 ## Checks
 
-`cargo test` and `cargo test --features v9`, no warnings. The application `abr-relational-chemistry` (`water/vessel/ingest`) must pass against this kernel. Under a local path patch, run `cargo update -p abr-kernel` first and confirm the local kernel compiles.
+`cargo test` and `cargo test --features v9`, no warnings. The application `abr-relational-ai/text-anticipation` (`cargo test --release`, including `tests/kernel_use.rs`) must pass against this kernel. The application `abr-relational-chemistry` (`water/vessel/ingest`) must pass against this kernel. Under a local path patch, run `cargo update -p abr-kernel` first and confirm the local kernel compiles.
