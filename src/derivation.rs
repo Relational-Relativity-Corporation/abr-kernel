@@ -73,6 +73,12 @@ pub fn rules_in_use() -> &'static [Derivation] {
     RULES_IN_USE
 }
 
+/// Legacy parts whose necessity Origin has not yet stated: named gaps
+/// (94th), never filled. Every other requirement holds for them.
+pub fn necessity_open() -> &'static [&'static str] {
+    NECESSITY_OPEN
+}
+
 /// The derivation of a reported part, if one is declared.
 pub fn of_part(name: &str) -> Option<&'static Derivation> {
     REGISTER.iter().find(|(n, _)| *n == name).map(|(_, d)| d)
@@ -146,13 +152,19 @@ pub fn underived(names: &[String]) -> Vec<String> {
     names.iter().filter(|n| of_part(n).is_none()).cloned().collect()
 }
 
-use Derivation::{Identity as Id, Operator as Op, Registered as Reg, Rule};
+use Derivation::{Identity as Id, Legacy, Operator as Op, Registered as Reg, Rule};
 use Operator::{A, B, Xi};
 use Reads::{Connection as Con, Energy as En, Freedom as Fr, Relation as Rel};
 
 // Every reading that compares pairs of relations states its scope (92nd:
 // the shape of attention when taken over every pair). Recorded, not decided:
 // whether these are fenced from the point of analysis is Origin's.
+// The minors (Origin, 2026-11-25, 94th: reclassified as legacy). *Was
+// (43rd table; 92nd register):* listed as operator readings, "multilinear
+// forms of A". A minor is not A, B or Ξ.
+const MINOR_PROVENANCE: &str = "exterior algebra: the 2×2 determinant (Leibniz; Cramer, 1750), the exterior product u∧v of two vectors (Grassmann, 1844), the name minor (Sylvester, 1850); summed over component planes, Σ m² = |u|²|v|² − (u·v)² (Lagrange's identity), so every minor zero is |cos| = 1 read exactly";
+const MINOR_IN_RELATION: &str = "an antisymmetric bilinear form of A's output, m_ij(e, f) = A_i[e]·A_j[f] − A_j[e]·A_i[f]: one A-value from each of two relations in two components, linear in each relation and a product of the two; not A, B or Ξ, and its bound needs the product bound (93rd). Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd)";
+
 static REGISTER: &[(&str, Derivation)] = &[
     // ── The relational field and its registrations ────────────────────────
     ("RelationalField.registrations", Reg { what: "the declared registrations at the loci, when the relations were formed from loci (empty when registered directly); kept as registered" }),
@@ -203,35 +215,43 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("RelationChange.change", Op { operators: &[A], reads: &[Fr], form: "A_p[c][e] = A_{t+1} − A_t, exact, rounded once" }),
     ("RelationChange.half_width", Rule { of: &[A], reads: &[Fr], rule: "the change bound, from both registrations' bounds and the gains (Z1a), rounded up" }),
     ("RelationChange.reading", Rule { of: &[A], reads: &[Fr], rule: "PC1 at δ: freedom where |A_p| exceeds its bound, structure otherwise, decided exactly" }),
-    ("PersistenceChange.across_components", Op { operators: &[A], reads: &[Fr, Con], form: concat!("PC2(a): the 2×2 minor of two relations' changes A_p across components i < j at each step (a multilinear form, the exterior product of two changes).", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
-    ("Couplings.readings", Op { operators: &[A], reads: &[Fr, Con], form: concat!("the PC2 readings, one per pair of moved relations and pair of components or steps.", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
+    // *Was:* ("PersistenceChange.across_components", Op { operators: &[A], reads: &[Fr, Con], form: concat!("PC2(a): the 2×2 minor of two relations' changes A_p across components i < j at each step (a multilinear form, the exterior product of two changes).", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
+    ("PersistenceChange.across_components", Legacy { method: "PC2(a): the 2×2 minor of two relations' changes A_p across components i < j at each step", provenance: MINOR_PROVENANCE, in_relation_to_operators: MINOR_IN_RELATION, necessity: None }),
+    // *Was:* ("Couplings.readings", Op { operators: &[A], reads: &[Fr, Con], form: concat!("the PC2 readings, one per pair of moved relations and pair of components or steps.", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
+    ("Couplings.readings", Legacy { method: "the PC2 readings, one minor per pair of moved relations and pair of components or steps", provenance: MINOR_PROVENANCE, in_relation_to_operators: MINOR_IN_RELATION, necessity: None }),
     ("ChangeCoupling.e", Id { what: "the first relation of a PC2 pair" }),
     ("ChangeCoupling.f", Id { what: "the second relation of a PC2 pair" }),
     ("ChangeCoupling.over", Id { what: "what a PC2 minor is taken over: two components at a step, or one component at two steps" }),
     ("Components.step", Id { what: "the step of a PC2(a) reading" }),
     ("Components.i", Id { what: "the first component of a PC2(a) reading" }),
     ("Components.j", Id { what: "the second component of a PC2(a) reading" }),
-    ("ChangeCoupling.minor", Op { operators: &[A], reads: &[Fr, Con], form: "μ = x_e·y_f − y_e·x_f on two changes A_p, exact, rounded once" }),
+    // *Was:* ("ChangeCoupling.minor", Op { operators: &[A], reads: &[Fr, Con], form: "μ = x_e·y_f − y_e·x_f on two changes A_p, exact, rounded once" }),
+    ("ChangeCoupling.minor", Legacy { method: "μ = x_e·y_f − y_e·x_f on two changes A_p, exact, rounded once", provenance: MINOR_PROVENANCE, in_relation_to_operators: MINOR_IN_RELATION, necessity: None }),
     ("ChangeCoupling.half_width", Rule { of: &[A], reads: &[Fr, Con], rule: "the minor's bound from its four entries' bounds: the product bound, legacy mathematics with its necessity (93rd; `legacy_in_use`), rounded up" }),
     ("ChangeCoupling.reading", Rule { of: &[A], reads: &[Fr, Con], rule: "PC2 at δ: freedom where the minor exceeds its bound (independent change), structure where it does not (change locked in proportion)" }),
     ("ChangeCoupling.forced", Rule { of: &[A], reads: &[Con], rule: "the reading is forced to structure by its bound (I-SC-D17 (iii)): reported apart, never read as coupled change (57th)" }),
     ("Couplings.forced_pairs", Id { what: "the pairs the declaration fixes (PC-D4), listed apart from the readings" }),
-    ("PersistenceChange.across_steps", Op { operators: &[A], reads: &[Fr, Con], form: concat!("PC2(b): the 2×2 minor of two relations' changes over consecutive steps s, s + 1 in one component.", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
+    // *Was:* ("PersistenceChange.across_steps", Op { operators: &[A], reads: &[Fr, Con], form: concat!("PC2(b): the 2×2 minor of two relations' changes over consecutive steps s, s + 1 in one component.", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
+    ("PersistenceChange.across_steps", Legacy { method: "PC2(b): the 2×2 minor of two relations' changes over consecutive steps s, s + 1 in one component", provenance: MINOR_PROVENANCE, in_relation_to_operators: MINOR_IN_RELATION, necessity: None }),
     ("Steps.component", Id { what: "the component of a PC2(b) reading" }),
     ("Steps.step", Id { what: "the first of the two steps of a PC2(b) reading" }),
-    ("PersistenceChange.arrangement", Op { operators: &[A], reads: &[Fr], form: concat!("PC3: the sign at δ of the minor m_ij(e, f) on A, compared at registrations s and s + 1.", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
+    // *Was:* ("PersistenceChange.arrangement", Op { operators: &[A], reads: &[Fr], form: concat!("PC3: the sign at δ of the minor m_ij(e, f) on A, compared at registrations s and s + 1.", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
+    ("PersistenceChange.arrangement", Legacy { method: "PC3: the sign at δ of the minor m_ij(e, f) on A, compared at registrations s and s + 1", provenance: MINOR_PROVENANCE, in_relation_to_operators: MINOR_IN_RELATION, necessity: None }),
     ("ArrangementStep.step", Id { what: "the step of a PC3 reading" }),
     ("ArrangementStep.e", Id { what: "the first relation of a PC3 pair" }),
     ("ArrangementStep.f", Id { what: "the second relation of a PC3 pair" }),
     ("ArrangementStep.i", Id { what: "the first component of a PC3 minor" }),
     ("ArrangementStep.j", Id { what: "the second component of a PC3 minor" }),
-    ("ArrangementStep.before", Rule { of: &[A], reads: &[Fr], rule: "the sign at δ of m_ij(e, f) = A_i[e]·A_j[f] − A_j[e]·A_i[f] at registration s, decided exactly" }),
-    ("ArrangementStep.after", Rule { of: &[A], reads: &[Fr], rule: "the same sign at registration s + 1" }),
+    // *Was:* ("ArrangementStep.before", Rule { of: &[A], reads: &[Fr], rule: "the sign at δ of m_ij(e, f) = A_i[e]·A_j[f] − A_j[e]·A_i[f] at registration s, decided exactly" }),
+    ("ArrangementStep.before", Legacy { method: "the sign at δ of m_ij(e, f) at registration s, decided exactly", provenance: MINOR_PROVENANCE, in_relation_to_operators: MINOR_IN_RELATION, necessity: None }),
+    // *Was:* ("ArrangementStep.after", Rule { of: &[A], reads: &[Fr], rule: "the same sign at registration s + 1" }),
+    ("ArrangementStep.after", Legacy { method: "the sign at δ of m_ij(e, f) at registration s + 1, decided exactly", provenance: MINOR_PROVENANCE, in_relation_to_operators: MINOR_IN_RELATION, necessity: None }),
     ("ArrangementStep.reading", Rule { of: &[A], reads: &[Fr], rule: "PC3: structure when the sign held over the step, freedom when it changed" }),
     // ── The ground: connection (V1, PC2) ──────────────────────────────────
     ("GroundReading.connection", Op { operators: &[A, B, Xi], reads: &[Con], form: "connection by grade: identity, proportional, sustained, coupled change, read beside each other and never merged" }),
     ("Connection.identity", Op { operators: &[A], reads: &[Con], form: concat!("the identity grade: pairs with A[e] − A[f] not resolved in any component at every registration (a difference of A between two relations, linear).", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
-    ("Connection.proportional", Op { operators: &[A], reads: &[Con], form: concat!("the proportional grade: pairs whose every minor m_ij(e, f) on A is held unresolved at every registration (the exterior product of two relations, multilinear).", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
+    // *Was:* ("Connection.proportional", Op { operators: &[A], reads: &[Con], form: concat!("the proportional grade: pairs whose every minor m_ij(e, f) on A is held unresolved at every registration (the exterior product of two relations, multilinear).", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
+    ("Connection.proportional", Legacy { method: "the proportional grade: pairs whose every minor m_ij(e, f) on A is held unresolved at every registration", provenance: MINOR_PROVENANCE, in_relation_to_operators: MINOR_IN_RELATION, necessity: None }),
     ("Connection.sustained", Op { operators: &[A, B, Xi], reads: &[Con], form: "the sustained grade: the sign at δ of Ξ(B(A))[e], held at every registration; local, over the relations B joins to e's neighbours (92nd)" }),
     ("Sustained.held_edges", Rule { of: &[A, B, Xi], reads: &[Con], rule: "relations whose sign of Ξ(B(A)) held resolved in at least one component at every registration" }),
     ("Sustained.reorganizing_edges", Rule { of: &[A, B, Xi], reads: &[Con], rule: "relations whose sign of Ξ(B(A)) did not hold one state" }),
@@ -242,12 +262,15 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("Sustained.share_held_all", Rule { of: &[A, B, Xi], reads: &[Con], rule: "declared projection (C): held / every formable relation, kept for comparison" }),
     ("Connection.coupled_change", Rule { of: &[A], reads: &[Con], rule: "the coupled-change grade (PC2): pairs whose every PC2 reading is structure, with at least one unforced (57th); every pair of moved relations (see PC2)" }),
     ("Connection.coupled_change_forced", Rule { of: &[A], reads: &[Con], rule: "pairs whose every PC2 reading was forced by the bound: reported apart, never read as coupled change (57th)" }),
-    ("Connection.reorganizing_pairs", Rule { of: &[A], reads: &[Con], rule: "pairs whose minors reorganized over the sequence (from the minor histories); every pair of resolved relations (see the proportional grade)" }),
+    // *Was:* ("Connection.reorganizing_pairs", Rule { of: &[A], reads: &[Con], rule: "pairs whose minors reorganized over the sequence (from the minor histories); every pair of resolved relations (see the proportional grade)" }),
+    ("Connection.reorganizing_pairs", Legacy { method: "pairs whose minors reorganized over the sequence (from the minor histories)", provenance: MINOR_PROVENANCE, in_relation_to_operators: MINOR_IN_RELATION, necessity: None }),
     ("Connection.evaluated_pairs", Rule { of: &[A], reads: &[Con], rule: "declared projection (C): the number of pairs of relations resolved at every registration, n(n − 1)/2" }),
     ("Connection.unresolved_edges", Rule { of: &[A], reads: &[Con], rule: "relations not resolved at δ at one or more registrations: they enter no pair, and are named" }),
     // ── V2, first form: a declared comparison only ────────────────────────
-    ("GroundReading.v2_held_arrangement", Op { operators: &[A], reads: &[Con], form: concat!("the first V2 form, superseded for freedom (7th): pairs with a minor m_ij(e, f) on A held resolved with one sign throughout; a persistent arrangement, structure, carried as a declared comparison (C) only.", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
-    ("Freedom.free_pairs", Rule { of: &[A], reads: &[Con], rule: "V2 first form: the pairs with a minor held resolved; every pair of resolved relations" }),
+    // *Was:* ("GroundReading.v2_held_arrangement", Op { operators: &[A], reads: &[Con], form: concat!("the first V2 form, superseded for freedom (7th): pairs with a minor m_ij(e, f) on A held resolved with one sign throughout; a persistent arrangement, structure, carried as a declared comparison (C) only.", " Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd).") }),
+    ("GroundReading.v2_held_arrangement", Legacy { method: "the first V2 form, superseded for freedom (7th): pairs with a minor m_ij(e, f) on A held resolved with one sign throughout; a declared comparison (C) only", provenance: MINOR_PROVENANCE, in_relation_to_operators: MINOR_IN_RELATION, necessity: None }),
+    // *Was:* ("Freedom.free_pairs", Rule { of: &[A], reads: &[Con], rule: "V2 first form: the pairs with a minor held resolved; every pair of resolved relations" }),
+    ("Freedom.free_pairs", Legacy { method: "V2 first form: the pairs with a minor held resolved", provenance: MINOR_PROVENANCE, in_relation_to_operators: MINOR_IN_RELATION, necessity: None }),
     ("Freedom.evaluated_pairs", Rule { of: &[A], reads: &[Con], rule: "declared projection (C): the number of pairs evaluated by the V2 first form" }),
     ("Freedom.unresolved_edges", Rule { of: &[A], reads: &[Con], rule: "relations not resolved at every registration, entering no V2 pair" }),
     ("Freedom.f_delta", Rule { of: &[A], reads: &[Con], rule: "declared projection (C): free / evaluated pairs of the V2 first form" }),
@@ -287,4 +310,14 @@ static RULES_IN_USE: &[Derivation] = &[
         reads: &[Rel, Con, Fr],
         rule: "gain widening (Z1a): a declared run-constant gain γ carried into a bound, h + γ·(|v| + h), exactly, rounded up. `exact::gain_widened`. The gain is declared, never fitted",
     },
+];
+
+/// The minor readings (94th): their necessity is Origin's to state, reading
+/// by reading. The Generator's expectation, not a declaration: PC3 and W2's
+/// rank have the strongest case, the every-pair proportional grade the
+/// weakest.
+static NECESSITY_OPEN: &[&str] = &[
+    "PersistenceChange.across_components", "PersistenceChange.across_steps", "Couplings.readings",
+    "ChangeCoupling.minor", "PersistenceChange.arrangement", "ArrangementStep.before", "ArrangementStep.after",
+    "Connection.proportional", "Connection.reorganizing_pairs", "GroundReading.v2_held_arrangement", "Freedom.free_pairs",
 ];

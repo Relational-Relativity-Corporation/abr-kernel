@@ -25,7 +25,7 @@ mod support;
 
 use std::cell::RefCell;
 
-use abr_kernel::derivation::{check, legacy_in_use, register, reported_names, rules_in_use, underived, Derivation};
+use abr_kernel::derivation::{check, legacy_in_use, necessity_open, of_part, register, reported_names, rules_in_use, underived, Derivation};
 use abr_kernel::operators::circulation_of_accumulation_terms;
 use abr_kernel::ground_variables::RelationCarrier;
 use abr_kernel::relational_field::RelationalField;
@@ -70,7 +70,20 @@ fn every_part_the_field_reports_has_a_derivation() {
 #[test]
 fn every_derivation_states_what_the_92nd_requires() {
     for (name, d) in register() {
-        if let Err(why) = check(d) { panic!("{name}: {why}"); }
+        // A legacy part whose necessity Origin has not yet stated is a named
+        // gap (94th), listed in `necessity_open`; every other requirement
+        // still holds for it.
+        let open = necessity_open().contains(name);
+        match (check(d), d) {
+            (Ok(()), _) => assert!(!open, "{name} is listed as open but its necessity is stated"),
+            (Err(_), Derivation::Legacy { method, provenance, in_relation_to_operators, necessity: None }) if open => {
+                assert!(!method.is_empty() && !provenance.is_empty() && !in_relation_to_operators.is_empty(), "{name}");
+            }
+            (Err(why), _) => panic!("{name}: {why}"),
+        }
+    }
+    for name in necessity_open() {
+        assert!(matches!(of_part(name), Some(Derivation::Legacy { necessity: None, .. })), "{name} listed as open is not a legacy part without its necessity");
     }
     assert!(!legacy_in_use().is_empty(), "the legacy methods in use at the code layer are listed (OC-LM-1)");
     for d in legacy_in_use() {
@@ -157,4 +170,33 @@ fn the_bound_of_xi_is_its_operators_with_the_signs_dropped() {
     });
     assert!(*equal.borrow() > 0, "the bound equals the operator with the signs dropped somewhere");
     assert!(*wider.borrow() > 0, "and is wider where a relation cancels in the value: the family reaches both");
+}
+
+/// The parts read through 2×2 minors (94th).
+const MINOR_READINGS: [&str; 11] = [
+    "PersistenceChange.across_components", "PersistenceChange.across_steps", "Couplings.readings",
+    "ChangeCoupling.minor", "PersistenceChange.arrangement", "ArrangementStep.before", "ArrangementStep.after",
+    "Connection.proportional", "Connection.reorganizing_pairs", "GroundReading.v2_held_arrangement", "Freedom.free_pairs",
+];
+
+/// 6. The minors are legacy mathematics (Origin, 94th): every part read
+/// through a 2×2 minor is listed as legacy, with the exterior algebra as its
+/// provenance and its relation to A stated; until Origin states its
+/// necessity, it is named open, and the open list is exactly these parts.
+#[test]
+fn the_minors_are_legacy_mathematics() {
+    for name in MINOR_READINGS {
+        match of_part(name) {
+            Some(Derivation::Legacy { provenance, in_relation_to_operators, .. }) => {
+                assert!(provenance.contains("Grassmann"), "{name}: {provenance}");
+                assert!(in_relation_to_operators.contains("bilinear form of A"), "{name}: {in_relation_to_operators}");
+            }
+            d => panic!("{name} is read through a minor and is not listed as legacy: {d:?}"),
+        }
+    }
+    let mut open: Vec<&str> = necessity_open().to_vec();
+    let mut want: Vec<&str> = MINOR_READINGS.to_vec();
+    open.sort();
+    want.sort();
+    assert_eq!(open, want, "the parts whose necessity is open are exactly the minor readings");
 }
