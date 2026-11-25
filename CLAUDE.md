@@ -12,6 +12,8 @@ Origin, 59th: we calculate relation as primitive alongside energy, connection an
 
 **What the kernel addresses** (Origin, 95th, 2026-11-25): *"at its core the kernel is about information nothing more. Specifically how information is observed and processed."* The process is kept separate from the domains it is applied to; domain mathematics is not expected to be invariant. External and legacy examples may confirm the kernel's mathematics, *"clearly labeled as such"*: label in the first line, domain and source, the kernel relationship confirmed, and never a basis. The readback of relations at their loci (K9, 96th) is admitted: its halves (leaving, entering) are the reading, never a locus state, every direction kept.
 
+**Energy** (Origin, 97th): *"a system changes depending on how much energy is in it and that is what I mostly want to capture"*. Energy is read signed, A(c), exchange with its side; energy content is the registered carrier at the loci, or the accumulated net inflow through K9, relative to the record boundary. Freedom and connection are reported beside the energy content; how a system changes with its energy is read from the data, never modelled (K3, ρ, retired).
+
 This governs everything we do. Check every change against it: relation is calculated first, as the primitive; energy, connection and freedom are calculated along with it; the means is linear algebraic operators. Its text and the check of each V10 form against it are at the head of `docs/kernel/V10_README.md`.
 
 ## Rules kept with it
