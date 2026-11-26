@@ -30,12 +30,17 @@ fn t8_a_field_with_no_directed_turn_is_admitted_with_no_feedback() {
     assert_eq!(check_t8(&r, &[]), Ok(T8Admission { feedback: vec![], turns: vec![] }));
 }
 
+// *Was (to the 109th):* `t8_a_self_relation_is_refused_even_if_declared_feedback`:
+// `check_t8(&r, &[fb(1)])` refused with `SelfRelation { edge: 1 }`. Amended by
+// Origin (109th): a self-relation declared as feedback with a basis is
+// admitted, a turn of one relation; formed from loci it stays refused
+// (`tests/v10_self_spokes.rs`, 3).
 #[test]
-fn t8_a_self_relation_is_refused_even_if_declared_feedback() {
+fn t8_a_self_relation_is_refused_unless_declared_feedback() {
     let r = rel(3, vec![(0, 1), (1, 1), (1, 2)]);
     assert_eq!(check_t8(&r, &[]), Err(vec![T8Refusal::SelfRelation { edge: 1 }]));
-    let e = check_t8(&r, &[fb(1)]).unwrap_err();
-    assert!(e.contains(&T8Refusal::SelfRelation { edge: 1 }));
+    let a = check_t8(&r, &[fb(1)]).expect("declared with its basis, admitted (109th)");
+    assert_eq!(a.turns, vec![vec![1]], "a turn of one relation");
 }
 
 #[test]

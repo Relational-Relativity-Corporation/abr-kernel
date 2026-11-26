@@ -203,6 +203,11 @@ impl EdgeSeries {
     pub fn from_registrations(seq: &[Registration], rel: &DeclaredRelations) -> Result<Self, DeclarationGap> {
         if seq.len() < 2 { return Err(DeclarationGap::NoProcessSequence); }
         crate::topology::admit_field(rel)?;
+        // Formed from loci, a self-relation registers nothing (x[s] − x[s] is
+        // zero by identity): refused even when declared (T8, 109th).
+        let selfs: Vec<crate::topology::T8Refusal> = rel.edges.iter().enumerate().filter(|(_, &(s, t))| s == t)
+            .map(|(e, _)| crate::topology::T8Refusal::SelfRelation { edge: e }).collect();
+        if !selfs.is_empty() { return Err(DeclarationGap::T8(selfs)); }
         let k = seq[0].x.k;
         assert!(seq.iter().all(|r| r.x.k == k), "every registration must declare the same components");
         assert!(seq.iter().all(|r| r.x.n == rel.n_nodes), "every registration must cover the declared loci");

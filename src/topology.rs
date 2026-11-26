@@ -12,9 +12,14 @@
 //! system that is a loop (107th).
 //! The check reads both together:
 //!
-//! 1. **A self-relation (s, s) is refused.** It declares a locus as its own
-//!    relational predecessor, the returning edge of §8, and its A is zero by
-//!    identity, so it registers nothing.
+//! 1. **A self-relation (s, s) is refused** unless declared as feedback with
+//!    a basis. *Amended (Origin, 109th):* on relations registered directly, a
+//!    declared self-relation is admitted, a turn of one relation (text's
+//!    self-spokes, a doubled character, with the basis "the order of
+//!    reading"). Formed from loci it stays refused: its A is x[s] − x[s],
+//!    zero by identity, so it registers nothing (`EdgeSeries::from_registrations`).
+//!    *Was:* refused always, as declaring a locus its own relational
+//!    predecessor, the returning edge of §8.
 //! 2. **A directed turn is admitted only as a declared feedback loop.** At
 //!    least one edge of every directed turn must be declared feedback, each
 //!    with a stated basis. Equivalently: the field with its declared feedback
@@ -146,8 +151,12 @@ fn strong_parts(rel: &DeclaredRelations, allowed: &dyn Fn(usize) -> bool) -> Vec
 /// The T8 check of a declared field with its feedback declarations.
 pub fn check_t8(rel: &DeclaredRelations, feedback: &[FeedbackDeclaration]) -> Result<T8Admission, Vec<T8Refusal>> {
     let mut refusals = Vec::new();
+    // A self-relation is admitted when declared as feedback with a basis
+    // (Origin, 109th: text's self-spokes, "the order of reading"); its turn
+    // is the relation alone. *Was:* every self-relation refused.
+    let declared_self = |e: usize| feedback.iter().any(|d| d.edge == e && !d.basis.trim().is_empty());
     for (e, &(s, t)) in rel.edges.iter().enumerate() {
-        if s == t { refusals.push(T8Refusal::SelfRelation { edge: e }); }
+        if s == t && !declared_self(e) { refusals.push(T8Refusal::SelfRelation { edge: e }); }
     }
     let mut fb: Vec<usize> = Vec::new();
     for d in feedback {
@@ -160,7 +169,7 @@ pub fn check_t8(rel: &DeclaredRelations, feedback: &[FeedbackDeclaration]) -> Re
     let mut turns = Vec::new();
     for &f in &fb {
         let (s, t) = rel.edges[f];
-        if s == t { continue; }
+        if s == t { turns.push(vec![f]); continue; }
         match path(rel, t, s, &|e| not_self(e)) {
             Some(p) => { let mut c = vec![f]; c.extend(p); turns.push(c); }
             None => refusals.push(T8Refusal::FeedbackNotOnTurn { edge: f }),
