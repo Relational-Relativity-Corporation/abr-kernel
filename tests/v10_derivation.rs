@@ -200,3 +200,32 @@ fn the_minors_are_legacy_mathematics() {
     want.sort();
     assert_eq!(open, want, "the parts whose necessity is open are exactly the minor readings");
 }
+
+/// The parts formed only from relations selected by δ (resolved, or moved)
+/// before their pairs are formed (98th).
+const SELECTED_BY_DELTA: [&str; 9] = [
+    "Connection.identity", "PersistenceChange.across_components", "PersistenceChange.across_steps",
+    "Couplings.readings", "PersistenceChange.arrangement", "Connection.proportional",
+    "Connection.reorganizing_pairs", "GroundReading.v2_held_arrangement", "Freedom.free_pairs",
+];
+
+/// 7. δ decides only at reading (Origin, 98th): where a reading selects by δ
+/// what enters before it forms its parts, its derivation names the
+/// departure; and A, B, Ξ, which select nothing by δ, name none.
+#[test]
+fn a_selection_by_delta_is_named_as_a_departure() {
+    const MARK: &str = "selects by δ what enters before its pairs are formed: a departure from the 98th";
+    let text = |d: &Derivation| match d {
+        Derivation::Operator { form, .. } => form.to_string(),
+        Derivation::Legacy { method, .. } => method.to_string(),
+        Derivation::Rule { rule, .. } => rule.to_string(),
+        Derivation::Registered { what } | Derivation::Identity { what } => what.to_string(),
+    };
+    for name in SELECTED_BY_DELTA {
+        let d = of_part(name).unwrap_or_else(|| panic!("{name} is registered"));
+        assert!(text(d).contains(MARK), "{name} does not name its selection by δ: {}", text(d));
+    }
+    for name in ["Forms.a", "Forms.b", "Forms.circulation", "RelationalField.persistence", "EnergyExchange.epsilon"] {
+        assert!(!text(of_part(name).unwrap()).contains(MARK), "{name} selects nothing by δ");
+    }
+}

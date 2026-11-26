@@ -14,6 +14,8 @@ Origin, 59th: we calculate relation as primitive alongside energy, connection an
 
 **Energy** (Origin, 97th): *"a system changes depending on how much energy is in it and that is what I mostly want to capture"*. Energy is read signed, A(c), exchange with its side; energy content is the registered carrier at the loci, or the accumulated net inflow through K9, relative to the record boundary. Freedom and connection are reported beside the energy content; how a system changes with its energy is read from the data, never modelled (K3, ρ, retired).
 
+**Where δ enters** (Origin, 98th, 2026-11-26): the foundation's relationships are exact about the registered information; every value carries its bound (the same operator with signs dropped); δ decides only at reading, and no δ selects what enters an operator. A reading that selects by δ before forming its parts names the departure in its derivation.
+
 This governs everything we do. Check every change against it: relation is calculated first, as the primitive; energy, connection and freedom are calculated along with it; the means is linear algebraic operators. Its text and the check of each V10 form against it are at the head of `docs/kernel/V10_README.md`.
 
 ## Rules kept with it
