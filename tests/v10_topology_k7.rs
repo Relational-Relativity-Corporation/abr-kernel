@@ -1,4 +1,4 @@
-//! Kernel V10.3 — K7: route enumeration, the two-route closure, and a cycle
+//! Kernel V10.3 — K7: route enumeration, the two-route turn sum, and a turn
 //! basis from a stated spanning tree.
 //!
 //! [IMPL] SYNTHETIC FIXTURES: declarations and values are chosen to exercise
@@ -12,7 +12,7 @@ mod synthetic_feedback;
 mod synthetic_identity;
 use abr_kernel::ground_variables::Registration;
 use abr_kernel::operators::{DeclaredRelations, EdgeProvenance, NodeField};
-use abr_kernel::persistence_change::{cycle_closure, is_closed_walk, EdgeSeries};
+use abr_kernel::persistence_change::{turn_sum, is_turn, EdgeSeries};
 use abr_kernel::topology::*;
 
 fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
@@ -59,82 +59,82 @@ fn k7_two_route_closure_is_the_difference_of_route_sums() {
     let r = diamond();
     // Edge-registered values with a route disagreement of 1.
     let s = edge_series(vec![vec![vec![1.0, 2.0, 0.5, 2.5, 4.0]], vec![vec![1.0, 2.0, 0.5, 2.5, 3.0]]]);
-    let cy = two_route_cycle(&r, &[0, 1], &[4]).unwrap();
-    assert!(is_closed_walk(&r, &cy));
+    let cy = two_route_turn(&r, &[0, 1], &[4]).unwrap();
+    assert!(is_turn(&r, &cy));
     assert_eq!(cy, vec![(0, 1), (1, 1), (4, -1)]);
     // B_π₁ − B_π₂ = (1 + 2) − 4 = −1 at registration 0; 0 at registration 1.
-    assert_eq!(cycle_closure(&s, &r, &cy, 0, 0), Some((-1.0, 3.0 * 0.0625)));
-    assert_eq!(cycle_closure(&s, &r, &cy, 1, 0).unwrap().0, 0.0);
-    assert!(two_route_cycle(&r, &[0], &[4]).is_none(), "different targets");
-    assert!(two_route_cycle(&r, &[0, 3], &[4]).is_none(), "not a route");
+    assert_eq!(turn_sum(&s, &r, &cy, 0, 0), Some((-1.0, 3.0 * 0.0625)));
+    assert_eq!(turn_sum(&s, &r, &cy, 1, 0).unwrap().0, 0.0);
+    assert!(two_route_turn(&r, &[0], &[4]).is_none(), "different targets");
+    assert!(two_route_turn(&r, &[0, 3], &[4]).is_none(), "not a route");
 }
 
-// ── Cycle basis ────────────────────────────────────────────────────────────
+// ── Turn basis ────────────────────────────────────────────────────────────
 
 #[test]
 fn k7_basis_from_a_stated_tree_has_m_minus_n_plus_c_cycles() {
     let r = diamond();
-    let b = cycle_basis(&r, &[0, 1, 2]).unwrap();
+    let b = turn_basis(&r, &[0, 1, 2]).unwrap();
     assert_eq!(b.tree, vec![0, 1, 2]);
     assert_eq!(b.chords, vec![3, 4]);
-    assert_eq!(b.cycles.len(), 5 - 4 + 1);
-    assert_eq!(b.cycles[0], vec![(3, 1), (1, -1), (0, -1), (2, 1)]);
-    assert_eq!(b.cycles[1], vec![(4, 1), (1, -1), (0, -1)]);
-    assert!(b.cycles.iter().all(|c| is_closed_walk(&r, c)));
+    assert_eq!(b.turns.len(), 5 - 4 + 1);
+    assert_eq!(b.turns[0], vec![(3, 1), (1, -1), (0, -1), (2, 1)]);
+    assert_eq!(b.turns[1], vec![(4, 1), (1, -1), (0, -1)]);
+    assert!(b.turns.iter().all(|c| is_turn(&r, c)));
 }
 
 #[test]
 fn k7_a_tree_per_connected_part() {
     // Two parts: 0 → 1 → 2 with 0 → 2, and 3 → 4 twice.
     let r = rel(5, vec![(0, 1), (1, 2), (0, 2), (3, 4), (3, 4)]);
-    let b = cycle_basis(&r, &[0, 1, 3]).unwrap();
-    assert_eq!(b.cycles.len(), 5 - 5 + 2);
-    assert_eq!(b.cycles[1], vec![(4, 1), (3, -1)]);
+    let b = turn_basis(&r, &[0, 1, 3]).unwrap();
+    assert_eq!(b.turns.len(), 5 - 5 + 2);
+    assert_eq!(b.turns[1], vec![(4, 1), (3, -1)]);
 }
 
 #[test]
 fn k7_a_stated_tree_that_is_not_a_spanning_tree_is_refused() {
     let r = diamond();
-    assert_eq!(cycle_basis(&r, &[0, 1, 4]).unwrap_err(), vec![
-        TreeRefusal::ClosesCycle { edge: 4 },
+    assert_eq!(turn_basis(&r, &[0, 1, 4]).unwrap_err(), vec![
+        TreeRefusal::FormsTurn { edge: 4 },
         TreeRefusal::DoesNotSpan { loci: (0, 2) },
         TreeRefusal::DoesNotSpan { loci: (2, 3) },
     ]);
-    assert!(cycle_basis(&r, &[0, 0, 2, 3]).unwrap_err().contains(&TreeRefusal::DuplicateEdge { edge: 0 }));
-    assert!(cycle_basis(&r, &[0, 2, 9]).unwrap_err().contains(&TreeRefusal::EdgeOutOfRange { edge: 9 }));
+    assert!(turn_basis(&r, &[0, 0, 2, 3]).unwrap_err().contains(&TreeRefusal::DuplicateEdge { edge: 0 }));
+    assert!(turn_basis(&r, &[0, 2, 9]).unwrap_err().contains(&TreeRefusal::EdgeOutOfRange { edge: 9 }));
 }
 
 #[test]
 fn k7_closure_is_zero_by_identity_on_node_values_and_a_test_on_edge_values() {
     let r = diamond();
-    let b = cycle_basis(&r, &[0, 1, 2]).unwrap();
+    let b = turn_basis(&r, &[0, 1, 2]).unwrap();
     let seq: Vec<Registration> = (0..2).map(|t| Registration::synthetic(
         NodeField::new(vec![vec![4.0 + t as f64, 3.0, 1.5, 0.0]]), vec![vec![0.0625; 4]])).collect();
     let n = EdgeSeries::from_registrations(&seq, &r).unwrap();
-    assert!(basis_closures(&n, &r, &b, 0, 0).iter().all(|(v, _)| *v == 0.0));
+    assert!(basis_turn_sums(&n, &r, &b, 0, 0).iter().all(|(v, _)| *v == 0.0));
     let s = edge_series(vec![vec![vec![1.0, 2.0, 0.5, 2.5, 4.0]], vec![vec![1.0, 2.0, 0.5, 2.5, 3.0]]]);
-    let c0 = basis_closures(&s, &r, &b, 0, 0);
-    assert_eq!(c0[1], (1.0, 3.0 * 0.0625)); // 4 − (1 + 2): resolved, closure fails at δ
+    let c0 = basis_turn_sums(&s, &r, &b, 0, 0);
+    assert_eq!(c0[1], (1.0, 3.0 * 0.0625)); // 4 − (1 + 2): resolved, turn sum fails at δ
     assert!(c0[1].0.abs() > c0[1].1);
-    assert_eq!(basis_closures(&s, &r, &b, 1, 0)[1].0, 0.0);
+    assert_eq!(basis_turn_sums(&s, &r, &b, 1, 0)[1].0, 0.0);
 }
 
 #[test]
 fn k7_reversing_a_cycle_negates_its_closure() {
     let r = diamond();
     let s = edge_series(vec![vec![vec![1.0, 2.0, 0.5, 2.5, 4.0]], vec![vec![1.0; 5]]]);
-    let cy = two_route_cycle(&r, &[0, 1], &[4]).unwrap();
+    let cy = two_route_turn(&r, &[0, 1], &[4]).unwrap();
     let rev: Vec<(usize, i8)> = cy.iter().rev().map(|&(e, sg)| (e, -sg)).collect();
-    let (a, h) = cycle_closure(&s, &r, &cy, 0, 0).unwrap();
-    assert_eq!(cycle_closure(&s, &r, &rev, 0, 0).unwrap(), (-a, h));
+    let (a, h) = turn_sum(&s, &r, &cy, 0, 0).unwrap();
+    assert_eq!(turn_sum(&s, &r, &rev, 0, 0).unwrap(), (-a, h));
 }
 
 #[test]
 fn k7_a_closed_walk_is_the_chord_combination_of_the_basis() {
     let r = diamond();
-    let b = cycle_basis(&r, &[0, 1, 2]).unwrap();
+    let b = turn_basis(&r, &[0, 1, 2]).unwrap();
     // The two-route walk 0→2→3 against 0→1→3 uses chord 3 once, chord 4 not.
-    let cy = two_route_cycle(&r, &[2, 3], &[0, 1]).unwrap();
+    let cy = two_route_turn(&r, &[2, 3], &[0, 1]).unwrap();
     assert_eq!(express_in_basis(&r, &b, &cy), Some(vec![1, 0]));
     assert_eq!(express_in_basis(&r, &b, &[(0, 1)]), None);
 }
@@ -224,26 +224,26 @@ fn prop_k7_basis_size_and_exact_chord_combination() {
         let mut g = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x6D6D);
         let r = enumerated_rel(&mut g, (2, 6), (1, 9));
         let (tree, parts) = enumerated_tree(&mut g, &r);
-        let b = cycle_basis(&r, &tree).unwrap();
-        assert_eq!(b.cycles.len(), r.n_edges() + parts - r.n_nodes, "seed {seed}");
-        assert!(b.cycles.iter().zip(&b.chords).all(|(c, &ch)| is_closed_walk(&r, c) && c[0] == (ch, 1)));
+        let b = turn_basis(&r, &tree).unwrap();
+        assert_eq!(b.turns.len(), r.n_edges() + parts - r.n_nodes, "seed {seed}");
+        assert!(b.turns.iter().zip(&b.chords).all(|(c, &ch)| is_turn(&r, c) && c[0] == (ch, 1)));
         let a: Vec<Vec<Vec<f64>>> = (0..2).map(|_| vec![(0..r.n_edges()).map(|_| g.eighth()).collect()]).collect();
         let s = edge_series(a);
-        let base = basis_closures(&s, &r, &b, 0, 0);
+        let base = basis_turn_sums(&s, &r, &b, 0, 0);
         let check = |w: &[(usize, i8)]| {
             let coef = express_in_basis(&r, &b, w).unwrap();
             let combined: f64 = coef.iter().zip(&base).map(|(k, (v, _))| *k as f64 * v).sum();
-            assert_eq!(cycle_closure(&s, &r, w, 0, 0).unwrap().0, combined, "seed {seed}");
+            assert_eq!(turn_sum(&s, &r, w, 0, 0).unwrap().0, combined, "seed {seed}");
         };
         // Two-route walks between a seed-selected pair of loci.
         let (from, to) = (g.usize(0, r.n_nodes - 1), g.usize(0, r.n_nodes - 1));
         let rs = routes(&r, from, to, 50).routes;
         for i in 0..rs.len() { for j in 0..rs.len() {
-            check(&two_route_cycle(&r, &rs[i], &rs[j]).unwrap()); walks += 1;
+            check(&two_route_turn(&r, &rs[i], &rs[j]).unwrap()); walks += 1;
         } }
-        // Another stated tree's fundamental cycles, in this basis.
+        // Another stated tree's fundamental turns, in this basis.
         let (tree2, _) = enumerated_tree(&mut g, &r);
-        for c in cycle_basis(&r, &tree2).unwrap().cycles { check(&c); cross += 1; }
+        for c in turn_basis(&r, &tree2).unwrap().turns { check(&c); cross += 1; }
     }
-    assert!(walks > 300 && cross > 300, "vacuous: {walks} walks, {cross} cross-basis cycles");
+    assert!(walks > 300 && cross > 300, "vacuous: {walks} walks, {cross} cross-basis turns");
 }

@@ -1,30 +1,32 @@
 //! Kernel V10.3 — topology checks on a declared field.
 //!
-//! # T8: cycles in a declared arrangement (10.3.0, 2026-11-22)
+//! # T8: turns in a declared arrangement (10.3.0, 2026-11-22)
 //!
 //! T8 states: no wraparound; feedback loops admissible with provenance;
 //! opposite directions of a relation not in one field without their own
 //! provenance. Origin's clarification of 2026-11-07 (`kernel_reference.md`
 //! §8) places ring inadmissibility on relational evolution (an observation
-//! sequence that closes onto itself), not on a cyclic arrangement of
-//! independently declared relations, which is admissible with provenance.
+//! sequence that comes back onto itself, which no information can do,
+//! 106th), not on a loop-shaped arrangement of independently declared
+//! relations, which is admissible with provenance: a turn is shape, never a
+//! system that is a loop (107th).
 //! The check reads both together:
 //!
 //! 1. **A self-relation (s, s) is refused.** It declares a locus as its own
-//!    relational predecessor, the closing edge of §8, and its A is zero by
+//!    relational predecessor, the returning edge of §8, and its A is zero by
 //!    identity, so it registers nothing.
-//! 2. **A directed cycle is admitted only as a declared feedback loop.** At
-//!    least one edge of every directed cycle must be declared feedback, each
+//! 2. **A directed turn is admitted only as a declared feedback loop.** At
+//!    least one edge of every directed turn must be declared feedback, each
 //!    with a stated basis. Equivalently: the field with its declared feedback
-//!    edges removed is acyclic. An undeclared cycle is refused, and the
-//!    refusal names one directed cycle per strongly connected part.
-//! 3. **Opposite directions** (s, t) and (t, s) form a 2-cycle, so rule 2
+//!    edges removed has no directed turn. An undeclared turn is refused, and the
+//!    refusal names one directed turn per strongly connected part.
+//! 3. **Opposite directions** (s, t) and (t, s) form a 2-turn, so rule 2
 //!    covers them: the reverse needs its own stated basis (the distinctness
 //!    axiom, §8).
 //!
-//! A declared feedback edge must lie on a directed cycle of the field (its
-//! target reaches its source); otherwise it closes nothing and is refused.
-//! Admission reports, for each feedback edge, one directed cycle it closes,
+//! A declared feedback edge must lie on a directed turn of the field (its
+//! target reaches its source); otherwise it lies on no turn and is refused.
+//! Admission reports, for each feedback edge, one directed turn it lies on,
 //! so the provenance of every loop is in the output. Nothing is repaired: a
 //! refusal returns to the declaration (W5). The observation sequence is not
 //! checked here: its order is the record's (ingest).
@@ -56,25 +58,25 @@ pub struct FeedbackDeclaration {
 pub enum T8Refusal {
     /// (s, s): a locus declared as its own predecessor.
     SelfRelation { edge: usize },
-    /// A directed cycle with no declared feedback edge. Edges in order of
+    /// A directed turn with no declared feedback edge. Edges in order of
     /// traversal along their declared direction.
-    UndeclaredCycle { cycle: Vec<usize> },
+    UndeclaredTurn { turn: Vec<usize> },
     /// A feedback declaration names an edge that is not declared.
     FeedbackEdgeOutOfRange { edge: usize },
     /// The same edge declared feedback twice.
     DuplicateFeedback { edge: usize },
     /// A feedback declaration with an empty basis.
     FeedbackWithoutBasis { edge: usize },
-    /// A feedback edge on no directed cycle: it closes nothing.
-    FeedbackNotOnCycle { edge: usize },
+    /// A feedback edge on no directed turn.
+    FeedbackNotOnTurn { edge: usize },
 }
 
-/// An admitted field: its feedback edges and, for each, one directed cycle
-/// it closes (the edge itself first).
+/// An admitted field: its feedback edges and, for each, one directed turn
+/// it lies on (the edge itself first). *Was:* the field `closes` (107th).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct T8Admission {
     pub feedback: Vec<usize>,
-    pub closes: Vec<Vec<usize>>,
+    pub turns: Vec<Vec<usize>>,
 }
 
 /// Shortest directed edge path from `from` to `to` over `allowed` edges.
@@ -155,32 +157,32 @@ pub fn check_t8(rel: &DeclaredRelations, feedback: &[FeedbackDeclaration]) -> Re
         fb.push(d.edge);
     }
     let not_self = |e: usize| rel.edges[e].0 != rel.edges[e].1;
-    let mut closes = Vec::new();
+    let mut turns = Vec::new();
     for &f in &fb {
         let (s, t) = rel.edges[f];
         if s == t { continue; }
         match path(rel, t, s, &|e| not_self(e)) {
-            Some(p) => { let mut c = vec![f]; c.extend(p); closes.push(c); }
-            None => refusals.push(T8Refusal::FeedbackNotOnCycle { edge: f }),
+            Some(p) => { let mut c = vec![f]; c.extend(p); turns.push(c); }
+            None => refusals.push(T8Refusal::FeedbackNotOnTurn { edge: f }),
         }
     }
     let residual = |e: usize| not_self(e) && !fb.contains(&e);
     for part in strong_parts(rel, &residual) {
         if part.len() < 2 { continue; }
-        // One directed cycle inside the part: an edge within it, closed back.
+        // One directed turn inside the part: an edge within it, turning back.
         let inside = |e: usize| residual(e) && part.contains(&rel.edges[e].0) && part.contains(&rel.edges[e].1);
         let e0 = (0..rel.n_edges()).find(|&e| inside(e)).unwrap();
-        let mut cycle = vec![e0];
-        cycle.extend(path(rel, rel.edges[e0].1, rel.edges[e0].0, &inside).unwrap());
-        refusals.push(T8Refusal::UndeclaredCycle { cycle });
+        let mut turn = vec![e0];
+        turn.extend(path(rel, rel.edges[e0].1, rel.edges[e0].0, &inside).unwrap());
+        refusals.push(T8Refusal::UndeclaredTurn { turn });
     }
     if refusals.is_empty() {
         let mut feedback = fb.clone();
         let mut order: Vec<usize> = (0..feedback.len()).collect();
         order.sort_by_key(|&i| feedback[i]);
-        closes = order.iter().map(|&i| closes[i].clone()).collect();
+        turns = order.iter().map(|&i| turns[i].clone()).collect();
         feedback.sort();
-        Ok(T8Admission { feedback, closes })
+        Ok(T8Admission { feedback, turns })
     } else {
         Err(refusals)
     }
@@ -260,24 +262,24 @@ pub fn t8_gap(rel: &DeclaredRelations) -> Result<(), DeclarationGap> {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// K7: routes and a cycle basis from a stated spanning tree (10.3.0)
+// K7: routes and a turn basis from a stated spanning tree (10.3.0)
 // ═══════════════════════════════════════════════════════════════════════════
 //
 // K7 (Declared, Origin 2026-11-16; general form HB-1, 2026-11-17): a route
 // π = (e₁, …, e_m) is a directed sequence of declared edges; for two routes
 // with the same source and target, A_π = B_π₁(g) − B_π₂(g), which is the
-// cycle closure of π₁ followed by π₂ traversed against its direction. The
-// independent closures are a cycle basis from a **stated** spanning tree:
-// each edge not in the tree (a chord) closes one fundamental cycle with the
+// turn sum of π₁ followed by π₂ traversed against its direction. The
+// independent turn sums are a turn basis from a **stated** spanning tree:
+// each edge not in the tree (a chord) forms one fundamental turn with the
 // tree path between its ends. There are m − n + c of them (m edges, n loci,
 // c connected parts). Traversal and sign are orders of analysis (Df2a,
-// OC-K-3a): reversing a cycle negates its closure and changes no reading.
+// OC-K-3a): reversing a turn negates its turn sum and changes no reading.
 //
-// Every closed walk's signed edge count is the sum, over chords, of the
-// chord's net count times its fundamental cycle, so its closure is that
-// integer combination of the basis closures, exactly (`express_in_basis`).
+// Every turn's signed edge count is the sum, over chords, of the
+// chord's net count times its fundamental turn, so its turn sum is that
+// integer combination of the basis turn sums, exactly (`express_in_basis`).
 // The tree is declared, not chosen by the kernel: a different stated tree
-// gives a different basis of the same cycle space.
+// gives a different basis of the same turn space.
 
 /// A directed route: edges in order, each starting where the last ended.
 pub type Route = Vec<usize>;
@@ -329,10 +331,10 @@ pub fn is_route(rel: &DeclaredRelations, route: &[usize]) -> bool {
         && route.windows(2).all(|w| rel.edges[w[0]].1 == rel.edges[w[1]].0)
 }
 
-/// The closed walk of a K7 two-route closure: π₁ along its direction, then
+/// The turn of a K7 two-route turn sum: π₁ along its direction, then
 /// π₂ against it. `None` unless both are routes with the same source and
-/// target. Its cycle closure is B_π₁(g) − B_π₂(g).
-pub fn two_route_cycle(rel: &DeclaredRelations, p1: &[usize], p2: &[usize]) -> Option<Vec<(usize, i8)>> {
+/// target. Its turn sum is B_π₁(g) − B_π₂(g).
+pub fn two_route_turn(rel: &DeclaredRelations, p1: &[usize], p2: &[usize]) -> Option<Vec<(usize, i8)>> {
     if !is_route(rel, p1) || !is_route(rel, p2) { return None; }
     let ends = |p: &[usize]| (rel.edges[p[0]].0, rel.edges[*p.last().unwrap()].1);
     if ends(p1) != ends(p2) { return None; }
@@ -346,28 +348,28 @@ pub fn two_route_cycle(rel: &DeclaredRelations, p1: &[usize], p2: &[usize]) -> O
 pub enum TreeRefusal {
     EdgeOutOfRange { edge: usize },
     DuplicateEdge { edge: usize },
-    /// The stated edges close an (undirected) cycle: not a tree.
-    ClosesCycle { edge: usize },
+    /// The stated edges close an (undirected) turn: not a tree.
+    FormsTurn { edge: usize },
     /// Loci joined by declared edges but not by the stated tree.
     DoesNotSpan { loci: (usize, usize) },
 }
 
-/// A cycle basis from a stated spanning tree: one fundamental cycle per chord.
+/// A turn basis from a stated spanning tree: one fundamental turn per chord.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CycleBasis {
+pub struct TurnBasis {
     pub tree: Vec<usize>,
-    /// Edges not in the tree, ascending; `cycles[i]` is closed by `chords[i]`.
+    /// Edges not in the tree, ascending; `turns[i]` is formed by `chords[i]`.
     pub chords: Vec<usize>,
-    /// Signed closed walks, each starting with its chord along its direction.
-    pub cycles: Vec<Vec<(usize, i8)>>,
+    /// Signed turns, each starting with its chord along its direction.
+    pub turns: Vec<Vec<(usize, i8)>>,
 }
 
 fn find(p: &mut [usize], v: usize) -> usize { let mut v = v; while p[v] != v { p[v] = p[p[v]]; v = p[v]; } v }
 
-/// The fundamental cycles of a stated spanning tree (or forest, one tree per
+/// The fundamental turns of a stated spanning tree (or forest, one tree per
 /// connected part). Refused, not repaired, when the stated edges are not a
 /// spanning tree of the declared field.
-pub fn cycle_basis(rel: &DeclaredRelations, tree: &[usize]) -> Result<CycleBasis, Vec<TreeRefusal>> {
+pub fn turn_basis(rel: &DeclaredRelations, tree: &[usize]) -> Result<TurnBasis, Vec<TreeRefusal>> {
     let mut refusals = Vec::new();
     let mut parent: Vec<usize> = (0..rel.n_nodes).collect();
     let mut t_edges: Vec<usize> = Vec::new();
@@ -376,7 +378,7 @@ pub fn cycle_basis(rel: &DeclaredRelations, tree: &[usize]) -> Result<CycleBasis
         if t_edges.contains(&e) { refusals.push(TreeRefusal::DuplicateEdge { edge: e }); continue; }
         let (s, t) = rel.edges[e];
         let (a, b) = (find(&mut parent, s), find(&mut parent, t));
-        if a == b { refusals.push(TreeRefusal::ClosesCycle { edge: e }); continue; }
+        if a == b { refusals.push(TreeRefusal::FormsTurn { edge: e }); continue; }
         parent[a] = b;
         t_edges.push(e);
     }
@@ -415,7 +417,7 @@ pub fn cycle_basis(rel: &DeclaredRelations, tree: &[usize]) -> Result<CycleBasis
         p
     };
     let chords: Vec<usize> = (0..rel.n_edges()).filter(|e| !t_edges.contains(e)).collect();
-    let cycles = chords.iter().map(|&e| {
+    let turns = chords.iter().map(|&e| {
         let (s, t) = rel.edges[e];
         let mut c = vec![(e, 1i8)];
         c.extend(tree_path(t, s));
@@ -423,22 +425,34 @@ pub fn cycle_basis(rel: &DeclaredRelations, tree: &[usize]) -> Result<CycleBasis
     }).collect();
     let mut tree_sorted = t_edges;
     tree_sorted.sort();
-    Ok(CycleBasis { tree: tree_sorted, chords, cycles })
+    Ok(TurnBasis { tree: tree_sorted, chords, turns })
 }
 
-/// The coefficients of a closed walk in the basis: for each chord, its net
-/// signed count in the walk. The walk's closure equals Σ coefficient ×
-/// fundamental-cycle closure, exactly. `None` when `walk` is not a closed walk.
-pub fn express_in_basis(rel: &DeclaredRelations, basis: &CycleBasis, walk: &[(usize, i8)]) -> Option<Vec<i64>> {
-    if !crate::persistence_change::is_closed_walk(rel, walk) { return None; }
+/// The coefficients of a turn in the basis: for each chord, its net
+/// signed count in the walk. The walk's turn sum equals Σ coefficient ×
+/// fundamental-turn sum, exactly. `None` when `walk` is not a turn.
+pub fn express_in_basis(rel: &DeclaredRelations, basis: &TurnBasis, walk: &[(usize, i8)]) -> Option<Vec<i64>> {
+    if !crate::persistence_change::is_turn(rel, walk) { return None; }
     Some(basis.chords.iter().map(|&c| walk.iter().filter(|w| w.0 == c).map(|w| w.1 as i64).sum()).collect())
 }
 
-/// The closure of every fundamental cycle of `basis` at registration t in
+/// The turn sum of every fundamental turn of `basis` at registration t in
 /// component c, (value, half-width) each, in chord order. Each holds at δ
 /// when |value| ≤ half-width. On a node-derived series every value is 0 by
 /// identity; on edge-registered values it is a test (K7).
-pub fn basis_closures(series: &crate::persistence_change::EdgeSeries, rel: &DeclaredRelations, basis: &CycleBasis,
+pub fn basis_turn_sums(series: &crate::persistence_change::EdgeSeries, rel: &DeclaredRelations, basis: &TurnBasis,
                       t: usize, c: usize) -> Vec<(f64, f64)> {
-    basis.cycles.iter().map(|cy| crate::persistence_change::cycle_closure(series, rel, cy, t, c).unwrap()).collect()
+    basis.turns.iter().map(|cy| crate::persistence_change::turn_sum(series, rel, cy, t, c).unwrap()).collect()
 }
+
+// ── The old names, kept as deprecated aliases (Origin, 2026-11-26, 107th):
+// a cycle is a turn, one revolution of the helix a route traces as
+// evolution carries it forward; a closure is the turn sum.
+#[deprecated(note = "renamed TurnBasis (Origin, 107th)")]
+pub type CycleBasis = TurnBasis;
+#[deprecated(note = "renamed turn_basis (Origin, 107th)")]
+pub fn cycle_basis(rel: &DeclaredRelations, tree: &[usize]) -> Result<TurnBasis, Vec<TreeRefusal>> { turn_basis(rel, tree) }
+#[deprecated(note = "renamed two_route_turn (Origin, 107th)")]
+pub fn two_route_cycle(rel: &DeclaredRelations, p1: &[usize], p2: &[usize]) -> Option<Vec<(usize, i8)>> { two_route_turn(rel, p1, p2) }
+#[deprecated(note = "renamed basis_turn_sums (Origin, 107th)")]
+pub fn basis_closures(series: &crate::persistence_change::EdgeSeries, rel: &DeclaredRelations, basis: &TurnBasis, t: usize, c: usize) -> Vec<(f64, f64)> { basis_turn_sums(series, rel, basis, t, c) }

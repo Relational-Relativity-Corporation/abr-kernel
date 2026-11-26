@@ -501,31 +501,31 @@ fn prop_isc_d9_coupled_change_is_transitive_exactly() {
     exercised(&N, "I-SC-D9 e–g pair evaluated");
 }
 
-/// An enumerated closed walk v0 → v1 → … → v0 over L ≥ 3 distinct loci, each step
+/// An enumerated turn v0 → v1 → … → v0 over L ≥ 3 distinct loci, each step
 /// declared as an edge in either direction.
-fn enumerated_cycle(r: &mut Seeds) -> (DeclaredRelations, Vec<(usize, i8)>) {
+fn enumerated_turn(r: &mut Seeds) -> (DeclaredRelations, Vec<(usize, i8)>) {
     let l = r.usize(3, 6);
     let mut edges = Vec::new();
-    let mut cycle = Vec::new();
+    let mut turn = Vec::new();
     for i in 0..l {
         let (u, v) = (i, (i + 1) % l);
-        if r.selects(4) { edges.push((u, v)); cycle.push((i, 1)); } else { edges.push((v, u)); cycle.push((i, -1)); }
+        if r.selects(4) { edges.push((u, v)); turn.push((i, 1)); } else { edges.push((v, u)); turn.push((i, -1)); }
     }
     let m = edges.len();
-    (synthetic_feedback::declare_loops(synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(l, edges, vec![EdgeProvenance::Continuation; m]))), cycle)
+    (synthetic_feedback::declare_loops(synthetic_identity::identify(DeclaredRelations::from_edges_with_provenance(l, edges, vec![EdgeProvenance::Continuation; m]))), turn)
 }
 
 #[test]
 fn prop_isc_d10_closure_on_change() {
     static N: AtomicUsize = AtomicUsize::new(0);
     for_all("I-SC-D10", |r| {
-        let (rel, cycle) = enumerated_cycle(r);
-        assert!(is_closed_walk(&rel, &cycle));
+        let (rel, turn) = enumerated_turn(r);
+        assert!(is_turn(&rel, &turn));
         let s = enumerated_edges(r, (rel.n_edges(), rel.n_edges()), (1, 1), (2, 4), 0.5);
         for st in 0..s.n_steps() {
-            let (c0, h0) = cycle_closure(&s, &rel, &cycle, st, 0).unwrap();
-            let (c1, h1) = cycle_closure(&s, &rel, &cycle, st + 1, 0).unwrap();
-            let (dc, dh) = cycle_change_closure(&s, &rel, &cycle, st, 0).unwrap();
+            let (c0, h0) = turn_sum(&s, &rel, &turn, st, 0).unwrap();
+            let (c1, h1) = turn_sum(&s, &rel, &turn, st + 1, 0).unwrap();
+            let (dc, dh) = turn_change_sum(&s, &rel, &turn, st, 0).unwrap();
             assert_eq!(dc, c1 - c0);
             assert_eq!(dh, h0 + h1);
             if c0.abs() <= h0 && c1.abs() <= h1 { assert!(dc.abs() <= dh); hit(&N); }
@@ -533,9 +533,9 @@ fn prop_isc_d10_closure_on_change() {
         // Node-derived: 0 by identity.
         let seq = enumerated_seq(r, rel.n_nodes, (1, 1), (2, 3), 0.5);
         let n = EdgeSeries::from_registrations(&seq, &rel).unwrap();
-        for t in 0..n.n_registrations() { assert_eq!(cycle_closure(&n, &rel, &cycle, t, 0).unwrap().0, 0.0); }
+        for t in 0..n.n_registrations() { assert_eq!(turn_sum(&n, &rel, &turn, t, 0).unwrap().0, 0.0); }
     });
-    exercised(&N, "I-SC-D10 closure held at both registrations");
+    exercised(&N, "I-SC-D10 turn sum held at both registrations");
 }
 
 #[test]

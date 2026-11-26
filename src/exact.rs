@@ -1,7 +1,7 @@
 //! Exact sums of registered values (Origin, 2026-11-23, 41st: "we are
 //! decomposing complex systems but we're not simplifying them").
 //!
-//! A V10 reading decomposes a field into parts: closures, accumulations,
+//! A V10 reading decomposes a field into parts: turn sums, accumulations,
 //! passages. Each is a sum of registered entries with integer
 //! coefficients. Adding them one at a time in floating point can lose a small
 //! entry beside a large one, and the result then depends on the order of
@@ -29,7 +29,7 @@
 //! module uses a general numerical method: Shewchuk's expansions, as in
 //! Python's `math.fsum`, with fused multiply-add. It adds no form, input or
 //! construct to any reading. Stated necessity: the 41st rule; without it, a
-//! closure depends on its traversal order. Listed as OC-LM-1, item 1, for
+//! turn sum depends on its traversal order. Listed as OC-LM-1, item 1, for
 //! Origin to confirm.
 //!
 //! **The range of exact arithmetic (the Verifier's batch-2 findings,

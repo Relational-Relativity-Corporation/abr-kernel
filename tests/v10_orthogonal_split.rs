@@ -28,7 +28,7 @@ use abr_kernel::operators::DeclaredRelations;
 use abr_kernel::persistence_change::EdgeSeries;
 use abr_kernel::relational_field::{InnerProduct, RelationalField, TwoParts};
 use abr_kernel::exact::Ratio;
-use abr_kernel::topology::cycle_basis;
+use abr_kernel::topology::turn_basis;
 use support::*;
 
 const K: usize = 2;
@@ -75,20 +75,20 @@ fn the_two_parts_sum_to_the_relation_exactly() {
 }
 
 /// 2. Each part is what it is declared to be, exactly: the potential part
-/// closes every declared cycle (K7), and the balanced part balances at every
+/// sums to zero along every declared turn (K7), and the balanced part balances at every
 /// locus (what enters equals what leaves, through the readback, K9).
 #[test]
-fn the_potential_part_closes_and_the_balanced_part_balances() {
+fn the_potential_part_sums_to_zero_along_every_turn_and_the_balanced_part_balances() {
     for_all("split: parts", 0x100_02, |r| {
         let rel = enumerated_rel(r);
         let (_, s) = split_field(r, &rel, 2, 0.125);
-        let basis = cycle_basis(&rel, &spanning_forest(&rel)).unwrap();
+        let basis = turn_basis(&rel, &spanning_forest(&rel)).unwrap();
         for x in s.spatial.iter().chain(&s.persistence) {
             for c in 0..K {
-                for cy in &basis.cycles {
-                    let mut closure = Ratio::zero();
-                    for &(e, sg) in cy { closure = if sg > 0 { closure.add(&x.exact_potential[c][e]) } else { closure.sub(&x.exact_potential[c][e]) }; }
-                    assert!(closure.is_zero(), "the potential part closes every cycle");
+                for cy in &basis.turns {
+                    let mut turn_sum = Ratio::zero();
+                    for &(e, sg) in cy { turn_sum = if sg > 0 { turn_sum.add(&x.exact_potential[c][e]) } else { turn_sum.sub(&x.exact_potential[c][e]) }; }
+                    assert!(turn_sum.is_zero(), "the potential part sums to zero along every turn");
                 }
                 for v in 0..rel.n_nodes {
                     let mut bal = Ratio::zero();
@@ -142,9 +142,9 @@ fn the_split_depends_on_no_choice_of_basis() {
         } } }
         // A split along a stated tree: the balanced part carried by the chords.
         let tree_split = |tree: &[usize]| -> Vec<Ratio> {
-            let b = cycle_basis(&rel, tree).unwrap();
+            let b = turn_basis(&rel, tree).unwrap();
             let mut q = vec![Ratio::zero(); m];
-            for (k, cy) in b.cycles.iter().enumerate() {
+            for (k, cy) in b.turns.iter().enumerate() {
                 let z = g_exact(&f, 0, 0, b.chords[k]);
                 for &(e, sg) in cy { q[e] = if sg > 0 { q[e].add(&z) } else { q[e].sub(&z) }; }
             }
@@ -173,7 +173,7 @@ fn the_split_of_a_change_is_the_change_of_the_split() {
 }
 
 /// 6. A field formed from the loci is all potential (its balanced part is
-/// 0); a field registered as a combination of declared cycles is all
+/// 0); a field registered as a combination of declared turns is all
 /// balanced (its potential part is 0).
 #[test]
 fn each_kind_of_field_falls_wholly_in_its_part() {
@@ -183,17 +183,17 @@ fn each_kind_of_field_falls_wholly_in_its_part() {
         let w = whole(&rel, enumerated_declared(r, &rel, K, 2, 0.5, false, false));
         let s = w.field.two_parts(&InnerProduct::equal());
         for x in &s.spatial { for c in 0..K { for e in 0..rel.n_edges() { assert!(x.exact_balanced[c][e].is_zero(), "locus-formed: no balanced part"); } } }
-        let b = cycle_basis(&rel, &spanning_forest(&rel)).unwrap();
-        if b.cycles.is_empty() { return; }
+        let b = turn_basis(&rel, &spanning_forest(&rel)).unwrap();
+        if b.turns.is_empty() { return; }
         let m = rel.n_edges();
         let a: Vec<Vec<Vec<f64>>> = (0..2).map(|_| (0..K).map(|_| {
             let mut g = vec![0.0; m];
-            for cy in &b.cycles { let z = r.int(-3, 3) as f64; for &(e, sg) in cy { g[e] += z * sg as f64; } }
+            for cy in &b.turns { let z = r.int(-3, 3) as f64; for &(e, sg) in cy { g[e] += z * sg as f64; } }
             g
         }).collect()).collect();
         let f = whole_of_relations(&rel, EdgeSeries::from_edge_values_synthetic(a, vec![vec![vec![0.125; m]; K]; 2]).unwrap(), &carrier(m, 2));
         let s = f.two_parts(&InnerProduct::equal());
-        for x in &s.spatial { for c in 0..K { for e in 0..m { assert!(x.exact_potential[c][e].is_zero(), "cycle combination: no potential part"); } } }
+        for x in &s.spatial { for c in 0..K { for e in 0..m { assert!(x.exact_potential[c][e].is_zero(), "turn combination: no potential part"); } } }
         *balanced_seen.borrow_mut() += 1;
     });
     assert!(*balanced_seen.borrow() > 0);

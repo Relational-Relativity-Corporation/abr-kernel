@@ -22,6 +22,8 @@ Origin, 59th: we calculate relation as primitive alongside energy, connection an
 
 **The operators never calculate a scalar** (Origin, 104th): *"the only thing that in the operators is relational information and mathematics there can be no scalars"*; *"We can always input projections provided that we describe their provenance otherwise we would not be able to calculate on legacy information I just don't want the operators themselves to calculate a scalar"*. Every operator output is a value on each relation or locus, with its identity and sign; magnitudes, bounds, decisions at δ, shares and counts are the framework, reading that output. Checked by linearity (`tests/v10_no_scalar.rs`).
 
+**No information is repeated** (Origin, 106th, 107th): *"no information can be repeated this is part of the same thing which makes relational evolution both inevitable and constant"*. Every point in evolution is distinct. Ξ is **the passage** (what follows less what precedes), never "circulation". A loop-shaped route is a **turn**, one revolution of the helix it traces as evolution carries it forward: shape, never a system that is a loop; its sum is the **turn sum**. No pitch, period or phase is assumed or fitted; a reading at one registration reads the shape, never a return.
+
 This governs everything we do. Check every change against it: relation is calculated first, as the primitive; energy, connection and freedom are calculated along with it; the means is linear algebraic operators. Its text and the check of each V10 form against it are at the head of `docs/kernel/V10_README.md`.
 
 ## Rules kept with it

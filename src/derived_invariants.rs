@@ -1872,12 +1872,12 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            a reading, so a middle relation is non-zero and e ∥ f, f ∥ g give
 //            e ∥ g. At δ two unresolved minors can chain to a resolved one:
 //            connection read at δ does not partition relations into sets.
-//   I-SC-D10 Closure on change. For a signed closed walk, Σ s_e·Δ[e] =
-//            A_cyc(s+1) − A_cyc(s), half-width Σ δΔ[e]. Closure at δ at both
-//            registrations implies closure on the change; not conversely: an
+//   I-SC-D10 Turn sum on change. For a signed turn, Σ s_e·Δ[e] =
+//            A_turn(s+1) − A_turn(s), half-width Σ δΔ[e]. Turn sum at δ at both
+//            registrations implies turn sum on the change; not conversely: an
 //            inconsistency fixed over the step cancels. On node-derived
-//            values the closure is 0 by identity (`cycle_closure`,
-//            `cycle_change_closure`, `is_closed_walk`).
+//            values the turn sum is 0 by identity (`turn_sum`,
+//            `turn_change_sum`, `is_turn`).
 //   I-SC-D11 Total passage. For any edge field g,
 //            Σ_e Ξ(g)[e] = Σ_f g[f]·(indeg(src f) − outdeg(tgt f)); zero for
 //            every field exactly when every weight is zero
@@ -1910,23 +1910,23 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            every term the same factor. So PC1 and PC2(b) pass any factor
 //            fixed over the run. PC2(a), PC3 and the proportional grade need
 //            λ_ie·λ_jf = λ_je·λ_if (separable factors). Identity, the
-//            sustained grade and K7 closures need one factor per component.
+//            sustained grade and K7 turn sums need one factor per component.
 //            State forms also pass a positive factor that differs between
 //            registrations; change forms do not. A negative factor fixed over
 //            the run reverses signs only. For Z1a, a gain of a failing kind
-//            must enter the form's bound: K7 closures now carry the per-edge
-//            and per-entry gains (`EdgeSeries::closure_gain`, proposed
+//            must enter the form's bound: K7 turn sums now carry the per-edge
+//            and per-entry gains (`EdgeSeries::turn_sum_gain`, proposed
 //            correction). Table and tests: V10_README §2.6,
 //            `tests/v10_scale_invariance.rs`.
-//   I-SC-D16 Closure over a cycle basis (Proposed, Generator, 2026-11-23).
+//   I-SC-D16 Turn sum over a turn basis (Proposed, Generator, 2026-11-23).
 //            (i) A closed walk's closure is Σ n_i·(basis closure i), n_i its
 //            net count of chord i, exactly, in state and on change. (ii) At δ
-//            every basis closure can hold while another cycle is resolved,
+//            every basis turn sum can hold while another turn is resolved,
 //            and which are resolved depends on the stated tree. (iii) Every
-//            simple cycle holds at δ ⇔ some node field x puts every relation
+//            simple turn holds at δ ⇔ some node field x puts every relation
 //            within its bound of x[s] − x[t] (difference constraints): the
 //            converse of PC-D4. (iv) A walk through a resolved chord can
-//            hold. V10_README §2.6, `tests/v10_closure_basis.rs`.
+//            hold. V10_README §2.6, `tests/v10_turn_basis.rs`.
 //   I-SC-D17 The carrier as a component (Proposed, Generator, 2026-11-23,
 //            48th; OC-SC-3). (i) ε = |A[c][e]|, δ_ε = δA[c][e]: the V3
 //            floor is the carrier component's state reading. (ii) |Δε| ≤
@@ -1943,14 +1943,14 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            `tests/v10_carrier_component.rs`.
 //   I-SC-D18 Beginning, ending and reversal of the three persistences
 //            (Proposed, Generator, 2026-11-23, 52nd; names W16 (a)):
-//            persistent imbalance (sign of Ξ(B(A))), persistent closure
+//            persistent imbalance (sign of Ξ(B(A))), persistent turn sum
 //            (K7), persistent arrangement (PC3). (i) A reading reverses
 //            (resolved, one sign to the other) over a step only where PC1
 //            reads freedom at a relation it is formed from: otherwise one
 //            field lies within both registrations' state bounds and both
 //            readings enclose it. Under every declared part of δ. (ii) At δ
 //            a reading can begin or end with all its relations held. (iii)
-//            Persistent closure and persistent arrangement are independent.
+//            Persistent turn sum and persistent arrangement are independent.
 //            V10_README §2.6, `tests/v10_persistence_reversal.rs`.
 //
 // OC-SC-4 (held pattern vs sustained passage), partly derived: I-SC-D5

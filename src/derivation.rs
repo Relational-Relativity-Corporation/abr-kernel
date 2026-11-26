@@ -199,9 +199,9 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("EdgeSeries.da", Rule { of: &[A], reads: &[Rel], rule: "the state bound δA of each relation: δ[s] + δ[t] from the loci, or as registered, with the run-constant parts (Z1a); rounded up, never down (41st)" }),
     ("EdgeSeries.da_rep", Rule { of: &[A], reads: &[Rel], rule: "the repeatability part of δA (Z1a)" }),
     ("EdgeSeries.dgain", Rule { of: &[A], reads: &[Fr], rule: "the unshared-gain part of the change bound: γ_s·|Δx_s| + γ_t·|Δx_t| (Z1a)" }),
-    ("EdgeSeries.shared_gain", Rule { of: &[A], reads: &[Fr], rule: "the shared gain bound [c][e]: enters reported change magnitudes and K7 closures (Z1a; I-SC-D15 (v))" }),
+    ("EdgeSeries.shared_gain", Rule { of: &[A], reads: &[Fr], rule: "the shared gain bound [c][e]: enters reported change magnitudes and K7 turn sums (Z1a; I-SC-D15 (v))" }),
     ("EdgeSeries.mixed_gain", Rule { of: &[A], reads: &[Con, Fr], rule: "the independent gain bound on relations registered directly: enters every minor that mixes components (Z1a)" }),
-    ("EdgeSeries.closure_gain", Rule { of: &[A], reads: &[Con], rule: "the gain bound differing between relations of one component: enters identity, Ξ and K7 closures (I-SC-D15 (v))" }),
+    ("EdgeSeries.turn_sum_gain", Rule { of: &[A], reads: &[Con], rule: "the gain bound differing between relations of one component: enters identity, Ξ and K7 turn sums (I-SC-D15 (v))" }),
     ("EdgeSeries.origin", Id { what: "where the relation values came from: formed from loci, or registered directly (ER-1)" }),
     ("EdgeSeries.forced_pairs", Id { what: "pairs of relations whose coupling the declaration fixes (PC-D4): identities, not readings" }),
     // ── A, B and Ξ ────────────────────────────────────────────────────────
@@ -223,13 +223,13 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("Ways.loci", Id { what: "n, the number of declared loci" }),
     ("Ways.pieces", Id { what: "c, the connected pieces the declared relations join the loci into; a locus no relation meets is a piece of its own" }),
     ("Ways.potential", Rule { of: &[A], reads: &[Rel, En], rule: "n − c: the independent ways of the potential part, fields explained by values at the loci (the relations of any spanning forest)" }),
-    ("Ways.balanced", Rule { of: &[A, Readback], reads: &[Rel, Con], rule: "m − n + c: the independent ways of the balanced part, where what enters every locus equals what leaves (the independent cycles, K7)" }),
+    ("Ways.balanced", Rule { of: &[A, Readback], reads: &[Rel, Con], rule: "m − n + c: the independent ways of the balanced part, where what enters every locus equals what leaves (the independent turns, K7)" }),
     // ── The orthogonal split (Origin, 100th; the 99th, Proposed) ──────────
     ("TwoParts.inner_product", Reg { what: "the declared inner product the split is orthogonal under (99th, 100th): equal weight on every relation by default; any other weighting a domain's declaration" }),
     ("Equal.basis", Reg { what: "the basis of the equal-weight inner product, declared with it" }),
     ("TwoParts.spatial", Legacy { method: "the orthogonal split at every registration: the potential part A G Aᵀ g and the balanced part g − A G Aᵀ g", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
     ("TwoParts.persistence", Legacy { method: "the orthogonal split over every step, of the change A_p; equal exactly to the change of the split (linear)", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
-    ("Split.potential", Legacy { method: "the potential part, the image of A: explained by values at the loci, closing every cycle; rounded once", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
+    ("Split.potential", Legacy { method: "the potential part, the image of A: explained by values at the loci, closing every turn; rounded once", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
     ("Split.balanced", Legacy { method: "the balanced part: at every locus what enters equals what leaves (the readback's balance zero); rounded once", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
     ("Split.exact_potential", Legacy { method: "the potential part exactly, in rationals: every identity of the split holds in it", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
     ("Split.exact_balanced", Legacy { method: "the balanced part exactly, in rationals", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
@@ -340,7 +340,7 @@ static LEGACY_IN_USE: &[Derivation] = &[
         method: "exact summation (floating-point expansions)",
         provenance: "Shewchuk's expansions (1997); the method of Python's math.fsum; two-sum and fused multiply-add. `src/exact.rs`",
         in_relation_to_operators: "adds no form, input or construct: it computes the sums A, B and Ξ (and the minors and bounds) are defined by, without loss, so a sum does not depend on the order of its terms (Df2a); each value is rounded once",
-        necessity: Some("the 41st rule, decompose, do not simplify: without it a closure depends on traversal order. Confirmed necessary by Origin (44th; OC-LM-1, item 1)"),
+        necessity: Some("the 41st rule, decompose, do not simplify: without it a turn sum depends on traversal order. Confirmed necessary by Origin (44th; OC-LM-1, item 1)"),
     },
     // *Was (92nd):* one entry, "interval bounds (outward rounding, absolute
     // values in product bounds)", its necessity stated by the Generator and
@@ -357,7 +357,7 @@ static LEGACY_IN_USE: &[Derivation] = &[
         method: "exact rationals (arbitrary-precision integers; Euclid's algorithm; Gauss–Jordan elimination)",
         provenance: "Euclid's algorithm (Elements VII); Gauss–Jordan elimination (Gauss; Jordan, 1888); schoolbook multiplication and binary long division. `exact::Ratio`",
         in_relation_to_operators: "adds no form: it computes the orthogonal split's solve over the loci (L = AᵀA, built from A) exactly, as exact summation computes the operators' sums; each value is converted to f64 once, to the nearest or upward",
-        necessity: Some("the orthogonal split (Origin, 100th), whose solve needs division that no f64 holds exactly; without it the split's identities (the parts summing to the relation, the potential part closing every cycle, the balanced part balancing, orthogonality) would hold only approximately, against the 41st"),
+        necessity: Some("the orthogonal split (Origin, 100th), whose solve needs division that no f64 holds exactly; without it the split's identities (the parts summing to the relation, the potential part closing every turn, the balanced part balancing, orthogonality) would hold only approximately, against the 41st"),
     },
 ];
 

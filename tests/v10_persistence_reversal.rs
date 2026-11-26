@@ -2,8 +2,8 @@
 //! persistences (Proposed, Generator, 2026-11-23, 52nd; V10_README §2.6).
 //!
 //! Names (W16 (a), Origin, 52nd): **persistent imbalance**, the sign of Ξ(B(A))
-//! held over the sequence (V1 sustained grade); **persistent closure**, the
-//! state of a closed walk's closure held (K7); **persistent arrangement**,
+//! held over the sequence (V1 sustained grade); **persistent turn sum**, the
+//! state of a turn's turn sum held (K7); **persistent arrangement**,
 //! the state of a minor m_ij(e, f) held (PC3, V8). Each is read per
 //! registration as a sign at δ: resolved +, resolved −, or not resolved.
 //!
@@ -20,16 +20,16 @@
 //!       δ_{s+1}), its share of the two state bounds; an edge-registered gain
 //!       widens a reading's bound and not PC1's.
 //! (ii)  **Beginning and ending need none, at δ.**
-//! (iii) **Persistent closure and persistent arrangement are independent.**
+//! (iii) **Persistent turn sum and persistent arrangement are independent.**
 //!
 //! **Whole fields (Origin, 53rd; Df6, W11).** The imbalance and arrangement
 //! claims are read on whole relational fields, with the carrier declared,
 //! from the parts the field reports: its Ξ(B(A)) at each registration
 //! (`spatial[t].passage`), checked against its own sustained grade; its
 //! PC1 and PC3; and with energy and every connection grade evaluated beside
-//! them. Closure is a test only on edge-registered values (PC-D4), where the
+//! them. Turn sum is a test only on edge-registered values (PC-D4), where the
 //! kernel forms no whole field: those tests read every PC level and the
-//! kernel's own closures there, and name what is not evaluated (option (b);
+//! kernel's own turn sums there, and name what is not evaluated (option (b);
 //! OC-WF-1). *Was (52nd):* Ξ(B(A)) and the closure recomputed in the test,
 //! on fields with no carrier, and PC1 computed directly.
 //!
@@ -185,7 +185,7 @@ fn d18_persistent_arrangement_reverses_only_with_freedom_at_its_entries() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Edge-registered series (option (b), 53rd): persistent closure, and the
+// Edge-registered series (option (b), 53rd): persistent turn sum, and the
 // arrangement with gains of every kind
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -216,16 +216,16 @@ fn edge_series(r: &mut Seeds, k: usize, m: usize, regs: usize) -> EdgeSeries {
     EdgeSeries::from_edge_values_synthetic(a, da).unwrap().with_run_constant(offset, gains)
 }
 
-/// The diamond 0→1, 1→2, 0→2, 0→3, 3→2 and its three simple closed walks.
+/// The diamond 0→1, 1→2, 0→2, 0→3, 3→2 and its three simple turns.
 fn diamond() -> (DeclaredRelations, Vec<Vec<(usize, i8)>>) {
     (rel(4, vec![(0, 1), (1, 2), (0, 2), (0, 3), (3, 2)]),
      vec![vec![(0, 1), (1, 1), (2, -1)], vec![(3, 1), (4, 1), (2, -1)], vec![(0, 1), (1, 1), (4, -1), (3, -1)]])
 }
 
-/// The kernel's closure state: its exact verdict, with the sign of its value.
-fn closure(s: &EdgeSeries, rel: &DeclaredRelations, walk: &[(usize, i8)], t: usize, c: usize) -> AtDelta<Sign> {
-    if cycle_closure_resolved(s, rel, walk, t, c).unwrap() {
-        AtDelta::Resolved(if cycle_closure(s, rel, walk, t, c).unwrap().0 > 0.0 { Sign::Positive } else { Sign::Negative })
+/// The kernel's turn sum state: its exact verdict, with the sign of its value.
+fn turn_sum_state(s: &EdgeSeries, rel: &DeclaredRelations, walk: &[(usize, i8)], t: usize, c: usize) -> AtDelta<Sign> {
+    if turn_sum_resolved(s, rel, walk, t, c).unwrap() {
+        AtDelta::Resolved(if turn_sum(s, rel, walk, t, c).unwrap().0 > 0.0 { Sign::Positive } else { Sign::Negative })
     } else { AtDelta::NotResolved }
 }
 
@@ -245,12 +245,12 @@ fn d18_persistent_closure_reverses_only_with_freedom_on_its_walk() {
             for c in 0..k {
                 for w in &walks {
                     let moved: Vec<bool> = w.iter().map(|&(e, _)| is_freedom(pc1(st, c, e))).collect();
-                    g.add(closure(&s, &rel, w, st, c), closure(&s, &rel, w, st + 1, c), &moved);
+                    g.add(turn_sum_state(&s, &rel, w, st, c), turn_sum_state(&s, &rel, w, st + 1, c), &moved);
                 }
             }
         }
     });
-    tally.into_inner().unwrap().require("persistent closure");
+    tally.into_inner().unwrap().require("persistent turn sum");
 }
 
 #[test]
@@ -266,7 +266,7 @@ fn d18_persistent_arrangement_on_edge_registered_series_with_gains() {
 
 #[test]
 fn d18_iii_closure_and_arrangement_persist_independently() {
-    // Over one step: closure persistent when every walk's state, in every
+    // Over one step: turn sum persistent when every walk's state, in every
     // component, is the same at both registrations; arrangement persistent
     // when every PC3 reading is structure (with at least one evaluated).
     let (rel, walks) = diamond();
@@ -278,9 +278,9 @@ fn d18_iii_closure_and_arrangement_persist_independently() {
         let arr = pc.arrangement.as_ref().unwrap();
         if arr.is_empty() { return; }
         let held_arr = arr.iter().all(|x| x.reading == Reading::Structure);
-        let held_clo = (0..k).all(|c| walks.iter().all(|w| closure(&s, &rel, w, 0, c) == closure(&s, &rel, w, 1, c)));
+        let held_clo = (0..k).all(|c| walks.iter().all(|w| turn_sum_state(&s, &rel, w, 0, c) == turn_sum_state(&s, &rel, w, 1, c)));
         seen.lock().unwrap()[held_clo as usize][held_arr as usize] += 1;
     });
     let g = seen.into_inner().unwrap();
-    assert!(g.iter().flatten().all(|&n| n > 0), "closure × arrangement (changes/persists): {g:?}");
+    assert!(g.iter().flatten().all(|&n| n > 0), "turn sum × arrangement (changes/persists): {g:?}");
 }

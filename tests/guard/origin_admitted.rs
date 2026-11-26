@@ -70,7 +70,8 @@ pub const STRUCTS_BEFORE_THE_GUARD: &[&str] = &[
     "ObservationalBasis", "MMappingDeclaration", "DeclaredDomain", "LocusDeclaration",
     "ObservableRelationDeclaration", "RelationalDeclaration", "DeclarationRegistry", "InputRecord",
     "RelationRecord", "ParameterRecord", "OutputEntry", "CalculationRecord", "ProvenancedOutput",
-    "FeedbackDeclaration", "T8Admission", "RelationIdentity", "RouteEnumeration", "CycleBasis",
+    // `TurnBasis` was `CycleBasis`, renamed on Origin's word (107th).
+    "FeedbackDeclaration", "T8Admission", "RelationIdentity", "RouteEnumeration", "TurnBasis",
     // Added by Origin's instruction, 2026-11-26: present at `9d6e4ae`, missed
     // by the first scan.
     "SpokeComponent", "HeldEnergy", "StepAngle", "RelativePhase",

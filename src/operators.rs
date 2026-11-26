@@ -134,7 +134,7 @@
 //     - pred(e) / adj_minus: the relations arriving at e's source, read
 //       backward by R and Σ, each keeping its declared direction;
 //     - reading e from its target end (gives −A(x)[e], same relation);
-//     - past records, earlier cycles, reverse traceability, any iteration
+//     - past records, earlier iterations, reverse traceability, any iteration
 //       order that does not change the result.
 //   Not re-accumulating what a prior output already carries is a SCOPE
 //   rule (do not count the same evolution twice), not a direction rule.
@@ -358,7 +358,7 @@
 //   REMOVED (V7.1, Origin declaration). cc is an M-supplied value, one per
 //   declared component pair. See "M-declared operator parameters" above.
 //
-// is_fully_connected(), has_undirected_cycle():
+// is_fully_connected(), has_undirected_turn():
 //   Both construct an undirected projection of the declared directed edge set.
 //   Their role is diagnostic only — they do not alter operator output or
 //   establish relational direction. Moved to the test module pending
@@ -536,7 +536,7 @@ pub struct DeclaredRelations {
     pub adj_minus: Vec<Vec<usize>>,       // adj_minus[e]: edges arriving into source of e (Primary)
     /// Edges declared feedback, each with its basis (T8; `topology`). Empty
     /// unless declared with `with_feedback`. Every V10 reading entry point
-    /// refuses a field whose directed cycles are not all declared here
+    /// refuses a field whose directed turns are not all declared here
     /// (Origin, 2026-11-22, 28th).
     pub feedback: Vec<crate::topology::FeedbackDeclaration>,
     /// Identity and direction basis per edge (RPPI-V10 G-1; `topology`).
@@ -1523,7 +1523,7 @@ mod tests {
     // create reverse relations, or provide physical interpretation.
     // Classification: DIAGNOSTIC ONLY — ISOLATE.
 
-    fn has_undirected_cycle(rel: &DeclaredRelations) -> bool {
+    fn has_undirected_turn(rel: &DeclaredRelations) -> bool {
         let mut adj: Vec<Vec<usize>> = vec![Vec::new(); rel.n_nodes];
         for &(s, t) in &rel.edges {
             if s != t && !adj[s].contains(&t) { adj[s].push(t); }
@@ -1569,16 +1569,16 @@ mod tests {
 
     // [IMPL] Ring detection diagnostic — synthetic fixture only.
     #[test]
-    fn closed_ring_detected_as_undirected_cycle() {
+    fn ring_detected_as_undirected_turn() {
         let rel = test_rel_from_edges(4, vec![(0,1),(1,2),(2,3),(3,0)]);
-        assert!(has_undirected_cycle(&rel));
+        assert!(has_undirected_turn(&rel));
     }
 
-    // [MATH] Open directed chain has no undirected cycle.
+    // [MATH] Open directed chain has no undirected turn.
     #[test]
-    fn directed_chain_no_undirected_cycle() {
+    fn directed_chain_no_undirected_turn() {
         let rel = directed_chain(4);
-        assert!(!has_undirected_cycle(&rel));
+        assert!(!has_undirected_turn(&rel));
     }
 
     // [IMPL] NodeField k/n accessors agree.
@@ -1824,7 +1824,7 @@ mod tests {
         for e in 0..rel.n_edges() {
             let expected = e2.spatial[0][e] - e1.spatial[0][e];
             assert!((p2.a_persistence[0][e] - expected).abs() < 1e-12,
-                "cycle 2: A_persistence must equal E_current - E_prior");
+                "turn 2: A_persistence must equal E_current - E_prior");
         }
     }
 

@@ -1,4 +1,4 @@
-//! Kernel V10.3 — T8: self-relations refused; a directed cycle admitted only
+//! Kernel V10.3 — T8: self-relations refused; a directed turn admitted only
 //! as a declared feedback loop with a stated basis; opposite directions need
 //! their own basis.
 //!
@@ -19,15 +19,15 @@ fn fb(edge: usize) -> FeedbackDeclaration {
     FeedbackDeclaration { edge, basis: "synthetic: registered return relation".into() }
 }
 
-/// A directed walk: consecutive edges meet head to tail and it closes.
-fn is_directed_cycle(r: &DeclaredRelations, c: &[usize]) -> bool {
+/// A directed turn: consecutive edges meet head to tail and it comes round to its first locus.
+fn is_directed_turn(r: &DeclaredRelations, c: &[usize]) -> bool {
     !c.is_empty() && (0..c.len()).all(|i| r.edges[c[i]].1 == r.edges[c[(i + 1) % c.len()]].0)
 }
 
 #[test]
-fn t8_an_acyclic_field_is_admitted_with_no_feedback() {
+fn t8_a_field_with_no_directed_turn_is_admitted_with_no_feedback() {
     let r = rel(4, vec![(0, 1), (1, 2), (0, 2), (2, 3)]);
-    assert_eq!(check_t8(&r, &[]), Ok(T8Admission { feedback: vec![], closes: vec![] }));
+    assert_eq!(check_t8(&r, &[]), Ok(T8Admission { feedback: vec![], turns: vec![] }));
 }
 
 #[test]
@@ -45,9 +45,9 @@ fn t8_an_undeclared_cycle_is_refused_and_named() {
     let e = check_t8(&r, &[]).unwrap_err();
     assert_eq!(e.len(), 1);
     match &e[0] {
-        T8Refusal::UndeclaredCycle { cycle } => {
-            assert!(is_directed_cycle(&r, cycle));
-            let mut c = cycle.clone(); c.sort();
+        T8Refusal::UndeclaredTurn { turn } => {
+            assert!(is_directed_turn(&r, turn));
+            let mut c = turn.clone(); c.sort();
             assert_eq!(c, vec![1, 2, 3]);
         }
         other => panic!("unexpected {other:?}"),
@@ -55,41 +55,41 @@ fn t8_an_undeclared_cycle_is_refused_and_named() {
 }
 
 #[test]
-fn t8_a_declared_feedback_loop_is_admitted_with_the_cycle_it_closes() {
+fn t8_a_declared_feedback_loop_is_admitted_with_the_turn_it_lies_on() {
     let r = rel(4, vec![(0, 1), (1, 2), (2, 3), (3, 1)]);
     let a = check_t8(&r, &[fb(3)]).unwrap();
     assert_eq!(a.feedback, vec![3]);
-    assert_eq!(a.closes, vec![vec![3, 1, 2]]);
-    assert!(is_directed_cycle(&r, &a.closes[0]));
+    assert_eq!(a.turns, vec![vec![3, 1, 2]]);
+    assert!(is_directed_turn(&r, &a.turns[0]));
     // Any edge of the loop may carry the declaration.
     assert!(check_t8(&r, &[fb(1)]).is_ok());
-    // The edge into the loop is on no cycle.
+    // The edge into the loop is on no turn.
     assert_eq!(check_t8(&r, &[fb(0)]).unwrap_err(),
-        vec![T8Refusal::FeedbackNotOnCycle { edge: 0 },
-             T8Refusal::UndeclaredCycle { cycle: check_cycle(&r) }]);
+        vec![T8Refusal::FeedbackNotOnTurn { edge: 0 },
+             T8Refusal::UndeclaredTurn { turn: check_turn(&r) }]);
 }
 
-fn check_cycle(r: &DeclaredRelations) -> Vec<usize> {
-    match &check_t8(r, &[]).unwrap_err()[0] { T8Refusal::UndeclaredCycle { cycle } => cycle.clone(), _ => unreachable!() }
+fn check_turn(r: &DeclaredRelations) -> Vec<usize> {
+    match &check_t8(r, &[]).unwrap_err()[0] { T8Refusal::UndeclaredTurn { turn } => turn.clone(), _ => unreachable!() }
 }
 
 #[test]
 fn t8_opposite_directions_need_their_own_basis() {
     let r = rel(2, vec![(0, 1), (1, 0)]);
-    assert!(matches!(check_t8(&r, &[]).unwrap_err()[0], T8Refusal::UndeclaredCycle { .. }));
-    assert_eq!(check_t8(&r, &[fb(1)]).unwrap().closes, vec![vec![1, 0]]);
+    assert!(matches!(check_t8(&r, &[]).unwrap_err()[0], T8Refusal::UndeclaredTurn { .. }));
+    assert_eq!(check_t8(&r, &[fb(1)]).unwrap().turns, vec![vec![1, 0]]);
 }
 
 #[test]
 fn t8_two_loops_sharing_a_locus_need_two_declarations() {
-    // 0 ⇄ 1 and 1 ⇄ 2 through edges 0..3; one declaration leaves a cycle.
+    // 0 ⇄ 1 and 1 ⇄ 2 through edges 0..3; one declaration leaves a turn.
     let r = rel(3, vec![(0, 1), (1, 0), (1, 2), (2, 1)]);
     let e = check_t8(&r, &[fb(1)]).unwrap_err();
     assert_eq!(e.len(), 1);
-    assert!(matches!(e[0], T8Refusal::UndeclaredCycle { .. }));
+    assert!(matches!(e[0], T8Refusal::UndeclaredTurn { .. }));
     let a = check_t8(&r, &[fb(3), fb(1)]).unwrap();
     assert_eq!(a.feedback, vec![1, 3]);
-    assert!(a.closes.iter().all(|c| is_directed_cycle(&r, c)));
+    assert!(a.turns.iter().all(|c| is_directed_turn(&r, c)));
 }
 
 #[test]
@@ -115,7 +115,7 @@ fn t8_declare_checked_constructs_and_checks_together() {
     assert_eq!((r.n_edges(), a.feedback), (2, vec![1]));
 }
 
-// ── Property: admitted exactly when the field less its feedback is acyclic ──
+// ── Property: admitted exactly when the field less its feedback has no directed turn ──
 
 struct Seeds(u64);
 impl Seeds {
@@ -129,8 +129,8 @@ impl Seeds {
     fn usize(&mut self, lo: usize, hi: usize) -> usize { lo + (self.next() % (hi - lo + 1) as u64) as usize }
 }
 
-/// Kahn's algorithm: an independent oracle for acyclicity over kept edges.
-fn acyclic(r: &DeclaredRelations, keep: &dyn Fn(usize) -> bool) -> bool {
+/// Kahn's algorithm: an independent oracle for the absence of directed turns over kept edges.
+fn no_directed_turn(r: &DeclaredRelations, keep: &dyn Fn(usize) -> bool) -> bool {
     let mut indeg = vec![0usize; r.n_nodes];
     for e in 0..r.n_edges() { if keep(e) { indeg[r.edges[e].1] += 1; } }
     let mut q: Vec<usize> = (0..r.n_nodes).filter(|&v| indeg[v] == 0).collect();
@@ -143,7 +143,7 @@ fn acyclic(r: &DeclaredRelations, keep: &dyn Fn(usize) -> bool) -> bool {
 }
 
 #[test]
-fn prop_t8_admits_exactly_when_the_residual_is_acyclic() {
+fn prop_t8_admits_exactly_when_the_residual_has_no_directed_turn() {
     let (mut admitted, mut refused) = (0, 0);
     for seed in 0..3000u64 {
         let mut g = Seeds(seed.wrapping_mul(0x2545_F491_4F6C_DD1D) ^ 0x7E7E);
@@ -155,27 +155,27 @@ fn prop_t8_admits_exactly_when_the_residual_is_acyclic() {
         }).collect();
         let r = rel(n, edges);
         let mut feedback: Vec<usize> = (0..m).filter(|_| g.next() % 3 == 0).collect();
-        // Keep only feedback edges that lie on a cycle, so the oracle is plain.
+        // Keep only feedback edges that lie on a turn, so the oracle is plain.
         feedback.retain(|&f| { let (s, t) = r.edges[f]; reaches(&r, t, s) });
         let decl: Vec<FeedbackDeclaration> = feedback.iter().map(|&e| fb(e)).collect();
-        let expect = acyclic(&r, &|e| !feedback.contains(&e));
+        let expect = no_directed_turn(&r, &|e| !feedback.contains(&e));
         match check_t8(&r, &decl) {
             Ok(a) => {
-                assert!(expect, "seed {seed}: admitted a residual cycle");
-                assert_eq!(a.closes.len(), a.feedback.len());
-                for (f, c) in a.feedback.iter().zip(&a.closes) {
+                assert!(expect, "seed {seed}: admitted a residual turn");
+                assert_eq!(a.turns.len(), a.feedback.len());
+                for (f, c) in a.feedback.iter().zip(&a.turns) {
                     assert_eq!(c[0], *f);
-                    assert!(is_directed_cycle(&r, c), "seed {seed}");
+                    assert!(is_directed_turn(&r, c), "seed {seed}");
                 }
                 admitted += 1;
             }
             Err(e) => {
-                assert!(!expect, "seed {seed}: refused an acyclic residual: {e:?}");
+                assert!(!expect, "seed {seed}: refused a residual with no directed turn: {e:?}");
                 for x in &e {
                     match x {
-                        T8Refusal::UndeclaredCycle { cycle } => {
-                            assert!(is_directed_cycle(&r, cycle), "seed {seed}");
-                            assert!(cycle.iter().all(|e| !feedback.contains(e)), "seed {seed}");
+                        T8Refusal::UndeclaredTurn { turn } => {
+                            assert!(is_directed_turn(&r, turn), "seed {seed}");
+                            assert!(turn.iter().all(|e| !feedback.contains(e)), "seed {seed}");
                         }
                         other => panic!("seed {seed}: unexpected {other:?}"),
                     }
@@ -188,7 +188,7 @@ fn prop_t8_admits_exactly_when_the_residual_is_acyclic() {
 }
 
 /// Directed reachability over every edge (depth-first): f = (s, t) lies on
-/// a directed cycle exactly when t reaches s.
+/// a directed turn exactly when t reaches s.
 fn reaches(r: &DeclaredRelations, from: usize, to: usize) -> bool {
     let (mut seen, mut stack) = (vec![false; r.n_nodes], vec![from]);
     while let Some(v) = stack.pop() {
@@ -238,7 +238,7 @@ mod entry_points {
         assert!(is_t8(ground_reading(&s, &r, Some(&c)).energy.as_ref().unwrap_err()));
         // The refusal names the loop and says what to return to.
         match EdgeSeries::from_registrations(&s, &r).unwrap_err() {
-            DeclarationGap::T8(v) => assert!(matches!(&v[0], T8Refusal::UndeclaredCycle { cycle } if cycle.len() == 3)),
+            DeclarationGap::T8(v) => assert!(matches!(&v[0], T8Refusal::UndeclaredTurn { turn } if turn.len() == 3)),
             _ => unreachable!(),
         }
         assert!(DeclarationGap::T8(vec![]).remedy().contains("feedback"));

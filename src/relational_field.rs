@@ -117,7 +117,7 @@ pub struct Ways {
     pub pieces: usize,
     /// n − c: the potential part, fields explained by values at the loci.
     pub potential: usize,
-    /// m − n + c: the balanced part, the independent cycles.
+    /// m − n + c: the balanced part, the independent turns.
     pub balanced: usize,
 }
 
@@ -215,9 +215,9 @@ fn forms_of_relations(series: &EdgeSeries, ts: &[(usize, f64)], rel: &DeclaredRe
     // The bound of each relation entering the readback (98th: every value
     // carries its bound): at a registration, its state bound widened by any
     // gain differing between relations (a sum across relations, as a
-    // closure); over a step, the change bound PC1 reads.
+    // turn sum); over a step, the change bound PC1 reads.
     let exact_bound: Vec<Vec<Expansion>> = (0..k).map(|c| (0..m).map(|e| match ts {
-        [(t, _)] => crate::exact::gain_widened(&series.entry(*t, c, e), &Expansion::of(series.da[*t][c][e]), series.closure_gain[c][e]),
+        [(t, _)] => crate::exact::gain_widened(&series.entry(*t, c, e), &Expansion::of(series.da[*t][c][e]), series.turn_sum_gain[c][e]),
         [(_, _), (t0, _)] => series.change_bound_exact(*t0, c, e),
         _ => unreachable!("forms are read at one registration or over one step"),
     }).collect()).collect();
@@ -238,7 +238,7 @@ fn forms_of_relations(series: &EdgeSeries, ts: &[(usize, f64)], rel: &DeclaredRe
 /// and every ground variable is read from it. Registered directly
 /// (`from_relations`, ER-1), it is the general case. Registered at the loci
 /// (`new`), the relations are formed as x[s] − x[t] first; that is the
-/// special case in which every closure is 0 by identity.
+/// special case in which every turn sum is 0 by identity.
 #[derive(Debug, Clone)]
 pub struct RelationalField {
     /// The declared sequence of registrations at the loci, when the relations
@@ -476,7 +476,7 @@ impl RelationalField {
                 })
             }).collect()).collect();
             let d = (0..k).map(|c| (0..m).map(|e| Ratio::from_f64(match ts {
-                [(t, _)] => crate::exact::gain_widened(&s.entry(*t, c, e), &crate::exact::Expansion::of(s.da[*t][c][e]), s.closure_gain[c][e]).up(),
+                [(t, _)] => crate::exact::gain_widened(&s.entry(*t, c, e), &crate::exact::Expansion::of(s.da[*t][c][e]), s.turn_sum_gain[c][e]).up(),
                 [(_, _), (t0, _)] => s.change_bound_exact(*t0, c, e).up(),
                 _ => unreachable!("a registration or one step"),
             })).collect()).collect();

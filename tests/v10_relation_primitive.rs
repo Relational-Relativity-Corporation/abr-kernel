@@ -7,8 +7,8 @@
 //!      from relations: on every enumerated field, forming the relations from
 //!      the loci and reading them as registered gives every form and every
 //!      ground variable unchanged.
-//!   2. A field registered on its relations reads a resolved closure, which
-//!      no field formed from loci can give (there every closure is 0 by
+//!   2. A field registered on its relations reads a resolved turn sum, which
+//!      no field formed from loci can give (there every turn sum is 0 by
 //!      identity), with energy, connection and freedom all evaluated.
 //!   3. A gain declared on registered relations (Z1a) enters the connection
 //!      grades read from them: an independent gain the proportional grade, a
@@ -25,7 +25,7 @@ mod support;
 use support::*;
 
 use abr_kernel::ground_variables::{minor_pattern, minor_pattern_of, RelationCarrier};
-use abr_kernel::persistence_change::{cycle_change_closure, cycle_change_closure_resolved, cycle_closure, cycle_closure_resolved, EdgeGains, EdgeSeries};
+use abr_kernel::persistence_change::{turn_change_sum, turn_change_sum_resolved, turn_sum, turn_sum_resolved, EdgeGains, EdgeSeries};
 use abr_kernel::relational_field::RelationalField;
 
 /// 1. The locus field is the special case. Over CASES enumerated fields, the
@@ -59,20 +59,20 @@ fn the_locus_field_is_the_special_case_of_the_relation_field() {
         for (t, reg) in w.field.registrations.iter().enumerate() {
             assert_eq!(minor_pattern_of(&w.field.relations, t), minor_pattern(reg, &rel));
         }
-        // Formed from loci, every closed walk closes exactly: relation reduces
+        // Formed from loci, every turn sums to zero exactly: relation reduces
         // to the loci there.
         for t in 0..w.field.relations.n_registrations() {
             for c in 0..k {
                 for (e, f, g) in closed_triangles(&rel) {
-                    let (v, _) = cycle_closure(&w.field.relations, &rel, &[e, f, g], t, c).unwrap();
-                    assert_eq!(v, 0.0, "a locus-formed closure is 0 by identity");
+                    let (v, _) = turn_sum(&w.field.relations, &rel, &[e, f, g], t, c).unwrap();
+                    assert_eq!(v, 0.0, "a locus-formed turn sum is 0 by identity");
                 }
             }
         }
     });
 }
 
-/// Closed walks of three declared relations (any direction), as (edge, sign).
+/// Turns of three declared relations (any direction), as (edge, sign).
 fn closed_triangles(rel: &abr_kernel::operators::DeclaredRelations) -> Vec<((usize, i8), (usize, i8), (usize, i8))> {
     let mut out = Vec::new();
     let m = rel.n_edges();
@@ -80,7 +80,7 @@ fn closed_triangles(rel: &abr_kernel::operators::DeclaredRelations) -> Vec<((usi
         if e == f || f == g || e == g { continue; }
         for se in [1i8, -1] { for sf in [1i8, -1] { for sg in [1i8, -1] {
             let walk = [(e, se), (f, sf), (g, sg)];
-            if abr_kernel::persistence_change::is_closed_walk(rel, &walk) { out.push(((e, se), (f, sf), (g, sg))); }
+            if abr_kernel::persistence_change::is_turn(rel, &walk) { out.push(((e, se), (f, sf), (g, sg))); }
         }}}
     }}}
     out
@@ -90,12 +90,12 @@ fn closed_triangles(rel: &abr_kernel::operators::DeclaredRelations) -> Vec<((usi
 fn triangle() -> abr_kernel::operators::DeclaredRelations { rel(3, vec![(0, 1), (1, 2), (0, 2)]) }
 const WALK: [(usize, i8); 3] = [(0, 1), (1, 1), (2, -1)];
 
-/// 2. Registered on its relations, the field reads a closure that no locus
+/// 2. Registered on its relations, the field reads a turn sum that no locus
 /// field can give, with every variable evaluated together.
 #[test]
-fn a_relation_registered_field_reads_a_resolved_closure_with_every_variable() {
+fn a_relation_registered_field_reads_a_resolved_turn_sum_with_every_variable() {
     let rel = triangle();
-    // a[t][c][e]: component 0 closes to 1 (1 + 1 − 1) at every registration;
+    // a[t][c][e]: component 0 sums to 1 (1 + 1 − 1) at every registration;
     // component 1 changes between registrations. δ = 1/8 throughout.
     let a = vec![
         vec![vec![1.0, 1.0, 1.0], vec![2.0, -1.0, 0.5]],
@@ -107,16 +107,16 @@ fn a_relation_registered_field_reads_a_resolved_closure_with_every_variable() {
     let carrier = relation_carrier(vec![vec![0.5, 0.0, 0.25]; 3], vec![vec![0.125; 3]; 3]);
     let field = whole_of_relations(&rel, series, &carrier);
 
-    // Relation: the closure of component 0 is 1 ± 3/8 at every registration,
-    // resolved. Its change closes exactly (0 ± 3/4 over each step): the
+    // Relation: the turn sum of component 0 is 1 ± 3/8 at every registration,
+    // resolved. Its change sums to zero exactly (0 ± 3/4 over each step): the
     // inconsistency is fixed over the run, and the change does not show it.
     for t in 0..3 {
-        assert_eq!(cycle_closure(&field.relations, &rel, &WALK, t, 0), Some((1.0, 0.375)));
-        assert_eq!(cycle_closure_resolved(&field.relations, &rel, &WALK, t, 0), Some(true));
+        assert_eq!(turn_sum(&field.relations, &rel, &WALK, t, 0), Some((1.0, 0.375)));
+        assert_eq!(turn_sum_resolved(&field.relations, &rel, &WALK, t, 0), Some(true));
     }
     for s in 0..2 {
-        assert_eq!(cycle_change_closure(&field.relations, &rel, &WALK, s, 0), Some((0.0, 0.75)));
-        assert_eq!(cycle_change_closure_resolved(&field.relations, &rel, &WALK, s, 0), Some(false));
+        assert_eq!(turn_change_sum(&field.relations, &rel, &WALK, s, 0), Some((0.0, 0.75)));
+        assert_eq!(turn_change_sum_resolved(&field.relations, &rel, &WALK, s, 0), Some(false));
     }
     // Energy, from the carrier registered across the relations, δ_ε = 1/8:
     // e0 resolved (0.5 > 1/8), e1 not (0 ≤ 1/8), e2 resolved (0.25 > 1/8).

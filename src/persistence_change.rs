@@ -77,7 +77,7 @@
 //   PC-D4  Forced constraint. In a node-derived series, edges with the same
 //          endpoints have identical A at every registration, so their
 //          coupling is fixed by the declaration: an identity, not a reading
-//          (V1). Such pairs are excluded and listed. Every cycle of a
+//          (V1). Such pairs are excluded and listed. Every turn of a
 //          node-derived series also satisfies Σ ±Δ[e] = 0 identically (K7);
 //          only edge-registered values make that a test.
 //   PC-D5  Minimum information. PC1 and PC3 need n ≥ 2; PC2(a) needs k ≥ 2;
@@ -152,14 +152,14 @@ pub enum EdgeOrigin {
 /// same entries carry the same factor at both steps (PC2(b)), so neither
 /// classification changes.
 ///
-/// **Closures (proposed correction, Generator, 2026-11-23; I-SC-D15 (v);
-/// Origin to confirm).** A K7 closure Σ s_e·A[c][e] sums one component across
+/// **Turn sums (proposed correction, Generator, 2026-11-23; I-SC-D15 (v);
+/// Origin to confirm).** A K7 turn sum Σ s_e·A[c][e] sums one component across
 /// edges. A factor per component multiplies the whole sum and changes no
-/// closure. A factor that differs between edges does not, so a gain per edge
-/// and an independent gain both enter the closure bound, as γ·(|v| + h) on
+/// turn sum. A factor that differs between edges does not, so a gain per edge
+/// and an independent gain both enter the turn sum bound, as γ·(|v| + h) on
 /// each term (`closure_gain`). *Was (10.3.0):* the shared edge gain entered
-/// `change_magnitude` only, and neither gain reached `cycle_closure` or
-/// `cycle_change_closure`.
+/// `change_magnitude` only, and neither gain reached `turn_sum` or
+/// `turn_change_sum`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct EdgeSeries {
     /// a[t][c][e], the nearest f64 to the exact relation value.
@@ -178,7 +178,7 @@ pub struct EdgeSeries {
     /// Shared gain bound [c][e] (a component factor times an edge factor):
     /// enters reported change magnitudes only (Z1a). *Qualified
     /// (2026-11-23, I-SC-D15 (v)): "only" holds for PC1, PC2 and PC3. Its
-    /// edge part also enters K7 closures, through `closure_gain`.*
+    /// edge part also enters K7 turn sums, through `turn_sum_gain`.*
     pub shared_gain: Vec<Vec<f64>>,
     /// Independent gain bound [c][e] on edge-registered values: enters the
     /// bound of every minor that mixes components (PC2(a), PC3) and reported
@@ -187,10 +187,10 @@ pub struct EdgeSeries {
     pub mixed_gain: Vec<Vec<f64>>,
     /// Gain bound [c][e] that differs between the edges of one component:
     /// (1 + γ_e)(1 + γ_ce) − 1 from the edge and independent parts. Enters the
-    /// bound of every term of a K7 closure (I-SC-D15 (v)). Zero for
-    /// node-derived series, whose closures are 0 by identity and whose
+    /// bound of every term of a K7 turn sum (I-SC-D15 (v)). Zero for
+    /// node-derived series, whose turn sums are 0 by identity and whose
     /// unshared gains are already in `da` and `dgain`.
-    pub closure_gain: Vec<Vec<f64>>,
+    pub turn_sum_gain: Vec<Vec<f64>>,
     pub origin: EdgeOrigin,
     /// Edge pairs whose coupling the declaration fixes (PC-D4).
     pub forced_pairs: Vec<(usize, usize)>,
@@ -239,8 +239,8 @@ impl EdgeSeries {
             }
         }
         let mixed_gain = vec![vec![0.0; rel.n_edges()]; k];
-        let closure_gain = mixed_gain.clone();
-        Ok(EdgeSeries { a, a_lo, da, da_rep, dgain, shared_gain, mixed_gain, closure_gain, origin: EdgeOrigin::NodeDerived, forced_pairs })
+        let turn_sum_gain = mixed_gain.clone();
+        Ok(EdgeSeries { a, a_lo, da, da_rep, dgain, shared_gain, mixed_gain, turn_sum_gain, origin: EdgeOrigin::NodeDerived, forced_pairs })
     }
 
     /// From a registered value per declared edge and component, with δ per
@@ -277,7 +277,7 @@ impl EdgeSeries {
             dgain: vec![vec![vec![0.0; m]; k]; steps],
             shared_gain: vec![vec![0.0; m]; k],
             mixed_gain: vec![vec![0.0; m]; k],
-            closure_gain: vec![vec![0.0; m]; k],
+            turn_sum_gain: vec![vec![0.0; m]; k],
             a_lo: vec![vec![vec![0.0; m]; k]; a.len()],
             da_rep: da.clone(),
             a, da, origin: EdgeOrigin::EdgeRegistered, forced_pairs: Vec::new(),
@@ -311,7 +311,7 @@ impl EdgeSeries {
         }
         self.shared_gain = (0..k).map(|c| (0..m)
             .map(|e| combined_gain(gains.component[c], gains.edge[e])).collect()).collect();
-        self.closure_gain = (0..k).map(|c| (0..m)
+        self.turn_sum_gain = (0..k).map(|c| (0..m)
             .map(|e| combined_gain(gains.edge[e], gains.independent[c][e])).collect()).collect();
         self.mixed_gain = gains.independent;
         self
@@ -485,7 +485,7 @@ pub struct EvolutionCount {
     pub component: usize,
     /// Γ: declared steps with change resolved at δ.
     pub changed_steps: usize,
-    /// Declared steps in the cycle of analysis (registrations − 1).
+    /// Declared steps in the sequence of analysis (registrations − 1).
     pub steps: usize,
 }
 
@@ -782,42 +782,43 @@ pub fn coupled_change_pairs_including_forced(pc: &PersistenceChange) -> Result<V
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Closure around a cycle (K7 / HB-1 on the series; I-SC-D10)
+// Turn sum around a turn (K7 / HB-1 on the series; I-SC-D10)
 // ═══════════════════════════════════════════════════════════════════════════
 //
-// A cycle is a closed walk over declared edges, each with a sign: +1 when
+// A turn is a walk over declared edges that comes round to its first locus in
+// the declared shape (107th), each with a sign: +1 when
 // traversed along its declared direction, −1 against it. Traversal is an
-// order of analysis (Df2a); no edge is reversed. The closure at registration
-// t is A_cyc = Σ s_e·A_t[c][e], half-width Σ δA_t[c][e]; it holds at δ when
-// |A_cyc| ≤ its half-width. On a node-derived series it is 0 by identity
+// order of analysis (Df2a); no edge is reversed. The turn sum at registration
+// t is A_turn = Σ s_e·A_t[c][e], half-width Σ δA_t[c][e]; it holds at δ when
+// |A_turn| ≤ its half-width. On a node-derived series it is 0 by identity
 // (PC-D4); only edge-registered values make it a test. A declared gain that
 // differs between edges (per edge, or per entry) widens each term's bound to
 // h + γ·(|v| + h); a gain per component does not enter (I-SC-D15 (v);
 // proposed correction, 2026-11-23).
 //
-// I-SC-D10 (Derived): the closure of the change Σ s_e·Δ_s[c][e] equals
-// A_cyc(s+1) − A_cyc(s), with half-width Σ δΔ_s[c][e]. If closure holds at δ
+// I-SC-D10 (Derived): the turn sum of the change Σ s_e·Δ_s[c][e] equals
+// A_turn(s+1) − A_turn(s), with half-width Σ δΔ_s[c][e]. If turn sum holds at δ
 // at both registrations, it holds on the change *(qualified, 2026-11-23: when
 // δ is repeatability alone; with a Z1a offset declared, the state bounds
 // carry the offset and the change bound does not, so the change can resolve
 // while both states hold, correctly. Test
 // `isc_d10_with_an_offset_the_change_can_resolve_while_both_states_hold`)*.
 // The converse fails: an
-// inconsistency fixed over the step (a calibration offset around the cycle)
+// inconsistency fixed over the step (a calibration offset around the turn)
 // cancels in the change. Persistent chain structure (W9) is read in state;
-// change closure reads only what changed.
+// change turn sum reads only what changed.
 
-/// True when `cycle` (edge, sign) is a closed walk over the declared edges.
-pub fn is_closed_walk(rel: &DeclaredRelations, cycle: &[(usize, i8)]) -> bool {
-    if cycle.is_empty() { return false; }
+/// True when `turn` (edge, sign) is a turn over the declared edges.
+pub fn is_turn(rel: &DeclaredRelations, turn: &[(usize, i8)]) -> bool {
+    if turn.is_empty() { return false; }
     let ends = |&(e, sg): &(usize, i8)| {
         let (s, t) = rel.edges[e];
         if sg >= 0 { (s, t) } else { (t, s) }
     };
-    if cycle.iter().any(|&(e, sg)| e >= rel.n_edges() || (sg != 1 && sg != -1)) { return false; }
-    let start = ends(&cycle[0]).0;
+    if turn.iter().any(|&(e, sg)| e >= rel.n_edges() || (sg != 1 && sg != -1)) { return false; }
+    let start = ends(&turn[0]).0;
     let mut at = start;
-    for step in cycle {
+    for step in turn {
         let (from, to) = ends(step);
         if from != at { return false; }
         at = to;
@@ -825,14 +826,14 @@ pub fn is_closed_walk(rel: &DeclaredRelations, cycle: &[(usize, i8)]) -> bool {
     at == start
 }
 
-// Closures are exact sums (Origin, 41st: decompose, do not simplify). The
+// Turn sums are exact sums (Origin, 41st: decompose, do not simplify). The
 // value is one exact signed sum over the walk, rounded once; the bound is one
 // exact sum of the term bounds, each widened by the gain that differs between
-// edges, h + γ·(|v| + h) (I-SC-D15 (vi)), rounded up. A walk's closure is
+// edges, h + γ·(|v| + h) (I-SC-D15 (vi)), rounded up. A walk's turn sum is
 // therefore the same whichever locus it starts from (Df2a). *Was (to
 // 6d09e61):* a left-to-right f64 fold, in which the walk 0 → 1 → 2 ← 0 over
 // (2⁵⁴, −0.5, 2⁵⁴) read 0 from two starting loci and −0.5 from the third.
-// As in `mixed`, h includes any offset bound, so the state closure is
+// As in `mixed`, h includes any offset bound, so the state turn sum is
 // conservative there.
 
 /// Term bound h + γ·(|v| + h), exactly, into `bound`.
@@ -841,75 +842,75 @@ fn add_term_bound(bound: &mut crate::exact::Expansion, v_abs: &crate::exact::Exp
     if g != 0.0 { bound.add_times(v_abs, g); bound.add_times(h, g); }
 }
 
-/// Closure at registration t. `None` when `cycle` is not a closed walk.
+/// Turn sum at registration t. `None` when `turn` is not a turn.
 ///
 /// **What the pair guarantees** (the Verifier's batch-2 note, 46th): the value
-/// is the exact closure rounded once, the bound the exact bound rounded up.
+/// is the exact turn sum rounded once, the bound the exact bound rounded up.
 /// A caller comparing the pair, |value| > bound, gets the one-sided guarantee
-/// of `exact.rs`: a closure read as resolved is resolved exactly. A closure
+/// of `exact.rs`: a turn sum read as resolved is resolved exactly. A turn sum
 /// within one rounding unit above its bound can read as holding. For the
-/// exact verdict use `cycle_closure_resolved`.
-pub fn cycle_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], t: usize, c: usize)
+/// exact verdict use `turn_sum_resolved`.
+pub fn turn_sum(series: &EdgeSeries, rel: &DeclaredRelations, turn: &[(usize, i8)], t: usize, c: usize)
     -> Option<(f64, f64)>
 {
-    closure_exact(series, rel, cycle, t, c).map(|(v, h)| (v.nearest(), h.up()))
+    turn_sum_exact(series, rel, turn, t, c).map(|(v, h)| (v.nearest(), h.up()))
 }
 
-/// The exact verdict on the closure at registration t: `Some(true)` when it is
+/// The exact verdict on the turn sum at registration t: `Some(true)` when it is
 /// resolved (does not hold at δ), decided on the exact value and bound.
-pub fn cycle_closure_resolved(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], t: usize, c: usize)
+pub fn turn_sum_resolved(series: &EdgeSeries, rel: &DeclaredRelations, turn: &[(usize, i8)], t: usize, c: usize)
     -> Option<bool>
 {
-    closure_exact(series, rel, cycle, t, c).map(|(v, h)| crate::exact::exceeds(&v, &h))
+    turn_sum_exact(series, rel, turn, t, c).map(|(v, h)| crate::exact::exceeds(&v, &h))
 }
 
-fn closure_exact(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], t: usize, c: usize)
+fn turn_sum_exact(series: &EdgeSeries, rel: &DeclaredRelations, turn: &[(usize, i8)], t: usize, c: usize)
     -> Option<(crate::exact::Expansion, crate::exact::Expansion)>
 {
     // The walk is checked before any registration is read: an open walk is
     // `None` whatever `t` is (the Verifier's probe, 39th; 28f39d8 read
     // `series.a[t]` first and panicked on an out-of-range t).
-    if !is_closed_walk(rel, cycle) { return None; }
+    if !is_turn(rel, turn) { return None; }
     use crate::exact::Expansion;
     let da = &series.da[t][c];
     let (mut v, mut h) = (Expansion::new(), Expansion::new());
-    for &(e, sg) in cycle {
+    for &(e, sg) in turn {
         let ae = series.entry(t, c, e);
         v.add_times(&ae, sg as f64);
-        add_term_bound(&mut h, &ae.abs(), &Expansion::of(da[e]), series.closure_gain[c][e]);
+        add_term_bound(&mut h, &ae.abs(), &Expansion::of(da[e]), series.turn_sum_gain[c][e]);
     }
     Some((v, h))
 }
 
-/// Closure of the change over step s. `None` when `cycle` is not a closed walk.
-/// The pair carries the one-sided guarantee described at `cycle_closure`; for
-/// the exact verdict use `cycle_change_closure_resolved`.
-pub fn cycle_change_closure(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], s: usize, c: usize)
+/// Turn sum of the change over step s. `None` when `turn` is not a turn.
+/// The pair carries the one-sided guarantee described at `turn_sum`; for
+/// the exact verdict use `turn_change_sum_resolved`.
+pub fn turn_change_sum(series: &EdgeSeries, rel: &DeclaredRelations, turn: &[(usize, i8)], s: usize, c: usize)
     -> Option<(f64, f64)>
 {
-    change_closure_exact(series, rel, cycle, s, c).map(|(v, h)| (v.nearest(), h.up()))
+    change_turn_sum_exact(series, rel, turn, s, c).map(|(v, h)| (v.nearest(), h.up()))
 }
 
-/// The exact verdict on the change closure over step s.
-pub fn cycle_change_closure_resolved(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], s: usize, c: usize)
+/// The exact verdict on the change turn sum over step s.
+pub fn turn_change_sum_resolved(series: &EdgeSeries, rel: &DeclaredRelations, turn: &[(usize, i8)], s: usize, c: usize)
     -> Option<bool>
 {
-    change_closure_exact(series, rel, cycle, s, c).map(|(v, h)| crate::exact::exceeds(&v, &h))
+    change_turn_sum_exact(series, rel, turn, s, c).map(|(v, h)| crate::exact::exceeds(&v, &h))
 }
 
-fn change_closure_exact(series: &EdgeSeries, rel: &DeclaredRelations, cycle: &[(usize, i8)], s: usize, c: usize)
+fn change_turn_sum_exact(series: &EdgeSeries, rel: &DeclaredRelations, turn: &[(usize, i8)], s: usize, c: usize)
     -> Option<(crate::exact::Expansion, crate::exact::Expansion)>
 {
     // Checked first, as in `cycle_closure` (39th). *Was (10.3.0):* `change(s)`
     // ran before the check, so an open walk with an out-of-range s panicked.
-    if !is_closed_walk(rel, cycle) { return None; }
+    if !is_turn(rel, turn) { return None; }
     use crate::exact::Expansion;
     let (mut v, mut h) = (Expansion::new(), Expansion::new());
-    for &(e, sg) in cycle {
+    for &(e, sg) in turn {
         // Δ[e] exactly, from the two registrations (not the rounded change).
         let de = series.change_exact(s, c, e);
         v.add_times(&de, sg as f64);
-        add_term_bound(&mut h, &de.abs(), &series.change_bound_exact(s, c, e), series.closure_gain[c][e]);
+        add_term_bound(&mut h, &de.abs(), &series.change_bound_exact(s, c, e), series.turn_sum_gain[c][e]);
     }
     Some((v, h))
 }
@@ -1021,3 +1022,15 @@ impl PersistenceChange {
         out
     }
 }
+
+// ── The old names, kept as deprecated aliases (Origin, 2026-11-26, 107th).
+#[deprecated(note = "renamed is_turn (Origin, 107th)")]
+pub fn is_closed_walk(rel: &DeclaredRelations, turn: &[(usize, i8)]) -> bool { is_turn(rel, turn) }
+#[deprecated(note = "renamed turn_sum (Origin, 107th)")]
+pub fn cycle_closure(series: &EdgeSeries, rel: &DeclaredRelations, turn: &[(usize, i8)], t: usize, c: usize) -> Option<(f64, f64)> { turn_sum(series, rel, turn, t, c) }
+#[deprecated(note = "renamed turn_sum_resolved (Origin, 107th)")]
+pub fn cycle_closure_resolved(series: &EdgeSeries, rel: &DeclaredRelations, turn: &[(usize, i8)], t: usize, c: usize) -> Option<bool> { turn_sum_resolved(series, rel, turn, t, c) }
+#[deprecated(note = "renamed turn_change_sum (Origin, 107th)")]
+pub fn cycle_change_closure(series: &EdgeSeries, rel: &DeclaredRelations, turn: &[(usize, i8)], s: usize, c: usize) -> Option<(f64, f64)> { turn_change_sum(series, rel, turn, s, c) }
+#[deprecated(note = "renamed turn_change_sum_resolved (Origin, 107th)")]
+pub fn cycle_change_closure_resolved(series: &EdgeSeries, rel: &DeclaredRelations, turn: &[(usize, i8)], s: usize, c: usize) -> Option<bool> { turn_change_sum_resolved(series, rel, turn, s, c) }

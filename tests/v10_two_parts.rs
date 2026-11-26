@@ -1,14 +1,14 @@
 //! The two parts of every field of relations (Proposed, Origin, 2026-11-26,
 //! 99th): the balanced part (at every locus what enters equals what leaves,
 //! read through the readback K9, 96th) and the potential part (explained by
-//! values at the loci, closing every cycle). Their numbers of independent
+//! values at the loci, closing every turn). Their numbers of independent
 //! ways are fixed by the declared relations alone.
 //!
 //! Each fixture is a whole relational field, formed at the loci with the
 //! carrier declared (`whole`), or from relations registered directly
 //! (`whole_of_relations`), so every variable is evaluated together; each
 //! claim is read from the parts the field reports (`spatial`, `persistence`,
-//! `ways`). The cycle basis is read from the kernel's declared objects (K7)
+//! `ways`). The turn basis is read from the kernel's declared objects (K7)
 //! on a spanning forest stated in the test, independently of how the field
 //! counts its ways.
 //!
@@ -29,7 +29,7 @@ use std::cell::RefCell;
 use abr_kernel::operators::DeclaredRelations;
 use abr_kernel::persistence_change::EdgeSeries;
 use abr_kernel::relational_field::RelationalField;
-use abr_kernel::topology::{basis_closures, cycle_basis, CycleBasis};
+use abr_kernel::topology::{basis_turn_sums, turn_basis, TurnBasis};
 use support::*;
 
 /// A spanning forest of the declared relations, stated by the test: each
@@ -45,11 +45,11 @@ fn forest(rel: &DeclaredRelations) -> Vec<usize> {
     tree
 }
 
-fn basis(rel: &DeclaredRelations) -> CycleBasis { cycle_basis(rel, &forest(rel)).expect("a stated spanning forest") }
+fn basis(rel: &DeclaredRelations) -> TurnBasis { turn_basis(rel, &forest(rel)).expect("a stated spanning forest") }
 
 /// 1. The count of ways: the potential part has n − c independent ways (the
 /// relations of a spanning forest), the balanced part m − n + c (the
-/// independent cycles), and together they account for every relation.
+/// independent turns), and together they account for every relation.
 #[test]
 fn the_ways_of_the_two_parts_account_for_every_relation() {
     for_all("two parts: ways", 0x99_01, |r| {
@@ -62,20 +62,20 @@ fn the_ways_of_the_two_parts_account_for_every_relation() {
         assert_eq!(ways.relations, rel.n_edges());
         assert_eq!(ways.loci, rel.n_nodes);
         assert_eq!(ways.potential, b.tree.len(), "potential ways are the forest's relations");
-        assert_eq!(ways.balanced, b.cycles.len(), "balanced ways are the independent cycles");
+        assert_eq!(ways.balanced, b.turns.len(), "balanced ways are the independent turns");
         assert_eq!(ways.potential + ways.balanced, ways.relations, "together, every relation");
         assert_eq!(ways.potential, ways.loci - ways.pieces);
     });
 }
 
 /// Relations registered directly as integer combinations of the declared
-/// cycles: each cycle's relations carry its coefficient, with the sign the
-/// cycle travels them.
-fn balanced_series(r: &mut Seeds, rel: &DeclaredRelations, b: &CycleBasis, k: usize, regs: usize) -> EdgeSeries {
+/// turns: each turn's relations carry its coefficient, with the sign the
+/// turn travels them.
+fn balanced_series(r: &mut Seeds, rel: &DeclaredRelations, b: &TurnBasis, k: usize, regs: usize) -> EdgeSeries {
     let m = rel.n_edges();
     let a: Vec<Vec<Vec<f64>>> = (0..regs).map(|_| (0..k).map(|_| {
         let mut g = vec![0.0; m];
-        for cy in &b.cycles {
+        for cy in &b.turns {
             let z = r.int(-3, 3) as f64;
             for &(e, sg) in cy { g[e] += z * sg as f64; }
         }
@@ -89,8 +89,8 @@ fn carrier_for(m: usize, regs: usize) -> abr_kernel::ground_variables::RelationC
 }
 
 /// 2. Membership. (a) A field formed from the loci lies in the potential
-/// part: every declared cycle closes to 0 exactly. (b) A field registered as
-/// a combination of the declared cycles lies in the balanced part: at every
+/// part: every declared turn sums to 0 exactly. (b) A field registered as
+/// a combination of the declared turns lies in the balanced part: at every
 /// locus, in every component and registration, what enters equals what
 /// leaves. The check can tell: some locus-formed field is not balanced.
 #[test]
@@ -104,12 +104,12 @@ fn each_part_is_what_it_is_declared_to_be() {
         // (a) the potential part
         let w = whole(&rel, enumerated_declared(r, &rel, k, regs, 0.5, false, false));
         for t in 0..regs { for c in 0..k {
-            for (v, _) in basis_closures(&w.field.relations, &rel, &b, t, c) { assert_eq!(v, 0.0, "a locus-formed field closes every cycle"); }
+            for (v, _) in basis_turn_sums(&w.field.relations, &rel, &b, t, c) { assert_eq!(v, 0.0, "a locus-formed field closes every turn"); }
         } }
         let f = &w.field.spatial;
         if f.iter().any(|x| x.leaving != x.entering) { *unbalanced_seen.borrow_mut() += 1; }
         // (b) the balanced part
-        if b.cycles.is_empty() { return; }
+        if b.turns.is_empty() { return; }
         let m = rel.n_edges();
         let field: RelationalField = whole_of_relations(&rel, balanced_series(r, &rel, &b, k, regs), &carrier_for(m, regs));
         for (t, x) in field.spatial.iter().enumerate() {

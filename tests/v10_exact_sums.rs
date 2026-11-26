@@ -1,7 +1,7 @@
 //! Kernel V10.3: exact sums (Origin, 2026-11-23, 41st: "we are decomposing
 //! complex systems but we're not simplifying them").
 //!
-//! A closure, an accumulation B or a passage Ξ is a decomposition of the
+//! A turn sum, an accumulation B or a passage Ξ is a decomposition of the
 //! field into a sum of registered entries. Each is checked here against an
 //! exact integer reference: every value is dyadic, scaled by 2¹² to an i128,
 //! where every sum is exact. Values span 2⁰ to 2⁵⁴, so f64 addition in
@@ -17,7 +17,7 @@ mod synthetic_identity;
 use abr_kernel::exact::*;
 use abr_kernel::operators::{passage_of_accumulation, passage_of_accumulation_half_width, DeclaredRelations, EdgeProvenance};
 use abr_kernel::persistence_change::*;
-use abr_kernel::topology::cycle_basis;
+use abr_kernel::topology::turn_basis;
 use std::cmp::Ordering;
 use std::sync::Mutex;
 
@@ -90,7 +90,7 @@ fn sequential_addition_loses_what_the_exact_sum_keeps() {
     assert_eq!(sum_nearest([-0.5, big, -big]), -0.5);
 }
 
-// ── Closures: the same from every starting locus ──────────────────────────
+// ── Turn sums: the same from every starting locus ──────────────────────────
 
 fn triangle() -> DeclaredRelations { rel(3, vec![(0, 1), (1, 2), (0, 2)]) }
 
@@ -99,10 +99,10 @@ fn k7_a_closure_is_the_same_from_every_starting_locus() {
     let r = triangle();
     let big = 2f64.powi(54);
     let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![big, -0.5, big]]; 2], vec![vec![vec![0.0; 3]]; 2]).unwrap();
-    // The cycle 0 → 1 → 2 ← 0 read from loci 0, 1 and 2. Before 41st these
+    // The turn 0 → 1 → 2 ← 0 read from loci 0, 1 and 2. Before 41st these
     // read 0, 0 and −0.5.
     for w in [vec![(0, 1), (1, 1), (2, -1)], vec![(1, 1), (2, -1), (0, 1)], vec![(2, -1), (0, 1), (1, 1)]] {
-        assert_eq!(cycle_closure(&s, &r, &w, 0, 0).unwrap(), (-0.5, 0.0), "from walk {w:?}");
+        assert_eq!(turn_sum(&s, &r, &w, 0, 0).unwrap(), (-0.5, 0.0), "from walk {w:?}");
     }
 }
 
@@ -129,16 +129,16 @@ fn forest(rel: &DeclaredRelations) -> Vec<usize> {
 }
 
 /// Over enumerated fields with mixed magnitudes and declared gains: every
-/// rotation of every basis cycle reads the same value and bound, in state
+/// rotation of every basis turn reads the same value and bound, in state
 /// and on change; the value is the exact sum rounded once; the bound is at or
 /// above the exact bound and the smallest f64 that is; and a resolution is
 /// read only where it holds exactly.
 #[test]
-fn prop_closures_are_exact_and_order_free() {
+fn prop_turn_sums_are_exact_and_order_free() {
     let (lossy, resolved) = (Mutex::new(0usize), Mutex::new(0usize));
-    for_all("exact closures", |r| {
+    for_all("exact turn sums", |r| {
         let rel = enumerated_rel(r);
-        let basis = cycle_basis(&rel, &forest(&rel)).unwrap();
+        let basis = turn_basis(&rel, &forest(&rel)).unwrap();
         let m = rel.n_edges();
         let a: Vec<Vec<Vec<f64>>> = (0..3).map(|_| vec![(0..m).map(|_| r.wide()).collect()]).collect();
         let d: Vec<Vec<Vec<f64>>> = (0..3).map(|_| vec![(0..m).map(|_| r.int(0, 4) as f64 / 16.0).collect()]).collect();
@@ -150,18 +150,18 @@ fn prop_closures_are_exact_and_order_free() {
         let g: Vec<i128> = (0..m).map(|e| to_i(ge[e]) + to_i(gi[e]) + to_i(ge[e]) * to_i(gi[e]) / 4096).collect();
         // Exact term bound h + γ(|v| + h), scaled by 2¹²: γ and h, v are scaled, so divide once.
         let term = |v: i128, h: i128, g: i128| h + g * (v.abs() + h) / 4096;
-        for cy in &basis.cycles {
+        for cy in &basis.turns {
             let rot: Vec<Vec<(usize, i8)>> = (0..cy.len()).map(|i| cy[i..].iter().chain(&cy[..i]).copied().collect()).collect();
             for t in 0..3 {
                 let v: i128 = cy.iter().map(|&(e, sg)| sg as i128 * to_i(a[t][0][e])).sum();
                 let h: i128 = cy.iter().map(|&(e, _)| term(to_i(a[t][0][e]), to_i(d[t][0][e]), g[e])).sum();
-                let read = cycle_closure(&s, &rel, cy, t, 0).unwrap();
+                let read = turn_sum(&s, &rel, cy, t, 0).unwrap();
                 assert_eq!(read.0, nearest_of(v));
                 assert_ne!(cmp(read.1, h), Ordering::Less);
                 assert_eq!(cmp(read.1.next_down(), h), Ordering::Less);
-                for w in &rot { assert_eq!(cycle_closure(&s, &rel, w, t, 0).unwrap(), read); }
+                for w in &rot { assert_eq!(turn_sum(&s, &rel, w, t, 0).unwrap(), read); }
                 if read.0.abs() > read.1 { *resolved.lock().unwrap() += 1; assert!(v.abs() > h); }
-                // Would sequential f64 addition have read this closure differently?
+                // Would sequential f64 addition have read this turn sum differently?
                 let seq = cy.iter().fold(0.0, |acc, &(e, sg)| acc + sg as f64 * a[t][0][e]);
                 if seq != read.0 { *lossy.lock().unwrap() += 1; }
             }
@@ -169,10 +169,10 @@ fn prop_closures_are_exact_and_order_free() {
                 let dv = |e: usize| to_i(a[st + 1][0][e]) - to_i(a[st][0][e]);
                 let v: i128 = cy.iter().map(|&(e, sg)| sg as i128 * dv(e)).sum();
                 let h: i128 = cy.iter().map(|&(e, _)| term(dv(e), to_i(d[st][0][e]) + to_i(d[st + 1][0][e]), g[e])).sum();
-                let read = cycle_change_closure(&s, &rel, cy, st, 0).unwrap();
+                let read = turn_change_sum(&s, &rel, cy, st, 0).unwrap();
                 assert_eq!(read.0, nearest_of(v));
                 assert_ne!(cmp(read.1, h), Ordering::Less);
-                for w in &rot { assert_eq!(cycle_change_closure(&s, &rel, w, st, 0).unwrap(), read); }
+                for w in &rot { assert_eq!(turn_change_sum(&s, &rel, w, st, 0).unwrap(), read); }
                 if read.0.abs() > read.1 { assert!(v.abs() > h); }
             }
         }

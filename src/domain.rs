@@ -514,7 +514,7 @@ fn records(d: &DomainDeclaration, field: &RelationalField, s: &EdgeSeries, en: &
 // A stage is a stretch of the sequence over which a declared set of
 // persistences holds; its boundaries are where one begins, ends or reverses
 // (I-SC-D18). Listed here for persistent imbalance and persistent
-// arrangement. Persistent closure is 0 by identity on node-derived fields
+// arrangement. Persistent turn sum is 0 by identity on node-derived fields
 // (PC-D4) and is read on edge-registered series. Locating a stage as a band
 // (where boundaries fall between resolved changes) uses parameters the
 // application declares; it is not done here.

@@ -19,9 +19,9 @@
 //! marked not invariant must be *exercised*: some enumerated field must change
 //! its classification. So the test fails if a cell is misstated either way.
 //!
-//! The same mechanism also settles the Z1a gain bounds for K7 closures
+//! The same mechanism also settles the Z1a gain bounds for K7 turn sums
 //! (part (v)). It found that a declared per-edge or per-entry gain did not
-//! reach `cycle_closure` or `cycle_change_closure`.
+//! reach `turn_sum` or `turn_change_sum`.
 //!
 //! [IMPL] SYNTHETIC FIXTURES: values and factors are chosen to exercise the
 //! forms, and are dyadic so every product is exact. They establish that the
@@ -34,7 +34,7 @@ mod synthetic_identity;
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{DeclaredRelations, EdgeProvenance, NodeField};
 use abr_kernel::persistence_change::*;
-use abr_kernel::topology::{cycle_basis, CycleBasis};
+use abr_kernel::topology::{turn_basis, TurnBasis};
 use std::sync::Mutex;
 
 fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
@@ -71,7 +71,7 @@ fn for_all(name: &str, prop: impl Fn(&mut Seeds)) {
     }
 }
 
-/// An enumerated field with cycles: distinct directed edges, no self-relation.
+/// An enumerated field with turns: distinct directed edges, no self-relation.
 fn enumerated_rel(r: &mut Seeds) -> DeclaredRelations {
     let n = r.usize(3, 5);
     let m = r.usize(n, 8.min(n * (n - 1)));
@@ -85,7 +85,7 @@ fn enumerated_rel(r: &mut Seeds) -> DeclaredRelations {
 
 /// A spanning forest stated by the test (the kernel never chooses one):
 /// each edge in declared order that joins two parts.
-fn stated_basis(rel: &DeclaredRelations) -> CycleBasis {
+fn stated_basis(rel: &DeclaredRelations) -> TurnBasis {
     let mut part: Vec<usize> = (0..rel.n_nodes).collect();
     fn root(p: &mut [usize], v: usize) -> usize { let mut v = v; while p[v] != v { v = p[v]; } v }
     let mut tree = Vec::new();
@@ -93,7 +93,7 @@ fn stated_basis(rel: &DeclaredRelations) -> CycleBasis {
         let (a, b) = (root(&mut part, s), root(&mut part, t));
         if a != b { part[a] = b; tree.push(e); }
     }
-    cycle_basis(rel, &tree).expect("a spanning forest of the declared field")
+    turn_basis(rel, &tree).expect("a spanning forest of the declared field")
 }
 
 /// Edge values [t][c][e] and repeatability bounds, two or three components.
@@ -118,11 +118,11 @@ enum Kind { C, E, CE, X }
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Over { Run, Reg }
 #[derive(Clone, Copy, Debug, PartialEq)]
-enum Form { Pc1, Pc2a, Pc2b, Pc3, Closure, ChangeClosure }
+enum Form { Pc1, Pc2a, Pc2b, Pc3, TurnSum, TurnChangeSum }
 
 const KINDS: [Kind; 4] = [Kind::C, Kind::E, Kind::CE, Kind::X];
 const OVERS: [Over; 2] = [Over::Run, Over::Reg];
-const FORMS: [Form; 6] = [Form::Pc1, Form::Pc2a, Form::Pc2b, Form::Pc3, Form::Closure, Form::ChangeClosure];
+const FORMS: [Form; 6] = [Form::Pc1, Form::Pc2a, Form::Pc2b, Form::Pc3, Form::TurnSum, Form::TurnChangeSum];
 
 /// I-SC-D15 for edge fields: true where every scale of that kind leaves the
 /// form's classifications unchanged.
@@ -138,17 +138,17 @@ const FORMS: [Form; 6] = [Form::Pc1, Form::Pc2a, Form::Pc2b, Form::Pc3, Form::Cl
 ///   they need λ_ie·λ_jf = λ_je·λ_if: C, E and CE pass, X does not. PC3
 ///   compares the classification of two states, each read in its own
 ///   registration, so it also passes per registration.
-/// - A closure sums entries of one component across edges, so it needs one
-///   factor per component: C only. The state closure passes per
-///   registration; the change closure does not.
+/// - A turn sum sums entries of one component across edges, so it needs one
+///   factor per component: C only. The state turn sum passes per
+///   registration; the change turn sum does not.
 fn invariant(form: Form, kind: Kind, over: Over) -> bool {
     use Form::*;
     match (form, over) {
         (Pc1 | Pc2b, Over::Run) => true,
         (Pc2a, Over::Run) => kind != Kind::X,
         (Pc3, _) => kind != Kind::X,
-        (Closure, _) => kind == Kind::C,
-        (ChangeClosure, Over::Run) => kind == Kind::C,
+        (TurnSum, _) => kind == Kind::C,
+        (TurnChangeSum, Over::Run) => kind == Kind::C,
         (_, Over::Reg) => false,
     }
 }
@@ -190,17 +190,17 @@ fn scaled(a: &[Vec<Vec<f64>>], d: &[Vec<Vec<f64>>], f: &[Vec<Vec<f64>>]) -> Edge
 
 /// The classifications of one form, in a fixed order. Signs are not part of
 /// a classification (they reverse under a negative factor; part (iv)).
-fn classifications(s: &EdgeSeries, rel: &DeclaredRelations, basis: &CycleBasis, form: Form) -> String {
+fn classifications(s: &EdgeSeries, rel: &DeclaredRelations, basis: &TurnBasis, form: Form) -> String {
     let holds = |(v, h): (f64, f64)| v.abs() <= h;
     match form {
         Form::Pc1 => format!("{:?}", relation_changes(s).iter().map(|x| (x.step, x.component, x.edge, x.reading)).collect::<Vec<_>>()),
         Form::Pc2a => format!("{:?}", coupling_across_components(s).map(|c| c.readings.iter().map(|x| (x.e, x.f, x.over, x.reading)).collect::<Vec<_>>())),
         Form::Pc2b => format!("{:?}", coupling_across_steps(s).map(|c| c.readings.iter().map(|x| (x.e, x.f, x.over, x.reading)).collect::<Vec<_>>())),
         Form::Pc3 => format!("{:?}", arrangement_steps(s).map(|xs| xs.iter().map(|x| (x.step, x.e, x.f, x.i, x.j, x.reading)).collect::<Vec<_>>())),
-        Form::Closure => format!("{:?}", (0..s.n_registrations()).flat_map(|t| (0..s.k()).flat_map(move |c|
-            basis.cycles.iter().map(move |cy| holds(cycle_closure(s, rel, cy, t, c).unwrap())))).collect::<Vec<_>>()),
-        Form::ChangeClosure => format!("{:?}", (0..s.n_steps()).flat_map(|st| (0..s.k()).flat_map(move |c|
-            basis.cycles.iter().map(move |cy| holds(cycle_change_closure(s, rel, cy, st, c).unwrap())))).collect::<Vec<_>>()),
+        Form::TurnSum => format!("{:?}", (0..s.n_registrations()).flat_map(|t| (0..s.k()).flat_map(move |c|
+            basis.turns.iter().map(move |cy| holds(turn_sum(s, rel, cy, t, c).unwrap())))).collect::<Vec<_>>()),
+        Form::TurnChangeSum => format!("{:?}", (0..s.n_steps()).flat_map(|st| (0..s.k()).flat_map(move |c|
+            basis.turns.iter().map(move |cy| holds(turn_change_sum(s, rel, cy, st, c).unwrap())))).collect::<Vec<_>>()),
     }
 }
 
@@ -341,8 +341,8 @@ fn prop_isc_d15_node_derived_grades_under_component_scales() {
 
 // ── Worked counterexamples, one per kind of failure ────────────────────────
 
-/// Triangle 0 → 1 → 2 with 0 → 2; the cycle e0, e1, then e2 against its
-/// direction: closure A[e0] + A[e1] − A[e2].
+/// Triangle 0 → 1 → 2 with 0 → 2; the turn e0, e1, then e2 against its
+/// direction: turn sum A[e0] + A[e1] − A[e2].
 fn triangle() -> (DeclaredRelations, Vec<(usize, i8)>) {
     (rel(3, vec![(0, 1), (1, 2), (0, 2)]), vec![(0, 1), (1, 1), (2, -1)])
 }
@@ -356,32 +356,32 @@ fn isc_d15_worked_counterexamples() {
     assert_eq!(relation_changes(&s)[0].reading, Reading::Structure);
     let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0]], vec![vec![1.25]]], vec![vec![vec![h]], vec![vec![1.25 * h]]]).unwrap();
     assert_eq!(relation_changes(&s)[0].reading, Reading::Freedom);
-    // A closure, a factor per edge: (1, 1, 2) closes at 0; ×1.25 on e2 gives
+    // A turn sum, a factor per edge: (1, 1, 2) sums to 0; ×1.25 on e2 gives
     // −0.5 against a half-width of 0.1875 + 0.0625·0.25 = 0.203125.
     let (r, cy) = triangle();
     let d = |f2: f64| vec![vec![vec![h, h, f2 * h]]; 2];
     let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0, 1.0, 2.0]]; 2], d(1.0)).unwrap();
-    assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.1875));
+    assert_eq!(turn_sum(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.1875));
     let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0, 1.0, 2.5]]; 2], d(1.25)).unwrap();
-    assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (-0.5, 0.203125));
-    // The same closure under one factor for the component: still holds.
+    assert_eq!(turn_sum(&s, &r, &cy, 0, 0).unwrap(), (-0.5, 0.203125));
+    // The same turn sum under one factor for the component: still holds.
     let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.25, 1.25, 2.5]]; 2], d(1.25).iter()
         .map(|t| t.iter().map(|c| c.iter().map(|_| 1.25 * h).collect()).collect()).collect()).unwrap();
-    let (v, w) = cycle_closure(&s, &r, &cy, 0, 0).unwrap();
+    let (v, w) = turn_sum(&s, &r, &cy, 0, 0).unwrap();
     assert!(v.abs() <= w);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// (v) What follows for declared gains (Z1a): closures
+// (v) What follows for declared gains (Z1a): turn sums
 // ═══════════════════════════════════════════════════════════════════════════
 //
 // A gain is a positive factor 1 + γ′, |γ′| ≤ γ, the same over the run. By the
 // table, a gain of a kind that a form's cell passes changes none of that
 // form's classifications. A gain of any other kind must enter that form's
 // bound. In 10.3.0 the edge-registered gains met this for PC1, PC2 and PC3,
-// but not for K7 closures. A gain per edge (`EdgeGains::edge`) or per entry
-// (`EdgeGains::independent`) differs between the edges of a closure, so it
-// must enter the closure bound. A gain per component does not.
+// but not for K7 turn sums. A gain per edge (`EdgeGains::edge`) or per entry
+// (`EdgeGains::independent`) differs between the edges of a turn sum, so it
+// must enter the turn sum bound. A gain per component does not.
 
 fn gains(component: Vec<f64>, edge: Vec<f64>, independent: Vec<Vec<f64>>) -> EdgeGains {
     EdgeGains { component, edge, independent }
@@ -392,49 +392,49 @@ fn z1a_a_gain_per_edge_enters_the_closure_bound() {
     let (r, cy) = triangle();
     let zero = || vec![vec![vec![0.0; 3]]; 2];
     let no_offset = vec![vec![0.0; 3]];
-    // Registered (1, 1, 2), then (2, 1, 3): closures 0 and 0, change closure 0.
+    // Registered (1, 1, 2), then (2, 1, 3): turn sums 0 and 0, change turn sum 0.
     let a = |f2: f64| vec![vec![vec![1.0, 1.0, 2.0 * f2]], vec![vec![2.0, 1.0, 3.0 * f2]]];
-    // The model permits a factor 1.125 on e2: closures −0.25 and −0.375, change −0.125.
+    // The model permits a factor 1.125 on e2: turn sums −0.25 and −0.375, change −0.125.
     let truth = EdgeSeries::from_edge_values_synthetic(a(1.125), zero()).unwrap();
-    assert_eq!(cycle_closure(&truth, &r, &cy, 0, 0).unwrap(), (-0.25, 0.0));
-    assert_eq!(cycle_change_closure(&truth, &r, &cy, 0, 0).unwrap(), (-0.125, 0.0));
+    assert_eq!(turn_sum(&truth, &r, &cy, 0, 0).unwrap(), (-0.25, 0.0));
+    assert_eq!(turn_change_sum(&truth, &r, &cy, 0, 0).unwrap(), (-0.125, 0.0));
     // Declared as a gain of 1/8 on e2, both the registered values and the
-    // values the model permits hold closure.
+    // values the model permits hold turn sum.
     let g = || gains(vec![0.0], vec![0.0, 0.0, 0.125], vec![vec![0.0; 3]]);
     for f2 in [1.0, 1.125] {
         let s = EdgeSeries::from_edge_values_synthetic(a(f2), zero()).unwrap().with_run_constant(no_offset.clone(), g());
         for t in 0..2 {
-            let (v, h) = cycle_closure(&s, &r, &cy, t, 0).unwrap();
-            assert!(v.abs() <= h, "closure at {t} under factor {f2}: {v} against {h}");
+            let (v, h) = turn_sum(&s, &r, &cy, t, 0).unwrap();
+            assert!(v.abs() <= h, "turn sum at {t} under factor {f2}: {v} against {h}");
         }
-        let (v, h) = cycle_change_closure(&s, &r, &cy, 0, 0).unwrap();
-        assert!(v.abs() <= h, "change closure under factor {f2}: {v} against {h}");
+        let (v, h) = turn_change_sum(&s, &r, &cy, 0, 0).unwrap();
+        assert!(v.abs() <= h, "change turn sum under factor {f2}: {v} against {h}");
     }
     // Registered values: h = 0.125·(|2| + 0) = 0.25, and 0.125·|1| on the change.
     let s = EdgeSeries::from_edge_values_synthetic(a(1.0), zero()).unwrap().with_run_constant(no_offset.clone(), g());
-    assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.25));
-    assert_eq!(cycle_change_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.125));
+    assert_eq!(turn_sum(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.25));
+    assert_eq!(turn_change_sum(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.125));
     // The same gain declared independent (on the entry) widens the same way.
     let gi = gains(vec![0.0], vec![0.0; 3], vec![vec![0.0, 0.0, 0.125]]);
     let s = EdgeSeries::from_edge_values_synthetic(a(1.0), zero()).unwrap().with_run_constant(no_offset.clone(), gi);
-    assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.25));
-    // A gain per component scales the whole closure: it does not enter.
+    assert_eq!(turn_sum(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.25));
+    // A gain per component scales the whole turn sum: it does not enter.
     let gc = gains(vec![0.125], vec![0.0; 3], vec![vec![0.0; 3]]);
     let s = EdgeSeries::from_edge_values_synthetic(a(1.0), zero()).unwrap().with_run_constant(no_offset, gc);
-    assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.0));
-    assert_eq!(cycle_change_closure(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.0));
+    assert_eq!(turn_sum(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.0));
+    assert_eq!(turn_change_sum(&s, &r, &cy, 0, 0).unwrap(), (0.0, 0.0));
 }
 
 /// Over enumerated fields: the values the model permits are
 /// (1 + γ′_c)(1 + γ′_e)(1 + γ′_ce)·(v + ε), each γ′ within its declared bound
 /// and fixed over the run, and |ε| within the repeatability bound at each
-/// registration. Every closure the declared series reads as resolved has the
+/// registration. Every turn sum the declared series reads as resolved has the
 /// same sign on those values, in state and in change. Without the declaration
-/// some resolved closures do not; this fails under the 10.3.0 closure bound.
+/// some resolved turn sums do not; this fails under the 10.3.0 turn sum bound.
 #[test]
 fn prop_z1a_declared_gains_never_reverse_a_resolved_closure() {
     let (resolved, would_flip) = (Mutex::new(0usize), Mutex::new(0usize));
-    for_all("Z1a closures", |r| {
+    for_all("Z1a turn sums", |r| {
         let rel = enumerated_rel(r);
         let basis = stated_basis(&rel);
         let (a, d) = enumerated_edge_values(r, rel.n_edges());
@@ -457,45 +457,45 @@ fn prop_z1a_declared_gains_never_reverse_a_resolved_closure() {
             .with_run_constant(vec![vec![0.0; m]; k], gains(gc.clone(), ge.clone(), gi.clone()));
         let undeclared = EdgeSeries::from_edge_values_synthetic(a.clone(), d.clone()).unwrap();
         let same_sign = |x: f64, y: f64| x * y > 0.0;
-        for cy in &basis.cycles {
+        for cy in &basis.turns {
             for c in 0..k {
                 let check = |read: &dyn Fn(&EdgeSeries) -> (f64, f64)| {
                     let (tv, _) = read(&truth);
                     let (v, h) = read(&declared);
                     if v.abs() > h {
                         *resolved.lock().unwrap() += 1;
-                        assert!(same_sign(v, tv), "a resolved closure {v} ± {h} reads {tv} on permitted values");
+                        assert!(same_sign(v, tv), "a resolved turn sum {v} ± {h} reads {tv} on permitted values");
                     }
                     let (u, hu) = read(&undeclared);
                     if u.abs() > hu && !same_sign(u, tv) { *would_flip.lock().unwrap() += 1; }
                 };
-                for t in 0..regs { check(&|s| cycle_closure(s, &rel, cy, t, c).unwrap()); }
-                for st in 0..regs - 1 { check(&|s| cycle_change_closure(s, &rel, cy, st, c).unwrap()); }
+                for t in 0..regs { check(&|s| turn_sum(s, &rel, cy, t, c).unwrap()); }
+                for st in 0..regs - 1 { check(&|s| turn_change_sum(s, &rel, cy, st, c).unwrap()); }
             }
         }
     });
-    assert!(resolved.into_inner().unwrap() > 0, "no closure was resolved under the declared gains");
-    assert!(would_flip.into_inner().unwrap() > 0, "undeclared gains never reversed a closure: the property does not test the widening");
+    assert!(resolved.into_inner().unwrap() > 0, "no turn sum was resolved under the declared gains");
+    assert!(would_flip.into_inner().unwrap() > 0, "undeclared gains never reversed a turn sum: the property does not test the widening");
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// I-SC-D10 qualified: an offset enters the state closures, not the change
+// I-SC-D10 qualified: an offset enters the state turn sums, not the change
 // ═══════════════════════════════════════════════════════════════════════════
 
-/// I-SC-D10's implication (closure at δ at both registrations ⇒ closure on
+/// I-SC-D10's implication (turn sum at δ at both registrations ⇒ turn sum on
 /// the change) was derived before Z1a, with δ as repeatability alone. With an
 /// offset declared, the state bound carries the offset and the change bound
-/// does not, so the implication can fail, correctly. Closures +0.125 and
+/// does not, so the implication can fail, correctly. Turn sums +0.125 and
 /// −0.125 each fit an offset bound of 3 × 1/16, but no one offset fits both,
-/// and the change closure −0.25 is resolved at zero repeatability.
+/// and the change turn sum −0.25 is resolved at zero repeatability.
 #[test]
 fn isc_d10_with_an_offset_the_change_can_resolve_while_both_states_hold() {
     let (r, cy) = triangle();
     let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0, 1.0, 1.875]], vec![vec![1.0, 1.0, 2.125]]], vec![vec![vec![0.0; 3]]; 2])
         .unwrap().with_run_constant(vec![vec![0.0625; 3]], gains(vec![0.0], vec![0.0; 3], vec![vec![0.0; 3]]));
-    assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (0.125, 0.1875));
-    assert_eq!(cycle_closure(&s, &r, &cy, 1, 0).unwrap(), (-0.125, 0.1875));
-    assert_eq!(cycle_change_closure(&s, &r, &cy, 0, 0).unwrap(), (-0.25, 0.0));
+    assert_eq!(turn_sum(&s, &r, &cy, 0, 0).unwrap(), (0.125, 0.1875));
+    assert_eq!(turn_sum(&s, &r, &cy, 1, 0).unwrap(), (-0.125, 0.1875));
+    assert_eq!(turn_change_sum(&s, &r, &cy, 0, 0).unwrap(), (-0.25, 0.0));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -519,7 +519,7 @@ fn z1a_a_small_gain_is_not_rounded_away() {
     for (edge, independent) in [(vec![0.0, 0.0, tiny], vec![vec![0.0; 3]]), (vec![0.0; 3], vec![vec![0.0, 0.0, tiny]])] {
         let s = EdgeSeries::from_edge_values_synthetic(a.clone(), zero.clone()).unwrap()
             .with_run_constant(vec![vec![0.0; 3]], gains(vec![0.0], edge, independent));
-        assert_eq!(cycle_closure(&s, &r, &walk, 0, 0).unwrap(), (-0.5, 1.0));
+        assert_eq!(turn_sum(&s, &r, &walk, 0, 0).unwrap(), (-0.5, 1.0));
     }
     // The same in a reported change magnitude, through the shared gain.
     let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![0.0]], vec![vec![big]]], vec![vec![vec![0.0]]; 2]).unwrap()
@@ -538,6 +538,6 @@ fn k7_an_open_walk_is_none_whatever_the_registration() {
     let (r, _) = triangle();
     let s = EdgeSeries::from_edge_values_synthetic(vec![vec![vec![1.0, 1.0, 2.0]]; 2], vec![vec![vec![0.0; 3]]; 2]).unwrap();
     let open = vec![(0, 1), (1, 1)];
-    assert_eq!(cycle_closure(&s, &r, &open, 99, 0), None);
-    assert_eq!(cycle_change_closure(&s, &r, &open, 99, 0), None);
+    assert_eq!(turn_sum(&s, &r, &open, 99, 0), None);
+    assert_eq!(turn_change_sum(&s, &r, &open, 99, 0), None);
 }

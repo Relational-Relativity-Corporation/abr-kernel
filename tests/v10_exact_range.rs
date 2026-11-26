@@ -18,7 +18,7 @@ use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{DeclaredRelations, EdgeProvenance, NodeField};
 use abr_kernel::persistence_change::*;
 use abr_kernel::relational_field::RelationalField;
-use abr_kernel::topology::cycle_basis;
+use abr_kernel::topology::turn_basis;
 
 fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
     let m = edges.len();
@@ -111,10 +111,10 @@ fn finding_3_the_sustained_grade_holds_edge_0() {
 }
 
 /// K7: the public pair carries the one-sided guarantee, and the exact verdict
-/// is separate. Triangle closure A[e0] + A[e1] − A[e2] over (1, 2⁻⁵³, 0) with
+/// is separate. Triangle turn sum A[e0] + A[e1] − A[e2] over (1, 2⁻⁵³, 0) with
 /// bounds (1, 2⁻⁵⁴, 0). Exactly, 1 + 2⁻⁵³ exceeds 1 + 2⁻⁵⁴: resolved. The
 /// pair reports 1 (the tie rounds to even) against 1 + 2⁻⁵² (rounded up), so
-/// a caller comparing it reads the closure as holding.
+/// a caller comparing it reads the turn sum as holding.
 #[test]
 fn k7_the_pair_is_one_sided_and_the_verdict_is_exact() {
     let r = rel(3, vec![(0, 1), (1, 2), (0, 2)]);
@@ -122,9 +122,9 @@ fn k7_the_pair_is_one_sided_and_the_verdict_is_exact() {
     let a = vec![vec![vec![1.0, 2f64.powi(-53), 0.0]]; 2];
     let d = vec![vec![vec![1.0, 2f64.powi(-54), 0.0]]; 2];
     let s = EdgeSeries::from_edge_values_synthetic(a, d).unwrap();
-    assert_eq!(cycle_closure(&s, &r, &cy, 0, 0).unwrap(), (1.0, (1.0f64).next_up()));
-    assert_eq!(cycle_closure_resolved(&s, &r, &cy, 0, 0), Some(true));
-    assert_eq!(cycle_change_closure_resolved(&s, &r, &cy, 0, 0), Some(false));
+    assert_eq!(turn_sum(&s, &r, &cy, 0, 0).unwrap(), (1.0, (1.0f64).next_up()));
+    assert_eq!(turn_sum_resolved(&s, &r, &cy, 0, 0), Some(true));
+    assert_eq!(turn_change_sum_resolved(&s, &r, &cy, 0, 0), Some(false));
 }
 
 // ── Inside the range, nothing is refused ──────────────────────────────────
@@ -188,8 +188,8 @@ fn prop_every_reading_inside_the_range_completes() {
             fn root(p: &[usize], v: usize) -> usize { let mut v = v; while p[v] != v { v = p[v]; } v }
             let mut tree = Vec::new();
             for &e in &order { let (s, t) = rel.edges[e]; let (x, y) = (root(&part, s), root(&part, t)); if x != y { part[x] = y; tree.push(e); } }
-            let b = cycle_basis(&rel, &tree).unwrap();
-            for cy in &b.cycles { for t in 0..regs { let _ = cycle_closure(&es, &rel, cy, t, 0); } let _ = cycle_change_closure(&es, &rel, cy, 0, 1); }
+            let b = turn_basis(&rel, &tree).unwrap();
+            for cy in &b.turns { for t in 0..regs { let _ = turn_sum(&es, &rel, cy, t, 0); } let _ = turn_change_sum(&es, &rel, cy, 0, 1); }
         }));
         assert!(caught.is_ok(), "a reading inside the admitted range was refused at seed {seed}");
     }

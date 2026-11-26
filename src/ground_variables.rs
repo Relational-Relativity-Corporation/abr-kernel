@@ -178,7 +178,7 @@ pub enum DeclarationGap {
     NoNeighbourInField,
     /// No energy carrier is declared in M for this domain (R9a, V3a).
     NoCarrierDeclared,
-    /// The declared field fails T8: a self-relation, or a directed cycle with
+    /// The declared field fails T8: a self-relation, or a directed turn with
     /// no declared feedback edge, or a fault in a feedback declaration
     /// (`topology`; Origin, 2026-11-22, 28th).
     T8(Vec<crate::topology::T8Refusal>),
@@ -214,7 +214,7 @@ impl DeclarationGap {
                 "declare a finer δ or add registrations so at least two edges are \
                  resolved throughout the sequence",
             DeclarationGap::NoNeighbourInField =>
-                "widen the cycle of analysis or declare the registered relations \
+                "widen the sequence of analysis or declare the registered relations \
                  continuing from or arriving at these edges; never reverse an edge",
             DeclarationGap::NoCarrierDeclared =>
                 "declare the energy carrier, its unit, mapping and δ in M (R9a)",
@@ -223,8 +223,8 @@ impl DeclarationGap {
                  its direction is declared from (Df2, T2); a class label is not an identity",
             DeclarationGap::T8(_) =>
                 "remove the self-relation, or declare at least one edge of each named \
-                 directed cycle as feedback with its registered basis (T8); never reverse \
-                 an edge to break a cycle (W8)",
+                 directed turn as feedback with its registered basis (T8); never reverse \
+                 an edge to break a turn (W8)",
         }
     }
 }
@@ -533,14 +533,14 @@ pub fn edge_resolved(a: &[Vec<f64>], da: &[Vec<f64>], e: usize) -> bool {
 /// a registration of the relations (`exact_field_of`, from an `EdgeSeries`),
 /// and a registration at the loci is one way of forming it (`exact_field`).
 /// Two gain bounds are carried with it for relations registered directly
-/// (Z1a): `mixed` enters every minor that mixes components, and `closure`
+/// (Z1a): `mixed` enters every minor that mixes components, and `turn_sum`
 /// every sum of one component across relations (identity, Ξ). Both are 0 for
 /// relations formed from loci, whose unshared gains are already in `da`.
 struct ExactField {
     a: Vec<Vec<crate::exact::Expansion>>,
     da: Vec<Vec<f64>>,
     mixed: Vec<Vec<f64>>,
-    closure: Vec<Vec<f64>>,
+    turn_sum: Vec<Vec<f64>>,
 }
 
 fn exact_field(r: &Registration, rel: &DeclaredRelations) -> ExactField {
@@ -548,7 +548,7 @@ fn exact_field(r: &Registration, rel: &DeclaredRelations) -> ExactField {
     let a = (0..r.x.k).map(|c| rel.edges.iter().map(|&(s, t)| Expansion::diff(r.x.data[c][s], r.x.data[c][t])).collect()).collect();
     let da = (0..r.x.k).map(|c| rel.edges.iter().map(|&(s, t)| r.state_bound(c, s).plus(&r.state_bound(c, t)).up()).collect()).collect();
     let zero = vec![vec![0.0; rel.n_edges()]; r.x.k];
-    ExactField { a, da, mixed: zero.clone(), closure: zero }
+    ExactField { a, da, mixed: zero.clone(), turn_sum: zero }
 }
 
 /// Registration t of the relations, exactly as the series holds it (59th).
@@ -558,7 +558,7 @@ fn exact_field_of(s: &EdgeSeries, t: usize) -> ExactField {
         a: (0..k).map(|c| (0..m).map(|e| s.entry(t, c, e)).collect()).collect(),
         da: s.da[t].clone(),
         mixed: s.mixed_gain.clone(),
-        closure: s.closure_gain.clone(),
+        turn_sum: s.turn_sum_gain.clone(),
     }
 }
 
@@ -568,8 +568,8 @@ impl ExactField {
         crate::exact::gain_widened(&self.a[c][e], &crate::exact::Expansion::of(self.da[c][e]), self.mixed[c][e])
     }
     /// The bound an entry carries into a sum of one component across relations.
-    fn closure_bound(&self, c: usize, e: usize) -> crate::exact::Expansion {
-        crate::exact::gain_widened(&self.a[c][e], &crate::exact::Expansion::of(self.da[c][e]), self.closure[c][e])
+    fn turn_sum_bound(&self, c: usize, e: usize) -> crate::exact::Expansion {
+        crate::exact::gain_widened(&self.a[c][e], &crate::exact::Expansion::of(self.da[c][e]), self.turn_sum[c][e])
     }
     fn resolved(&self, e: usize) -> bool {
         (0..self.a.len()).any(|c| crate::exact::exceeds(&self.a[c][e], &crate::exact::Expansion::of(self.da[c][e])))
@@ -875,7 +875,7 @@ fn freedom_from(h: MinorHistories) -> Result<Freedom, DeclarationGap> {
 
 /// Identity grade: pairs whose difference is not resolved throughout.
 /// *Amended (59th):* read from the registrations of the relations; each
-/// bound carries its closure gain (0 for relations formed from loci).
+/// bound carries its turn sum gain (0 for relations formed from loci).
 fn identity_pairs(fields: &[ExactField], held: &[usize]) -> Vec<(usize, usize)> {
     // A[e] − A[f] and its bound, exactly (OC-NUM-1, 45th).
     use crate::exact::exceeds;
@@ -883,7 +883,7 @@ fn identity_pairs(fields: &[ExactField], held: &[usize]) -> Vec<(usize, usize)> 
     for (n, &e) in held.iter().enumerate() {
         for &f in &held[n + 1..] {
             let same = fields.iter().all(|x| {
-                (0..x.a.len()).all(|c| !exceeds(&x.a[c][e].minus(&x.a[c][f]), &x.closure_bound(c, e).plus(&x.closure_bound(c, f))))
+                (0..x.a.len()).all(|c| !exceeds(&x.a[c][e].minus(&x.a[c][f]), &x.turn_sum_bound(c, e).plus(&x.turn_sum_bound(c, f))))
             });
             if same { out.push((e, f)); }
         }
@@ -926,8 +926,8 @@ fn passage_signs_exact(x: &ExactField, rel: &DeclaredRelations) -> Vec<Option<Ve
             let (mut v, mut h) = (Expansion::new(), Expansion::new());
             crate::work::terms(w.len() + wb.len());
             for &(f, kf) in &w { v.add_times(&x.a[ci][f], kf as f64); }
-            // Each term's bound carries its closure gain (59th; 0 from loci).
-            for &(f, kf) in &wb { h.add_times(&x.closure_bound(ci, f), kf as f64); }
+            // Each term's bound carries its turn sum gain (59th; 0 from loci).
+            for &(f, kf) in &wb { h.add_times(&x.turn_sum_bound(ci, f), kf as f64); }
             sign_at_delta_exact(&v, &h)
         }).collect())
     }).collect()

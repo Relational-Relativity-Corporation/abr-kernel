@@ -11,7 +11,7 @@
 //! mesh currents (Maxwell, *A Treatise on Electricity and Magnetism*, 1873);
 //! Tellegen's theorem (1952); the superposition theorem; the currents of a
 //! unit-resistance network as the orthogonal projection of its EMFs onto its
-//! cycles (Weyl, 1923). The networks are hand-derived worked examples and
+//! turns (Weyl, 1923). The networks are hand-derived worked examples and
 //! enumerated synthetic networks; no measurement is used.
 //!
 //! **The declared mapping (M, a domain declaration, never the kernel's):**
@@ -36,7 +36,7 @@ use abr_kernel::exact::Ratio;
 use abr_kernel::operators::DeclaredRelations;
 use abr_kernel::persistence_change::EdgeSeries;
 use abr_kernel::relational_field::{InnerProduct, RelationalField};
-use abr_kernel::topology::cycle_basis;
+use abr_kernel::topology::turn_basis;
 use support::*;
 
 /// A whole field over a network: the EMFs at the first registration, and
@@ -88,20 +88,20 @@ fn confirmation_legacy_the_balanced_wheatstone_bridge() {
 }
 
 /// Maxwell's mesh currents, computed independently of the kernel's split:
-/// over the declared cycles C (K7), solve (CᵀC) z = Cᵀe for the mesh
+/// over the declared turns C (K7), solve (CᵀC) z = Cᵀe for the mesh
 /// currents z, exactly, and form the branch currents i = C z. The kernel's
-/// split works over the loci; this works over the cycles.
+/// split works over the loci; this works over the turns.
 fn mesh_currents(rel: &DeclaredRelations, emf: &[Ratio]) -> Vec<Ratio> {
     let m = rel.n_edges();
     let mut p: Vec<usize> = (0..rel.n_nodes).collect();
     fn root(p: &mut [usize], v: usize) -> usize { let mut v = v; while p[v] != v { v = p[v]; } v }
     let mut tree = Vec::new();
     for (e, &(s, t)) in rel.edges.iter().enumerate() { let (a, b) = (root(&mut p, s), root(&mut p, t)); if a != b { p[a] = b; tree.push(e); } }
-    let b = cycle_basis(rel, &tree).unwrap();
-    let k = b.cycles.len();
+    let b = turn_basis(rel, &tree).unwrap();
+    let k = b.turns.len();
     let col = |j: usize| -> Vec<Ratio> {
         let mut c = vec![Ratio::zero(); m];
-        for &(e, sg) in &b.cycles[j] { c[e] = if sg > 0 { c[e].add(&Ratio::from_i64(1)) } else { c[e].sub(&Ratio::from_i64(1)) }; }
+        for &(e, sg) in &b.turns[j] { c[e] = if sg > 0 { c[e].add(&Ratio::from_i64(1)) } else { c[e].sub(&Ratio::from_i64(1)) }; }
         c
     };
     let cols: Vec<Vec<Ratio>> = (0..k).map(col).collect();

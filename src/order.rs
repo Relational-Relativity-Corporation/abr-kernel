@@ -67,7 +67,7 @@ pub struct Level {
 impl Order {
     /// Admit an order over the declared relations. Every relation must carry
     /// its identity and basis. T8 is not applied: it governs forming B and Ξ
-    /// over cycles, and this reading forms neither; a self-relation (a
+    /// over turns, and this reading forms neither; a self-relation (a
     /// doubled character) is the 76th's identity spoke on the occurrence
     /// chain, and the order is that chain, so it is kept, never cut.
     pub fn new(rel: &DeclaredRelations, steps: Vec<usize>) -> Result<Self, OrderRefusal> {

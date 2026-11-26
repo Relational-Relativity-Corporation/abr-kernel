@@ -1,8 +1,8 @@
 //! Test support (synthetic only): declare feedback on a generated field so it
 //! passes T8 by declaration, never by bypassing the check. Every edge (s, t)
-//! with s > t that lies on a directed cycle is declared feedback with a basis
-//! marked SYNTHETIC. The remaining edges either run s < t or lie on no cycle,
-//! so the field less its feedback is acyclic. A registered record declares its
+//! with s > t that lies on a directed turn is declared feedback with a basis
+//! marked SYNTHETIC. The remaining edges either run s < t or lie on no turn,
+//! so the field less its feedback has no directed turn. A registered record declares its
 //! feedback from its own observing chain instead.
 
 use abr_kernel::operators::DeclaredRelations;

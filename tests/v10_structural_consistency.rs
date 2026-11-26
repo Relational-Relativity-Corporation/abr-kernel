@@ -285,30 +285,30 @@ fn sc_d9_coupled_change_is_transitive_exactly() {
     }
 }
 
-// ── I-SC-D10: closure on change ─────────────────────────────────────────────
+// ── I-SC-D10: turn sum on change ─────────────────────────────────────────────
 
 #[test]
 fn sc_d10_change_closure_reads_what_changed_not_a_fixed_inconsistency() {
-    // Triangle a → b → c with a → c; cycle a→b, b→c, then a→c against its
+    // Triangle a → b → c with a → c; turn a→b, b→c, then a→c against its
     // direction. Edge-registered values carry a fixed offset of 0.6 on a→c:
-    // state closure fails at δ, change closure holds.
+    // state turn sum fails at δ, change turn sum holds.
     let r = rel(3, vec![(0, 1), (1, 2), (0, 2)]);
-    let cycle = [(0, 1), (1, 1), (2, -1)];
+    let turn = [(0, 1), (1, 1), (2, -1)];
     let x = [[3.0, 1.0, 0.0], [3.5, 1.25, 0.5]];
     let a: Vec<Vec<Vec<f64>>> = x.iter().map(|v| vec![vec![v[0] - v[1], v[1] - v[2], v[0] - v[2] + 0.6]]).collect();
     let s = edges(a, 0.1);
     for t in 0..2 {
-        let (v, h) = cycle_closure(&s, &r, &cycle, t, 0).unwrap();
-        assert!(v.abs() > h, "state closure fails by the fixed offset");
+        let (v, h) = turn_sum(&s, &r, &turn, t, 0).unwrap();
+        assert!(v.abs() > h, "state turn sum fails by the fixed offset");
     }
-    let (v, h) = cycle_change_closure(&s, &r, &cycle, 0, 0).unwrap();
+    let (v, h) = turn_change_sum(&s, &r, &turn, 0, 0).unwrap();
     assert!(v.abs() <= h, "the offset cancels in the change");
-    // Node-derived: closure is 0 by identity at every registration.
+    // Node-derived: turn sum is 0 by identity at every registration.
     let seq: Vec<Registration> = x.iter().map(|v| reg(vec![v.to_vec()], 0.1)).collect();
     let n = EdgeSeries::from_registrations(&seq, &r).unwrap();
-    for t in 0..2 { assert_eq!(cycle_closure(&n, &r, &cycle, t, 0).unwrap().0, 0.0); }
-    // Not a closed walk: refused.
-    assert!(cycle_closure(&s, &r, &[(0, 1), (2, 1)], 0, 0).is_none());
+    for t in 0..2 { assert_eq!(turn_sum(&n, &r, &turn, t, 0).unwrap().0, 0.0); }
+    // Not a turn: refused.
+    assert!(turn_sum(&s, &r, &[(0, 1), (2, 1)], 0, 0).is_none());
 }
 
 // ── I-SC-D11: total passage ─────────────────────────────────────────────
