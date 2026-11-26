@@ -70,6 +70,9 @@ pub const STRUCTS_BEFORE_THE_GUARD: &[&str] = &[
     "ObservableRelationDeclaration", "RelationalDeclaration", "DeclarationRegistry", "InputRecord",
     "RelationRecord", "ParameterRecord", "OutputEntry", "CalculationRecord", "ProvenancedOutput",
     "FeedbackDeclaration", "T8Admission", "RelationIdentity", "RouteEnumeration", "CycleBasis",
+    // Added by Origin's instruction, 2026-11-26: present at `9d6e4ae`, missed
+    // by the first scan.
+    "SpokeComponent", "HeldEnergy", "StepAngle", "RelativePhase",
 ];
 
 /// Familiar methods (CLAUDE.md, 84th, 90th): a name in the code (outside
