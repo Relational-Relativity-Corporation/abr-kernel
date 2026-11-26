@@ -16,6 +16,8 @@ Origin, 59th: we calculate relation as primitive alongside energy, connection an
 
 **Where δ enters** (Origin, 98th, 2026-11-26): the foundation's relationships are exact about the registered information; every value carries its bound (the same operator with signs dropped); δ decides only at reading, and no δ selects what enters an operator. A reading that selects by δ before forming its parts names the departure in its derivation.
 
+**Legacy as projection** (Origin, 101st): a legacy result enters a confirmation as a projection through a declared mapping; the confirmation is the intersection with the kernel's relational result (W14, C), never its basis, even where the legacy result could also be a relational result. Example: `tests/confirmation_kirchhoff.rs`.
+
 This governs everything we do. Check every change against it: relation is calculated first, as the primitive; energy, connection and freedom are calculated along with it; the means is linear algebraic operators. Its text and the check of each V10 form against it are at the head of `docs/kernel/V10_README.md`.
 
 ## Rules kept with it
