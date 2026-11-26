@@ -388,15 +388,17 @@ pub struct SpokeComponent {
     pub run: Option<Run>,
 }
 
-/// Energy exchanged along a spoke, accumulated over registrations 0 … t.
+/// Energy moved across a spoke, accumulated over registrations 0 … t: the net
+/// movement since the record began (Origin, 104th: no magnitude).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AccumulatedEnergy {
     pub registrations: usize,
-    /// Σ ε, one exact sum of the reported ε, rounded once.
+    /// Σ A(c)[e], one exact sum of the signed exchanges, rounded once:
+    /// movement in opposite directions cancels. *Was:* Σ ε, the magnitudes.
     pub sum: f64,
-    /// Σ δ_ε, rounded up.
+    /// Σ of the signed exchanges' bounds, rounded up.
     pub bound: f64,
-    /// Registrations with the floor ε > δ_ε resolved.
+    /// Registrations with the movement's side resolved (the floor).
     pub floor_resolved: usize,
 }
 
@@ -461,14 +463,14 @@ pub fn radial_graphs(field: &RelationalField, rel: &crate::operators::DeclaredRe
         }).collect();
         let energy = field.ground.energy.as_ref().map_err(|g| g.clone()).map(|en| {
             let (mut v, mut h, mut resolved) = (Expansion::new(), Expansion::new(), 0);
-            // Reads the fenced magnitude ε (Origin, 103rd: magnitude is not a
-            // variable). Named, not changed: whether the accumulated energy
-            // becomes the signed sum Σ A(c) is for Origin (step two).
+            // The net movement across the relation since the record began:
+            // the signed exchanges summed, exactly (Origin, 104th: no
+            // magnitude). *Was:* the sum of ε = |A(c)| (103rd: fenced).
             for t in 0..=through {
-                let x = &en.exchanges[t][e];
-                v.add(x.epsilon);
-                h.add(x.delta_epsilon);
-                if x.floor_resolved { resolved += 1; }
+                let x = &en.signed[t][e];
+                v.add(x.value);
+                h.add(x.bound);
+                if x.side != crate::ground_variables::Side::NotResolved { resolved += 1; }
             }
             AccumulatedEnergy { registrations: through + 1, sum: v.nearest(), bound: h.up(), floor_resolved: resolved }
         });

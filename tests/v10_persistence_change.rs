@@ -316,7 +316,7 @@ fn v5_rate_is_counted_steps_never_time() {
 #[test]
 fn photon_carrier_wavenumber_and_hc_over_lambda_read_identically() {
     use abr_kernel::derived_invariants::{C_DECLARED, H_PLANCK};
-    use abr_kernel::ground_variables::{energy_exchange, mapped_half_width, EnergyCarrier};
+    use abr_kernel::ground_variables::{signed_exchanges, mapped_half_width, EnergyCarrier};
     // Registered wavelengths (m) at three loci over four registrations, with
     // δ_λ. hc/λ is a construct mapping; the wavenumber 1/λ is the registered
     // quantity in another unit. Every V10 reading must agree.
@@ -331,10 +331,11 @@ fn photon_carrier_wavenumber_and_hc_over_lambda_read_identically() {
         delta: lam[t].iter().map(|&l| mapped_half_width(|x| scale / x, l, d_lam)).collect(),
     };
     for t in 0..4 {
-        let (k, e) = (energy_exchange(&carrier(1.0, t), &r), energy_exchange(&carrier(hc, t), &r));
+        // The sides agree (104th). *Was:* the floors and the degrees ε/δ_ε
+        // (the degree retired with the magnitude).
+        let (k, e) = (signed_exchanges(&carrier(1.0, t), &r), signed_exchanges(&carrier(hc, t), &r));
         for (a, b) in k.iter().zip(&e) {
-            assert_eq!(a.floor_resolved, b.floor_resolved);
-            assert!((a.degree().unwrap() - b.degree().unwrap()).abs() < 1e-9 * a.degree().unwrap());
+            assert_eq!(a.side, b.side);
         }
     }
     // The carrier as a component: PC readings agree.

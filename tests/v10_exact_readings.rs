@@ -17,6 +17,7 @@
 mod synthetic_feedback;
 #[path = "support/synthetic_identity.rs"]
 mod synthetic_identity;
+use abr_kernel::ground_variables::Side;
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{DeclaredRelations, EdgeProvenance, NodeField};
 use abr_kernel::persistence_change::*;
@@ -218,12 +219,14 @@ fn prop_connection_grades_and_energy_are_exact() {
         // Energy: the first component as a carrier.
         let carrier = EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::synthetic(), name: "SYNTHETIC".into(), unit: "u".into(),
             values: f.seq[0].x.data[0].clone(), delta: f.seq[0].delta[0].clone() };
-        for x in energy_exchange(&carrier, &f.rel) {
+        // The signed exchange (104th). *Was:* ε = near1(|d|), floor |d| > h.
+        for x in signed_exchanges(&carrier, &f.rel) {
             let (s, u) = f.rel.edges[x.edge];
             let (d, h) = (f.x[0][0][s] - f.x[0][0][u], f.d[0][s] + f.d[0][u]);
-            assert_eq!(x.epsilon, near1(d.abs()));
-            assert!(is_up(x.delta_epsilon, h, 1));
-            assert_eq!(x.floor_resolved, d.abs() > h);
+            assert_eq!(x.value, near1(d));
+            assert!(is_up(x.bound, h, 1));
+            let want = if d > h { Side::Entering } else if d < -h { Side::Leaving } else { Side::NotResolved };
+            assert_eq!(x.side, want);
         }
         *checked.lock().unwrap() += 1;
     });

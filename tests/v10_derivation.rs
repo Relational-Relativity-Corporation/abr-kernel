@@ -242,7 +242,8 @@ fn a_selection_by_delta_is_named_as_a_departure() {
         let d = of_part(name).unwrap_or_else(|| panic!("{name} is registered"));
         assert!(text(d).contains(MARK), "{name} does not name its selection by δ: {}", text(d));
     }
-    for name in ["Forms.a", "Forms.b", "Forms.circulation", "RelationalField.persistence", "EnergyExchange.epsilon"] {
+    // *Was:* the list ended with "EnergyExchange.epsilon" (retired, 104th).
+    for name in ["Forms.a", "Forms.b", "Forms.circulation", "RelationalField.persistence", "SignedExchange.value"] {
         assert!(!text(of_part(name).unwrap()).contains(MARK), "{name} selects nothing by δ");
     }
 }

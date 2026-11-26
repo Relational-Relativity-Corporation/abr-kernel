@@ -53,7 +53,9 @@ use support::*;
 
 /// Operator readings that calculate a scalar, shown to fail below: for
 /// Origin to retire (104th).
-const OPERATOR_SCALARS: &[&str] = &["EnergyExchange.epsilon"];
+/// *Was:* `&["EnergyExchange.epsilon"]`, the magnitude |A(c)|, retired by
+/// Origin (104th).
+const OPERATOR_SCALARS: &[&str] = &[];
 
 /// Legacy mathematics that calculates a scalar, shown to fail below.
 const LEGACY_SCALARS: &[&str] = &["ChangeCoupling.minor"];

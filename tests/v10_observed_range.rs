@@ -48,7 +48,7 @@ fn an_edge_value_with_no_resolution_is_not_a_registration() {
 fn a_carrier_with_no_resolution_is_not_a_registration() {
     let r = DeclaredRelations::from_edges_with_provenance(2, vec![(0, 1)], vec![EdgeProvenance::Continuation]);
     let c = EnergyCarrier { range: ObservedRange::Human, name: "c".into(), unit: "u".into(), values: vec![0.0, 3.0], delta: vec![0.0, 0.0] };
-    let _ = energy_exchange(&c, &r);
+    let _ = signed_exchanges(&c, &r);
 }
 
 #[test]

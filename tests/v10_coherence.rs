@@ -302,7 +302,8 @@ fn every_input_reshapes_every_graph_and_nothing_is_removed() {
                         assert_eq!(c.run, Some(Run { reading, length }));
                     }
                     let (e, ep) = (sp.energy.as_ref().unwrap(), spp.energy.as_ref().unwrap());
-                    assert_eq!(e.sum, ep.sum + en.exchanges[t][sp.edge].epsilon, "this registration's energy added");
+                    // The signed movement added (104th). *Was:* `.exchanges[t][sp.edge].epsilon`.
+                    assert_eq!(e.sum, ep.sum + en.signed[t][sp.edge].value, "this registration's movement added");
                     assert_eq!(e.registrations, t + 1);
                 }
                 // Connection between spokes: every PC2 reading within the steps, counted once.

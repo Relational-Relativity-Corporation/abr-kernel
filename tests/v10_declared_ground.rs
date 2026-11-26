@@ -123,13 +123,16 @@ fn held_energy_is_declared_once_with_every_part_of_delta() {
                 assert_eq!(h.at_loci[t][v].value, d.values[t][c][v]);
                 assert_eq!(h.at_loci[t][v].bound, regs_[t].state_bound(c, v).up());
             }
-            let old = abr_kernel::ground_variables::energy_exchange(&EnergyCarrier { range: ObservedRange::synthetic(),
+            let old = abr_kernel::ground_variables::signed_exchanges(&EnergyCarrier { range: ObservedRange::synthetic(),
                 name: "the 10.3.0 path".into(), unit: "synthetic".into(), values: d.values[t][c].clone(), delta: d.delta[c].clone() }, &rel);
             for e in 0..rel.n_edges() {
                 let a = df.series.entry(t, c, e);
                 assert_eq!(h.exchange[t][e].resolved, exceeds(&a, &Expansion::of(df.series.da[t][c][e])), "the component's state reading");
-                assert_eq!(h.exchange[t][e].value, a.abs().nearest());
-                if old[e].floor_resolved != h.exchange[t][e].resolved { *differs.lock().unwrap() += 1; }
+                // The signed exchange (104th). *Was:* `a.abs().nearest()`.
+                assert_eq!(h.exchange[t][e].value, a.nearest());
+                assert_eq!(old[e].value, h.exchange[t][e].value, "the same movement on both paths");
+                let old_floor = old[e].side != abr_kernel::ground_variables::Side::NotResolved;
+                if old_floor != h.exchange[t][e].resolved { *differs.lock().unwrap() += 1; }
             }
         }
     });

@@ -187,8 +187,9 @@ pub struct HeldEnergy {
     /// at_loci[t][v]: E[v] = c[v] with its state bound (V3, held). Reported:
     /// present and held, never read as zero (G1).
     pub at_loci: Vec<Vec<Read>>,
-    /// exchange[t][e]: ε = |A[c][e]| against its state bound, every part of
-    /// δ included (the V3 floor; I-SC-D17 (i)).
+    /// exchange[t][e]: the signed exchange A[c][e] against its state bound,
+    /// every part of δ included; resolved is the floor, the side resolved
+    /// (I-SC-D17 (i); 103rd). *Was:* ε = |A[c][e]| (retired, 104th).
     pub exchange: Vec<Vec<Read>>,
 }
 
@@ -378,8 +379,10 @@ fn read_energy(d: &DomainDeclaration, field: &RelationalField, s: &EdgeSeries, r
                 let at_loci = field.registrations.iter().map(|r| (0..rel.n_nodes).map(|v|
                     read(&Expansion::of(r.x.data[c][v]), &r.state_bound(c, v))).collect()).collect();
                 let exchange = (0..n_t).map(|t| (0..rel.n_edges()).map(|e| {
+                    // The signed exchange A(c)[e] (Origin, 103rd, 104th: no
+                    // magnitude). *Was:* `value: a.abs().nearest()`.
                     let a = s.entry(t, c, e);
-                    Read { value: a.abs().nearest(), bound: s.da[t][c][e], resolved: exceeds(&a, &Expansion::of(s.da[t][c][e])) }
+                    read(&a, &Expansion::of(s.da[t][c][e]))
                 }).collect()).collect();
                 out.held.push(HeldEnergy { component: c, name: name.clone(), unit: unit.clone(), at_loci, exchange });
             }

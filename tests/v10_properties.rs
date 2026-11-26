@@ -465,10 +465,12 @@ fn prop_energy_readings_invariant_under_carrier_rescaling() {
         let kappa = 2f64.powi(r.int(-3, 6) as i32);
         let c = |s: f64| EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::synthetic(), name: "c".into(), unit: "u".into(),
             values: vals.iter().map(|v| s * v).collect(), delta: del.iter().map(|d| s * d).collect() };
-        let (x, y) = (energy_exchange(&c(1.0), &rel), energy_exchange(&c(kappa), &rel));
+        // The sides and the movement, scaled exactly (104th). *Was:* the
+        // floors and the degrees ε/δ_ε (the degree retired with the magnitude).
+        let (x, y) = (signed_exchanges(&c(1.0), &rel), signed_exchanges(&c(kappa), &rel));
         for (p, q) in x.iter().zip(&y) {
-            assert_eq!(p.floor_resolved, q.floor_resolved);
-            assert_eq!(p.degree(), q.degree());
+            assert_eq!(p.side, q.side);
+            assert_eq!(q.value, kappa * p.value);
         }
     });
 }

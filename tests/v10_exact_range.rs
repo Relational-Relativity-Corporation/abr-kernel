@@ -92,7 +92,7 @@ fn a_gain_below_the_range_is_refused() {
 #[should_panic(expected = "outside the range of exact arithmetic")]
 fn a_carrier_above_the_range_is_refused() {
     let c = EnergyCarrier { range: abr_kernel::ground_variables::ObservedRange::synthetic(), name: "SYNTHETIC".into(), unit: "u".into(), values: vec![0.0, 2f64.powi(201)], delta: vec![0.0; 2] };
-    let _ = energy_exchange(&c, &rel(2, vec![(0, 1)]));
+    let _ = signed_exchanges(&c, &rel(2, vec![(0, 1)]));
 }
 
 // ── Finding 3: the sustained grade decides on its exact bound ─────────────

@@ -122,7 +122,8 @@ fn a_relation_registered_field_reads_a_resolved_closure_with_every_variable() {
     // e0 resolved (0.5 > 1/8), e1 not (0 ≤ 1/8), e2 resolved (0.25 > 1/8).
     let en = field.ground.energy.as_ref().expect("energy is read");
     for t in 0..3 {
-        let floors: Vec<bool> = en.exchanges[t].iter().map(|x| x.floor_resolved).collect();
+        // The floor is the side resolved (104th). *Was:* `en.exchanges[t]…floor_resolved`.
+        let floors: Vec<bool> = en.signed[t].iter().map(|x| x.side != abr_kernel::ground_variables::Side::NotResolved).collect();
         assert_eq!(floors, vec![true, false, true]);
     }
     // Freedom: PC1 is read at every relation, component and step.

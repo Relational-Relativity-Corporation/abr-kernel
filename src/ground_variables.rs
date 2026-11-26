@@ -1073,9 +1073,13 @@ pub fn connection_of(series: &EdgeSeries, rel: &DeclaredRelations) -> Result<Con
 // its unit, mapping and δ_c.
 //
 //     held       E[v] = c[v]
-//     exchanged  ε[e] = |A(c)[e]| = |c[s] − c[t]|,   δ_ε[e] = δ_c[s] + δ_c[t]
+//     moving     A(c)[e] = c[s] − c[t], signed,   bound δ_c[s] + δ_c[t]
 //
-// I-T graded: the tunneling floor holds at δ when ε > δ_ε; degree ε/δ_ε.
+// The sign is the direction energy moves across the relation, toward the
+// entering locus when positive (Origin, 103rd); no magnitude is calculated
+// (104th). I-T: the tunneling floor holds at δ when the side is resolved.
+// *Was:* exchanged ε[e] = |A(c)[e]|; floor ε > δ_ε; degree ε/δ_ε (retired,
+// 104th).
 // Energy has its own carrier: it flows whether or not anything reorganizes,
 // and connection is not a factor of it. Where no carrier is declared, energy
 // is not evaluated. Supersedes `epsilon_e` (ε = |Δι|·𝟙) for V10 readings.
@@ -1093,38 +1097,27 @@ pub struct EnergyCarrier {
     pub range: ObservedRange,
 }
 
-/// Exchanged energy at one edge and registration.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct EnergyExchange {
-    pub edge: usize,
-    pub epsilon: f64,
-    pub delta_epsilon: f64,
-    /// Tunneling floor at δ: ε > δ_ε.
-    pub floor_resolved: bool,
-}
+// *Retired (Origin, 2026-11-26, 104th; fenced at the 103rd):* the V3
+// magnitude, `EnergyExchange { edge, epsilon, delta_epsilon, floor_resolved }`
+// with ε = |c[s] − c[t]|, its degree ε/δ_ε, and the building block
+// `energy_exchange`. *"magnitude really can't be its own variable because
+// energy is relative"* (103rd); *"I just don't want the operators themselves
+// to calculate a scalar"* (104th). The signed exchange below replaces it; its
+// floor is the side resolved. The retired text stands in `V10_README.md`
+// (§1.2, V3; Part 9, 97th, 103rd, 104th).
 
-impl EnergyExchange {
-    /// Graded degree ε / δ_ε. `None` when δ_ε is zero.
-    pub fn degree(&self) -> Option<f64> {
-        if self.delta_epsilon > 0.0 { Some(self.epsilon / self.delta_epsilon) } else { None }
-    }
-}
-
-/// Exchanged energy at every edge of one registration. A building block.
-pub fn energy_exchange(c: &EnergyCarrier, rel: &DeclaredRelations) -> Vec<EnergyExchange> {
+/// The signed exchange at every relation of one registration, from a
+/// carrier at the loci: A(c)[e] = c[s] − c[t] (103rd). A building block.
+pub fn signed_exchanges(c: &EnergyCarrier, rel: &DeclaredRelations) -> Vec<SignedExchange> {
     assert_eq!(c.values.len(), rel.n_nodes, "carrier must be declared at every locus");
     assert_eq!(c.delta.len(), rel.n_nodes, "δ_c must be declared at every locus");
     assert!(c.values.iter().all(|v| v.is_finite()), "carrier values must be in D");
     assert!(c.delta.iter().all(|d| d.is_finite() && *d >= 0.0), "δ_c must be finite and non-negative");
     c.range.check(c.values.iter().zip(&c.delta));
     assert!(c.values.iter().chain(&c.delta).all(|v| crate::exact::in_exact_range(*v)), "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
-    // ε = |c[s] − c[t]| rounded once, δ_ε rounded up, the floor decided
-    // exactly (OC-NUM-1, 45th).
-    use crate::exact::{exceeds, Expansion};
+    use crate::exact::Expansion;
     rel.edges.iter().enumerate().map(|(e, &(s, t))| {
-        let d = Expansion::diff(c.values[s], c.values[t]);
-        let h = Expansion::of(c.delta[s]).plus(&Expansion::of(c.delta[t]));
-        EnergyExchange { edge: e, epsilon: d.abs().nearest(), delta_epsilon: h.up(), floor_resolved: exceeds(&d, &h) }
+        signed_exchange(e, &Expansion::diff(c.values[s], c.values[t]), &Expansion::of(c.delta[s]).plus(&Expansion::of(c.delta[t])))
     }).collect()
 }
 
@@ -1143,15 +1136,12 @@ pub struct Energy {
     pub unit: String,
     /// The signed exchange (Origin, 2026-11-26, 103rd), signed[t][e] at
     /// registration t: energy moving across each relation, with its side.
-    /// This is energy; the magnitude below is not a variable.
+    /// This is energy; no magnitude is calculated (104th).
     pub signed: Vec<Vec<SignedExchange>>,
-    /// exchanges[t][e] at registration t. **Fenced (103rd):** ε = |A(c)| is
-    /// not a reading of energy (*"magnitude really can't be its own variable
-    /// because energy is relative"*); kept for comparison, and for its
-    /// floor, which is the side resolved.
-    pub exchanges: Vec<Vec<EnergyExchange>>,
-    /// Share of (registration, edge) readings with the floor resolved: the
-    /// share of movements whose side is resolved.
+    // *Retired (104th):* `exchanges: Vec<Vec<EnergyExchange>>`, the V3
+    // magnitude ε = |A(c)| at every registration and relation.
+    /// The share of (registration, relation) movements whose side is
+    /// resolved (the tunneling floor): a declared projection (C, K6).
     pub share_resolved: f64,
 }
 
@@ -1187,8 +1177,10 @@ pub struct SignedExchange {
 /// The signed exchange of relation e from its exact value and bound; the
 /// side decided exactly (OC-NUM-1).
 fn signed_exchange(e: usize, v: &crate::exact::Expansion, h: &crate::exact::Expansion) -> SignedExchange {
-    let side = if !crate::exact::exceeds(v, h) { Side::NotResolved }
-        else if v.signum() > 0 { Side::Entering } else { Side::Leaving };
+    // The side as a sign against the bound (104th): v − h > 0 toward the
+    // entering locus, v + h < 0 toward the leaving locus; no magnitude.
+    let side = if v.minus(h).signum() > 0 { Side::Entering }
+        else if v.plus(h).signum() < 0 { Side::Leaving } else { Side::NotResolved };
     SignedExchange { edge: e, value: v.nearest(), bound: h.up(), side }
 }
 
@@ -1201,20 +1193,8 @@ pub fn energy(carriers: Option<&[EnergyCarrier]>, n_registrations: usize, rel: &
     let cs = carriers.ok_or(DeclarationGap::NoCarrierDeclared)?;
     assert_eq!(cs.len(), n_registrations, "the carrier must be declared at every registration");
     if rel.n_edges() == 0 { return Err(DeclarationGap::FewerThanTwoEdges); }
-    let exchanges: Vec<Vec<EnergyExchange>> = cs.iter().map(|c| energy_exchange(c, rel)).collect();
-    use crate::exact::Expansion;
-    let signed = cs.iter().map(|c| rel.edges.iter().enumerate().map(|(e, &(s, t))| {
-        signed_exchange(e, &Expansion::diff(c.values[s], c.values[t]), &Expansion::of(c.delta[s]).plus(&Expansion::of(c.delta[t])))
-    }).collect()).collect();
-    let total = exchanges.len() * rel.n_edges();
-    let resolved = exchanges.iter().flatten().filter(|x| x.floor_resolved).count();
-    Ok(Energy {
-        carrier: cs[0].name.clone(),
-        unit: cs[0].unit.clone(),
-        signed,
-        share_resolved: resolved as f64 / total as f64,
-        exchanges,
-    })
+    let signed: Vec<Vec<SignedExchange>> = cs.iter().map(|c| signed_exchanges(c, rel)).collect();
+    Ok(Energy { carrier: cs[0].name.clone(), unit: cs[0].unit.clone(), share_resolved: share_resolved(&signed), signed })
 }
 
 /// An energy carrier registered **across the declared relations** (relation
@@ -1254,7 +1234,7 @@ impl RelationCarrier {
 pub fn energy_of_relations(carrier: Option<&RelationCarrier>, n_registrations: usize, rel: &DeclaredRelations)
     -> Result<Energy, DeclarationGap>
 {
-    use crate::exact::{exceeds, Expansion};
+    use crate::exact::Expansion;
     if n_registrations < 2 { return Err(DeclarationGap::NoProcessSequence); }
     crate::topology::admit_field(rel)?;
     let c = carrier.ok_or(DeclarationGap::NoCarrierDeclared)?;
@@ -1265,27 +1245,29 @@ pub fn energy_of_relations(carrier: Option<&RelationCarrier>, n_registrations: u
     assert!(c.a.iter().flatten().chain(c.da.iter().flatten()).all(|v| crate::exact::in_exact_range(*v)), "outside the range of exact arithmetic: 0, or 2⁻²⁰⁰ ≤ |x| ≤ 2²⁰⁰ (OC-NUM-1, 46th)");
     c.range.check(c.a.iter().flatten().zip(c.da.iter().flatten()));
     if rel.n_edges() == 0 { return Err(DeclarationGap::FewerThanTwoEdges); }
-    let exchanges: Vec<Vec<EnergyExchange>> = c.a.iter().zip(&c.da).map(|(at, dt)| at.iter().zip(dt).enumerate().map(|(e, (&v, &h))| {
-        let (v, h) = (Expansion::of(v), Expansion::of(h));
-        EnergyExchange { edge: e, epsilon: v.abs().nearest(), delta_epsilon: h.up(), floor_resolved: exceeds(&v, &h) }
-    }).collect()).collect();
-    let signed = c.a.iter().zip(&c.da).map(|(at, dt)| at.iter().zip(dt).enumerate()
+    let signed: Vec<Vec<SignedExchange>> = c.a.iter().zip(&c.da).map(|(at, dt)| at.iter().zip(dt).enumerate()
         .map(|(e, (&v, &h))| signed_exchange(e, &Expansion::of(v), &Expansion::of(h))).collect()).collect();
-    let total = exchanges.len() * rel.n_edges();
-    let resolved = exchanges.iter().flatten().filter(|x| x.floor_resolved).count();
-    Ok(Energy { carrier: c.name.clone(), unit: c.unit.clone(), signed, share_resolved: resolved as f64 / total as f64, exchanges })
+    Ok(Energy { carrier: c.name.clone(), unit: c.unit.clone(), share_resolved: share_resolved(&signed), signed })
+}
+
+/// The share of movements whose side is resolved: a declared projection (C,
+/// K6), read in the framework from the signed exchanges (104th).
+fn share_resolved(signed: &[Vec<SignedExchange>]) -> f64 {
+    let total = signed.iter().map(|t| t.len()).sum::<usize>();
+    let resolved = signed.iter().flatten().filter(|x| x.side != Side::NotResolved).count();
+    resolved as f64 / total as f64
 }
 
 /// Connected exchange (V3b): edges whose circulation is held (sustained grade)
-/// and whose tunneling floor is resolved at every registration, with ε at
-/// each registration. *Reads the fenced magnitude ε (Origin, 103rd).*
-/// Named, not changed: whether it reports the signed exchange is for Origin.
+/// and whose movement's side is resolved at every registration, with the
+/// signed exchange A(c)[e] at each registration (Origin, 104th: no magnitude).
+/// *Was:* with ε = |A(c)[e]| at each registration.
 pub fn connected_exchange(energy: &Energy, connection: &Connection) -> Vec<(usize, Vec<f64>)> {
     let held = match &connection.sustained { Ok(s) => &s.held_edges, Err(_) => return Vec::new() };
     held.iter().filter_map(|&e| {
-        let xs: Vec<&EnergyExchange> = energy.exchanges.iter().map(|t| &t[e]).collect();
-        if xs.iter().all(|x| x.floor_resolved) {
-            Some((e, xs.iter().map(|x| x.epsilon).collect()))
+        let xs: Vec<&SignedExchange> = energy.signed.iter().map(|t| &t[e]).collect();
+        if xs.iter().all(|x| x.side != Side::NotResolved) {
+            Some((e, xs.iter().map(|x| x.value).collect()))
         } else { None }
     }).collect()
 }

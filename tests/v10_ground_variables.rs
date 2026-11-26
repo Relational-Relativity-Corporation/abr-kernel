@@ -255,11 +255,13 @@ fn coarse_delta_leaves_circulation_unresolved() {
 
 #[test]
 fn energy_is_the_exchange_of_the_declared_carrier() {
-    let x = energy_exchange(&carrier(vec![5.0, 2.0, 2.5], 0.1), &chain());
-    assert_eq!(x[0].epsilon, 3.0);
-    assert!((x[0].delta_epsilon - 0.2).abs() < 1e-12);
-    assert!(x[0].floor_resolved);
-    assert!((x[0].degree().unwrap() - 15.0).abs() < 1e-9);
+    // The signed exchange (104th). *Was:* ε = 3, degree ε/δ_ε = 15 (retired).
+    let x = signed_exchanges(&carrier(vec![5.0, 2.0, 2.5], 0.1), &chain());
+    assert_eq!(x[0].value, 3.0, "5 − 2: moving toward the entering locus");
+    assert!((x[0].bound - 0.2).abs() < 1e-12);
+    assert_eq!(x[0].side, abr_kernel::ground_variables::Side::Entering);
+    assert_eq!(x[1].value, -0.5, "2 − 2.5: moving toward the leaving locus");
+    assert_eq!(x[1].side, abr_kernel::ground_variables::Side::Leaving);
 }
 
 #[test]
@@ -273,7 +275,8 @@ fn connected_exchange_needs_held_circulation_and_resolved_floor() {
     let c = connection(&seq, &chain()).unwrap();
     let cs = vec![carrier(vec![5.0, 2.0, 2.5], 0.0), carrier(vec![5.5, 2.0, 2.5], 0.0)];
     let en = energy(Some(&cs), 2, &chain()).unwrap();
-    assert_eq!(connected_exchange(&en, &c), vec![(0, vec![3.0, 3.5]), (1, vec![0.5, 0.5])]);
+    // Signed (104th). *Was:* `vec![(0, vec![3.0, 3.5]), (1, vec![0.5, 0.5])]`.
+    assert_eq!(connected_exchange(&en, &c), vec![(0, vec![3.0, 3.5]), (1, vec![-0.5, -0.5])]);
 }
 
 #[test]

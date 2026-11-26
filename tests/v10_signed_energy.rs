@@ -149,8 +149,10 @@ fn two_reversing_a_relation_reverses_its_side() {
     assert!(flipped.get() > 0, "the family reaches resolved sides that reverse");
 }
 
-/// 3. Two carriers that differ only in sign: the fenced magnitude ε cannot
-/// tell them apart; the signed exchange reads opposite sides.
+/// 3. Two carriers that differ only in sign: a magnitude cannot tell them
+/// apart; the signed exchange reads opposite sides. *Was (103rd):* the
+/// magnitude read from the field's fenced ε; retired (104th), so the test
+/// takes |·| itself, in the framework.
 #[test]
 fn three_carriers_differing_only_in_sign_read_opposite_sides() {
     let opposite = Cell::new(0usize);
@@ -162,8 +164,8 @@ fn three_carriers_differing_only_in_sign_read_opposite_sides() {
         let (a, b) = (energy_of(&f), energy_of(&g));
         for t in 0..c.a.len() {
             for e in 0..w.rel.n_edges() {
-                assert_eq!(a.exchanges[t][e].epsilon, b.exchanges[t][e].epsilon, "ε is the same for both");
                 let (x, y) = (&a.signed[t][e], &b.signed[t][e]);
+                assert_eq!(x.value.abs(), y.value.abs(), "a magnitude is the same for both");
                 assert_eq!(y.value, -x.value);
                 match (x.side, y.side) {
                     (Side::Entering, Side::Leaving) | (Side::Leaving, Side::Entering) => opposite.set(opposite.get() + 1),
@@ -176,21 +178,19 @@ fn three_carriers_differing_only_in_sign_read_opposite_sides() {
     assert!(opposite.get() > 0, "the family reaches movements the magnitude cannot tell apart");
 }
 
-/// 4. The tunneling floor is the side resolved, decided exactly, on both
-/// paths; its share is the share of resolved sides. **Cannot tell (named):**
-/// it holds under the magnitude reading too (resolved is the same decision
-/// either way); it checks that the fenced floor and the side agree.
+/// 4. The tunneling floor is the side resolved: its share is the share of
+/// resolved sides, on both paths. **Cannot tell (named):** it holds under a
+/// magnitude reading too (resolved is the same decision either way).
+/// *Was (103rd):* also checked the fenced floor against the side; the floor
+/// retired with the magnitude (104th).
 #[test]
 fn four_the_floor_is_the_side_resolved() {
     let check = |en: &Energy| {
         let mut resolved = 0usize;
         let mut total = 0usize;
-        for (t, row) in en.signed.iter().enumerate() {
-            for (e, x) in row.iter().enumerate() {
-                assert_eq!(en.exchanges[t][e].floor_resolved, x.side != Side::NotResolved, "registration {t}, relation {e}");
-                total += 1;
-                if x.side != Side::NotResolved { resolved += 1; }
-            }
+        for x in en.signed.iter().flatten() {
+            total += 1;
+            if x.side != Side::NotResolved { resolved += 1; }
         }
         assert_eq!(en.share_resolved, resolved as f64 / total as f64);
     };

@@ -6,12 +6,15 @@
 //! the declared ones; nothing is added. What follows is derived:
 //!
 //! (i)   One registration, one number. With no run-constant part declared on
-//!       the carrier, ε[e] = |A[c][e]| and δ_ε[e] = δA[c][e]: the V3 floor is
-//!       the state reading of the carrier component, at every registration.
-//! (ii)  PC1 on the carrier reads the signed exchange. |ε_{s+1} − ε_s| ≤
-//!       |Δ_s[c][e]|, with equality unless A[c][e] changes sign, and the two
-//!       share one bound. A resolved change of ε is PC1 freedom on the
-//!       carrier; PC1 freedom can occur with ε held (the exchange reverses).
+//!       the carrier, the signed exchange is A[c][e] with bound δA[c][e]: the
+//!       floor (the side resolved) is the state reading of the carrier
+//!       component, at every registration.
+//! (ii)  PC1 on the carrier reads the signed exchange. Its change over a
+//!       step is Δ_s[c][e] exactly, with one bound, so a resolved change of
+//!       the signed exchange is exactly PC1 freedom on the carrier, both ways.
+//!       *Was (to the 104th, with ε = |A(c)| retired):* |ε_{s+1} − ε_s| ≤
+//!       |Δ_s[c][e]|; PC1 freedom could occur with ε held (the exchange
+//!       reverses), which the magnitude could not see.
 //! (iii) A change minor is resolved only where each of its two readings is
 //!       resolved at PC1 on at least one of its two edges (PC2(a) and
 //!       PC2(b)). So wherever the structure holds on both edges, PC2(a)
@@ -42,6 +45,7 @@
 
 #[path = "support/synthetic_whole_field.rs"]
 mod wf;
+use abr_kernel::ground_variables::Side;
 use abr_kernel::exact::{exceeds, Expansion};
 use abr_kernel::persistence_change::*;
 use std::sync::Mutex;
@@ -79,15 +83,17 @@ fn d17_i_the_energy_floor_is_the_state_reading_of_the_carrier_component() {
         let mut g = counts.lock().unwrap();
         for t in 0..regs {
             for e in 0..rel.n_edges() {
-                let x = energy.exchanges[t][e];
+                let x = energy.signed[t][e];
                 let a = w.series.entry(t, c, e);
-                assert_eq!(x.epsilon, a.abs().nearest(), "ε = |A[c][e]|, always");
+                // *Was:* ε = |A[c][e]|, always (retired, 104th).
+                assert_eq!(x.value, a.nearest(), "the signed exchange is A[c][e], always");
                 let state = exceeds(&a, &Expansion::of(w.series.da[t][c][e]));
+                let floor = x.side != Side::NotResolved;
                 if !w.declared.carrier_run_constant() {
-                    assert_eq!(x.delta_epsilon, w.series.da[t][c][e], "δ_ε = δA[c][e]");
-                    assert_eq!(x.floor_resolved, state, "one reading");
-                    g[x.floor_resolved as usize] += 1;
-                } else if x.floor_resolved != state {
+                    assert_eq!(x.bound, w.series.da[t][c][e], "the bound is δA[c][e]");
+                    assert_eq!(floor, state, "one reading");
+                    g[floor as usize] += 1;
+                } else if floor != state {
                     g[2] += 1;
                 }
             }
@@ -105,17 +111,18 @@ fn d17_i_the_energy_floor_is_the_state_reading_of_the_carrier_component() {
 #[test]
 fn d17_ii_worked_the_exchange_reverses_with_its_magnitude_held() {
     // Loci 0 → 1. Carrier (component 1) at 0 then 1, then 1 then 0: A = −1
-    // then +1. ε = 1 at both registrations, so the V3 degree holds; the
-    // exchange has reversed, and PC1 on the carrier reads it (Δ = 2 > 1/4).
+    // then +1. The movement has reversed: toward the leaving locus, then
+    // toward the entering locus, and PC1 on the carrier reads it (Δ = 2 >
+    // 1/4). *Was:* ε = 1 at both registrations, the reversal unseen by it.
     // One edge: PC2 and connection's pair grades are not formable, and are
     // named (W11).
     let rel = rel(2, vec![(0, 1)]);
     let d = Declared::repeatability(vec![vec![vec![0.0, 0.0], vec![0.0, 1.0]], vec![vec![0.0, 0.0], vec![1.0, 0.0]]],
         vec![vec![1.0 / 16.0; 2]; 2]);
     let w = whole(&rel, d);
-    let x = &w.field.ground.energy.as_ref().unwrap().exchanges;
-    assert_eq!((x[0][0].epsilon, x[1][0].epsilon), (1.0, 1.0));
-    assert!(x[0][0].floor_resolved && x[1][0].floor_resolved);
+    let x = &w.field.ground.energy.as_ref().unwrap().signed;
+    assert_eq!((x[0][0].value, x[1][0].value), (-1.0, 1.0));
+    assert_eq!((x[0][0].side, x[1][0].side), (Side::Leaving, Side::Entering));
     assert_eq!(w.pc1(0, 1, 0), Reading::Freedom);
     assert_eq!(w.freedom().relations.iter().find(|r| r.component == 1).unwrap().change, 2.0);
     assert_eq!(w.pc1(0, 0, 0), Reading::Structure);
@@ -124,24 +131,26 @@ fn d17_ii_worked_the_exchange_reverses_with_its_magnitude_held() {
 
 #[test]
 fn d17_ii_a_resolved_change_of_exchange_is_pc1_freedom_not_conversely() {
-    // ε and δ_ε from the field's energy; PC1 from the field's freedom.
+    // The signed exchange and its bound from the field's energy; PC1 from the
+    // field's freedom.
     let counts = Mutex::new((0usize, 0usize));
     for_all("d17_ii", 0xD17, |r| {
         let rel = enumerated_rel(r);
         let regs = r.usize(2, 4);
         let rc = r.selects(4);
         let w = whole(&rel, enumerated_declared(r, &rel, 2, regs, 0.5, rc, rc));
-        let (c, x) = (w.carrier(), &w.field.ground.energy.as_ref().unwrap().exchanges);
+        let (c, x) = (w.carrier(), &w.field.ground.energy.as_ref().unwrap().signed);
         let mut g = counts.lock().unwrap();
         for st in 0..regs - 1 {
             for e in 0..rel.n_edges() {
-                let d_eps = Expansion::diff(x[st + 1][e].epsilon, x[st][e].epsilon);
+                let d_eps = Expansion::diff(x[st + 1][e].value, x[st][e].value);
                 let d = w.series.change_exact(st, c, e);
-                // |Δε| ≤ |Δ| exactly, on every field.
-                assert!(d.abs().minus(&d_eps.abs()).signum() >= 0);
+                // The change of the signed exchange is Δ exactly, on every
+                // field. *Was:* |Δε| ≤ |Δ| (ε retired, 104th).
+                assert_eq!(d.minus(&d_eps).signum(), 0);
                 if w.declared.carrier_run_constant() { continue; }
-                // One bound: δΔ = δε_s + δε_{s+1}.
-                let h = Expansion::of(x[st][e].delta_epsilon).plus(&Expansion::of(x[st + 1][e].delta_epsilon));
+                // One bound: δΔ = the two registrations' bounds.
+                let h = Expansion::of(x[st][e].bound).plus(&Expansion::of(x[st + 1][e].bound));
                 assert_eq!(w.series.change_bound_exact(st, c, e).minus(&h).signum(), 0);
                 let resolved = exceeds(&d_eps, &h);
                 if resolved { assert_eq!(w.pc1(st, c, e), Reading::Freedom); g.0 += 1; }
@@ -150,7 +159,9 @@ fn d17_ii_a_resolved_change_of_exchange_is_pc1_freedom_not_conversely() {
         }
     });
     let (both, pc1_only) = counts.into_inner().unwrap();
-    assert!(both > 0 && pc1_only > 0, "ε resolved {both}, PC1 alone {pc1_only}");
+    // Both ways now: PC1 freedom is never read without the signed change
+    // resolved. *Was:* `both > 0 && pc1_only > 0` (ε missed reversals).
+    assert!(both > 0 && pc1_only == 0, "signed change resolved {both}, PC1 alone {pc1_only}");
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -333,8 +344,8 @@ fn d17_iv_exactly_the_carrier_structure_minor_is_a_property_of_their_plane() {
         assert_eq!(pc1s(&wf_, 0), pc1s(&wg, 0));
         let mut m = moved.lock().unwrap();
         if pc1s(&wf_, 1) != pc1s(&wg, 1) { m.0 += 1 }
-        let floors = |w: &Whole| w.field.ground.energy.as_ref().unwrap().exchanges.iter()
-            .map(|t| t.iter().map(|x| x.floor_resolved).collect::<Vec<_>>()).collect::<Vec<_>>();
+        let floors = |w: &Whole| w.field.ground.energy.as_ref().unwrap().signed.iter()
+            .map(|t| t.iter().map(|x| x.side != Side::NotResolved).collect::<Vec<_>>()).collect::<Vec<_>>();
         if floors(&wf_) != floors(&wg) { m.1 += 1 }
     });
     let (pc1_moved, floor_moved) = moved.into_inner().unwrap();
