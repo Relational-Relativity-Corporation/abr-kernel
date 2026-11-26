@@ -47,6 +47,10 @@ This governs everything we do. Check every change against it: relation is calcul
 
 **Start here:** `docs/process/HANDOFF_2026-11-26.md`, then Part 9 from the 92nd. *Was:* `docs/process/HANDOFF_2026-11-25.md`, then Part 9 from the 72nd (the previous handoff, kept).
 
+## The guard (Origin, 2026-11-26)
+
+`tests/guard_operators.rs`: every legacy part admitted by Origin by name with its Part 9 entry; nothing no operator forms stands as a reading; a new public structure registers every field; no familiar method named in the code. What is admitted is in `tests/guard/origin_admitted.rs`, **Origin's file**. The hooks in `.claude/settings.json` run the guard after every Rust edit, run every check before Claude stops, and refuse any edit by Claude to `tests/guard/` or `.claude/`. Never work around them; ask Origin.
+
 ## Checks
 
 `cargo test` and `cargo test --features v9`, no warnings. The application `abr-relational-ai/text-anticipation` (`cargo test --release`, including `tests/kernel_use.rs`) must pass against this kernel. The application `abr-relational-chemistry` (`water/vessel/ingest`) must pass against this kernel. Under a local path patch, run `cargo update -p abr-kernel` first and confirm the local kernel compiles.
