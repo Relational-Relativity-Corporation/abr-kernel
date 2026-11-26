@@ -53,7 +53,7 @@ fn main() {
     let f = RelationalField::new(&rel, seq.clone(), Some(&carriers)).expect("field");
     println!("registrations: {}, steps: {}", f.spatial.len(), f.n_steps());
     for (t, s) in f.spatial.iter().enumerate() {
-        println!("  t={t}  A[0]={:?}  Ξ[0]={:?}", s.a[0], s.circulation[0]);
+        println!("  t={t}  A[0]={:?}  Ξ[0]={:?}", s.a[0], s.passage[0]);
     }
 
     let h = minor_histories(&seq, &rel).unwrap();
