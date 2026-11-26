@@ -72,8 +72,9 @@ pub struct Level {
 pub struct Degree {
     /// The earlier point in evolution (point j: where step j − 1 entered).
     pub point: usize,
-    /// The relation that left it there, `steps[point]`: the readback's
-    /// leaving half at the current locus, kept decomposed by point (K9).
+    /// The relation that left it there, `steps[point]`, as registered. No
+    /// operator forms it. *Was:* described as the readback's leaving half
+    /// (K9), which the code does not compute (corrected, 2026-11-26).
     pub leaving: usize,
     /// Its turn to now: the span of the order `point .. n`, the relations
     /// registered between it and the current point.

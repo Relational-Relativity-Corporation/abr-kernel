@@ -57,6 +57,14 @@ This governs everything we do. Check every change against it: relation is calcul
 
 When Origin asks that question, answer it truthfully for the code as it stands, naming every part where the answer is no. No other prevention: no refusal hooks.
 
+**The suite that tells us when the mathematics departs from relation** (2026-11-26, Origin: *"finish the unit tests until we have a comprehensive suite"*):
+- `tests/v10_formation.rs`: **every derivation is true.** Each part the register claims as an operator reading, a registration or a rule is recomputed from its definition (A, B, Ξ, the readback, A_p, their bounds; registrations against their input) and must equal what the field reports; an operator reading or registration without a recomputation fails, whatever it is called.
+- `tests/v10_no_scalar.rs`: **no operator calculates a scalar** (104th): every numeric part of the field, its split, W5's radial graphs and the declared ground is linear (reversal and sum).
+- `tests/v10_no_repetition.rs`: **no information is repeated** (106th, 107th): no period, phase, modulus or cycle named in the code; identical registrations stay distinct points; the degrees never merge identical routes.
+- `tests/guard_operators.rs`: **legacy only by Origin's admission**, as below.
+- `tests/v10_derivation.rs`: every reported part has a derivation stating what the 92nd requires.
+- **Not covered (named):** a mapping declared without Origin (Origin's check); a definition wrong the same way in the register and in its recomputation; the applications, which are not run against this suite.
+
 **The tests that tell us when legacy mathematics has slipped in:** `tests/guard_operators.rs`. Every legacy part is admitted by Origin by name, with its Part 9 entry. Nothing no operator forms stands as a reading. A new public structure registers every field. No familiar method is named in the code. What is admitted is in `tests/guard/origin_admitted.rs`, Origin's to decide; change it only on Origin's word. The hooks in `.claude/settings.json` run the guard after every Rust edit and every check before Claude stops. *Was (same day):* a third hook refused edits to `tests/guard/` and `.claude/`; deleted by Origin (*"I want to delete that thing"*).
 
 ## Checks

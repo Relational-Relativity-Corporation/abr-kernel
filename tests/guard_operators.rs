@@ -238,7 +238,12 @@ fn every_legacy_part_is_admitted_by_origin() {
 /// 2. Nothing no operator forms stands as a reading.
 #[test]
 fn nothing_no_operator_forms_stands_as_a_reading() {
-    let parts: Vec<(&str, String)> = register().iter().map(|(n, d)| (*n, text(d))).collect();
+    // Readings only: a registration or an identity is an input, never formed
+    // by an operator, and says so truthfully (2026-11-26: `Degree.leaving`).
+    // *Was:* every register entry.
+    let parts: Vec<(&str, String)> = register().iter()
+        .filter(|(_, d)| !matches!(d, Derivation::Registered { .. } | Derivation::Identity { .. }))
+        .map(|(n, d)| (*n, text(d))).collect();
     let why = unformed_readings(&parts, ADMITTED_LEGACY, NOT_ADMITTED);
     assert!(why.is_empty(), "\n{}\n", why.join("\n"));
     // And no operator reading or rule says it is not one.

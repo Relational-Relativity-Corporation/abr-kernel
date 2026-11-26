@@ -232,3 +232,54 @@ fn a_planted_magnitude_and_product_fail_the_test() {
     assert_eq!(floats("[[0.5, -1.0]]"), Some(vec![0.5, -1.0]));
     assert_eq!(floats("3"), None);
 }
+
+/// Readings beyond the relational field that calculate a scalar, shown to
+/// fail below: for Origin. *Empty: none found on this family.*
+const BEYOND_SCALARS: &[&str] = &[];
+
+/// The same test on the readings outside the relational field (2026-11-26,
+/// the comprehensive suite): W5's radial graphs (`coherence.rs`) and the
+/// declared ground (§2.7, `domain.rs`). Every numeric part they report is
+/// checked for reversal and sum, as above; their bounds, shares and counts
+/// (named here by the words bound, share, degree or steps, or with no
+/// derivation of their own) are the framework and listed apart.
+#[test]
+fn the_readings_beyond_the_field_calculate_no_scalar() {
+    let fails: RefCell<BTreeSet<String>> = RefCell::new(BTreeSet::new());
+    let checked: RefCell<BTreeSet<String>> = RefCell::new(BTreeSet::new());
+    for_all("no scalar: beyond the field", 0x104_02, |r| {
+        let rel = enumerated_rel(r);
+        let k = r.usize(2, 3);
+        let regs = r.usize(2, 4);
+        let x = enumerated_declared(r, &rel, k, regs, 0.5, false, false);
+        let y = Declared { values: enumerated_declared(r, &rel, k, regs, 0.5, false, false).values, ..x.clone() };
+        let of = |d: &Declared| {
+            let w = whole(&rel, d.clone());
+            let graphs = abr_kernel::coherence::radial_graphs(&w.field, &rel, regs - 1).ok();
+            let df = declared(&rel, d, domain(d, true, vec![], vec![]));
+            format!("{graphs:?} {:?}", df.energy)
+        };
+        let (px, _) = numeric_parts(&of(&x));
+        let (pneg, _) = numeric_parts(&of(&scaled(&x, -1.0)));
+        let (py, _) = numeric_parts(&of(&y));
+        let (psum, _) = numeric_parts(&of(&summed(&x, &y)));
+        let get = |p: &[(String, Vec<f64>)], n: &str| p.iter().find(|q| q.0 == n).map(|q| q.1.clone());
+        for (name, vx) in &px {
+            checked.borrow_mut().insert(name.clone());
+            let linear = match (get(&pneg, name), get(&py, name), get(&psum, name)) {
+                (Some(vn), Some(vy), Some(vs)) => vn.len() == vx.len() && vy.len() == vx.len() && vs.len() == vx.len()
+                    && vx.iter().zip(&vn).all(|(a, b)| *b == -a) && vx.iter().zip(&vy).zip(&vs).all(|((a, b), s)| *s == a + b),
+                _ => false,
+            };
+            if !linear { fails.borrow_mut().insert(name.clone()); }
+        }
+    });
+    let framework = |n: &str| { let f = n.split('.').nth(1).unwrap_or(""); f.contains("bound") || f.contains("share") || f.contains("degree") || f.contains("steps") };
+    let fails = fails.into_inner();
+    let scalars: Vec<String> = fails.iter().filter(|n| !framework(n)).cloned().collect();
+    eprintln!("[no scalar, beyond the field] checked: {:?}", checked.borrow());
+    eprintln!("[no scalar, beyond the field] not linear, framework: {:?}", fails.iter().filter(|n| framework(n)).collect::<Vec<_>>());
+    eprintln!("[no scalar, beyond the field] not linear, readings: {scalars:?}");
+    assert!(!checked.borrow().is_empty(), "the readings beyond the field are reached");
+    assert_eq!(scalars, BEYOND_SCALARS.to_vec(), "readings beyond the field that calculate a scalar (104th)");
+}
