@@ -241,3 +241,183 @@ pub fn combination_up(terms: impl IntoIterator<Item = (i64, f64)>) -> f64 {
     for (k, x) in terms { if k != 0 { s.add_product(k as f64, x); } }
     s.up()
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Exact rationals (Origin, 2026-11-26, 100th: the orthogonal split)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// The orthogonal split of a field of relations into its two parts needs a
+// solve over the loci, whose results are rationals that no f64 holds exactly.
+// They are computed here exactly: arbitrary-precision integers (base 2³²,
+// schoolbook multiplication, binary long division) and rationals kept in
+// lowest terms (Euclid's algorithm), so equal values compare equal. Each
+// value is converted to f64 once, to the nearest or upward.
+//
+// [IMPL] Legacy arithmetic at the code layer (OC-LM-1; `derivation.rs`). No
+// external dependency (Cargo.toml). Conversion to f64 does not produce
+// subnormal values; a magnitude outside the normal range panics.
+
+/// A non-negative integer of any size, base 2³², least significant first,
+/// without trailing zeros (zero is empty).
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct Nat(Vec<u32>);
+
+impl Nat {
+    fn zero() -> Self { Nat(Vec::new()) }
+    fn from_u64(x: u64) -> Self { let mut n = Nat(vec![x as u32, (x >> 32) as u32]); n.trim(); n }
+    fn trim(&mut self) { while self.0.last() == Some(&0) { self.0.pop(); } }
+    fn is_zero(&self) -> bool { self.0.is_empty() }
+    fn bits(&self) -> usize { match self.0.last() { None => 0, Some(&top) => 32 * (self.0.len() - 1) + (32 - top.leading_zeros() as usize) } }
+    fn bit(&self, i: usize) -> bool { self.0.get(i / 32).is_some_and(|w| w >> (i % 32) & 1 == 1) }
+    fn cmp(&self, o: &Nat) -> std::cmp::Ordering {
+        use std::cmp::Ordering::*;
+        if self.0.len() != o.0.len() { return self.0.len().cmp(&o.0.len()); }
+        for i in (0..self.0.len()).rev() { if self.0[i] != o.0[i] { return if self.0[i] < o.0[i] { Less } else { Greater }; } }
+        Equal
+    }
+    fn add(&self, o: &Nat) -> Nat {
+        let mut r = Vec::with_capacity(self.0.len().max(o.0.len()) + 1);
+        let mut carry = 0u64;
+        for i in 0..self.0.len().max(o.0.len()) {
+            let s = *self.0.get(i).unwrap_or(&0) as u64 + *o.0.get(i).unwrap_or(&0) as u64 + carry;
+            r.push(s as u32); carry = s >> 32;
+        }
+        if carry > 0 { r.push(carry as u32); }
+        let mut n = Nat(r); n.trim(); n
+    }
+    /// self − o, for self ≥ o.
+    fn sub(&self, o: &Nat) -> Nat {
+        let mut r = Vec::with_capacity(self.0.len());
+        let mut borrow = 0i64;
+        for i in 0..self.0.len() {
+            let mut d = self.0[i] as i64 - *o.0.get(i).unwrap_or(&0) as i64 - borrow;
+            borrow = if d < 0 { d += 1 << 32; 1 } else { 0 };
+            r.push(d as u32);
+        }
+        assert_eq!(borrow, 0, "Nat::sub below zero");
+        let mut n = Nat(r); n.trim(); n
+    }
+    fn mul(&self, o: &Nat) -> Nat {
+        if self.is_zero() || o.is_zero() { return Nat::zero(); }
+        let mut r = vec![0u64; self.0.len() + o.0.len() + 1];
+        for (i, &a) in self.0.iter().enumerate() {
+            let mut carry = 0u64;
+            for (j, &b) in o.0.iter().enumerate() {
+                let t = r[i + j] + a as u64 * b as u64 + carry;
+                r[i + j] = t & 0xFFFF_FFFF; carry = t >> 32;
+            }
+            let mut k = i + o.0.len();
+            while carry > 0 { let t = r[k] + carry; r[k] = t & 0xFFFF_FFFF; carry = t >> 32; k += 1; }
+        }
+        let mut n = Nat(r.into_iter().map(|x| x as u32).collect()); n.trim(); n
+    }
+    fn shl(&self, s: usize) -> Nat {
+        if self.is_zero() { return Nat::zero(); }
+        let (w, b) = (s / 32, s % 32);
+        let mut r = vec![0u32; w];
+        let mut carry = 0u32;
+        for &x in &self.0 {
+            r.push(if b == 0 { x } else { (x << b) | carry });
+            carry = if b == 0 { 0 } else { x >> (32 - b) };
+        }
+        if carry > 0 { r.push(carry); }
+        let mut n = Nat(r); n.trim(); n
+    }
+    /// (quotient, remainder) of self / d, d ≠ 0: binary long division.
+    fn divrem(&self, d: &Nat) -> (Nat, Nat) {
+        assert!(!d.is_zero(), "division by zero");
+        if self.cmp(d) == std::cmp::Ordering::Less { return (Nat::zero(), self.clone()); }
+        let mut q = vec![0u32; self.0.len()];
+        let mut r = Nat::zero();
+        for i in (0..self.bits()).rev() {
+            r = r.shl(1);
+            if self.bit(i) { if r.0.is_empty() { r.0.push(1); } else { r.0[0] |= 1; } }
+            if r.cmp(d) != std::cmp::Ordering::Less { r = r.sub(d); q[i / 32] |= 1 << (i % 32); }
+        }
+        let mut qn = Nat(q); qn.trim(); (qn, r)
+    }
+    fn gcd(&self, o: &Nat) -> Nat {
+        let (mut a, mut b) = (self.clone(), o.clone());
+        while !b.is_zero() { let (_, r) = a.divrem(&b); a = b; b = r; }
+        a
+    }
+    fn low_u64(&self) -> u64 { *self.0.first().unwrap_or(&0) as u64 | (*self.0.get(1).unwrap_or(&0) as u64) << 32 }
+}
+
+/// An exact rational, in lowest terms, the denominator positive.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Ratio { negative: bool, num: Nat, den: Nat }
+
+impl Ratio {
+    fn new(negative: bool, num: Nat, den: Nat) -> Self {
+        if num.is_zero() { return Ratio::zero(); }
+        let g = num.gcd(&den);
+        let (num, den) = if g == Nat::from_u64(1) { (num, den) } else { (num.divrem(&g).0, den.divrem(&g).0) };
+        Ratio { negative, num, den }
+    }
+    pub fn zero() -> Self { Ratio { negative: false, num: Nat::zero(), den: Nat::from_u64(1) } }
+    pub fn from_i64(x: i64) -> Self { Ratio::new(x < 0, Nat::from_u64(x.unsigned_abs()), Nat::from_u64(1)) }
+    /// The exact value of a finite f64.
+    pub fn from_f64(x: f64) -> Self {
+        assert!(x.is_finite(), "a finite value");
+        if x == 0.0 { return Ratio::zero(); }
+        let bits = x.to_bits();
+        let exp = ((bits >> 52) & 0x7FF) as i64;
+        let frac = bits & ((1u64 << 52) - 1);
+        let (mant, e) = if exp == 0 { (frac, -1074) } else { (frac | (1u64 << 52), exp - 1075) };
+        let m = Nat::from_u64(mant);
+        if e >= 0 { Ratio::new(x < 0.0, m.shl(e as usize), Nat::from_u64(1)) } else { Ratio::new(x < 0.0, m, Nat::from_u64(1).shl((-e) as usize)) }
+    }
+    pub fn is_zero(&self) -> bool { self.num.is_zero() }
+    pub fn neg(&self) -> Self { if self.is_zero() { self.clone() } else { Ratio { negative: !self.negative, ..self.clone() } } }
+    pub fn abs(&self) -> Self { Ratio { negative: false, ..self.clone() } }
+    pub fn add(&self, o: &Ratio) -> Ratio {
+        let (a, b) = (self.num.mul(&o.den), o.num.mul(&self.den));
+        let den = self.den.mul(&o.den);
+        if self.negative == o.negative { return Ratio::new(self.negative, a.add(&b), den); }
+        match a.cmp(&b) {
+            std::cmp::Ordering::Equal => Ratio::zero(),
+            std::cmp::Ordering::Greater => Ratio::new(self.negative, a.sub(&b), den),
+            std::cmp::Ordering::Less => Ratio::new(o.negative, b.sub(&a), den),
+        }
+    }
+    pub fn sub(&self, o: &Ratio) -> Ratio { self.add(&o.neg()) }
+    pub fn mul(&self, o: &Ratio) -> Ratio { Ratio::new(self.negative != o.negative, self.num.mul(&o.num), self.den.mul(&o.den)) }
+    pub fn div(&self, o: &Ratio) -> Ratio {
+        assert!(!o.is_zero(), "division by zero");
+        Ratio::new(self.negative != o.negative, self.num.mul(&o.den), self.den.mul(&o.num))
+    }
+    /// self ≤ o.
+    pub fn le(&self, o: &Ratio) -> bool { let d = o.sub(self); d.is_zero() || !d.negative }
+    /// The nearest f64 (ties to even).
+    pub fn to_f64_nearest(&self) -> f64 { self.to_f64(false) }
+    /// The least f64 not below the value.
+    pub fn to_f64_up(&self) -> f64 { self.to_f64(true) }
+    fn to_f64(&self, up: bool) -> f64 {
+        if self.is_zero() { return 0.0; }
+        let (n, d) = (&self.num, &self.den);
+        let s = 55 + d.bits() as i64 - n.bits() as i64;
+        let (q, r) = if s >= 0 { n.shl(s as usize).divrem(d) } else { n.divrem(&d.shl((-s) as usize)) };
+        let sticky = !r.is_zero();
+        let shift = q.bits() - 53;
+        let mut mant = q.divrem(&Nat::from_u64(1).shl(shift)).0.low_u64();
+        let low = q.divrem(&Nat::from_u64(1).shl(shift)).1;
+        let half = Nat::from_u64(1).shl(shift - 1);
+        // Magnitude rounding: toward +∞ means away from zero for a positive
+        // value and toward zero for a negative one.
+        let away = if up {
+            !self.negative && (!low.is_zero() || sticky)
+        } else {
+            match low.cmp(&half) {
+                std::cmp::Ordering::Greater => true,
+                std::cmp::Ordering::Less => false,
+                std::cmp::Ordering::Equal => sticky || mant & 1 == 1,
+            }
+        };
+        if away { mant += 1; }
+        let e2 = shift as i64 - s;
+        assert!((-1000..1000).contains(&(e2 + 53)), "outside the normal range of f64");
+        let v = mant as f64 * 2f64.powi(e2 as i32);
+        if self.negative { -v } else { v }
+    }
+}

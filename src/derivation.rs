@@ -168,6 +168,13 @@ use Reads::{Connection as Con, Energy as En, Freedom as Fr, Relation as Rel};
 const MINOR_PROVENANCE: &str = "exterior algebra: the 2×2 determinant (Leibniz; Cramer, 1750), the exterior product u∧v of two vectors (Grassmann, 1844), the name minor (Sylvester, 1850); summed over component planes, Σ m² = |u|²|v|² − (u·v)² (Lagrange's identity), so every minor zero is |cos| = 1 read exactly";
 const MINOR_IN_RELATION: &str = "an antisymmetric bilinear form of A's output, m_ij(e, f) = A_i[e]·A_j[f] − A_j[e]·A_i[f]: one A-value from each of two relations in two components, linear in each relation and a product of the two; not A, B or Ξ, and its bound needs the product bound (93rd). Scope: every pair of relations that qualifies (resolved, or moved), whether or not B joins them; the work grows with the square of the relations, and is not counted in `work` (92nd)";
 
+// The orthogonal split (Origin, 2026-11-26, 100th: "Proceed with the
+// orthogonal split we'll see how that looks keep in mind if our construct
+// reveals observable behaviors that will be our validation").
+const SPLIT_PROVENANCE: &str = "Kirchhoff (1847), the currents of a network as loops and potentials; the image of a linear map and the null space of its transpose; on networks, the discrete Hodge decomposition (Eckmann, 1944); the orthogonal projection of least squares (Legendre, 1805; Gauss, 1809)";
+const SPLIT_IN_RELATION: &str = "built from A and the readback only: P = A G Aᵀ, where Aᵀ is the readback's balance (what leaves less what enters, K9) and G inverts L = AᵀA over the loci, one locus of each piece held at 0; the potential part is in the image of A, the balanced part has a readback balance of zero at every locus. Not local: each relation's part depends on every relation of its piece, and the bounds read all m × m entries of P, so the work grows with the square of the relations (not counted in `work`, 92nd). Its solve over the loci needs division, computed exactly in rationals";
+const SPLIT_NECESSITY: &str = "declared by Origin (100th): to test the 99th's candidate, that energy, connection and freedom are the parts of one structure; the orthogonal split is the one that depends on no choice of basis or tree (41st). Validation is the observable behaviour the construct reveals (Origin, 100th), not these synthetic tests";
+
 static REGISTER: &[(&str, Derivation)] = &[
     // ── The relational field and its registrations ────────────────────────
     ("RelationalField.registrations", Reg { what: "the declared registrations at the loci, when the relations were formed from loci (empty when registered directly); kept as registered" }),
@@ -212,6 +219,20 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("Ways.pieces", Id { what: "c, the connected pieces the declared relations join the loci into; a locus no relation meets is a piece of its own" }),
     ("Ways.potential", Rule { of: &[A], reads: &[Rel, En], rule: "n − c: the independent ways of the potential part, fields explained by values at the loci (the relations of any spanning forest)" }),
     ("Ways.balanced", Rule { of: &[A, Readback], reads: &[Rel, Con], rule: "m − n + c: the independent ways of the balanced part, where what enters every locus equals what leaves (the independent cycles, K7)" }),
+    // ── The orthogonal split (Origin, 100th; the 99th, Proposed) ──────────
+    ("TwoParts.inner_product", Reg { what: "the declared inner product the split is orthogonal under (99th, 100th): equal weight on every relation by default; any other weighting a domain's declaration" }),
+    ("Equal.basis", Reg { what: "the basis of the equal-weight inner product, declared with it" }),
+    ("TwoParts.spatial", Legacy { method: "the orthogonal split at every registration: the potential part A G Aᵀ g and the balanced part g − A G Aᵀ g", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
+    ("TwoParts.persistence", Legacy { method: "the orthogonal split over every step, of the change A_p; equal exactly to the change of the split (linear)", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
+    ("Split.potential", Legacy { method: "the potential part, the image of A: explained by values at the loci, closing every cycle; rounded once", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
+    ("Split.balanced", Legacy { method: "the balanced part: at every locus what enters equals what leaves (the readback's balance zero); rounded once", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
+    ("Split.exact_potential", Legacy { method: "the potential part exactly, in rationals: every identity of the split holds in it", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
+    ("Split.exact_balanced", Legacy { method: "the balanced part exactly, in rationals", provenance: SPLIT_PROVENANCE, in_relation_to_operators: SPLIT_IN_RELATION, necessity: Some(SPLIT_NECESSITY) }),
+    ("Split.potential_bound", Rule { of: &[A, Readback], reads: &[Rel, En], rule: "the bound of the potential part: Σ_f |P[e][f]|·δ_f, the projection with its signs dropped applied to the relations' bounds (93rd, 98th), exactly, rounded up" }),
+    ("Split.balanced_bound", Rule { of: &[A, Readback], reads: &[Rel, Con], rule: "the bound of the balanced part: Σ_f |I[e][f] − P[e][f]|·δ_f, formed as the potential part's" }),
+    ("Ratio.negative", Id { what: "the sign of an exact rational" }),
+    ("Ratio.num", Id { what: "the numerator of an exact rational, in lowest terms (an integer of any size)" }),
+    ("Ratio.den", Id { what: "the denominator of an exact rational, positive, in lowest terms" }),
     // ── The ground: energy ────────────────────────────────────────────────
     ("RelationalField.ground", Reg { what: "energy, freedom and connection, read together over the whole sequence (Df6, W11); each part below has its own derivation" }),
     ("GroundReading.energy", Op { operators: &[A], reads: &[En], form: "V3: energy read from a declared carrier, ε = |A(carrier)|, or named as not evaluated when no carrier is declared" }),
@@ -311,6 +332,12 @@ static LEGACY_IN_USE: &[Derivation] = &[
         provenance: "interval arithmetic (Moore, 1966): over [x ± δx] and [y ± δy], |x·y − x₀·y₀| ≤ |x₀|·δy + |y₀|·δx + δx·δy. `exact::product_bound`",
         in_relation_to_operators: "the bound of a bilinear form of A: a 2×2 minor m_ij(e, f) = A_i[e]·A_j[f] − A_j[e]·A_i[f] multiplies two relations, and the second-order term δx·δy has no counterpart in A, B or Ξ, whose bounds are linear in δ",
         necessity: Some("the 41st rule (every part reported with its bound, never rounded down), only as long as the minors are read: the proportional grade, the V2 first form, PC2 and PC3. Declared by Origin (93rd); if those readings are fenced from the point of analysis, the necessity narrows to them"),
+    },
+    Derivation::Legacy {
+        method: "exact rationals (arbitrary-precision integers; Euclid's algorithm; Gauss–Jordan elimination)",
+        provenance: "Euclid's algorithm (Elements VII); Gauss–Jordan elimination (Gauss; Jordan, 1888); schoolbook multiplication and binary long division. `exact::Ratio`",
+        in_relation_to_operators: "adds no form: it computes the orthogonal split's solve over the loci (L = AᵀA, built from A) exactly, as exact summation computes the operators' sums; each value is converted to f64 once, to the nearest or upward",
+        necessity: Some("the orthogonal split (Origin, 100th), whose solve needs division that no f64 holds exactly; without it the split's identities (the parts summing to the relation, the potential part closing every cycle, the balanced part balancing, orthogonality) would hold only approximately, against the 41st"),
     },
 ];
 

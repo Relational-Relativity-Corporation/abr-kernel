@@ -50,6 +50,9 @@ fn names_reported() -> Vec<String> {
         add(format!("{with:?}"));
         let without = RelationalField::from_relations(&rel, w.field.relations.clone(), None).unwrap();
         add(format!("{without:?}"));
+        // The orthogonal split read from the field (100th): its parts are
+        // reported parts too.
+        add(format!("{:?}", with.two_parts(&abr_kernel::relational_field::InnerProduct::equal())));
     });
     all.into_inner()
 }
@@ -131,7 +134,10 @@ fn the_checks_can_tell() {
 fn the_bounds_are_split_as_the_93rd_declares() {
     let methods: Vec<&str> = legacy_in_use().iter().map(|d| match d {
         Derivation::Legacy { method, .. } => *method, _ => "not legacy" }).collect();
-    assert_eq!(methods.len(), 2, "legacy methods in use: {methods:?}");
+    // *Amended (100th):* a third method, exact rationals, for the orthogonal
+    // split. *Was:* `assert_eq!(methods.len(), 2, ...)`.
+    assert_eq!(methods.len(), 3, "legacy methods in use: {methods:?}");
+    assert!(methods[2].starts_with("exact rationals"), "{methods:?}");
     assert!(methods[0].starts_with("exact summation"), "{methods:?}");
     assert!(methods[1].starts_with("product bounds"), "{methods:?}");
     match &legacy_in_use()[1] {

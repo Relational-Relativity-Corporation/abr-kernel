@@ -388,3 +388,191 @@ mod tests {
         }
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// The orthogonal split into the two parts (Origin, 2026-11-26, 100th; 99th)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Every field of relations g is the sum of a potential part p = A(x), the
+// image of A, and a balanced part q, where at every locus what enters equals
+// what leaves (Aᵀq = 0, the readback's balance, K9). Under a declared inner
+// product the two are orthogonal and the split is unique: it depends on no
+// choice of basis or tree (41st). x solves L x = Aᵀg over the loci, with
+// L = AᵀA (each locus with the relations meeting it), one locus of each
+// connected piece held at 0; the potential part is then the same whichever
+// locus is held, since A takes no difference within a constant.
+//
+// [IMPL] Legacy mathematics (92nd; `derivation.rs`): Kirchhoff (1847); the
+// discrete Hodge decomposition (Eckmann, 1944); the orthogonal projection of
+// least squares. Computed exactly in rationals (`exact::Ratio`), by
+// Gauss–Jordan elimination over the loci. **Not local:** each relation's
+// part depends on every relation of its piece, and the bounds read the whole
+// projection, m × m entries, so its work grows with the square of the
+// relations. It is not an operator reading and is not counted in `work`.
+
+use crate::exact::Ratio;
+
+/// The inner product the split is orthogonal under: a declaration (99th).
+#[derive(Debug, Clone, PartialEq)]
+pub enum InnerProduct {
+    /// Equal weight on every relation: the declared default. Any other
+    /// weighting is a domain's declaration, not the kernel's.
+    Equal { basis: String },
+}
+
+impl InnerProduct {
+    /// The declared default: equal weight on every relation.
+    pub fn equal() -> Self { InnerProduct::Equal { basis: "equal weight on every relation (the declared default, 100th)".into() } }
+}
+
+/// The two parts at one registration, or over one step, [c][e].
+#[derive(Debug, Clone, PartialEq)]
+pub struct Split {
+    /// The potential part, rounded once to the nearest f64.
+    pub potential: Vec<Vec<f64>>,
+    /// The balanced part, rounded once to the nearest f64.
+    pub balanced: Vec<Vec<f64>>,
+    /// The bound of each part: the projection with its signs dropped applied
+    /// to the relations' bounds (93rd, 98th), rounded up.
+    pub potential_bound: Vec<Vec<f64>>,
+    pub balanced_bound: Vec<Vec<f64>>,
+    /// The parts exactly: every identity of the split holds in these.
+    pub exact_potential: Vec<Vec<Ratio>>,
+    pub exact_balanced: Vec<Vec<Ratio>>,
+}
+
+/// The orthogonal split of a whole field into its two parts, at every
+/// registration and over every step.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TwoParts {
+    pub inner_product: InnerProduct,
+    pub spatial: Vec<Split>,
+    pub persistence: Vec<Split>,
+}
+
+impl RelationalField {
+    /// The orthogonal split of the field into its potential and balanced
+    /// parts (Origin, 100th), under the declared inner product. Read from the
+    /// field's own relations, at every registration and step.
+    pub fn two_parts(&self, ip: &InnerProduct) -> TwoParts {
+        let InnerProduct::Equal { .. } = ip;
+        // The declared relations, read from the field's own record of the
+        // relations meeting at each locus (`meeting`): each relation's source
+        // is the locus it leaves, its target the locus it enters.
+        let n = self.meeting.leaving.len();
+        let mut edges = vec![(usize::MAX, usize::MAX); self.relations.n_edges()];
+        for v in 0..n {
+            for &e in &self.meeting.leaving[v] { edges[e].0 = v; }
+            for &e in &self.meeting.entering[v] { edges[e].1 = v; }
+        }
+        let proj = Projection::of(n, &edges);
+        let s = &self.relations;
+        let (k, m) = (s.k(), s.n_edges());
+        let exact_of = |ts: &[(usize, f64)]| -> (Vec<Vec<Ratio>>, Vec<Vec<Ratio>>) {
+            let g = (0..k).map(|c| (0..m).map(|e| {
+                ts.iter().fold(Ratio::zero(), |acc, &(t, w)| {
+                    let v = Ratio::from_f64(s.a[t][c][e]).add(&Ratio::from_f64(s.a_lo[t][c][e]));
+                    if w > 0.0 { acc.add(&v) } else { acc.sub(&v) }
+                })
+            }).collect()).collect();
+            let d = (0..k).map(|c| (0..m).map(|e| Ratio::from_f64(match ts {
+                [(t, _)] => crate::exact::gain_widened(&s.entry(*t, c, e), &crate::exact::Expansion::of(s.da[*t][c][e]), s.closure_gain[c][e]).up(),
+                [(_, _), (t0, _)] => s.change_bound_exact(*t0, c, e).up(),
+                _ => unreachable!("a registration or one step"),
+            })).collect()).collect();
+            (g, d)
+        };
+        let split = |ts: &[(usize, f64)]| -> Split {
+            let (g, d) = exact_of(ts);
+            let mut out = Split { potential: Vec::new(), balanced: Vec::new(), potential_bound: Vec::new(), balanced_bound: Vec::new(),
+                exact_potential: Vec::new(), exact_balanced: Vec::new() };
+            for c in 0..k {
+                let p = proj.apply(&g[c]);
+                let q: Vec<Ratio> = (0..m).map(|e| g[c][e].sub(&p[e])).collect();
+                let (pb, qb) = proj.bounds(&d[c]);
+                out.potential.push(p.iter().map(Ratio::to_f64_nearest).collect());
+                out.balanced.push(q.iter().map(Ratio::to_f64_nearest).collect());
+                out.potential_bound.push(pb.iter().map(Ratio::to_f64_up).collect());
+                out.balanced_bound.push(qb.iter().map(Ratio::to_f64_up).collect());
+                out.exact_potential.push(p);
+                out.exact_balanced.push(q);
+            }
+            out
+        };
+        let n_t = s.n_registrations();
+        TwoParts {
+            inner_product: ip.clone(),
+            spatial: (0..n_t).map(|t| split(&[(t, 1.0)])).collect(),
+            persistence: (0..n_t - 1).map(|t| split(&[(t + 1, 1.0), (t, -1.0)])).collect(),
+        }
+    }
+}
+
+/// The orthogonal projection onto the potential part, exactly: G, a
+/// generalized inverse of L = AᵀA over the loci (one locus of each piece
+/// held at 0), and P = A G Aᵀ over the relations.
+struct Projection { edges: Vec<(usize, usize)>, n: usize, g: Vec<Vec<Ratio>> }
+
+impl Projection {
+    fn of(n: usize, edges: &[(usize, usize)]) -> Self {
+        // L = AᵀA: the relations meeting each locus on the diagonal, minus
+        // the relations joining two loci off it.
+        let mut l = vec![vec![0i64; n]; n];
+        for &(s, t) in edges { l[s][s] += 1; l[t][t] += 1; l[s][t] -= 1; l[t][s] -= 1; }
+        // One locus of each connected piece held at 0 (the least).
+        let mut root: Vec<usize> = (0..n).collect();
+        fn find(p: &mut [usize], v: usize) -> usize { let mut v = v; while p[v] != v { p[v] = p[p[v]]; v = p[v]; } v }
+        for &(s, t) in edges { let (a, b) = (find(&mut root, s), find(&mut root, t)); if a != b { root[a.max(b)] = a.min(b); } }
+        let held: Vec<bool> = (0..n).map(|v| find(&mut root, v) == v).collect();
+        let free: Vec<usize> = (0..n).filter(|&v| !held[v]).collect();
+        // Gauss–Jordan on the free loci, exactly: [L_free | I] → [I | L_free⁻¹].
+        let r = free.len();
+        let mut a: Vec<Vec<Ratio>> = (0..r).map(|i| (0..2 * r).map(|j| {
+            if j < r { Ratio::from_i64(l[free[i]][free[j]]) } else if j - r == i { Ratio::from_i64(1) } else { Ratio::zero() }
+        }).collect()).collect();
+        for col in 0..r {
+            let piv = (col..r).find(|&i| !a[i][col].is_zero()).expect("the reduced matrix over the loci is invertible");
+            a.swap(col, piv);
+            let pv = a[col][col].clone();
+            for j in 0..2 * r { a[col][j] = a[col][j].div(&pv); }
+            for i in 0..r {
+                if i == col || a[i][col].is_zero() { continue; }
+                let f = a[i][col].clone();
+                for j in 0..2 * r { let t = a[col][j].mul(&f); a[i][j] = a[i][j].sub(&t); }
+            }
+        }
+        let mut g = vec![vec![Ratio::zero(); n]; n];
+        for i in 0..r { for j in 0..r { g[free[i]][free[j]] = a[i][r + j].clone(); } }
+        Projection { edges: edges.to_vec(), n, g }
+    }
+    /// The potential part of g: A G Aᵀ g, exactly.
+    fn apply(&self, g: &[Ratio]) -> Vec<Ratio> {
+        let mut b = vec![Ratio::zero(); self.n];
+        for (e, &(s, t)) in self.edges.iter().enumerate() { b[s] = b[s].add(&g[e]); b[t] = b[t].sub(&g[e]); }
+        let x: Vec<Ratio> = (0..self.n).map(|u| (0..self.n).fold(Ratio::zero(), |acc, v| if self.g[u][v].is_zero() || b[v].is_zero() { acc } else { acc.add(&self.g[u][v].mul(&b[v])) })).collect();
+        self.edges.iter().map(|&(s, t)| x[s].sub(&x[t])).collect()
+    }
+    /// P[e][f] = (A G Aᵀ)[e][f].
+    fn entry(&self, e: usize, f: usize) -> Ratio {
+        let ((se, te), (sf, tf)) = (self.edges[e], self.edges[f]);
+        self.g[se][sf].sub(&self.g[se][tf]).sub(&self.g[te][sf]).add(&self.g[te][tf])
+    }
+    /// The bounds of the two parts from the relations' bounds d: Σ_f |P[e][f]|·d[f]
+    /// and Σ_f |I[e][f] − P[e][f]|·d[f] (93rd: the projection with its signs
+    /// dropped, applied to the bounds).
+    fn bounds(&self, d: &[Ratio]) -> (Vec<Ratio>, Vec<Ratio>) {
+        let m = self.edges.len();
+        let mut pb = vec![Ratio::zero(); m];
+        let mut qb = vec![Ratio::zero(); m];
+        for e in 0..m {
+            for f in 0..m {
+                if d[f].is_zero() { continue; }
+                let p = self.entry(e, f);
+                let q = if e == f { Ratio::from_i64(1).sub(&p) } else { p.neg() };
+                pb[e] = pb[e].add(&p.abs().mul(&d[f]));
+                qb[e] = qb[e].add(&q.abs().mul(&d[f]));
+            }
+        }
+        (pb, qb)
+    }
+}
