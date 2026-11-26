@@ -461,6 +461,9 @@ pub fn radial_graphs(field: &RelationalField, rel: &crate::operators::DeclaredRe
         }).collect();
         let energy = field.ground.energy.as_ref().map_err(|g| g.clone()).map(|en| {
             let (mut v, mut h, mut resolved) = (Expansion::new(), Expansion::new(), 0);
+            // Reads the fenced magnitude ε (Origin, 103rd: magnitude is not a
+            // variable). Named, not changed: whether the accumulated energy
+            // becomes the signed sum Σ A(c) is for Origin (step two).
             for t in 0..=through {
                 let x = &en.exchanges[t][e];
                 v.add(x.epsilon);
