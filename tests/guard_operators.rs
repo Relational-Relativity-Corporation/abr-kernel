@@ -11,9 +11,9 @@
 //! that ("No operator forms it"). This guard closes that door:
 //!
 //! 1. Every legacy part is admitted by Origin, by name, with the Part 9 entry
-//!    that admits it, in `tests/guard/origin_admitted.rs`, a file the
-//!    Generator cannot edit (a PreToolUse hook refuses it). A legacy part not
-//!    listed fails, whatever its derivation says.
+//!    that admits it, in `tests/guard/origin_admitted.rs`, changed only on
+//!    Origin's word. A legacy part not listed fails, whatever its
+//!    derivation says.
 //! 2. A part whose derivation says no operator forms it is never a reading:
 //!    it is listed as not admitted, or admitted only as a check.
 //! 3. A public structure added after the guard has every field registered
@@ -35,6 +35,10 @@
 //!
 //! The hooks that run this after every edit, and the full checks before the
 //! Generator stops, are in `.claude/settings.json` and `.claude/hooks/`.
+//! Beyond these tests there is no prevention (Origin, 2026-11-26): Origin
+//! asks whether relation is treated as primitive, followed by calculating
+//! freedom, connection and energy in linear recursive algebra, and the
+//! Generator answers truthfully.
 
 #[path = "guard/origin_admitted.rs"]
 mod origin;

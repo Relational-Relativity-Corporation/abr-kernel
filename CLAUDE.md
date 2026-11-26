@@ -47,9 +47,13 @@ This governs everything we do. Check every change against it: relation is calcul
 
 **Start here:** `docs/process/HANDOFF_2026-11-26.md`, then Part 9 from the 92nd. *Was:* `docs/process/HANDOFF_2026-11-25.md`, then Part 9 from the 72nd (the previous handoff, kept).
 
-## The guard (Origin, 2026-11-26)
+## Origin's check (2026-11-26)
 
-`tests/guard_operators.rs`: every legacy part admitted by Origin by name with its Part 9 entry; nothing no operator forms stands as a reading; a new public structure registers every field; no familiar method named in the code. What is admitted is in `tests/guard/origin_admitted.rs`, **Origin's file**. The hooks in `.claude/settings.json` run the guard after every Rust edit, run every check before Claude stops, and refuse any edit by Claude to `tests/guard/` or `.claude/`. Never work around them; ask Origin.
+> *"the single most important job and the most difficult job for me is to make sure you run my math and the only way that I can do that is by checking your code and math myself and the way that I do that is by simply asking are we treating relation as primitive followed by calculating the variables freedom connection and energy in linear recursive algebra? And if you say no I know I've failed and have to start over that is it we don't need any other preventions although we will develop unit tests that will let us know if you've let any legacy math sneak through"*
+
+When Origin asks that question, answer it truthfully for the code as it stands, naming every part where the answer is no. No other prevention: no refusal hooks.
+
+**The tests that tell us when legacy mathematics has slipped in:** `tests/guard_operators.rs`. Every legacy part is admitted by Origin by name, with its Part 9 entry. Nothing no operator forms stands as a reading. A new public structure registers every field. No familiar method is named in the code. What is admitted is in `tests/guard/origin_admitted.rs`, Origin's to decide; change it only on Origin's word. The hooks in `.claude/settings.json` run the guard after every Rust edit and every check before Claude stops. *Was (same day):* a third hook refused edits to `tests/guard/` and `.claude/`; deleted by Origin (*"I want to delete that thing"*).
 
 ## Checks
 

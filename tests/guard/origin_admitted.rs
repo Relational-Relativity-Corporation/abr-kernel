@@ -1,8 +1,9 @@
 //! ORIGIN'S FILE. What Origin has admitted, read by `tests/guard_operators.rs`.
 //!
-//! The Generator (Claude) may not change this file: a PreToolUse hook in
-//! `.claude/settings.json` refuses any edit to `tests/guard/` and `.claude/`.
-//! Origin changes it directly, with the Part 9 entry that admits each line.
+//! What it holds is Origin's to decide: the Generator (Claude) changes it
+//! only on Origin's word, with the Part 9 entry that admits each line.
+//! *Was:* a PreToolUse hook refused every edit by the Generator; deleted by
+//! Origin, 2026-11-26.
 //!
 //! Written by the Generator on 2026-11-26 from the register as it stood at
 //! `9d6e4ae`, for Origin to confirm or strike. Every line names the Part 9
