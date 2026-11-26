@@ -20,6 +20,8 @@ Origin, 59th: we calculate relation as primitive alongside energy, connection an
 
 **The order is the relational field** (Origin, 102nd): *"the order of information read from left to right including all character spaces and punctuations"*. The possibilities at the current point are the continuations the entire input registered after the route arriving there, at every length, each with its occurrences; no weight or decay by distance. The choice among them is decided by the variables (open).
 
+**The operators never calculate a scalar** (Origin, 104th): *"the only thing that in the operators is relational information and mathematics there can be no scalars"*; *"We can always input projections provided that we describe their provenance otherwise we would not be able to calculate on legacy information I just don't want the operators themselves to calculate a scalar"*. Every operator output is a value on each relation or locus, with its identity and sign; magnitudes, bounds, decisions at δ, shares and counts are the framework, reading that output. Checked by linearity (`tests/v10_no_scalar.rs`).
+
 This governs everything we do. Check every change against it: relation is calculated first, as the primitive; energy, connection and freedom are calculated along with it; the means is linear algebraic operators. Its text and the check of each V10 form against it are at the head of `docs/kernel/V10_README.md`.
 
 ## Rules kept with it
