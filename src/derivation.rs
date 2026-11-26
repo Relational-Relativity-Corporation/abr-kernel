@@ -175,6 +175,11 @@ const SPLIT_PROVENANCE: &str = "Kirchhoff (1847), the currents of a network as l
 const SPLIT_IN_RELATION: &str = "built from A and the readback only: P = A G Aᵀ, where Aᵀ is the readback's balance (what leaves less what enters, K9) and G inverts L = AᵀA over the loci, one locus of each piece held at 0; the potential part is in the image of A, the balanced part has a readback balance of zero at every locus. Not local: each relation's part depends on every relation of its piece, and the bounds read all m × m entries of P, so the work grows with the square of the relations (not counted in `work`, 92nd). Its solve over the loci needs division, computed exactly in rationals";
 const SPLIT_NECESSITY: &str = "declared by Origin (100th): to test the 99th's candidate, that energy, connection and freedom are the parts of one structure; the orthogonal split is the one that depends on no choice of basis or tree (41st). Validation is the observable behaviour the construct reveals (Origin, 100th), not these synthetic tests";
 
+// The order's reading (Origin, 2026-11-26, 102nd).
+const ORDER_PROVENANCE: &str = "the continuations of a route through a registered sequence: what a suffix index or a variable-order context model computes (Weiner, 1973; Rissanen, 1983); a familiar method by the 84th and 90th, here the direct reading of the field Origin declared";
+const ORDER_IN_RELATION: &str = "a reading of the order of relations: each step's relation continues from the locus the previous entered (B joins a relation to its successors; the order registers which successor followed, step by step); route length 0 is the readback at the current locus counted over the order, the summed field's star; each longer route keeps only the earlier points that also match one step further back. No operator forms it, and no weight or decay by distance enters (74th)";
+const ORDER_NECESSITY: &str = "declared by Origin (102nd): the order is the relational field, and the possibilities at the current point are the continuations the entire input registered after the route arriving there; a sum forgets order, so no reading of the summed field can give them";
+
 static REGISTER: &[(&str, Derivation)] = &[
     // ── The relational field and its registrations ────────────────────────
     ("RelationalField.registrations", Reg { what: "the declared registrations at the loci, when the relations were formed from loci (empty when registered directly); kept as registered" }),
@@ -233,6 +238,12 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("Ratio.negative", Id { what: "the sign of an exact rational" }),
     ("Ratio.num", Id { what: "the numerator of an exact rational, in lowest terms (an integer of any size)" }),
     ("Ratio.den", Id { what: "the denominator of an exact rational, positive, in lowest terms" }),
+    // ── The order (Origin, 102nd: the order is the relational field) ──────
+    ("Order.edges", Reg { what: "each declared relation as the locus it leaves and the locus it enters; a self-relation is the 76th's identity spoke on the occurrence chain" }),
+    ("Order.steps", Reg { what: "the order: the relation registered at each step, oldest first, each continuing from the locus the previous step entered; read left to right, every character a step, nothing cut (102nd)" }),
+    ("Level.route", Id { what: "the route arriving at the current point: the last relations of the order, oldest first; empty at length 0" }),
+    ("Level.occurrences", Legacy { method: "every earlier point of the order where the same route arrived, as the step that followed it there", provenance: ORDER_PROVENANCE, in_relation_to_operators: ORDER_IN_RELATION, necessity: Some(ORDER_NECESSITY) }),
+    ("Level.continuations", Legacy { method: "each relation that followed the route in the order, with how many times: the possibilities at the current point after that route", provenance: ORDER_PROVENANCE, in_relation_to_operators: ORDER_IN_RELATION, necessity: Some(ORDER_NECESSITY) }),
     // ── The ground: energy ────────────────────────────────────────────────
     ("RelationalField.ground", Reg { what: "energy, freedom and connection, read together over the whole sequence (Df6, W11); each part below has its own derivation" }),
     ("GroundReading.energy", Op { operators: &[A], reads: &[En], form: "V3: energy read from a declared carrier, ε = |A(carrier)|, or named as not evaluated when no carrier is declared" }),

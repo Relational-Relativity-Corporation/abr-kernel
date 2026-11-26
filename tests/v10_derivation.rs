@@ -50,6 +50,17 @@ fn names_reported() -> Vec<String> {
         add(format!("{with:?}"));
         let without = RelationalField::from_relations(&rel, w.field.relations.clone(), None).unwrap();
         add(format!("{without:?}"));
+        // An order over the declared relations (102nd): a walk from the first
+        // relation, each step the first relation leaving where the last
+        // entered, up to twelve steps; its possibilities are reported parts.
+        let mut walk = vec![0usize];
+        while walk.len() < 12 {
+            let at = rel.edges[*walk.last().unwrap()].1;
+            match (0..rel.n_edges()).find(|&e| rel.edges[e].0 == at) { Some(e) => walk.push(e), None => break }
+        }
+        let order = abr_kernel::order::Order::new(&rel, walk).unwrap();
+        add(format!("{order:?}"));
+        add(format!("{:?}", order.possibilities()));
         // The orthogonal split read from the field (100th): its parts are
         // reported parts too.
         add(format!("{:?}", with.two_parts(&abr_kernel::relational_field::InnerProduct::equal())));

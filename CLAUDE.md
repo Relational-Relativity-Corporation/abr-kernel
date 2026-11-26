@@ -18,6 +18,8 @@ Origin, 59th: we calculate relation as primitive alongside energy, connection an
 
 **Legacy as projection** (Origin, 101st): a legacy result enters a confirmation as a projection through a declared mapping; the confirmation is the intersection with the kernel's relational result (W14, C), never its basis, even where the legacy result could also be a relational result. Example: `tests/confirmation_kirchhoff.rs`.
 
+**The order is the relational field** (Origin, 102nd): *"the order of information read from left to right including all character spaces and punctuations"*. The possibilities at the current point are the continuations the entire input registered after the route arriving there, at every length, each with its occurrences; no weight or decay by distance. The choice among them is decided by the variables (open).
+
 This governs everything we do. Check every change against it: relation is calculated first, as the primitive; energy, connection and freedom are calculated along with it; the means is linear algebraic operators. Its text and the check of each V10 form against it are at the head of `docs/kernel/V10_README.md`.
 
 ## Rules kept with it

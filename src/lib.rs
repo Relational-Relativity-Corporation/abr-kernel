@@ -137,3 +137,7 @@ pub mod work;
 // reading, or legacy mathematics with its provenance, its description in
 // relation to the operators and its necessity (Origin, 2026-11-25, 92nd).
 pub mod derivation;
+
+// The order is the relational field (Origin, 2026-11-26, 102nd): the
+// possibilities at the current point after every route arriving there.
+pub mod order;
