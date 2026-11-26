@@ -32,6 +32,14 @@ pub const ADMITTED_LEGACY: &[(&str, &str, Use)] = &[
     ("Connection.reorganizing_pairs", "94th", Use::Reading),
     ("GroundReading.v2_held_arrangement", "94th", Use::Reading),
     ("Freedom.free_pairs", "94th", Use::Reading),
+    // The degrees of freedom of the current point (108th): the comparison of
+    // two distinct points, admitted as a reading of the registered order.
+    ("Degree.alongside", "108th", Use::Reading),
+    ("Degree.parts", "108th", Use::Reading),
+    // The 102nd's possibilities, kept as a fenced check of the degrees
+    // (108th (5)). *Was:* listed in NOT_ADMITTED, waiting on the 103rd.
+    ("Level.occurrences", "108th", Use::Check),
+    ("Level.continuations", "108th", Use::Check),
     // Methods in use at the code layer.
     ("exact summation", "44th", Use::Reading),
     ("product bounds", "93rd", Use::Reading),
@@ -48,8 +56,8 @@ pub enum Use { Reading, Check }
 /// application may read them as a result. Origin strikes a line to make the
 /// guard fail until the part is fenced or formed by the operators.
 pub const NOT_ADMITTED: &[(&str, &str)] = &[
-    ("Level.occurrences", "the 103rd: no operator forms it (the suffix match of the 102nd)"),
-    ("Level.continuations", "the 103rd: no operator forms it (the suffix match of the 102nd)"),
+    // *Was:* Level.occurrences and Level.continuations, waiting on the 103rd;
+    // admitted as a check by the 108th (above).
 ];
 
 /// The public structures as they stood at `9d6e4ae`, before this guard. A

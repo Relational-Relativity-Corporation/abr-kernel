@@ -64,7 +64,43 @@ pub struct Level {
     pub continuations: Vec<(usize, usize)>,
 }
 
+/// A degree of freedom of the current point (Origin, 2026-11-26, 108th): an
+/// earlier point where the order stood at the current locus, a distinct
+/// revolution of the helix (106th, 107th), never another occurrence of the
+/// same route. Every part is an identity in the order; none is a count.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Degree {
+    /// The earlier point in evolution (point j: where step j − 1 entered).
+    pub point: usize,
+    /// The relation that left it there, `steps[point]`: the readback's
+    /// leaving half at the current locus, kept decomposed by point (K9).
+    pub leaving: usize,
+    /// Its turn to now: the span of the order `point .. n`, the relations
+    /// registered between it and the current point.
+    pub turn: (usize, usize),
+    /// The span its arrival runs alongside the current arrival: `steps[a..b]`
+    /// (b = point) equals, relation by relation, the last b − a steps.
+    pub alongside: (usize, usize),
+    /// Where the two arrivals part: (the relation there, the relation now);
+    /// `None` where the earlier arrival reaches the record boundary.
+    pub parts: Option<(usize, usize)>,
+}
+
 impl Order {
+    /// The degrees of freedom of the current point (108th): every earlier
+    /// point at the current locus, in order of evolution, each kept
+    /// distinct; nothing is merged and nothing is counted.
+    pub fn degrees(&self) -> Vec<Degree> {
+        let n = self.steps.len();
+        let here = self.locus(n);
+        (0..n).filter(|&j| self.locus(j) == here).map(|j| {
+            let mut k = 0;
+            while k < j && self.steps[j - 1 - k] == self.steps[n - 1 - k] { k += 1; }
+            let parts = if k == j { None } else { Some((self.steps[j - 1 - k], self.steps[n - 1 - k])) };
+            Degree { point: j, leaving: self.steps[j], turn: (j, n), alongside: (j - k, j), parts }
+        }).collect()
+    }
+
     /// Admit an order over the declared relations. Every relation must carry
     /// its identity and basis. T8 is not applied: it governs forming B and Ξ
     /// over turns, and this reading forms neither; a self-relation (a
@@ -88,7 +124,10 @@ impl Order {
 
     /// The possibilities at the current point, at every length of route the
     /// order carries, shortest first; it ends at the first length no earlier
-    /// point shares.
+    /// point shares. **Fenced as a check (Origin, 108th):** it counts the
+    /// earlier points at the same route as one, which reads repetition
+    /// (106th); the reading is `degrees`, which keeps every point distinct.
+    /// Kept to confirm the degrees (`tests/v10_degrees.rs`, 4).
     pub fn possibilities(&self) -> Vec<Level> {
         let n = self.steps.len();
         let here = self.locus(n);

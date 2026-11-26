@@ -61,6 +61,8 @@ fn names_reported() -> Vec<String> {
         let order = abr_kernel::order::Order::new(&rel, walk).unwrap();
         add(format!("{order:?}"));
         add(format!("{:?}", order.possibilities()));
+        // The degrees of freedom of the current point (108th).
+        add(format!("{:?}", order.degrees()));
         // The orthogonal split read from the field (100th): its parts are
         // reported parts too.
         add(format!("{:?}", with.two_parts(&abr_kernel::relational_field::InnerProduct::equal())));
