@@ -55,6 +55,85 @@ pub struct Forms {
     pub b: Vec<Vec<f64>>,
     /// Ξ, the circulation.
     pub circulation: Vec<Vec<f64>>,
+    /// The readback at the loci (K9, Origin, 96th), [c][v]: what leaves
+    /// locus v, Tᵀg[v] = Σ of the relations leaving v. A reading of
+    /// relations at a locus, never a locus state. The relations it sums are
+    /// `RelationalField::meeting`.
+    pub leaving: Vec<Vec<f64>>,
+    /// What enters locus v, Hᵀg[v] = Σ of the relations entering v.
+    pub entering: Vec<Vec<f64>>,
+    /// The bounds of the two halves, [c][v]: the sums of the bounds of the
+    /// relations summed (the operator with its signs dropped, 93rd), rounded
+    /// up. Empty on the locus path kept for comparison (`forms_of`).
+    pub leaving_bound: Vec<Vec<f64>>,
+    pub entering_bound: Vec<Vec<f64>>,
+}
+
+/// The halves of the readback (K9, 96th), [c][v], from the exact relation
+/// values and their bounds: one exact sum each, rounded once (values) or up
+/// (bounds). The balance, what leaves less what enters, is derived from the
+/// halves and never stands in for them.
+fn readback(exact: &[Vec<crate::exact::Expansion>], bound: Option<&[Vec<crate::exact::Expansion>]>, rel: &DeclaredRelations)
+    -> (Vec<Vec<f64>>, Vec<Vec<f64>>, Vec<Vec<f64>>, Vec<Vec<f64>>) {
+    use crate::exact::Expansion;
+    use crate::work::terms;
+    let half = |at: &[Vec<usize>], of: &[Vec<Expansion>], round_up: bool| -> Vec<Vec<f64>> {
+        of.iter().map(|c| (0..rel.n_nodes).map(|v| {
+            let mut sum = Expansion::new();
+            terms(at[v].len());
+            for &e in &at[v] { sum.add_times(&c[e], 1.0); }
+            if round_up { sum.up() } else { sum.nearest() }
+        }).collect()).collect()
+    };
+    let (lb, eb) = match bound {
+        Some(b) => (half(&rel.out, b, true), half(&rel.inc, b, true)),
+        None => (Vec::new(), Vec::new()),
+    };
+    (half(&rel.out, exact, false), half(&rel.inc, exact, false), lb, eb)
+}
+
+/// The relations meeting at each locus (K9, 96th, condition (1)): the
+/// relations each half of the readback sums, in the order declared, every
+/// direction kept (condition (3)).
+#[derive(Debug, Clone, PartialEq)]
+pub struct Meeting {
+    /// leaving[v]: the relations declared to leave locus v.
+    pub leaving: Vec<Vec<usize>>,
+    /// entering[v]: the relations declared to enter locus v.
+    pub entering: Vec<Vec<usize>>,
+}
+
+/// The independent ways of the two parts of every field of relations
+/// (Proposed, Origin, 2026-11-26, 99th): fixed by the declared relations
+/// alone, independent of the data, the domain and δ.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Ways {
+    /// m, the declared relations.
+    pub relations: usize,
+    /// n, the declared loci.
+    pub loci: usize,
+    /// c, the connected pieces the relations join the loci into (a locus
+    /// no relation meets is a piece of its own).
+    pub pieces: usize,
+    /// n − c: the potential part, fields explained by values at the loci.
+    pub potential: usize,
+    /// m − n + c: the balanced part, the independent cycles.
+    pub balanced: usize,
+}
+
+impl Ways {
+    /// The ways of the declared relations.
+    pub fn of(rel: &DeclaredRelations) -> Self {
+        let mut p: Vec<usize> = (0..rel.n_nodes).collect();
+        fn root(p: &mut [usize], v: usize) -> usize { let mut v = v; while p[v] != v { p[v] = p[p[v]]; v = p[v]; } v }
+        let mut pieces = rel.n_nodes;
+        for &(s, t) in &rel.edges {
+            let (a, b) = (root(&mut p, s), root(&mut p, t));
+            if a != b { p[a] = b; pieces -= 1; }
+        }
+        let (m, n) = (rel.n_edges(), rel.n_nodes);
+        Ways { relations: m, loci: n, pieces, potential: n - pieces, balanced: m + pieces - n }
+    }
 }
 
 /// A, B and Ξ of Σ_r w_r·A(x_r), each from the registered node values in one
@@ -89,10 +168,12 @@ fn forms_of(xs: &[(&NodeField, f64)], rel: &DeclaredRelations) -> Forms {
         w
     }).collect();
     let xi_coeff: Vec<Vec<i64>> = (0..m).map(|e| crate::operators::circulation_of_accumulation_coefficients(rel, e, -1)).collect();
+    let (leaving, entering, leaving_bound, entering_bound) = readback(&exact_a, None, rel);
     Forms {
         a: exact_a.iter().map(|c| c.iter().map(|v| v.nearest()).collect()).collect(),
         b: (0..k).map(|c| b_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
         circulation: (0..k).map(|c| xi_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
+        leaving, entering, leaving_bound, entering_bound,
     }
 }
 
@@ -131,10 +212,21 @@ fn forms_of_relations(series: &EdgeSeries, ts: &[(usize, f64)], rel: &DeclaredRe
         terms(w.len());
         w
     }).collect();
+    // The bound of each relation entering the readback (98th: every value
+    // carries its bound): at a registration, its state bound widened by any
+    // gain differing between relations (a sum across relations, as a
+    // closure); over a step, the change bound PC1 reads.
+    let exact_bound: Vec<Vec<Expansion>> = (0..k).map(|c| (0..m).map(|e| match ts {
+        [(t, _)] => crate::exact::gain_widened(&series.entry(*t, c, e), &Expansion::of(series.da[*t][c][e]), series.closure_gain[c][e]),
+        [(_, _), (t0, _)] => series.change_bound_exact(*t0, c, e),
+        _ => unreachable!("forms are read at one registration or over one step"),
+    }).collect()).collect();
+    let (leaving, entering, leaving_bound, entering_bound) = readback(&exact_a, Some(&exact_bound), rel);
     Forms {
         a: exact_a.iter().map(|c| c.iter().map(|v| v.nearest()).collect()).collect(),
         b: (0..k).map(|c| b_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
         circulation: (0..k).map(|c| xi_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
+        leaving, entering, leaving_bound, entering_bound,
     }
 }
 
@@ -163,6 +255,10 @@ pub struct RelationalField {
     pub persistence: Vec<Forms>,
     /// Energy, freedom and connection over the whole sequence.
     pub ground: GroundReading,
+    /// The relations meeting at each locus, which the readback sums (K9).
+    pub meeting: Meeting,
+    /// The ways of the two parts of every field of relations (99th, Proposed).
+    pub ways: Ways,
 }
 
 impl RelationalField {
@@ -189,7 +285,7 @@ impl RelationalField {
         let relations = EdgeSeries::from_registrations(&registrations, rel)?;
         let (spatial, persistence) = forms_over(&relations, rel);
         let ground = ground_reading(&registrations, rel, carriers);
-        Ok(RelationalField { registrations, relations, spatial, persistence, ground })
+        Ok(RelationalField { registrations, relations, spatial, persistence, ground, meeting: meeting_of(rel), ways: Ways::of(rel) })
     }
 
     /// Form the relational field from a declared sequence of registrations of
@@ -210,7 +306,7 @@ impl RelationalField {
         assert_eq!(relations.n_edges(), rel.n_edges(), "the series must register every declared relation");
         let (spatial, persistence) = forms_over(&relations, rel);
         let ground = ground_reading_of_relations(&relations, rel, carrier);
-        Ok(RelationalField { registrations: Vec::new(), relations, spatial, persistence, ground })
+        Ok(RelationalField { registrations: Vec::new(), relations, spatial, persistence, ground, meeting: meeting_of(rel), ways: Ways::of(rel) })
     }
 
     /// True when the relations were formed from registrations at the loci.
@@ -222,6 +318,10 @@ impl RelationalField {
     pub fn n_steps(&self) -> usize {
         self.persistence.len()
     }
+}
+
+fn meeting_of(rel: &DeclaredRelations) -> Meeting {
+    Meeting { leaving: rel.out.clone(), entering: rel.inc.clone() }
 }
 
 /// The forms at every registration, and over every consecutive step (the
@@ -276,11 +376,15 @@ mod tests {
             Registration::synthetic(NodeField::new(data), vec![vec![0.5; 4]; 2])
         }).collect();
         let field = RelationalField::new(&rel, regs.clone(), None).unwrap();
+        // The locus path carries no bounds (`forms_of`), so the bounds are
+        // set aside before comparing; every value is compared. *Was:* the
+        // whole `Forms` compared, before the readback (99th) gave it bounds.
+        let values = |f: &Forms| Forms { leaving_bound: Vec::new(), entering_bound: Vec::new(), ..f.clone() };
         for (t, r) in regs.iter().enumerate() {
-            assert_eq!(field.spatial[t], forms_of(&[(&r.x, 1.0)], &rel));
+            assert_eq!(values(&field.spatial[t]), forms_of(&[(&r.x, 1.0)], &rel));
         }
         for t in 0..2 {
-            assert_eq!(field.persistence[t], forms_of(&[(&regs[t + 1].x, 1.0), (&regs[t].x, -1.0)], &rel));
+            assert_eq!(values(&field.persistence[t]), forms_of(&[(&regs[t + 1].x, 1.0), (&regs[t].x, -1.0)], &rel));
         }
     }
 }

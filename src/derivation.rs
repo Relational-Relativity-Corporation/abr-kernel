@@ -21,6 +21,9 @@ pub enum Operator {
     B,
     /// Ξ: B over successors less B over predecessors.
     Xi,
+    /// K9 (Origin, 96th): the readback of relations at their loci, in two
+    /// halves, Tᵀ (leaving) and Hᵀ (entering).
+    Readback,
 }
 
 /// The primitive and the three variables (71st).
@@ -153,7 +156,7 @@ pub fn underived(names: &[String]) -> Vec<String> {
 }
 
 use Derivation::{Identity as Id, Legacy, Operator as Op, Registered as Reg, Rule};
-use Operator::{A, B, Xi};
+use Operator::{A, B, Readback, Xi};
 use Reads::{Connection as Con, Energy as En, Freedom as Fr, Relation as Rel};
 
 // Every reading that compares pairs of relations states its scope (92nd:
@@ -195,6 +198,20 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("Forms.a", Op { operators: &[A], reads: &[Rel], form: "A at a registration, or A_p over a step, one exact sum rounded once" }),
     ("Forms.b", Op { operators: &[A, B], reads: &[Rel], form: "B(A)[e] = A[e] + Σ_succ A[f], over the relations B joins to e only (92nd)" }),
     ("Forms.circulation", Op { operators: &[A, B, Xi], reads: &[Rel, Con], form: "Ξ(B(A))[e] = Σ_succ B − Σ_pred B, over the relations B joins to e's neighbours only (92nd)" }),
+    // ── The readback and the two parts (96th; 99th, Proposed) ─────────────
+    ("Forms.leaving", Op { operators: &[A, Readback], reads: &[Rel, Con], form: "Tᵀg[v]: the sum of the relations leaving locus v (K9), one exact sum rounded once; a reading of relations at a locus, never a locus state" }),
+    ("Forms.entering", Op { operators: &[A, Readback], reads: &[Rel, Con], form: "Hᵀg[v]: the sum of the relations entering locus v (K9); the balance Tᵀg − Hᵀg is derived from the two halves, never standing in for them" }),
+    ("Forms.leaving_bound", Rule { of: &[A, Readback], reads: &[Rel, Con], rule: "the bound of what leaves: the sum of the bounds of the relations summed, the operator with its signs dropped (93rd), rounded up; the state bound widened by any differing gain at a registration, the change bound over a step" }),
+    ("Forms.entering_bound", Rule { of: &[A, Readback], reads: &[Rel, Con], rule: "the bound of what enters, formed as the bound of what leaves" }),
+    ("RelationalField.meeting", Reg { what: "the relations meeting at each locus, as declared: the relations each half of the readback sums (96th, condition (1)), every direction kept (condition (3))" }),
+    ("Meeting.leaving", Reg { what: "the relations declared to leave each locus, in declared order" }),
+    ("Meeting.entering", Reg { what: "the relations declared to enter each locus, in declared order" }),
+    ("RelationalField.ways", Rule { of: &[A, Readback], reads: &[Rel, Con, En, Fr], rule: "the independent ways of the two parts of every field of relations (99th, Proposed): the potential part, the image of A, and the balanced part, the null space of the readback's balance; fixed by the declared relations alone, independent of the data, the domain and δ" }),
+    ("Ways.relations", Id { what: "m, the number of declared relations" }),
+    ("Ways.loci", Id { what: "n, the number of declared loci" }),
+    ("Ways.pieces", Id { what: "c, the connected pieces the declared relations join the loci into; a locus no relation meets is a piece of its own" }),
+    ("Ways.potential", Rule { of: &[A], reads: &[Rel, En], rule: "n − c: the independent ways of the potential part, fields explained by values at the loci (the relations of any spanning forest)" }),
+    ("Ways.balanced", Rule { of: &[A, Readback], reads: &[Rel, Con], rule: "m − n + c: the independent ways of the balanced part, where what enters every locus equals what leaves (the independent cycles, K7)" }),
     // ── The ground: energy ────────────────────────────────────────────────
     ("RelationalField.ground", Reg { what: "energy, freedom and connection, read together over the whole sequence (Df6, W11); each part below has its own derivation" }),
     ("GroundReading.energy", Op { operators: &[A], reads: &[En], form: "V3: energy read from a declared carrier, ε = |A(carrier)|, or named as not evaluated when no carrier is declared" }),
