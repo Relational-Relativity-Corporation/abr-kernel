@@ -406,7 +406,7 @@ fn records(d: &DomainDeclaration, field: &RelationalField, s: &EdgeSeries, en: &
     let pc: &PersistenceChange = field.ground.freedom.as_ref().expect("freedom forms with the field");
     let conn = field.ground.connection.as_ref().ok();
     let imb: Vec<Vec<Option<Vec<AtDelta<Sign>>>>> = field.registrations.iter()
-        .map(|r| crate::ground_variables::circulation_signs(r, rel)).collect();
+        .map(|r| crate::ground_variables::passage_signs(r, rel)).collect();
     // Indexed once (no reading changes): `relation_changes` lists step, then
     // component, then edge, so (st, c, e) is at st·k·m + c·m + e.
     let ix = |st: usize, c: usize, e: usize| (st * k + c) * m + e;
@@ -564,7 +564,7 @@ pub fn persistence_boundaries(df: &DeclaredField) -> Vec<Boundary> {
     for r in &df.records {
         let Some((a, b)) = r.connection.imbalance else { continue };
         let Some(kind) = kind(a, b) else { continue };
-        let w = crate::operators::circulation_of_accumulation_coefficients(&df.relations, r.edge, -1);
+        let w = crate::operators::passage_of_accumulation_coefficients(&df.relations, r.edge, -1);
         let moved = (0..rel_edges).any(|f| w[f] != 0 && free(r.step, r.component, f));
         out.push(Boundary { step: r.step, persistence: Persistence::Imbalance { edge: r.edge, component: r.component },
             kind, before: a, after: b, freedom_among_its_relations: moved });

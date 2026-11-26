@@ -9,7 +9,7 @@
 mod synthetic_identity;
 use abr_kernel::ground_variables::*;
 use abr_kernel::operators::{
-    operator_a, operator_b, operator_circulation, DeclaredRelations, EdgeProvenance, NodeField,
+    operator_a, operator_b, operator_passage, DeclaredRelations, EdgeProvenance, NodeField,
 };
 use abr_kernel::relational_field::*;
 
@@ -63,7 +63,7 @@ fn spatial_forms_match_the_operators() {
         let b = operator_b(&a, &rel);
         assert_eq!(f.spatial[t].a, a.spatial);
         assert_eq!(f.spatial[t].b, b.spatial);
-        assert_eq!(f.spatial[t].circulation, operator_circulation(&b.spatial, &rel));
+        assert_eq!(f.spatial[t].passage, operator_passage(&b.spatial, &rel));
     }
 }
 
@@ -77,14 +77,14 @@ fn persistence_is_the_difference_of_each_form_because_the_forms_are_linear() {
         };
         assert!(close(&p.a, &diff(&cur.a, &pri.a)));
         assert!(close(&p.b, &diff(&cur.b, &pri.b)));
-        assert!(close(&p.circulation, &diff(&cur.circulation, &pri.circulation)));
+        assert!(close(&p.passage, &diff(&cur.passage, &pri.passage)));
     }
 }
 
 // Declared historical comparison with V9 (runs with `--features v9`).
 #[cfg(feature = "v9")]
 #[test]
-fn circulation_sign_equals_the_v9_r_minus_b_sign() {
+fn passage_sign_equals_the_v9_r_minus_b_sign() {
     use abr_kernel::operators::{compute_rho, operator_r};
     // V9's R − B is ρ[src]·Ξ on the spatial term; ρ > 0 here, so the signs agree.
     let rel = chain();
@@ -92,7 +92,7 @@ fn circulation_sign_equals_the_v9_r_minus_b_sign() {
     let a = operator_a(&x, &rel, &[]);
     let b = operator_b(&a, &rel);
     let r = operator_r(&b, &rel, &compute_rho(&a, &rel, 0.5, 1.0), &[]);
-    let c = operator_circulation(&b.spatial, &rel);
+    let c = operator_passage(&b.spatial, &rel);
     for e in 0..2 {
         assert_eq!((r.spatial[0][e] - b.spatial[0][e]).signum(), c[0][e].signum());
     }

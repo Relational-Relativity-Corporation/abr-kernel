@@ -370,24 +370,24 @@ fn prop_isc_d3_d4_fixed_ratio_or_offset_locks_change() {
 }
 
 #[test]
-fn prop_isc_d5_circulation_additive_and_sign_persists() {
+fn prop_isc_d5_passage_additive_and_sign_persists() {
     static N: AtomicUsize = AtomicUsize::new(0);
     for_all("I-SC-D5", |r| {
         let rel = enumerated_rel(r, false);
         let seq = enumerated_seq(r, rel.n_nodes, (1, 3), (2, 5), 0.0);
         let f = RelationalField::new(&rel, seq, None).unwrap();
         for s in 0..f.n_steps() {
-            for c in 0..f.spatial[s].circulation.len() {
+            for c in 0..f.spatial[s].passage.len() {
                 for e in 0..rel.n_edges() {
-                    let (now, ch) = (f.spatial[s].circulation[c][e], f.persistence[s].circulation[c][e]);
-                    let next = f.spatial[s + 1].circulation[c][e];
+                    let (now, ch) = (f.spatial[s].passage[c][e], f.persistence[s].passage[c][e]);
+                    let next = f.spatial[s + 1].passage[c][e];
                     assert_eq!(next, now + ch);
                     if step_preserves_sign(now, ch.abs()) && ch != 0.0 { assert_eq!(now.signum(), next.signum()); hit(&N); }
                 }
             }
         }
     });
-    exercised(&N, "I-SC-D5 circulation sign preserved under change");
+    exercised(&N, "I-SC-D5 passage sign preserved under change");
 }
 
 #[test]
@@ -403,7 +403,7 @@ fn prop_isc_d6_uniform_rescaling_holds_every_sign() {
                        Registration::synthetic(NodeField::new(scaled), zero)];
         let f = RelationalField::new(&rel, seq.clone(), None).unwrap();
         for c in 0..k { for e in 0..rel.n_edges() {
-            assert_eq!(f.spatial[1].circulation[c][e], kappa * f.spatial[0].circulation[c][e]);
+            assert_eq!(f.spatial[1].passage[c][e], kappa * f.spatial[0].passage[c][e]);
         }}
         let s = EdgeSeries::from_registrations(&seq, &rel).unwrap();
         for x in arrangement_steps(&s).unwrap() { assert_eq!(x.reading, Reading::Structure); }
@@ -539,15 +539,15 @@ fn prop_isc_d10_closure_on_change() {
 }
 
 #[test]
-fn prop_isc_d11_total_circulation_is_the_weighted_sum() {
-    use abr_kernel::operators::operator_circulation;
-    use abr_kernel::relational_field::circulation_weights;
+fn prop_isc_d11_total_passage_is_the_weighted_sum() {
+    use abr_kernel::operators::operator_passage;
+    use abr_kernel::relational_field::passage_weights;
     for_all("I-SC-D11", |r| {
         let rel = enumerated_rel(r, true);
-        let w = circulation_weights(&rel);
+        let w = passage_weights(&rel);
         let k = r.usize(1, 3);
         let g: Vec<Vec<f64>> = (0..k).map(|_| (0..rel.n_edges()).map(|_| r.eighth(-4.0, 4.0)).collect()).collect();
-        let xi = operator_circulation(&g, &rel);
+        let xi = operator_passage(&g, &rel);
         for c in 0..k {
             let total: f64 = xi[c].iter().sum();
             let weighted: f64 = g[c].iter().zip(&w).map(|(v, &wi)| v * wi as f64).sum();

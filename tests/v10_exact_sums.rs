@@ -1,7 +1,7 @@
 //! Kernel V10.3: exact sums (Origin, 2026-11-23, 41st: "we are decomposing
 //! complex systems but we're not simplifying them").
 //!
-//! A closure, an accumulation B or a circulation Ξ is a decomposition of the
+//! A closure, an accumulation B or a passage Ξ is a decomposition of the
 //! field into a sum of registered entries. Each is checked here against an
 //! exact integer reference: every value is dyadic, scaled by 2¹² to an i128,
 //! where every sum is exact. Values span 2⁰ to 2⁵⁴, so f64 addition in
@@ -15,7 +15,7 @@ mod synthetic_feedback;
 #[path = "support/synthetic_identity.rs"]
 mod synthetic_identity;
 use abr_kernel::exact::*;
-use abr_kernel::operators::{circulation_of_accumulation, circulation_of_accumulation_half_width, DeclaredRelations, EdgeProvenance};
+use abr_kernel::operators::{passage_of_accumulation, passage_of_accumulation_half_width, DeclaredRelations, EdgeProvenance};
 use abr_kernel::persistence_change::*;
 use abr_kernel::topology::cycle_basis;
 use std::cmp::Ordering;
@@ -184,7 +184,7 @@ fn prop_closures_are_exact_and_order_free() {
 // ── Ξ(B(A)) from A in one exact sum ───────────────────────────────────────
 
 #[test]
-fn prop_circulation_of_accumulation_is_exact() {
+fn prop_passage_of_accumulation_is_exact() {
     let lossy = Mutex::new(0usize);
     for_all("exact Ξ(B(A))", |r| {
         let rel = enumerated_rel(r);
@@ -192,8 +192,8 @@ fn prop_circulation_of_accumulation_is_exact() {
         let a: Vec<Vec<f64>> = vec![(0..m).map(|_| r.wide()).collect()];
         let da: Vec<Vec<f64>> = vec![(0..m).map(|_| r.int(0, 4) as f64 / 16.0).collect()];
         let b = |e: usize, x: &[f64]| -> i128 { to_i(x[e]) + rel.succ(e).iter().map(|&f| to_i(x[f])).sum::<i128>() };
-        let xi = circulation_of_accumulation(&a, &rel);
-        let hw = circulation_of_accumulation_half_width(&da, &rel);
+        let xi = passage_of_accumulation(&a, &rel);
+        let hw = passage_of_accumulation_half_width(&da, &rel);
         for e in 0..m {
             let v: i128 = rel.succ(e).iter().map(|&f| b(f, &a[0])).sum::<i128>() - rel.pred(e).iter().map(|&p| b(p, &a[0])).sum::<i128>();
             let h: i128 = rel.succ(e).iter().chain(rel.pred(e)).map(|&f| b(f, &da[0])).sum();

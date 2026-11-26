@@ -107,10 +107,10 @@ fn sc_d4_offset_locks_change_without_proportional_state() {
     assert_eq!(coupled_change_pairs(&pc).unwrap(), vec![(0, 1)]);
 }
 
-// ── I-SC-D5: circulation over a step is exactly additive ───────────────────
+// ── I-SC-D5: passage over a step is exactly additive ───────────────────
 //
 // Ξ is linear in B and B is linear in A, so Ξ_{s+1} = Ξ_s + Ξ(B(Δ_s)) exactly.
-// Persistence condition for the sustained grade (the circulation counterpart
+// Persistence condition for the sustained grade (the passage counterpart
 // of I-SC-D1): the sign of Ξ[c][e] cannot change over a step where
 // |Ξ(B(Δ))[c][e]| < |Ξ_s[c][e]|, because a sign changes only through zero.
 
@@ -126,12 +126,12 @@ fn evolving_field() -> RelationalField {
 }
 
 #[test]
-fn sc_d5_circulation_is_additive_over_a_step() {
+fn sc_d5_passage_is_additive_over_a_step() {
     let f = evolving_field();
     for s in 0..f.n_steps() {
-        for (c, row) in f.spatial[s + 1].circulation.iter().enumerate() {
+        for (c, row) in f.spatial[s + 1].passage.iter().enumerate() {
             for (e, xi_next) in row.iter().enumerate() {
-                let sum = f.spatial[s].circulation[c][e] + f.persistence[s].circulation[c][e];
+                let sum = f.spatial[s].passage[c][e] + f.persistence[s].passage[c][e];
                 assert!((xi_next - sum).abs() < 1e-12);
             }
         }
@@ -139,14 +139,14 @@ fn sc_d5_circulation_is_additive_over_a_step() {
 }
 
 #[test]
-fn sc_d5_circulation_sign_persists_when_its_change_is_smaller() {
+fn sc_d5_passage_sign_persists_when_its_change_is_smaller() {
     let f = evolving_field();
     let (mut checked, mut crossed) = (0, 0);
     for s in 0..f.n_steps() {
-        for c in 0..f.spatial[s].circulation.len() {
-            for e in 0..f.spatial[s].circulation[c].len() {
-                let (now, change) = (f.spatial[s].circulation[c][e], f.persistence[s].circulation[c][e]);
-                let next = f.spatial[s + 1].circulation[c][e];
+        for c in 0..f.spatial[s].passage.len() {
+            for e in 0..f.spatial[s].passage[c].len() {
+                let (now, change) = (f.spatial[s].passage[c][e], f.persistence[s].passage[c][e]);
+                let next = f.spatial[s + 1].passage[c][e];
                 if step_preserves_sign(now, change.abs()) {
                     assert_eq!(now.signum(), next.signum());
                     checked += 1;
@@ -163,7 +163,7 @@ fn sc_d5_circulation_sign_persists_when_its_change_is_smaller() {
 // ── I-SC-D6: uniform positive rescaling holds every sign ───────────────────
 //
 // If A_{s+1} = κ·A_s with κ > 0 at every edge and component, every minor
-// scales by κ² and every circulation by κ, so no sign changes: the
+// scales by κ² and every passage by κ, so no sign changes: the
 // arrangement (PC3) and the sustained grade are both held, while every
 // non-zero relation changes (PC1 freedom). Change without reorganization.
 
@@ -175,9 +175,9 @@ fn sc_d6_uniform_rescaling_holds_every_sign() {
     let scaled: Vec<Vec<f64>> = base.iter().map(|c| c.iter().map(|v| kappa * v).collect()).collect();
     let seq = vec![reg(base, 0.0), reg(scaled, 0.0)];
     let f = RelationalField::new(&r, seq.clone(), None).unwrap();
-    for (c, row) in f.spatial[0].circulation.iter().enumerate() {
+    for (c, row) in f.spatial[0].passage.iter().enumerate() {
         for (e, &xi) in row.iter().enumerate() {
-            assert!((f.spatial[1].circulation[c][e] - kappa * xi).abs() < 1e-12);
+            assert!((f.spatial[1].passage[c][e] - kappa * xi).abs() < 1e-12);
         }
     }
     let s = EdgeSeries::from_registrations(&seq, &r).unwrap();
@@ -311,18 +311,18 @@ fn sc_d10_change_closure_reads_what_changed_not_a_fixed_inconsistency() {
     assert!(cycle_closure(&s, &r, &[(0, 1), (2, 1)], 0, 0).is_none());
 }
 
-// ── I-SC-D11: total circulation ─────────────────────────────────────────────
+// ── I-SC-D11: total passage ─────────────────────────────────────────────
 
 #[test]
-fn sc_d11_total_circulation_is_the_weighted_sum() {
-    use abr_kernel::operators::operator_circulation;
-    use abr_kernel::relational_field::circulation_weights;
+fn sc_d11_total_passage_is_the_weighted_sum() {
+    use abr_kernel::operators::operator_passage;
+    use abr_kernel::relational_field::passage_weights;
     // Chain a → b → c: Ξ[ab] = g[bc], Ξ[bc] = −g[ab], total g[bc] − g[ab];
     // weights: w[ab] = indeg(a) − outdeg(b) = −1, w[bc] = indeg(b) − outdeg(c) = 1.
     let r = rel(3, vec![(0, 1), (1, 2)]);
-    assert_eq!(circulation_weights(&r), vec![-1, 1]);
+    assert_eq!(passage_weights(&r), vec![-1, 1]);
     let g = vec![vec![2.0, 5.0]];
-    let xi = operator_circulation(&g, &r);
+    let xi = operator_passage(&g, &r);
     assert_eq!(xi[0].iter().sum::<f64>(), 3.0);
 }
 

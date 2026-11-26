@@ -1,5 +1,5 @@
 //! Kernel V10.3 — I-SC-D14: the held minor pattern and the sustained
-//! circulation are independent grades (closes OC-SC-4).
+//! passage are independent grades (closes OC-SC-4).
 //!
 //! Worked examples realize all four combinations (held/held, held/
 //! reorganizing, reorganizing/held, reorganizing/reorganizing) through the
@@ -16,7 +16,7 @@ mod synthetic_feedback;
 #[path = "support/synthetic_identity.rs"]
 mod synthetic_identity;
 use abr_kernel::ground_variables::*;
-use abr_kernel::operators::{operator_b, operator_circulation, DeclaredRelations, EdgeField, EdgeProvenance, NodeField};
+use abr_kernel::operators::{operator_b, operator_passage, DeclaredRelations, EdgeField, EdgeProvenance, NodeField};
 
 fn rel(n: usize, edges: Vec<(usize, usize)>) -> DeclaredRelations {
     let m = edges.len();
@@ -40,13 +40,13 @@ fn reg_from_edges(a: &[Vec<f64>]) -> Registration {
 
 /// The base field F: A_1 = (1, 2, 3, 4), A_2 = (2, 1, 4, 3). Every minor is
 /// non-zero, and on the path Ξ(B(A_1)) = (5, 4, −1, −7) and
-/// Ξ(B(A_2)) = (5, 4, −2, −7): the two components' circulations agree in sign
+/// Ξ(B(A_2)) = (5, 4, −2, −7): the two components' passages agree in sign
 /// at every edge.
 fn base() -> Vec<Vec<f64>> { vec![vec![1.0, 2.0, 3.0, 4.0], vec![2.0, 1.0, 4.0, 3.0]] }
 
 fn xi(a: &[Vec<f64>], r: &DeclaredRelations) -> Vec<Vec<f64>> {
     let b = operator_b(&EdgeField { spatial: a.to_vec(), comp: vec![], comp_pairs: vec![], k: a.len() }, r).spatial;
-    operator_circulation(&b, r)
+    operator_passage(&b, r)
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -77,7 +77,7 @@ fn isc_d14_base_field_is_as_stated() {
     assert_eq!(xi(&base(), &r), vec![vec![5.0, 4.0, -1.0, -7.0], vec![5.0, 4.0, -2.0, -7.0]]);
     let a = base();
     for e in 0..4 { for f in (e + 1)..4 { assert_ne!(minor(&a, e, f, 0, 1), 0.0); } }
-    // Every minor and every circulation is resolved at δ = 1/32.
+    // Every minor and every passage is resolved at δ = 1/32.
     let p = minor_pattern(&reg_from_edges(&a), &r).unwrap();
     assert!(p.minors.iter().all(|m| m.4.is_resolved()));
 }
@@ -110,8 +110,8 @@ fn isc_d14_held_pattern_reorganizing_sustained() {
 }
 
 /// Reorganizing / held: swap the two components. Every minor scales by
-/// det = −1 and crosses; Ξ is swapped, and since the components' circulations
-/// agree in sign at every edge, every circulation sign is held.
+/// det = −1 and crosses; Ξ is swapped, and since the components' passages
+/// agree in sign at every edge, every passage sign is held.
 #[test]
 fn isc_d14_reorganizing_pattern_held_sustained() {
     let r = path();
@@ -125,7 +125,7 @@ fn isc_d14_reorganizing_pattern_held_sustained() {
 }
 
 /// Reorganizing / reorganizing: minus the swap. det = −1 again, so every minor
-/// crosses; Ξ maps to −(swapped Ξ), so every resolved circulation crosses.
+/// crosses; Ξ maps to −(swapped Ξ), so every resolved passage crosses.
 #[test]
 fn isc_d14_reorganizing_pattern_reorganizing_sustained() {
     let r = path();

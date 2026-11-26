@@ -25,7 +25,7 @@
 //! **Whole fields (Origin, 53rd; Df6, W11).** The imbalance and arrangement
 //! claims are read on whole relational fields, with the carrier declared,
 //! from the parts the field reports: its Ξ(B(A)) at each registration
-//! (`spatial[t].circulation`), checked against its own sustained grade; its
+//! (`spatial[t].passage`), checked against its own sustained grade; its
 //! PC1 and PC3; and with energy and every connection grade evaluated beside
 //! them. Closure is a test only on edge-registered values (PC-D4), where the
 //! kernel forms no whole field: those tests read every PC level and the
@@ -41,7 +41,7 @@
 mod wf;
 use abr_kernel::exact::Expansion;
 use abr_kernel::ground_variables::{history, sign_at_delta_exact, AtDelta, History, Sign};
-use abr_kernel::operators::{circulation_of_accumulation_coefficients, circulation_of_accumulation_half_width, DeclaredRelations};
+use abr_kernel::operators::{passage_of_accumulation_coefficients, passage_of_accumulation_half_width, DeclaredRelations};
 use abr_kernel::persistence_change::*;
 use std::sync::Mutex;
 use wf::{for_all, enumerated_declared, enumerated_rel, rel, whole, Declared, Seeds, Whole};
@@ -88,8 +88,8 @@ fn is_freedom(r: Reading) -> bool { r == Reading::Freedom }
 fn imbalance_states(w: &Whole) -> Vec<Vec<Vec<Option<AtDelta<Sign>>>>> {
     let rel = &w.rel;
     w.field.spatial.iter().enumerate().map(|(t, forms)| {
-        let hw = circulation_of_accumulation_half_width(&w.series.da[t], rel);
-        forms.circulation.iter().enumerate().map(|(c, xi)| (0..rel.n_edges()).map(|e| {
+        let hw = passage_of_accumulation_half_width(&w.series.da[t], rel);
+        forms.passage.iter().enumerate().map(|(c, xi)| (0..rel.n_edges()).map(|e| {
             if rel.succ(e).is_empty() && rel.pred(e).is_empty() { return None; }
             Some(sign_at_delta_exact(&Expansion::of(xi[e]), &Expansion::of(hw[c][e])))
         }).collect()).collect()
@@ -126,7 +126,7 @@ fn d18_persistent_imbalance_reverses_only_with_freedom_among_its_relations() {
             for c in 0..k {
                 for e in 0..rel.n_edges() {
                     let (Some(before), Some(after)) = (st[s][c][e], st[s + 1][c][e]) else { continue };
-                    let wc = circulation_of_accumulation_coefficients(&rel, e, -1);
+                    let wc = passage_of_accumulation_coefficients(&rel, e, -1);
                     let moved: Vec<bool> = wc.iter().enumerate().filter(|(_, &q)| q != 0).map(|(f, _)| is_freedom(w.pc1(s, c, f))).collect();
                     g.add(before, after, &moved);
                 }
@@ -149,7 +149,7 @@ fn d18_worked_an_imbalance_ends_with_every_relation_held() {
     let w = whole(&rel(3, vec![(0, 1), (1, 2)]), Declared::repeatability(values, vec![vec![1.0 / 16.0; 3]; 2]));
     let st = imbalance_states(&w);
     agrees_with_the_sustained_grade(&w, &st);
-    assert_eq!(circulation_of_accumulation_coefficients(&w.rel, 0, -1), vec![0, 1]);
+    assert_eq!(passage_of_accumulation_coefficients(&w.rel, 0, -1), vec![0, 1]);
     assert_eq!((st[0][0][0], st[1][0][0]), (Some(AtDelta::Resolved(Sign::Positive)), Some(AtDelta::NotResolved)));
     assert_eq!((w.pc1(0, 0, 0), w.pc1(0, 0, 1)), (Reading::Structure, Reading::Structure));
     assert!(w.connection().sustained.as_ref().unwrap().boundary_conditioned.contains(&0));

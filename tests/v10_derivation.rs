@@ -26,7 +26,7 @@ mod support;
 use std::cell::RefCell;
 
 use abr_kernel::derivation::{check, legacy_in_use, necessity_open, of_part, register, reported_names, rules_in_use, underived, Derivation};
-use abr_kernel::operators::circulation_of_accumulation_terms;
+use abr_kernel::operators::passage_of_accumulation_terms;
 use abr_kernel::ground_variables::RelationCarrier;
 use abr_kernel::relational_field::RelationalField;
 use support::*;
@@ -174,8 +174,8 @@ fn the_bound_of_xi_is_its_operators_with_the_signs_dropped() {
     for_all("derivation: the bound of Xi", 0x93_01, |r| {
         let rel = enumerated_rel(r);
         for e in 0..rel.n_edges() {
-            let value = circulation_of_accumulation_terms(&rel, e, -1);
-            let bound = circulation_of_accumulation_terms(&rel, e, 1);
+            let value = passage_of_accumulation_terms(&rel, e, -1);
+            let bound = passage_of_accumulation_terms(&rel, e, 1);
             let at = |t: &[(usize, i64)], f: usize| t.iter().find(|x| x.0 == f).map_or(0, |x| x.1);
             for f in 0..rel.n_edges() {
                 let (v, b) = (at(&value, f), at(&bound, f));
@@ -243,7 +243,7 @@ fn a_selection_by_delta_is_named_as_a_departure() {
         assert!(text(d).contains(MARK), "{name} does not name its selection by δ: {}", text(d));
     }
     // *Was:* the list ended with "EnergyExchange.epsilon" (retired, 104th).
-    for name in ["Forms.a", "Forms.b", "Forms.circulation", "RelationalField.persistence", "SignedExchange.value"] {
+    for name in ["Forms.a", "Forms.b", "Forms.passage", "RelationalField.persistence", "SignedExchange.value"] {
         assert!(!text(of_part(name).unwrap()).contains(MARK), "{name} selects nothing by δ");
     }
 }

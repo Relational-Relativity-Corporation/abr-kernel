@@ -247,7 +247,7 @@ fn prop_relational_field_forms_are_exact() {
                     assert_eq!(forms.a[c][e], near1(val(c, e)));
                     assert_eq!(forms.b[c][e], near1(b(c, e)));
                     let xi = f.rel.succ(e).iter().map(|&g| b(c, g)).sum::<i128>() - f.rel.pred(e).iter().map(|&g| b(c, g)).sum::<i128>();
-                    assert_eq!(forms.circulation[c][e], near1(xi));
+                    assert_eq!(forms.passage[c][e], near1(xi));
                 }
             }
         };

@@ -327,11 +327,11 @@ fn pc_d3_negative_scale_reverses_signs_only() {
     exercised(&FLIPPED, "negative_scale: a resolved change reversed");
     exercised(&MINOR, "negative_scale: a minor reversed by a mixed-sign product");
     exercised(&ARR, "negative_scale: a resolved arrangement sign reversed");
-    exercised(&SUST, "negative_scale: a held circulation");
+    exercised(&SUST, "negative_scale: a held passage");
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// A-3: record-boundary-conditioned circulation
+// A-3: record-boundary-conditioned passage
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// 0 → 1 → 2 → 3 → 1, and 4 → 5 apart. Edge (0, 1) has a successor and no

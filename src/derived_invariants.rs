@@ -1837,20 +1837,20 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            A_i[e]·c_j − A_j[e]·c_i, generally resolved. The coupled-change
 //            grade (PC2) reads a connection the proportional grade (V1) does
 //            not. The converse of I-SC-D3 fails.
-//   I-SC-D5  Circulation is additive over a step. Ξ and B are linear, so
+//   I-SC-D5  Passage is additive over a step. Ξ and B are linear, so
 //            Ξ_{s+1} = Ξ_s + Ξ(B(Δ_s)) exactly. Persistence condition for the
 //            sustained grade: the sign of Ξ cannot change over a step where
 //            |Ξ(B(Δ))| < |Ξ_s|, because a sign changes only through zero
-//            (the circulation counterpart of I-SC-D1; `step_preserves_sign`).
+//            (the passage counterpart of I-SC-D1; `step_preserves_sign`).
 //   I-SC-D6  Uniform positive rescaling holds every sign. If A_{s+1} = κ·A_s,
-//            κ > 0, every minor scales by κ² and every circulation by κ: the
+//            κ > 0, every minor scales by κ² and every passage by κ: the
 //            arrangement (PC3) and the sustained grade are held while every
 //            non-zero relation changes (PC1). Change without reorganization.
 //            CORRECTED (Verifier, 2026-11-21; 17th): the exact-sign statement stands, but "every non-zero relation changes (PC1)" holds for exact values only. At δ: (i) PC1 reads freedom iff |κ − 1|·|A_s[e]| > δA_s[e] + δA_{s+1}[e];
 //            (ii) if δ scales with the values, every PC3 state is held;
 //            (iii) with δ fixed, κ ≥ 1 holds every resolved PC3 state (an unresolved one may resolve) and κ ≤ 1 holds every unresolved one (a resolved one may unresolve);
 //            (iv) never a crossing.
-//            For circulation only the exact sign is claimed.
+//            For passage only the exact sign is claimed.
 //            (tests: sc_d6_rescaling_can_leave_a_relation_unresolved_at_delta,
 //            prop_isc_d6_resolution_conditions_under_rescaling)
 //   I-SC-D7  The declared sequence is part of the reading. Comparing a record
@@ -1878,10 +1878,10 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            inconsistency fixed over the step cancels. On node-derived
 //            values the closure is 0 by identity (`cycle_closure`,
 //            `cycle_change_closure`, `is_closed_walk`).
-//   I-SC-D11 Total circulation. For any edge field g,
+//   I-SC-D11 Total passage. For any edge field g,
 //            Σ_e Ξ(g)[e] = Σ_f g[f]·(indeg(src f) − outdeg(tgt f)); zero for
 //            every field exactly when every weight is zero
-//            (`relational_field::circulation_weights`).
+//            (`relational_field::passage_weights`).
 //   I-SC-D12 Readings are local to their components. Dropping a component
 //            changes no PC1, PC2 or PC3 reading that does not involve it;
 //            only PC3's evaluated set can shrink. Shares can move either way:
@@ -1892,13 +1892,13 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            |ΣΔ| = Σ|Δ| > Σ δΔ ≥ δ_first + δ_last). For any coarsening into
 //            G groups, #(one-sign groups) ≤ Γ_coarse ≤ G.
 //   I-SC-D14 Independence of the held minor pattern and the sustained
-//            circulation (10.3.0, 2026-11-22). (i) A per-edge positive
+//            passage (10.3.0, 2026-11-22). (i) A per-edge positive
 //            scaling A[·][e] → λ_e·A[·][e] multiplies m_ij(e, f) by λ_e·λ_f
 //            > 0 (every minor keeps its sign) while Ξ(B(A)), linear within a
 //            component and mixing neighbouring edges, can reverse. (ii)
 //            Mixing two components by a 2×2 matrix R multiplies every minor
 //            by det R and maps Ξ(B(A)) to R·Ξ(B(A)): a swap reverses every
-//            minor and holds each circulation whose components agree in sign;
+//            minor and holds each passage whose components agree in sign;
 //            −swap reverses both. All four combinations occur on one
 //            declaration at one δ (`tests/v10_grade_independence.rs`), so
 //            neither grade implies the other; they are read side by side,
@@ -1953,7 +1953,7 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //            Persistent closure and persistent arrangement are independent.
 //            V10_README §2.6, `tests/v10_persistence_reversal.rs`.
 //
-// OC-SC-4 (held pattern vs sustained circulation), partly derived: I-SC-D5
+// OC-SC-4 (held pattern vs sustained passage), partly derived: I-SC-D5
 // gives the sustained grade its own persistence condition; I-SC-D6 gives a
 // common sufficient condition (uniform positive rescaling) under which both
 // hold. A general relation between the two is still open.
@@ -1998,7 +1998,7 @@ pub fn decoherence_condition(indicator: f64, epsilon_e: f64, tol: f64) -> bool {
 //          persistence difference A_p of the declared field (how energy
 //          drives Δm).
 // OC-SC-4  Relation between the minor pattern (held connection) and the
-//          persistent (R − B) circulation sign (sustained connection).
+//          persistent (R − B) passage sign (sustained connection).
 //          [Closed, 10.3.0: I-SC-D14, independent grades.]
 
 // V3 → V4: Four new invariants added.

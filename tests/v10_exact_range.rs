@@ -100,7 +100,7 @@ fn a_carrier_above_the_range_is_refused() {
 /// The Verifier's case: path 0 → 1 → 2 → 3, x = [0, 1, 0, −2⁻⁵³],
 /// δ = [0, 1, 0, 2⁻⁵⁴], repeated. At edge 0, Ξ(B(A)) = 1 + 2⁻⁵³ exactly,
 /// above its bound 1 + 2⁻⁵⁴. Rounding that bound up first, to 1 + 2⁻⁵², hid
-/// the held circulation.
+/// the held passage.
 #[test]
 fn finding_3_the_sustained_grade_holds_edge_0() {
     let r = rel(4, vec![(0, 1), (1, 2), (2, 3)]);

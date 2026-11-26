@@ -209,7 +209,7 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("RelationalField.persistence", Op { operators: &[A, B, Xi], reads: &[Rel, Fr], form: "A_p = A_{t+1} − A_t, B_p = B(A_p), Ξ_p = Ξ(B_p) over every consecutive step (linear, so B_p and Ξ_p are the differences exactly)" }),
     ("Forms.a", Op { operators: &[A], reads: &[Rel], form: "A at a registration, or A_p over a step, one exact sum rounded once" }),
     ("Forms.b", Op { operators: &[A, B], reads: &[Rel], form: "B(A)[e] = A[e] + Σ_succ A[f], over the relations B joins to e only (92nd)" }),
-    ("Forms.circulation", Op { operators: &[A, B, Xi], reads: &[Rel, Con], form: "Ξ(B(A))[e] = Σ_succ B − Σ_pred B, over the relations B joins to e's neighbours only (92nd)" }),
+    ("Forms.passage", Op { operators: &[A, B, Xi], reads: &[Rel, Con], form: "Ξ(B(A))[e] = Σ_succ B − Σ_pred B, over the relations B joins to e's neighbours only (92nd)" }),
     // ── The readback and the two parts (96th; 99th, Proposed) ─────────────
     ("Forms.leaving", Op { operators: &[A, Readback], reads: &[Rel, Con], form: "Tᵀg[v]: the sum of the relations leaving locus v (K9), one exact sum rounded once; a reading of relations at a locus, never a locus state" }),
     ("Forms.entering", Op { operators: &[A, Readback], reads: &[Rel, Con], form: "Hᵀg[v]: the sum of the relations entering locus v (K9); the balance Tᵀg − Hᵀg is derived from the two halves, never standing in for them" }),
@@ -314,7 +314,7 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("Sustained.held_edges", Rule { of: &[A, B, Xi], reads: &[Con], rule: "relations whose sign of Ξ(B(A)) held resolved in at least one component at every registration" }),
     ("Sustained.reorganizing_edges", Rule { of: &[A, B, Xi], reads: &[Con], rule: "relations whose sign of Ξ(B(A)) did not hold one state" }),
     ("Sustained.not_formable", Id { what: "relations with no neighbour in the field (IV-3): Ξ is not formable there" }),
-    ("Sustained.boundary_conditioned", Id { what: "relations with exactly one side registered (A-3): Ξ there is never read as a circulation of zero" }),
+    ("Sustained.boundary_conditioned", Id { what: "relations with exactly one side registered (A-3): Ξ there is never read as a passage of zero" }),
     ("Sustained.share_held", Rule { of: &[A, B, Xi], reads: &[Con], rule: "declared projection (C, K6): held / formable relations with both sides registered (A-3)" }),
     ("Sustained.share_held_boundary", Rule { of: &[A, B, Xi], reads: &[Con], rule: "declared projection (C): held / boundary-conditioned relations, reported apart" }),
     ("Sustained.share_held_all", Rule { of: &[A, B, Xi], reads: &[Con], rule: "declared projection (C): held / every formable relation, kept for comparison" }),

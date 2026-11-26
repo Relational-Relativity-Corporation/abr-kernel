@@ -2,7 +2,7 @@
 //! decomposing complex systems but we're not simplifying them").
 //!
 //! A V10 reading decomposes a field into parts: closures, accumulations,
-//! circulations. Each is a sum of registered entries with integer
+//! passages. Each is a sum of registered entries with integer
 //! coefficients. Adding them one at a time in floating point can lose a small
 //! entry beside a large one, and the result then depends on the order of
 //! addition. Example: 2⁵⁴ + (−0.5) − 2⁵⁴ gives 0, while the exact sum is

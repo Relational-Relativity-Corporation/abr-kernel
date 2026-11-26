@@ -245,7 +245,7 @@ fn sustained_edge_with_no_neighbour_is_not_formable() {
 }
 
 #[test]
-fn coarse_delta_leaves_circulation_unresolved() {
+fn coarse_delta_leaves_passage_unresolved() {
     let seq = vec![reg(vec![vec![3.0, 1.0, 2.0]], 0.5), reg(vec![vec![3.0, 1.0, 2.0]], 0.5)];
     let s = connection(&seq, &chain()).unwrap().sustained.unwrap();
     assert!(!s.held_edges.contains(&0));
@@ -270,7 +270,7 @@ fn energy_without_carrier_is_a_declaration_gap() {
 }
 
 #[test]
-fn connected_exchange_needs_held_circulation_and_resolved_floor() {
+fn connected_exchange_needs_held_passage_and_resolved_floor() {
     let seq = vec![reg(vec![vec![3.0, 1.0, 2.0]], 0.0), reg(vec![vec![3.4, 1.2, 2.0]], 0.0)];
     let c = connection(&seq, &chain()).unwrap();
     let cs = vec![carrier(vec![5.0, 2.0, 2.5], 0.0), carrier(vec![5.5, 2.0, 2.5], 0.0)];

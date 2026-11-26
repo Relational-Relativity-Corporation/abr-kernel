@@ -270,8 +270,8 @@
 // the max selection (element 2) and the saturating form (element 3).
 //
 // Kernel V10 (Origin, 2026-11-21): ρ and χ are RETIRED from V10 readings; the
-// OPEN conditions above, and OC-K-1, are dissolved for V10. V10 circulation is
-// the parameter-free operator Ξ (`operator_circulation`). The ρ-weighted
+// OPEN conditions above, and OC-K-1, are dissolved for V10. V10 passage is
+// the parameter-free operator Ξ (`operator_passage`). The ρ-weighted
 // functions remain for V9 callers and are not used by V10 readings.
 //
 // ── B Activation Condition ───────────────────────────────────────────────
@@ -346,7 +346,7 @@
 // detect_failure_mode, expression_condition:
 //   Both depended on rank. Suspended.
 //
-// FailureMode::DifferentiationCollapse, FailureMode::CirculationCancellation:
+// FailureMode::DifferentiationCollapse, FailureMode::PassageCancellation:
 //   Both depended on rank(Im Δ) or rank(Im Σ). Suspended.
 //   FailureMode::RelationalIsolation depended only on declared adjacency
 //   structure; replaced by relational_isolation() predicate, which is preserved.
@@ -397,7 +397,7 @@
 // V7 (purge, first pass) — SVD, nalgebra, rank(Im Δ), rank(Im Σ), ρ_P,
 //      RhoP, RhoPUndefined, im_delta_rank, im_sigma_rank, rho_p_ratio,
 //      propagation_capacity, detect_failure_mode, expression_condition,
-//      FailureMode::DifferentiationCollapse, FailureMode::CirculationCancellation,
+//      FailureMode::DifferentiationCollapse, FailureMode::PassageCancellation,
 //      frobenius_norm, frobenius_norm_spatial removed or suspended.
 //      from_edges() restricted to #[cfg(test)].
 //      Undirected graph projections moved to test module.
@@ -1169,7 +1169,7 @@ pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f6
     EdgeField { spatial, comp, comp_pairs: pairs.clone(), k }
 }
 
-// ── Operator Ξ — circulation (Kernel V10, Origin 2026-11-21) ─────────────
+// ── Operator Ξ — passage (Kernel V10, Origin 2026-11-21) ─────────────
 //
 // Ξ(g)[e] = Σ_{f ∈ succ(e)} g[f] − Σ_{p ∈ pred(e)} g[p], per component.
 //
@@ -1181,19 +1181,19 @@ pub fn operator_r(bg: &EdgeField, rel: &DeclaredRelations, rho: &[f64], cc: &[f6
 // V10 retires ρ and χ (ρ_base, χ₀, the max selection, the saturating form)
 // and the component coupling cc[p] from V10 readings. They imposed a fixed,
 // undeclared model of how local magnitude of change (an energy-like quantity
-// read without a declared carrier) modulates circulation. V10 declares energy
+// read without a declared carrier) modulates passage. V10 declares energy
 // with its own carrier and reads its effect on structure from the data. The
 // ρ-weighted functions in this file (compute_rho*, operator_sigma,
 // antisymmetric_term, operator_r, operator_e, operator_e_v5,
 // operator_r_persistence) are unchanged and remain available to V9 callers;
 // they are not used by V10 readings.
 //
-// Applied to g = B(A(x)) this is the V10 circulation of the ABR path; applied
-// to g = Δ(x) it is the circulation of the primary path. V9's R − B equals
+// Applied to g = B(A(x)) this is the V10 passage of the ABR path; applied
+// to g = Δ(x) it is the passage of the primary path. V9's R − B equals
 // ρ[src(e)]·Ξ[e] on the spatial term, so the sign of Ξ is the sign V9's
 // indicator read.
 
-pub fn operator_circulation(g: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+pub fn operator_passage(g: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
     // One exact sum Σ_succ − Σ_pred, rounded once (41st). *Was:* the two sums
     // rounded separately and then subtracted.
     g.iter().map(|c| {
@@ -1203,7 +1203,7 @@ pub fn operator_circulation(g: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<
 }
 
 /// Half-width of Ξ(g) from half-widths dg: Σ_succ dg + Σ_pred dg.
-pub fn circulation_half_width(dg: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+pub fn passage_half_width(dg: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
     // Rounded up from the exact sum, so the bound is never below its exact
     // value (41st; `exact`).
     dg.iter().map(|c| {
@@ -1216,7 +1216,7 @@ pub fn circulation_half_width(dg: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<V
 /// Integer coefficients of Ξ(B(·))[e] over the edges: Ξ(B(g))[e] =
 /// Σ_f coeff[f]·g[f]. Ξ and B are linear, so their composition is one integer
 /// combination of the entries.
-pub fn circulation_of_accumulation_coefficients(rel: &DeclaredRelations, e: usize, sign_pred: i64) -> Vec<i64> {
+pub fn passage_of_accumulation_coefficients(rel: &DeclaredRelations, e: usize, sign_pred: i64) -> Vec<i64> {
     let mut k = vec![0i64; rel.n_edges()];
     let mut add_b = |f: usize, w: i64| { k[f] += w; for &h in rel.succ(f) { k[h] += w; } };
     for &f in rel.succ(e) { add_b(f, 1); }
@@ -1228,10 +1228,10 @@ pub fn circulation_of_accumulation_coefficients(rel: &DeclaredRelations, e: usiz
 /// 2026-11-25, 92nd): Ξ(B(g))[e] = Σ (f, w) w·g[f] over the relations f that
 /// B joins to e's successors and predecessors, each listed once, zeros
 /// omitted, in increasing f. Equal entry for entry to the nonzero entries of
-/// `circulation_of_accumulation_coefficients`, which is kept beside it; that
+/// `passage_of_accumulation_coefficients`, which is kept beside it; that
 /// form visits every relation for every e, so the work of forming Ξ grew with
 /// the square of the relations. This form visits only e's neighbourhood.
-pub fn circulation_of_accumulation_terms(rel: &DeclaredRelations, e: usize, sign_pred: i64) -> Vec<(usize, i64)> {
+pub fn passage_of_accumulation_terms(rel: &DeclaredRelations, e: usize, sign_pred: i64) -> Vec<(usize, i64)> {
     let mut t: Vec<(usize, i64)> = Vec::new();
     let mut add_b = |f: usize, w: i64| { t.push((f, w)); for &h in rel.succ(f) { t.push((h, w)); } };
     for &f in rel.succ(e) { add_b(f, 1); }
@@ -1260,17 +1260,17 @@ fn merged_terms(mut t: Vec<(usize, i64)>) -> Vec<(usize, i64)> {
 }
 
 /// Ξ(B(a)) per component, computed from a in one exact sum and rounded once
-/// (41st). Equal to `operator_circulation(operator_b(a))` in exact
+/// (41st). Equal to `operator_passage(operator_b(a))` in exact
 /// arithmetic, without rounding B first.
-pub fn circulation_of_accumulation(a: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
-    let ks: Vec<Vec<i64>> = (0..rel.n_edges()).map(|e| circulation_of_accumulation_coefficients(rel, e, -1)).collect();
+pub fn passage_of_accumulation(a: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+    let ks: Vec<Vec<i64>> = (0..rel.n_edges()).map(|e| passage_of_accumulation_coefficients(rel, e, -1)).collect();
     a.iter().map(|c| ks.iter().map(|k| crate::exact::combination_nearest(k.iter().zip(c).map(|(&w, &v)| (w, v)))).collect()).collect()
 }
 
 /// The half-width of Ξ(B(a)) from da, Σ_succ δB + Σ_pred δB with δB = B(da),
 /// as one exact sum rounded up (41st).
-pub fn circulation_of_accumulation_half_width(da: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
-    let ks: Vec<Vec<i64>> = (0..rel.n_edges()).map(|e| circulation_of_accumulation_coefficients(rel, e, 1)).collect();
+pub fn passage_of_accumulation_half_width(da: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> {
+    let ks: Vec<Vec<i64>> = (0..rel.n_edges()).map(|e| passage_of_accumulation_coefficients(rel, e, 1)).collect();
     da.iter().map(|c| ks.iter().map(|k| crate::exact::combination_up(k.iter().zip(c).map(|(&w, &v)| (w, v)))).collect()).collect()
 }
 
@@ -2102,3 +2102,19 @@ mod tests {
         }
     }
 }
+
+// ── The old names of Ξ, kept as deprecated aliases (Origin, 2026-11-26,
+// 106th): Ξ is the passage, never "circulation": no information returns to
+// where it was. Each alias calls the renamed function unchanged.
+#[deprecated(note = "renamed operator_passage (Origin, 106th)")]
+pub fn operator_circulation(g: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> { operator_passage(g, rel) }
+#[deprecated(note = "renamed passage_half_width (Origin, 106th)")]
+pub fn circulation_half_width(dg: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> { passage_half_width(dg, rel) }
+#[deprecated(note = "renamed passage_of_accumulation_coefficients (Origin, 106th)")]
+pub fn circulation_of_accumulation_coefficients(rel: &DeclaredRelations, e: usize, sign_pred: i64) -> Vec<i64> { passage_of_accumulation_coefficients(rel, e, sign_pred) }
+#[deprecated(note = "renamed passage_of_accumulation_terms (Origin, 106th)")]
+pub fn circulation_of_accumulation_terms(rel: &DeclaredRelations, e: usize, sign_pred: i64) -> Vec<(usize, i64)> { passage_of_accumulation_terms(rel, e, sign_pred) }
+#[deprecated(note = "renamed passage_of_accumulation (Origin, 106th)")]
+pub fn circulation_of_accumulation(a: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> { passage_of_accumulation(a, rel) }
+#[deprecated(note = "renamed passage_of_accumulation_half_width (Origin, 106th)")]
+pub fn circulation_of_accumulation_half_width(da: &[Vec<f64>], rel: &DeclaredRelations) -> Vec<Vec<f64>> { passage_of_accumulation_half_width(da, rel) }

@@ -4,7 +4,7 @@
 // ── Df6 ───────────────────────────────────────────────────────────────────
 //
 // All operators and all ground variables occur simultaneously throughout
-// relational evolution. A, B, the circulation Ξ, their persistence
+// relational evolution. A, B, the passage Ξ, their persistence
 // differences, and energy, freedom and connection are aspects of one ongoing
 // relational evolution, not stages. The composition order and the sequence of
 // registrations are orders of analysis (Df2a). The observer intersects the
@@ -53,8 +53,8 @@ use crate::persistence_change::EdgeSeries;
 pub struct Forms {
     pub a: Vec<Vec<f64>>,
     pub b: Vec<Vec<f64>>,
-    /// Ξ, the circulation.
-    pub circulation: Vec<Vec<f64>>,
+    /// Ξ, the passage.
+    pub passage: Vec<Vec<f64>>,
     /// The readback at the loci (K9, Origin, 96th), [c][v]: what leaves
     /// locus v, Tᵀg[v] = Σ of the relations leaving v. A reading of
     /// relations at a locus, never a locus state. The relations it sums are
@@ -167,12 +167,12 @@ fn forms_of(xs: &[(&NodeField, f64)], rel: &DeclaredRelations) -> Forms {
         for &f in rel.succ(e) { w[f] += 1; }
         w
     }).collect();
-    let xi_coeff: Vec<Vec<i64>> = (0..m).map(|e| crate::operators::circulation_of_accumulation_coefficients(rel, e, -1)).collect();
+    let xi_coeff: Vec<Vec<i64>> = (0..m).map(|e| crate::operators::passage_of_accumulation_coefficients(rel, e, -1)).collect();
     let (leaving, entering, leaving_bound, entering_bound) = readback(&exact_a, None, rel);
     Forms {
         a: exact_a.iter().map(|c| c.iter().map(|v| v.nearest()).collect()).collect(),
         b: (0..k).map(|c| b_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
-        circulation: (0..k).map(|c| xi_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
+        passage: (0..k).map(|c| xi_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
         leaving, entering, leaving_bound, entering_bound,
     }
 }
@@ -208,7 +208,7 @@ fn forms_of_relations(series: &EdgeSeries, ts: &[(usize, f64)], rel: &DeclaredRe
         w
     }).collect();
     let xi_coeff: Vec<Vec<(usize, i64)>> = (0..m).map(|e| {
-        let w = crate::operators::circulation_of_accumulation_terms(rel, e, -1);
+        let w = crate::operators::passage_of_accumulation_terms(rel, e, -1);
         terms(w.len());
         w
     }).collect();
@@ -225,7 +225,7 @@ fn forms_of_relations(series: &EdgeSeries, ts: &[(usize, f64)], rel: &DeclaredRe
     Forms {
         a: exact_a.iter().map(|c| c.iter().map(|v| v.nearest()).collect()).collect(),
         b: (0..k).map(|c| b_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
-        circulation: (0..k).map(|c| xi_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
+        passage: (0..k).map(|c| xi_coeff.iter().map(|w| combine(c, w)).collect()).collect(),
         leaving, entering, leaving_bound, entering_bound,
     }
 }
@@ -333,23 +333,23 @@ fn forms_over(series: &EdgeSeries, rel: &DeclaredRelations) -> (Vec<Forms>, Vec<
     (spatial, persistence)
 }
 
-/// Whole-field circulation weights (I-SC-D11, Derived 2026-11-21): for every
+/// Whole-field passage weights (I-SC-D11, Derived 2026-11-21): for every
 /// declared edge f, w[f] = indeg(src f) − outdeg(tgt f). For any edge field g,
 /// Σ_e Ξ(g)[e] = Σ_f w[f]·g[f], because f is a successor of every edge ending
 /// at src f and a predecessor of every edge starting at tgt f. The total is
 /// zero for every field exactly when every weight is zero.
-pub fn circulation_weights(rel: &DeclaredRelations) -> Vec<i64> {
+pub fn passage_weights(rel: &DeclaredRelations) -> Vec<i64> {
     let indeg = |v: usize| rel.edges.iter().filter(|e| e.1 == v).count() as i64;
     let outdeg = |v: usize| rel.edges.iter().filter(|e| e.0 == v).count() as i64;
     rel.edges.iter().map(|&(s, t)| indeg(s) - outdeg(t)).collect()
 }
 
-/// Edges whose circulation is **record-boundary-conditioned** (A-3, decided
+/// Edges whose passage is **record-boundary-conditioned** (A-3, decided
 /// by Origin 2026-11-22, Part 9, 20th): exactly one of the successor and
 /// predecessor sums is empty. A record boundary cuts an ongoing relation
 /// (Df3), so the missing side is *not registered*, not zero. The empty sum is
 /// taken as 0 (so I-SC-D11's identity holds), and Ξ at such an edge is
-/// reported with this flag and never read as a circulation of zero. An edge
+/// reported with this flag and never read as a passage of zero. An edge
 /// with both sides empty is not formable (IV-3) and is not listed here.
 pub fn boundary_conditioned_edges(rel: &DeclaredRelations) -> Vec<usize> {
     (0..rel.n_edges()).filter(|&e| rel.succ(e).is_empty() != rel.pred(e).is_empty()).collect()
@@ -576,3 +576,8 @@ impl Projection {
         (pb, qb)
     }
 }
+
+/// The old name, kept as a deprecated alias (Origin, 106th: Ξ is the
+/// passage).
+#[deprecated(note = "renamed passage_weights (Origin, 106th)")]
+pub fn circulation_weights(rel: &DeclaredRelations) -> Vec<i64> { passage_weights(rel) }

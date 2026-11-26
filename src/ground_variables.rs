@@ -56,7 +56,7 @@
 // ── Operators ─────────────────────────────────────────────────────────────
 //
 // Every reading runs through the operators A (`operator_a`), B (`operator_b`)
-// and the parameter-free circulation Ξ (`operator_circulation`). ρ and χ are
+// and the parameter-free passage Ξ (`operator_passage`). ρ and χ are
 // retired from V10 readings (Origin, 2026-11-21). No operator formula changes in V10. Resolution is carried as
 // interval half-widths: A and B are linear with coefficients ±1, so
 // δ_A[e] = δ[s] + δ[t] and δ_B = B(δ_A).
@@ -148,7 +148,7 @@ pub enum ConnectionGrade {
     /// Relations that vary together: every minor m_ij(e,f) not resolved,
     /// held through evolution.
     Proportional,
-    /// Persistent circulation: the sign of Ξ(B(A(x)))[e] resolved and the
+    /// Persistent passage: the sign of Ξ(B(A(x)))[e] resolved and the
     /// same through evolution. Needs an interior locus.
     Sustained,
     /// Relations whose change is locked in proportion wherever it is read
@@ -862,9 +862,9 @@ fn freedom_from(h: MinorHistories) -> Result<Freedom, DeclarationGap> {
 //   PROPORTIONAL  every minor m_ij(e, f) not resolved at every registration:
 //                 the relations vary together. Needs two components; needs no
 //                 interior.
-//   SUSTAINED     sign of the circulation Ξ(B(A(x)))[e] = Σ_succ B − Σ_pred B
+//   SUSTAINED     sign of the passage Ξ(B(A(x)))[e] = Σ_succ B − Σ_pred B
 //                 resolved and the same at every registration: persistent
-//                 circulation. Parameter-free (`operator_circulation`); ρ and χ
+//                 passage. Parameter-free (`operator_passage`); ρ and χ
 //                 are retired from V10 (2026-11-21). Needs an interior locus;
 //                 an edge with no neighbour is not formable (IV-3).
 //
@@ -892,35 +892,35 @@ fn identity_pairs(fields: &[ExactField], held: &[usize]) -> Vec<(usize, usize)> 
 }
 
 /// Sustained grade at one registration: sign of Ξ(B(A(x)))[e] at δ per
-/// component, through the parameter-free circulation operator. `None` where
+/// component, through the parameter-free passage operator. `None` where
 /// the edge has no neighbour in the field (IV-3).
-pub(crate) fn circulation_signs(r: &Registration, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
+pub(crate) fn passage_signs(r: &Registration, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
     // Ξ(B(A(x))) from the exact relation values in one exact sum (45th), so no
     // rounding of A enters; its bound from the state bounds (rounded up) in
     // one exact sum, rounded up. *Was (41st):* from A rounded once; before
     // that, B rounded and Ξ of it.
-    circulation_signs_exact(&exact_field(r, rel), rel)
+    passage_signs_exact(&exact_field(r, rel), rel)
 }
 
 /// The sustained grade's signs at one registration of the relations (59th).
-pub(crate) fn circulation_signs_of(series: &EdgeSeries, t: usize, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
-    circulation_signs_exact(&exact_field_of(series, t), rel)
+pub(crate) fn passage_signs_of(series: &EdgeSeries, t: usize, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
+    passage_signs_exact(&exact_field_of(series, t), rel)
 }
 
-fn circulation_signs_exact(x: &ExactField, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
+fn passage_signs_exact(x: &ExactField, rel: &DeclaredRelations) -> Vec<Option<Vec<AtDelta<Sign>>>> {
     use crate::exact::Expansion;
     let k = x.a.len();
     // The bound is kept exact through the decision and never rounded first
     // (the Verifier's batch-2 finding 3, 46th). *Was (45th):* rounded up before
     // the comparison, so on 0 → 1 → 2 → 3 with x = [0, 1, 0, −2⁻⁵³],
-    // δ = [0, 1, 0, 2⁻⁵⁴] the circulation 1 + 2⁻⁵³ at edge 0 was compared with
+    // δ = [0, 1, 0, 2⁻⁵⁴] the passage 1 + 2⁻⁵³ at edge 0 was compared with
     // 1 + 2⁻⁵² instead of its bound 1 + 2⁻⁵⁴, and the held edge was omitted.
     (0..rel.n_edges()).map(|e| {
         if rel.succ(e).is_empty() && rel.pred(e).is_empty() { return None; }
         // Only the relations B joins to e (92nd). *Was:* the coefficient
         // vectors over every relation; the nonzero terms are the same.
-        let w = crate::operators::circulation_of_accumulation_terms(rel, e, -1);
-        let wb = crate::operators::circulation_of_accumulation_terms(rel, e, 1);
+        let w = crate::operators::passage_of_accumulation_terms(rel, e, -1);
+        let wb = crate::operators::passage_of_accumulation_terms(rel, e, 1);
         crate::work::terms(w.len() + wb.len());
         Some((0..k).map(|ci| {
             let (mut v, mut h) = (Expansion::new(), Expansion::new());
@@ -936,16 +936,16 @@ fn circulation_signs_exact(x: &ExactField, rel: &DeclaredRelations) -> Vec<Optio
 /// Sustained connection over the sequence.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Sustained {
-    /// Edges whose circulation sign is held resolved in at least one component.
+    /// Edges whose passage sign is held resolved in at least one component.
     pub held_edges: Vec<usize>,
-    /// Edges whose circulation reorganized.
+    /// Edges whose passage reorganized.
     pub reorganizing_edges: Vec<usize>,
     /// Edges with no neighbour in the field (IV-3).
     pub not_formable: Vec<usize>,
     /// Formable edges with exactly one empty side, successor or predecessor
-    /// (A-3): their circulation is record-boundary-conditioned. They are read
+    /// (A-3): their passage is record-boundary-conditioned. They are read
     /// and listed in `held_edges` or `reorganizing_edges` as usual, and
-    /// flagged here; a Ξ at one of them is never read as a circulation of
+    /// flagged here; a Ξ at one of them is never read as a passage of
     /// zero, since the missing side is not registered.
     pub boundary_conditioned: Vec<usize>,
     /// The headline (A-3, the Verifier's recommendation, 2026-11-22, 35th):
@@ -963,7 +963,7 @@ pub struct Sustained {
 
 fn sustained(series: &EdgeSeries, rel: &DeclaredRelations) -> Result<Sustained, DeclarationGap> {
     if !has_interior(rel) { return Err(DeclarationGap::PrimaryRegion); }
-    let signs: Vec<_> = (0..series.n_registrations()).map(|t| circulation_signs_of(series, t, rel)).collect();
+    let signs: Vec<_> = (0..series.n_registrations()).map(|t| passage_signs_of(series, t, rel)).collect();
     let k = series.k();
     let (mut held, mut reorg, mut nf) = (Vec::new(), Vec::new(), Vec::new());
     for e in 0..rel.n_edges() {
@@ -1005,7 +1005,7 @@ pub struct Connection {
     pub identity: Vec<(usize, usize)>,
     /// Proportional grade: pairs whose minors are all held unresolved.
     pub proportional: Result<Vec<(usize, usize)>, DeclarationGap>,
-    /// Sustained grade: persistent circulation.
+    /// Sustained grade: persistent passage.
     pub sustained: Result<Sustained, DeclarationGap>,
     /// Coupled-change grade: pairs whose change is locked in proportion (PC2).
     pub coupled_change: Result<Vec<(usize, usize)>, DeclarationGap>,
@@ -1258,7 +1258,7 @@ fn share_resolved(signed: &[Vec<SignedExchange>]) -> f64 {
     resolved as f64 / total as f64
 }
 
-/// Connected exchange (V3b): edges whose circulation is held (sustained grade)
+/// Connected exchange (V3b): edges whose passage is held (sustained grade)
 /// and whose movement's side is resolved at every registration, with the
 /// signed exchange A(c)[e] at each registration (Origin, 104th: no magnitude).
 /// *Was:* with ε = |A(c)[e]| at each registration.
