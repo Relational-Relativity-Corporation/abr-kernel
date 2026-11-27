@@ -63,6 +63,11 @@ fn names_reported() -> Vec<String> {
         add(format!("{:?}", order.possibilities()));
         // The degrees of freedom of the current point (108th).
         add(format!("{:?}", order.degrees()));
+        // The activity at a point (116th, under trial): the walk read by the
+        // radial field over the declared loci, at its last point.
+        let mut radial = abr_kernel::radial::RadialField::new(rel.n_nodes);
+        for &e in &order.steps { radial.push(rel.edges[e].0, rel.edges[e].1).unwrap(); }
+        add(format!("{:?}", radial.activity(radial.steps(), 4).unwrap()));
         // The orthogonal split read from the field (100th): its parts are
         // reported parts too.
         add(format!("{:?}", with.two_parts(&abr_kernel::relational_field::InnerProduct::equal())));
@@ -214,10 +219,13 @@ fn the_minors_are_legacy_mathematics() {
         }
     }
     let mut open: Vec<&str> = necessity_open().to_vec();
+    // *Amended (116th):* and the activity's comparison, under trial, not
+    // admitted, its necessity Origin's to state. *Was:* the minors alone.
     let mut want: Vec<&str> = MINOR_READINGS.to_vec();
+    want.extend(["Agreement.agrees", "Agreement.differs"]);
     open.sort();
     want.sort();
-    assert_eq!(open, want, "the parts whose necessity is open are exactly the minor readings");
+    assert_eq!(open, want, "the parts whose necessity is open are exactly the minor readings and the activity's comparison");
 }
 
 /// The parts formed only from relations selected by δ (resolved, or moved)

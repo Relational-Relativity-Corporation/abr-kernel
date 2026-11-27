@@ -180,6 +180,8 @@ const ORDER_PROVENANCE: &str = "the continuations of a route through a registere
 const ORDER_IN_RELATION: &str = "a reading of the order of relations: each step's relation continues from the locus the previous entered (B joins a relation to its successors; the order registers which successor followed, step by step); route length 0 is the readback at the current locus counted over the order, the summed field's star; each longer route keeps only the earlier points that also match one step further back. No operator forms it, and no weight or decay by distance enters (74th)";
 const DEGREE_PROVENANCE: &str = "the comparison of two positions of a registered sequence back to their first difference: the comparison a suffix index makes (Weiner, 1973); here kept between two distinct points, nothing merged or counted (108th)";
 const DEGREE_IN_RELATION: &str = "a reading of the registered order, not formed by an operator: it compares which relation stood at matching positions behind two distinct points; the relations compared are the order's registrations, the leaving relation is the readback's leaving half (K9) decomposed by point; its operator form is sought (108th (5)). *Since the 112th:* also formed from the field itself, `order::indications`: the readback (K9) of every step in order, compared at matching points behind two distinct points, equal exactly to this reading on actual text (`tests/v10_indications.rs`); whether that retires the legacy comparison is Origin's";
+const ACTIVITY_PROVENANCE: &str = "the 108th's comparison of two arrivals (Degree.alongside; the comparison a suffix index makes, Weiner 1973) continued past where they part; position-by-position agreement of two sequences (Hamming, 1950); kept as sets per point, never counted or pooled";
+const ACTIVITY_IN_RELATION: &str = "a reading of the registered order: each element compared is the locus between two steps (entered by the readback of one, left by the readback of the next, K9) at matching points behind two distinct points, never identified (106th); no operator forms the comparison; under trial (116th), not admitted by Origin";
 const DEGREE_NECESSITY: &str = "admitted by Origin (108th): the degrees of freedom of the current point read how far each earlier revolution's arrival runs alongside the current one and where it parts; no operator of the kernel yet forms the comparison";
 const ORDER_NECESSITY: &str = "declared by Origin (102nd): the order is the relational field, and the possibilities at the current point are the continuations the entire input registered after the route arriving there; a sum forgets order, so no reading of the summed field can give them";
 
@@ -253,6 +255,16 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("Degree.turn", Id { what: "the degree's turn to now: the span of the order between the earlier point and the current point, the relations registered between them" }),
     ("Degree.alongside", Legacy { method: "the span the earlier arrival runs alongside the current arrival: the relations behind each point compared position by position, back to the first that differs; a comparison of two distinct points, never an identification of them", provenance: DEGREE_PROVENANCE, in_relation_to_operators: DEGREE_IN_RELATION, necessity: Some(DEGREE_NECESSITY) }),
     ("Degree.parts", Legacy { method: "where the two arrivals part: the relation there and the relation now at the first position behind the points that differs, or the record boundary", provenance: DEGREE_PROVENANCE, in_relation_to_operators: DEGREE_IN_RELATION, necessity: Some(DEGREE_NECESSITY) }),
+    // ── The activity at a point, and coherence (116th, Proposed, under trial) ──
+    ("Activity.point", Id { what: "the current point of the activity: where step point − 1 entered" }),
+    ("Activity.reach", Reg { what: "the declared reach: how many points behind the current point are active; a scope of analysis (85th), never a boundary of the field; under trial (116th), its setting open for Origin" }),
+    ("Activity.agreements", Id { what: "every degree of freedom of the current point (108th), each with its agreement, in order of evolution, none merged (106th)" }),
+    ("Activity.coherent", Rule { of: &[Readback], reads: &[Con, Fr], rule: "the degrees whose agreement no other degree's agreement strictly contains: inclusion of sets of distances, decided exactly; never a count, a sum or a score (104th); freedom, the coherent degrees inclusion cannot order (116th)" }),
+    ("Agreement.point", Id { what: "the earlier point in evolution where the text stood at the current element: a distinct revolution (106th, 107th)" }),
+    ("Agreement.leaving", Reg { what: "the relation registered at the step that left that point (steps[point], numbered x·n + y), as registered" }),
+    ("Agreement.agrees", Legacy { method: "the distances at which the element behind the earlier point is the element behind the current point, at every distance within the reach, not stopping where the arrivals part", provenance: ACTIVITY_PROVENANCE, in_relation_to_operators: ACTIVITY_IN_RELATION, necessity: None }),
+    ("Agreement.differs", Legacy { method: "the distances at which the elements behind the two points differ", provenance: ACTIVITY_PROVENANCE, in_relation_to_operators: ACTIVITY_IN_RELATION, necessity: None }),
+    ("Agreement.beyond", Id { what: "the distances behind the record boundary of either point: not evaluated, never filled" }),
     ("Level.continuations", Legacy { method: "each relation that followed the route in the order, with how many times: the possibilities at the current point after that route", provenance: ORDER_PROVENANCE, in_relation_to_operators: ORDER_IN_RELATION, necessity: Some(ORDER_NECESSITY) }),
     // ── The ground: energy ────────────────────────────────────────────────
     ("RelationalField.ground", Reg { what: "energy, freedom and connection, read together over the whole sequence (Df6, W11); each part below has its own derivation" }),
@@ -392,6 +404,8 @@ static RULES_IN_USE: &[Derivation] = &[
 /// rank have the strongest case, the every-pair proportional grade the
 /// weakest.
 static NECESSITY_OPEN: &[&str] = &[
+    // The activity (116th, under trial): not admitted, its necessity not stated.
+    "Agreement.agrees", "Agreement.differs",
     "PersistenceChange.across_components", "PersistenceChange.across_steps", "Couplings.readings",
     "ChangeCoupling.minor", "PersistenceChange.arrangement", "ArrangementStep.before", "ArrangementStep.after",
     "Connection.proportional", "Connection.reorganizing_pairs", "GroundReading.v2_held_arrangement", "Freedom.free_pairs",

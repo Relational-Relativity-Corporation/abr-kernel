@@ -50,6 +50,7 @@ const FORMED: &[&str] = &[
     "Registration.locus_gain", "Registration.shared_gain", "Registration.range", "Synthetic.basis",
     "RelationalField.relations", "RelationalField.meeting", "Meeting.leaving", "Meeting.entering",
     "RelationalField.ground", "TwoParts.inner_product", "Equal.basis", "Order.edges", "Order.steps", "Degree.leaving",
+    "Activity.reach", "Agreement.leaving",
     // Operator readings.
     "EdgeSeries.a", "EdgeSeries.a_lo", "RelationalField.spatial", "RelationalField.persistence", "Forms.a", "Forms.b",
     "Forms.passage", "Forms.leaving", "Forms.entering", "PersistenceChange.relations", "RelationChange.change",
@@ -61,7 +62,7 @@ const FORMED: &[&str] = &[
     "RelationChange.reading", "SignedExchange.bound", "SignedExchange.side", "Energy.share_resolved",
     "Sustained.held_edges", "Sustained.reorganizing_edges", "Sustained.share_held", "Sustained.share_held_all",
     "Sustained.share_held_boundary", "Connection.evaluated_pairs", "Connection.unresolved_edges",
-    "RelationalField.ways", "Ways.potential", "Ways.balanced",
+    "RelationalField.ways", "Ways.potential", "Ways.balanced", "Activity.coherent",
 ];
 
 /// Rules not recomputed here, each with its reason. No operator reading and
@@ -193,6 +194,31 @@ fn the_order_registers_its_steps() {
         assert_eq!(o.edges, rel.edges, "Order.edges");
         assert_eq!(o.steps, steps, "Order.steps");
         for d in o.degrees() { assert_eq!(d.leaving, steps[d.point], "Degree.leaving: the step registered at its point"); }
+    });
+}
+
+/// The activity (116th, under trial): the reach as declared, each degree's
+/// leaving relation as registered (x·n + y from the steps pushed), and the
+/// coherent degrees by inclusion, recomputed from the agreements by comparing
+/// every pair.
+#[test]
+fn the_activity_is_formed_as_stated() {
+    for_all("formation: the activity", 0xF0_03, |r| {
+        let n = r.usize(2, 6);
+        let mut f = abr_kernel::radial::RadialField::new(n);
+        let mut at = r.usize(0, n - 1);
+        let mut steps = Vec::new();
+        for _ in 0..r.usize(4, 60) { let y = r.usize(0, n - 1); f.push(at, y).unwrap(); steps.push((at, y)); at = y; }
+        for through in 1..=steps.len() {
+            let reach = r.usize(0, 10);
+            let a = f.activity(through, reach).unwrap();
+            assert_eq!(a.reach, reach, "Activity.reach: as declared");
+            for g in &a.agreements { assert_eq!(g.leaving, steps[g.point].0 * n + steps[g.point].1, "Agreement.leaving: the step registered at its point"); }
+            let sets: Vec<&Vec<usize>> = a.agreements.iter().map(|g| &g.agrees).collect();
+            let inside = |s: &Vec<usize>, t: &Vec<usize>| t.len() > s.len() && s.iter().all(|k| t.contains(k));
+            let expect: Vec<usize> = (0..sets.len()).filter(|&i| !sets.iter().any(|t| inside(sets[i], t))).collect();
+            assert_eq!(a.coherent, expect, "Activity.coherent: by inclusion");
+        }
     });
 }
 

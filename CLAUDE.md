@@ -68,6 +68,7 @@ When Origin asks that question, answer it truthfully for the code as it stands, 
 - `tests/v10_no_repetition.rs`: **no information is repeated** (106th, 107th): no period, phase, modulus or cycle named in the code; identical registrations stay distinct points; the degrees never merge identical routes.
 - `tests/v10_no_drift.rs`: **no drift by design** (Origin, 2026-11-27: *"what we need to establish is that our process eliminates drift by mathematical design"*): continuing only by indicated continuations, under any choice among them, generates no relation the input does not hold, every generated step traces to an observed point, and where nothing is indicated nothing is continued; an inventing process is caught at its first invented step.
 - `tests/guard_operators.rs`: **legacy only by Origin's admission**, as below.
+- The activity and coherence (116th, under trial; `src/radial.rs`, `tests/v10_activity.rs`) are held to every test above: formed as stated (`v10_formation`), continuing by a coherent degree generates only what was observed (`v10_no_drift`), identical agreements stay distinct degrees (`v10_no_repetition`), and the comparison is listed as not admitted, waiting on Origin (`guard_operators`).
 - `tests/v10_derivation.rs`: every reported part has a derivation stating what the 92nd requires.
 - **Not covered (named):** a mapping declared without Origin (Origin's check); a definition wrong the same way in the register and in its recomputation; the applications, which are not run against this suite.
 

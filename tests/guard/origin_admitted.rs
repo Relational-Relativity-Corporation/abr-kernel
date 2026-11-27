@@ -58,6 +58,10 @@ pub enum Use { Reading, Check }
 /// application may read them as a result. Origin strikes a line to make the
 /// guard fail until the part is fenced or formed by the operators.
 pub const NOT_ADMITTED: &[(&str, &str)] = &[
+    // The activity at a point (116th, Proposed, under trial): the comparison
+    // of elements at matching points, continued past where arrivals part.
+    ("Agreement.agrees", "Origin's admission (116th, under trial)"),
+    ("Agreement.differs", "Origin's admission (116th, under trial)"),
     // *Was:* Level.occurrences and Level.continuations, waiting on the 103rd;
     // admitted as a check by the 108th (above).
 ];

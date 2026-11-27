@@ -94,6 +94,40 @@ fn the_process_generates_only_what_was_observed() {
     }
 }
 
+/// The same holds when the choice is among the coherent degrees (116th,
+/// under trial): the activity, read on the radial field of the order as it
+/// grows, at three reaches, continuing by the first and by the last coherent
+/// degree, generates only what was observed.
+#[test]
+fn continuing_by_coherence_generates_only_what_was_observed() {
+    use abr_kernel::radial::RadialField;
+    for text in TEXTS {
+        let t = text_order(text);
+        let n = t.chars.len();
+        let observed: BTreeSet<usize> = t.steps.iter().copied().collect();
+        let n0 = t.steps.len();
+        for reach in [3, 8, 20] {
+            for last in [false, true] {
+                let mut f = RadialField::new(n);
+                for &e in &t.steps { f.push(e / n, e % n).unwrap(); }
+                let mut steps = t.steps.clone();
+                let mut from: Vec<Option<usize>> = vec![None; n0];
+                for _ in 0..60 {
+                    let a = f.activity(f.steps(), reach).unwrap();
+                    if a.coherent.is_empty() { assert!(a.agreements.is_empty(), "coherent degrees exist wherever degrees do"); break; }
+                    let g = &a.agreements[if last { *a.coherent.last().unwrap() } else { a.coherent[0] }];
+                    assert_eq!(g.leaving, steps[g.point], "a coherent degree continues by the relation registered at its point");
+                    f.push(g.leaving / n, g.leaving % n).unwrap();
+                    steps.push(g.leaving);
+                    from.push(Some(g.point));
+                }
+                let why = drift(&steps, n0, &observed, &from);
+                assert!(why.is_empty(), "{text:?}, reach {reach}: {why:?}");
+            }
+        }
+    }
+}
+
 /// Where the current element has never been met before, nothing is
 /// indicated: the process has nothing to continue with.
 #[test]

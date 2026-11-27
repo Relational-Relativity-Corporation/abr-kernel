@@ -33,6 +33,74 @@ use std::collections::HashMap;
 
 use crate::order::Degree;
 
+// The activity at a point, and coherence (Proposed, under trial, Origin,
+// 2026-11-27, 116th: *"we should avoid any sort of probability and instead
+// use coherence which is what our brains use"*). A metaphor, labelled
+// (108th (4)): a neuron is an element's locus, a synapse a spoke, a firing a
+// step. The activity at the current point is the elements at the points
+// behind it, within a declared reach (a scope of analysis, 85th). At each
+// degree of freedom (108th), an active neuron agrees where the element at its
+// distance behind that earlier point is the same element: read at every
+// distance within the reach, not stopping where the arrivals part, and never
+// pooled across points (106th). The coherent degrees are those whose
+// agreement no other degree's agreement strictly contains: inclusion of
+// sets, never a count, a sum or a score (104th). Each continues by the
+// relation registered at its point, so continuing by a coherent degree is
+// continuing by an indicated one (`tests/v10_no_drift.rs`).
+//
+// Not admitted (named): the comparison of elements at matching points is
+// the 108th's comparison continued past where the arrivals part; no operator
+// forms it; it waits on Origin (`tests/guard/origin_admitted.rs`).
+
+/// The most distances an activity holds: the agreement is held as one
+/// machine word per degree. A limit of this implementation, not of the
+/// mathematics; a wider reach is refused, never cut.
+pub const MOST_REACH: usize = 64;
+
+/// Why an activity is refused (never repaired).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ActivityRefusal {
+    /// The point is not in the field: `through` steps read, 1 ≤ through ≤ steps.
+    Through { through: usize, steps: usize },
+    /// A reach wider than this implementation holds.
+    Reach { reach: usize, most: usize },
+}
+
+/// One degree of freedom of the current point and how the active neurons
+/// agree with it (116th, under trial). Distances are identities in the
+/// order: distance k is the active neuron at the point k behind the current
+/// one, matched with the point k behind the degree's.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Agreement {
+    /// The earlier point in evolution where the text stood at the current element.
+    pub point: usize,
+    /// The relation that left it there, as registered (x·n + y).
+    pub leaving: usize,
+    /// The distances at which the element behind the earlier point is the
+    /// element behind the current point, in increasing order.
+    pub agrees: Vec<usize>,
+    /// The distances at which they are different elements.
+    pub differs: Vec<usize>,
+    /// The distances behind the record boundary of either point.
+    pub beyond: Vec<usize>,
+}
+
+/// The activity at a point: every degree of freedom with its agreement, and
+/// the coherent degrees (116th, under trial).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Activity {
+    /// The current point: where step `point − 1` entered.
+    pub point: usize,
+    /// The declared reach: how many points behind the current point are
+    /// active. A scope of analysis (85th), never a boundary of the field.
+    pub reach: usize,
+    /// Every degree of the current point, in order of evolution, none merged.
+    pub agreements: Vec<Agreement>,
+    /// The coherent degrees, as positions in `agreements`, in order: those
+    /// whose agreement no other degree's agreement strictly contains.
+    pub coherent: Vec<usize>,
+}
+
 /// Why a step is refused (never repaired).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RadialRefusal {
@@ -124,5 +192,36 @@ impl RadialField {
             let parts = if k == j { None } else { Some((spoke(self.steps[j - 1 - k]), spoke(self.steps[through - 1 - k]))) };
             Degree { point: j, leaving: spoke(self.steps[j]), turn: (j, through), alongside: (j - k, j), parts }
         }).collect()
+    }
+
+    /// The activity at the point after `through` steps, within `reach`
+    /// (116th, under trial).
+    pub fn activity(&self, through: usize, reach: usize) -> Result<Activity, ActivityRefusal> {
+        if through == 0 || through > self.steps.len() { return Err(ActivityRefusal::Through { through, steps: self.steps.len() }); }
+        if reach > MOST_REACH { return Err(ActivityRefusal::Reach { reach, most: MOST_REACH }); }
+        let here = self.locus(through);
+        let mut agreements = Vec::new();
+        let mut held: Vec<u64> = Vec::new();
+        for j in (0..through).filter(|&j| self.locus(j) == here) {
+            let (mut agrees, mut differs, mut beyond, mut word) = (Vec::new(), Vec::new(), Vec::new(), 0u64);
+            for k in 1..=reach {
+                if k > j { beyond.push(k); }
+                else if self.locus(j - k) == self.locus(through - k) { agrees.push(k); word |= 1 << (k - 1); }
+                else { differs.push(k); }
+            }
+            let (x, y) = self.steps[j];
+            agreements.push(Agreement { point: j, leaving: x * self.n + y, agrees, differs, beyond });
+            held.push(word);
+        }
+        // Inclusion: a degree is coherent unless another's agreement strictly
+        // contains its own. Distinct agreements are compared widest first; an
+        // agreement inside another lies inside one already kept.
+        let mut distinct: Vec<u64> = held.clone();
+        distinct.sort_unstable_by(|a, b| b.count_ones().cmp(&a.count_ones()).then(a.cmp(b)));
+        distinct.dedup();
+        let mut kept: Vec<u64> = Vec::new();
+        for w in distinct { if !kept.iter().any(|&m| m & w == w) { kept.push(w); } }
+        let coherent = (0..held.len()).filter(|&i| kept.contains(&held[i])).collect();
+        Ok(Activity { point: through, reach, agreements, coherent })
     }
 }

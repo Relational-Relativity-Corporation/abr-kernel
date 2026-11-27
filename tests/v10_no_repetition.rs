@@ -143,3 +143,33 @@ fn three_an_exact_repetition_of_text_is_distinct_degrees() {
     let spans: Vec<usize> = d.iter().map(|x| x.alongside.1 - x.alongside.0).collect();
     assert_eq!(spans, vec![1, 5, 9, 13], "each runs alongside to the record boundary, by its own length");
 }
+
+/// 4. Coherence never merges (116th, under trial): on actual text, degrees
+/// whose agreements are identical stay distinct degrees, each listed as
+/// coherent in its own right, at its own point of evolution.
+#[test]
+fn four_identical_agreements_are_distinct_coherent_degrees() {
+    use abr_kernel::radial::RadialField;
+    const BOOK: &str = include_str!("data/pride_and_prejudice.txt");
+    let start = BOOK.find("It is a truth universally acknowledged").unwrap();
+    let end = BOOK[start..].find("CHAPTER II.").map(|e| start + e).unwrap();
+    let mut elems: Vec<char> = Vec::new();
+    let mut f = RadialField::new(0);
+    let ids: Vec<usize> = BOOK[start..end].chars().map(|c| match elems.iter().position(|&x| x == c) {
+        Some(i) => i,
+        None => { elems.push(c); f.declare() }
+    }).collect();
+    for w in ids.windows(2) { f.push(w[0], w[1]).unwrap(); }
+    let mut shared = 0;
+    for p in (1..f.steps()).step_by(37) {
+        let a = f.activity(p, 6).unwrap();
+        let points: Vec<usize> = a.agreements.iter().map(|g| g.point).collect();
+        assert!(points.windows(2).all(|w| w[0] < w[1]), "every degree at its own point, in order of evolution");
+        for (u, &i) in a.coherent.iter().enumerate() {
+            for &j in &a.coherent[u + 1..] {
+                if a.agreements[i].agrees == a.agreements[j].agrees { shared += 1; assert_ne!(a.agreements[i].point, a.agreements[j].point); }
+            }
+        }
+    }
+    assert!(shared > 0, "identical agreements occur on actual text and are kept apart");
+}
