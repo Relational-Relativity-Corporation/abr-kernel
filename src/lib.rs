@@ -141,3 +141,6 @@ pub mod derivation;
 // The order is the relational field (Origin, 2026-11-26, 102nd): the
 // possibilities at the current point after every route arriving there.
 pub mod order;
+// The radial field: the relational field on complete radial graphs, read step
+// by step (Origin, 2026-11-27, the compute rebuild).
+pub mod radial;

@@ -8,12 +8,14 @@ use std::time::Instant;
 use abr_kernel::ground_variables::ground_reading_of_relations;
 use abr_kernel::operators::{DeclaredRelations, EdgeProvenance};
 use abr_kernel::persistence_change::EdgeSeries;
+use abr_kernel::radial::RadialField;
 use abr_kernel::relational_field::RelationalField;
 use abr_kernel::topology::{FeedbackDeclaration, RelationIdentity};
 
 fn main() {
     for text in ["It was the best of times, it was the worst of times",
-                 "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness"] {
+                 "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness",
+                 "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair, we had everything before us, we had nothing before us, we were all going direct to Heaven, we were all going direct the other way"] {
         let cs: Vec<char> = text.chars().collect();
         let mut chars: Vec<char> = Vec::new();
         for &c in &cs { if !chars.contains(&c) { chars.push(c); } }
@@ -37,10 +39,22 @@ fn main() {
         let _f = RelationalField::from_relations(&rel, series.clone(), None).unwrap();
         let t_field = t2.elapsed();
         let _ = ground;
+        // The radial field: the same readings, step by step.
+        let t3 = Instant::now();
+        let mut r = RadialField::new(n);
+        let mut probe = 0i64;
+        for &e in &steps {
+            r.push(e / n, e % n).unwrap();
+            let here = e % n;
+            for y in 0..n { probe += r.b(here, y) + r.xi(here, y); } // B and Ξ on every spoke leaving the current element
+            probe += r.indications(r.steps()).len() as i64;
+        }
+        let t_radial = t3.elapsed();
         println!("{} characters: {n} elements, {m} spokes, {} registrations, {} values held",
             cs.len(), steps.len(), m * steps.len());
         println!("  the series:                 {:>8.3} s", t_series.as_secs_f64());
         println!("  the ground (E, F, C) alone: {:>8.3} s", t_ground.as_secs_f64());
-        println!("  the whole field:            {:>8.3} s  (forms A, B, Ξ, readback ≈ {:.3} s)\n", t_field.as_secs_f64(), (t_field.as_secs_f64() - t_ground.as_secs_f64()).max(0.0));
+        println!("  the whole field:            {:>8.3} s  (forms A, B, Ξ, readback ≈ {:.3} s)", t_field.as_secs_f64(), (t_field.as_secs_f64() - t_ground.as_secs_f64()).max(0.0));
+        println!("  the radial field, reading A, B, Ξ and the indications at every point: {:>8.6} s  [{probe}]\n", t_radial.as_secs_f64());
     }
 }
