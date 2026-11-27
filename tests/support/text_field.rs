@@ -93,3 +93,37 @@ pub fn text_order(text: &str) -> TextOrder {
     let steps: Vec<usize> = registered.windows(2).map(|w| at(w[0]) * n + at(w[1])).collect();
     TextOrder { chars, registered, rel, steps }
 }
+
+// ── The word scale (Origin, 114th) ───────────────────────────────────────
+
+/// The text at word scale: in turn, a word (a run of letters, an apostrophe
+/// between letters kept), the separator between words (the run of anything
+/// else), and the capital mark ⇧ as its own element before its word.
+pub fn words(text: &str) -> Vec<String> {
+    let reg = project(text);
+    let letter = |i: usize| reg[i].is_alphabetic();
+    let apostrophe = |i: usize| (reg[i] == '’' || reg[i] == '\'') && i > 0 && i + 1 < reg.len() && letter(i - 1) && letter(i + 1);
+    let mut out: Vec<String> = Vec::new();
+    let mut i = 0;
+    while i < reg.len() {
+        if reg[i] == CAPITAL { out.push(CAPITAL.to_string()); i += 1; continue; }
+        let start = i;
+        if letter(i) {
+            while i < reg.len() && (letter(i) || apostrophe(i)) { i += 1; }
+        } else {
+            while i < reg.len() && reg[i] != CAPITAL && !letter(i) { i += 1; }
+        }
+        out.push(reg[start..i].iter().collect());
+    }
+    out
+}
+
+/// The word-scale elements read back as the text (through the projection).
+pub fn words_back(tokens: &[String]) -> String {
+    let joined: Vec<char> = tokens.iter().flat_map(|t| t.chars()).collect();
+    read_back(&joined)
+}
+
+impl TextOrder {
+    pub fn at(&self, c: char) -> usize { self.chars.iter().position(|&x| x == c).unwrap() }
+}
