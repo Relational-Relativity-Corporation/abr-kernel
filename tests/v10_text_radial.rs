@@ -155,3 +155,24 @@ fn five_energy_moves_toward_the_element_entered() {
         assert!(t.field.ground.freedom.is_ok() && t.field.ground.connection.is_ok(), "freedom and connection read");
     }
 }
+
+/// 6. The readback of the input in order (Origin, 2026-11-27: *"Are we
+/// missing a read back of the inputted text in order?"*): read registration
+/// by registration, the readback's halves of each step (out of one element,
+/// into the next) spell the input back exactly.
+#[test]
+fn six_the_readback_in_order_spells_the_input() {
+    for text in TEXTS {
+        let t = text_field(text);
+        let one = |v: &[f64]| -> usize { let at: Vec<usize> = (0..v.len()).filter(|&i| v[i] != 0.0).collect(); assert_eq!(at.len(), 1, "one element each way"); at[0] };
+        // The first step is the first registration itself; every later one
+        // is the change between registrations.
+        let s0 = &t.field.spatial[0];
+        let mut read: String = [t.chars[one(&s0.leaving[0])], t.chars[one(&s0.entering[0])]].iter().collect();
+        for p in &t.field.persistence {
+            assert_eq!(t.chars[one(&p.leaving[0])], read.chars().last().unwrap(), "each step leaves where the last entered");
+            read.push(t.chars[one(&p.entering[0])]);
+        }
+        assert_eq!(read, text, "the readback in order is the input");
+    }
+}
