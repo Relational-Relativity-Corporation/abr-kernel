@@ -1,3 +1,7 @@
+//! **Withdrawn (Origin, 2026-11-27, 115th):** the 99th's candidate was the
+//! Generator's; there is no division between potential and balanced. These
+//! tests stay as checks of what the readback and the incidence compute.
+//!
 //! The two parts of every field of relations (Proposed, Origin, 2026-11-26,
 //! 99th): the balanced part (at every locus what enters equals what leaves,
 //! read through the readback K9, 96th) and the potential part (explained by

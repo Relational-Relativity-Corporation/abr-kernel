@@ -425,6 +425,10 @@ impl InnerProduct {
     pub fn equal() -> Self { InnerProduct::Equal { basis: "equal weight on every relation (the declared default, 100th)".into() } }
 }
 
+/// **Fenced (Origin, 2026-11-27, 115th):** kept as a check and for the
+/// Kirchhoff confirmation (101st), never a reading: there is no division
+/// between potential and balanced, the two are intrinsically one system.
+///
 /// The two parts at one registration, or over one step, [c][e].
 #[derive(Debug, Clone, PartialEq)]
 pub struct Split {
@@ -441,6 +445,8 @@ pub struct Split {
     pub exact_balanced: Vec<Vec<Ratio>>,
 }
 
+/// **Fenced (115th):** see `Split`.
+///
 /// The orthogonal split of a whole field into its two parts, at every
 /// registration and over every step.
 #[derive(Debug, Clone, PartialEq)]
@@ -451,6 +457,10 @@ pub struct TwoParts {
 }
 
 impl RelationalField {
+    /// **Fenced (Origin, 2026-11-27, 115th):** the Generator's exploration,
+    /// inspired by legacy mathematics; its necessity withdrawn; kept as a
+    /// check and for the Kirchhoff confirmation (101st), never a reading.
+    ///
     /// The orthogonal split of the field into its potential and balanced
     /// parts (Origin, 100th), under the declared inner product. Read from the
     /// field's own relations, at every registration and step.

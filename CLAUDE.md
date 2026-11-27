@@ -24,6 +24,8 @@ Origin, 59th: we calculate relation as primitive alongside energy, connection an
 
 **No information is repeated** (Origin, 106th, 107th): *"no information can be repeated this is part of the same thing which makes relational evolution both inevitable and constant"*. Every point in evolution is distinct. Ξ is **the passage** (what follows less what precedes), never "circulation". A loop-shaped route is a **turn**, one revolution of the helix it traces as evolution carries it forward: shape, never a system that is a loop; its sum is the **turn sum**. No pitch, period or phase is assumed or fitted; a reading at one registration reads the shape, never a return.
 
+**No division between potential and balanced** (Origin, 115th): *"there is no division between potential and balanced the two are intrinsically a part of the same system"*. The orthogonal split (100th) was the Generator's exploration, inspired by legacy mathematics; it is fenced (a check, and the Kirchhoff confirmation's legacy side, never a reading), and the 99th's candidate is withdrawn.
+
 This governs everything we do. Check every change against it: relation is calculated first, as the primitive; energy, connection and freedom are calculated along with it; the means is linear algebraic operators. Its text and the check of each V10 form against it are at the head of `docs/kernel/V10_README.md`.
 
 ## Rules kept with it

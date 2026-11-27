@@ -1,3 +1,7 @@
+//! **Fenced (Origin, 2026-11-27, 115th):** the split is kept as a check, never
+//! a reading; there is no division between potential and balanced, the two
+//! are intrinsically one system. These tests stay, so the check holds.
+//!
 //! The orthogonal split of a field of relations into its two parts (Origin,
 //! 2026-11-26, 100th; the 99th, Proposed): the potential part, the image of
 //! A, and the balanced part, where what enters every locus equals what

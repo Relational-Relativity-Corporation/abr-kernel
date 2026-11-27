@@ -5,6 +5,10 @@
 //! careful about legacy as projection even though it could be a valid
 //! relational result as well that intersection is what we actually want"*).
 //!
+//! **The split, fenced (Origin, 2026-11-27, 115th):** this confirmation keeps
+//! the orthogonal split as the legacy side it is confirmed against, a
+//! projection under the 101st, never a basis and never a reading.
+//!
 //! **Domain and source:** electrical networks of resistors, every resistance
 //! 1 Ω, with sources of EMF in branches. Legacy results: Kirchhoff's laws
 //! (1845, 1847); the balanced bridge (Christie, 1833; Wheatstone, 1843);

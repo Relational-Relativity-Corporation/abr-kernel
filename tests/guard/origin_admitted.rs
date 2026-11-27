@@ -13,13 +13,14 @@
 /// method in use at the code layer, the first words of its method), with the
 /// Part 9 entry that admits it and whether it is a reading or only a check.
 pub const ADMITTED_LEGACY: &[(&str, &str, Use)] = &[
-    // The orthogonal split (100th).
-    ("TwoParts.spatial", "100th", Use::Reading),
-    ("TwoParts.persistence", "100th", Use::Reading),
-    ("Split.potential", "100th", Use::Reading),
-    ("Split.balanced", "100th", Use::Reading),
-    ("Split.exact_potential", "100th", Use::Reading),
-    ("Split.exact_balanced", "100th", Use::Reading),
+    // The orthogonal split, fenced (115th): a check, never a reading.
+    // *Was:* admitted as a reading by the 100th.
+    ("TwoParts.spatial", "115th", Use::Check),
+    ("TwoParts.persistence", "115th", Use::Check),
+    ("Split.potential", "115th", Use::Check),
+    ("Split.balanced", "115th", Use::Check),
+    ("Split.exact_potential", "115th", Use::Check),
+    ("Split.exact_balanced", "115th", Use::Check),
     // The 2×2 minors: legacy (94th), necessity open reading by reading.
     ("PersistenceChange.across_components", "94th", Use::Reading),
     ("PersistenceChange.across_steps", "94th", Use::Reading),
@@ -43,7 +44,8 @@ pub const ADMITTED_LEGACY: &[(&str, &str, Use)] = &[
     // Methods in use at the code layer.
     ("exact summation", "44th", Use::Reading),
     ("product bounds", "93rd", Use::Reading),
-    ("exact rationals", "100th", Use::Reading),
+    // Exact rationals, fenced with the split (115th). *Was:* 100th, a reading.
+    ("exact rationals", "115th", Use::Check),
 ];
 
 /// Whether admitted legacy mathematics may stand as a reading, or only as a
