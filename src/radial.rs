@@ -37,10 +37,13 @@ use crate::order::Degree;
 // 2026-11-27, 116th: *"we should avoid any sort of probability and instead
 // use coherence which is what our brains use"*). A metaphor, labelled
 // (108th (4)): a neuron is an element's locus, a synapse a spoke, a firing a
-// step. The activity at the current point is the elements at the points
-// behind it, within a declared reach (a scope of analysis, 85th). At each
-// degree of freedom (108th), an active neuron agrees where the element at its
-// distance behind that earlier point is the same element: read at every
+// step. *Amended (Origin, 2026-11-27):* "it is synaptic activity which
+// describes neural Nets ... It is information across the synapse which
+// drives neural firing". The activity at the current point is the synapses
+// fired at the steps behind it, within a declared reach (a scope of
+// analysis, 85th). At each degree of freedom (108th), the active synapse at
+// distance k agrees where the relation fired k steps behind that earlier
+// point is the same relation (*was:* the element, the neuron; fenced): read at every
 // distance within the reach, not stopping where the arrivals part, and never
 // pooled across points (106th). The coherent degrees are those whose
 // agreement no other degree's agreement strictly contains: inclusion of
@@ -76,8 +79,9 @@ pub struct Agreement {
     pub point: usize,
     /// The relation that left it there, as registered (x·n + y).
     pub leaving: usize,
-    /// The distances at which the element behind the earlier point is the
-    /// element behind the current point, in increasing order.
+    /// The distances at which the synapse fired behind the earlier point is
+    /// the synapse fired behind the current point (the same relation), in
+    /// increasing order. *Was:* the element (the neuron), fenced.
     pub agrees: Vec<usize>,
     /// The distances at which they are different elements.
     pub differs: Vec<usize>,
@@ -196,7 +200,27 @@ impl RadialField {
 
     /// The activity at the point after `through` steps, within `reach`
     /// (116th, under trial).
+    ///
+    /// *Amended (Origin, 2026-11-27):* *"it is synaptic activity which
+    /// describes neural Nets ... It is information across the synapse which
+    /// drives neural firing"*. The active synapse at distance k is the
+    /// relation fired k steps behind the point; it agrees where the relation
+    /// fired k steps behind the earlier point is the same relation.
     pub fn activity(&self, through: usize, reach: usize) -> Result<Activity, ActivityRefusal> {
+        self.read_activity(through, reach, &|j, k| self.steps[j - k] == self.steps[through - k])
+    }
+
+    /// **Fenced (Origin, 2026-11-27):** the first reading of the 116th, the
+    /// elements (the neurons) at matching points compared; kept as a check,
+    /// never a reading: *"It is information across the synapse which drives
+    /// neural firing"*.
+    pub fn element_activity(&self, through: usize, reach: usize) -> Result<Activity, ActivityRefusal> {
+        self.read_activity(through, reach, &|j, k| self.locus(j - k) == self.locus(through - k))
+    }
+
+    /// The activity, with the comparison at distance k behind the earlier
+    /// point j and the current point (1 ≤ k ≤ j).
+    fn read_activity(&self, through: usize, reach: usize, same: &dyn Fn(usize, usize) -> bool) -> Result<Activity, ActivityRefusal> {
         if through == 0 || through > self.steps.len() { return Err(ActivityRefusal::Through { through, steps: self.steps.len() }); }
         if reach > MOST_REACH { return Err(ActivityRefusal::Reach { reach, most: MOST_REACH }); }
         let here = self.locus(through);
@@ -206,7 +230,7 @@ impl RadialField {
             let (mut agrees, mut differs, mut beyond, mut word) = (Vec::new(), Vec::new(), Vec::new(), 0u64);
             for k in 1..=reach {
                 if k > j { beyond.push(k); }
-                else if self.locus(j - k) == self.locus(through - k) { agrees.push(k); word |= 1 << (k - 1); }
+                else if same(j, k) { agrees.push(k); word |= 1 << (k - 1); }
                 else { differs.push(k); }
             }
             let (x, y) = self.steps[j];

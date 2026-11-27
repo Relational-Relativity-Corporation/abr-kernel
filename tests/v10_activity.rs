@@ -6,11 +6,14 @@
 //! brains use"*).
 //!
 //! The brain is a metaphor, labelled (108th (4)): a neuron is a character's
-//! locus, a synapse a spoke, a firing a step. The activity at a point is the
-//! elements at the points behind it, within a declared reach (a scope of
-//! analysis, 85th). At each degree of freedom of the current point (108th),
-//! an active neuron agrees where the element at its distance behind that
-//! earlier point is the same element. The coherent degrees are those whose
+//! locus, a synapse a spoke, a firing a step. *Amended (Origin, 2026-11-27):*
+//! *"it is synaptic activity which describes neural Nets ... It is information
+//! across the synapse which drives neural firing"*. The activity at a point is
+//! the synapses fired at the steps behind it, within a declared reach (a scope
+//! of analysis, 85th). At each degree of freedom of the current point (108th),
+//! the active synapse at distance k agrees where the relation fired k steps
+//! behind that earlier point is the same relation. *Was:* the elements (the
+//! neurons) compared, kept fenced as `element_activity` (test 8). The coherent degrees are those whose
 //! agreement no other degree's agreement strictly contains.
 //!
 //! What is shown: (1) every degree is kept, none merged, each continuing as
@@ -77,10 +80,12 @@ fn every_degree_is_kept_and_none_merged() {
     }
 }
 
-/// 2. The agreement is the elements at matching points: at distance k
+/// 2. The agreement is the synapses at matching points: at distance k
 /// (1 ≤ k ≤ reach) the earlier point j and the current point p agree where
-/// the element at j − k is the element at p − k; beyond, where either
-/// reaches the record boundary; every distance in exactly one of the three.
+/// the relation fired k steps behind j (from the element at j − k to the
+/// element at j − k + 1) is the relation fired k steps behind p; beyond,
+/// where either reaches the record boundary; every distance in exactly one
+/// of the three.
 #[test]
 fn the_agreement_is_read_from_the_text_at_matching_points() {
     let (elems, r) = chapter();
@@ -93,7 +98,7 @@ fn the_agreement_is_read_from_the_text_at_matching_points() {
                 assert_eq!(elems[j], elems[p], "a degree stands at the current element");
                 let (mut agrees, mut differs, mut beyond) = (vec![], vec![], vec![]);
                 for k in 1..=reach {
-                    if k > j || k > p { beyond.push(k) } else if elems[j - k] == elems[p - k] { agrees.push(k) } else { differs.push(k) }
+                    if k > j || k > p { beyond.push(k) } else if (elems[j - k], elems[j - k + 1]) == (elems[p - k], elems[p - k + 1]) { agrees.push(k) } else { differs.push(k) }
                 }
                 assert_eq!((&g.agrees, &g.differs, &g.beyond), (&agrees, &differs, &beyond), "point {p}, degree {j}, reach {reach}");
             }
@@ -182,4 +187,20 @@ fn coherence_keeps_agreement_past_where_arrivals_part() {
     }
     assert!(found > 0, "no coherent degree agrees past where its arrival parts");
     eprintln!("[activity] coherent degrees agreeing past where their arrivals part: {found}");
+}
+
+/// 8. *Fenced (Origin, 2026-11-27):* the neuron form, the elements compared
+/// at matching points, kept as a check of the first reading of the 116th;
+/// never a reading.
+#[test]
+fn the_fenced_neuron_form_compares_elements() {
+    let (elems, r) = chapter();
+    for p in points(&r).step_by(3) {
+        let a = r.element_activity(p, 12).unwrap();
+        for g in &a.agreements {
+            let j = g.point;
+            let agrees: Vec<usize> = (1..=12).filter(|&k| k <= j && elems[j - k] == elems[p - k]).collect();
+            assert_eq!(g.agrees, agrees, "point {p}, degree {j}");
+        }
+    }
 }

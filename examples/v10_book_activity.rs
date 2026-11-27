@@ -1,4 +1,5 @@
-//! Coherence through a whole book (116th, under trial): does the activity
+//! Coherence through a whole book (116th, under trial; amended: synaptic
+//! activity, the relations fired behind each point compared): does the activity
 //! at a point narrow the next character more than the 108th's comparison?
 //!
 //! [IMPL] Actual text: *Pride and Prejudice* (`tests/data/`), the novel from
