@@ -68,6 +68,7 @@ fn names_reported() -> Vec<String> {
         let mut radial = abr_kernel::radial::RadialField::new(rel.n_nodes);
         for &e in &order.steps { radial.push(rel.edges[e].0, rel.edges[e].1).unwrap(); }
         add(format!("{:?}", radial.activity(radial.steps(), 4).unwrap()));
+        add(format!("{:?}", radial.synapse(rel.edges[0].0, rel.edges[0].1)));
         // The orthogonal split read from the field (100th): its parts are
         // reported parts too.
         add(format!("{:?}", with.two_parts(&abr_kernel::relational_field::InnerProduct::equal())));

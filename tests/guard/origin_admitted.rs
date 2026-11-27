@@ -41,6 +41,10 @@ pub const ADMITTED_LEGACY: &[(&str, &str, Use)] = &[
     // (108th (5)). *Was:* listed in NOT_ADMITTED, waiting on the 103rd.
     ("Level.occurrences", "108th", Use::Check),
     ("Level.continuations", "108th", Use::Check),
+    // The activity's comparison, fenced (the 116th amended): a check, never a
+    // reading ("There are no independent synapses").
+    ("Agreement.agrees", "116th", Use::Check),
+    ("Agreement.differs", "116th", Use::Check),
     // Methods in use at the code layer.
     ("exact summation", "44th", Use::Reading),
     ("product bounds", "93rd", Use::Reading),
@@ -58,10 +62,8 @@ pub enum Use { Reading, Check }
 /// application may read them as a result. Origin strikes a line to make the
 /// guard fail until the part is fenced or formed by the operators.
 pub const NOT_ADMITTED: &[(&str, &str)] = &[
-    // The activity at a point (116th, Proposed, under trial): the comparison
-    // of elements at matching points, continued past where arrivals part.
-    ("Agreement.agrees", "Origin's admission (116th, under trial)"),
-    ("Agreement.differs", "Origin's admission (116th, under trial)"),
+    // *Was:* Agreement.agrees and Agreement.differs, waiting on Origin's
+    // admission (116th, under trial); fenced as a check by the 116th amended.
     // *Was:* Level.occurrences and Level.continuations, waiting on the 103rd;
     // admitted as a check by the 108th (above).
 ];

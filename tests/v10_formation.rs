@@ -51,6 +51,7 @@ const FORMED: &[&str] = &[
     "RelationalField.relations", "RelationalField.meeting", "Meeting.leaving", "Meeting.entering",
     "RelationalField.ground", "TwoParts.inner_product", "Equal.basis", "Order.edges", "Order.steps", "Degree.leaving",
     "Activity.reach", "Agreement.leaving",
+    "SynapseReading.a", "SynapseReading.b", "SynapseReading.passage", "SynapseReading.leaving", "SynapseReading.entering",
     // Operator readings.
     "EdgeSeries.a", "EdgeSeries.a_lo", "RelationalField.spatial", "RelationalField.persistence", "Forms.a", "Forms.b",
     "Forms.passage", "Forms.leaving", "Forms.entering", "PersistenceChange.relations", "RelationChange.change",
@@ -218,6 +219,34 @@ fn the_activity_is_formed_as_stated() {
             let inside = |s: &Vec<usize>, t: &Vec<usize>| t.len() > s.len() && s.iter().all(|k| t.contains(k));
             let expect: Vec<usize> = (0..sets.len()).filter(|&i| !sets.iter().any(|t| inside(sets[i], t))).collect();
             assert_eq!(a.coherent, expect, "Activity.coherent: by inclusion");
+        }
+    });
+}
+
+/// The synapse on the whole field (the 116th amended): A, B, Ξ and the
+/// readback's halves at every spoke and every registration of an enumerated
+/// walk, recomputed from the definitions by summing over every spoke.
+#[test]
+fn the_synapse_is_formed_as_stated() {
+    for_all("formation: the synapse", 0xF0_04, |r| {
+        let n = r.usize(2, 6);
+        let mut f = abr_kernel::radial::RadialField::new(n);
+        let mut am = vec![vec![0i64; n]; n];
+        let mut at = r.usize(0, n - 1);
+        for _ in 0..r.usize(3, 30) {
+            let y = r.usize(0, n - 1);
+            f.push(at, y).unwrap();
+            am[at][y] += 1;
+            at = y;
+            let b = |u: usize, v: usize| am[u][v] + (0..n).map(|z| am[v][z]).sum::<i64>();
+            for u in 0..n { for v in 0..n {
+                let s = f.synapse(u, v);
+                assert_eq!(s.a, am[u][v], "SynapseReading.a");
+                assert_eq!(s.b, b(u, v), "SynapseReading.b");
+                assert_eq!(s.passage, (0..n).map(|z| b(v, z)).sum::<i64>() - (0..n).map(|w| b(w, u)).sum::<i64>(), "SynapseReading.passage");
+                assert_eq!(s.leaving, (0..n).map(|z| am[u][z]).sum::<i64>(), "SynapseReading.leaving");
+                assert_eq!(s.entering, (0..n).map(|w| am[w][v]).sum::<i64>(), "SynapseReading.entering");
+            } }
         }
     });
 }

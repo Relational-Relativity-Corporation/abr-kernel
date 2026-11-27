@@ -51,9 +51,37 @@ use crate::order::Degree;
 // relation registered at its point, so continuing by a coherent degree is
 // continuing by an indicated one (`tests/v10_no_drift.rs`).
 //
+// **Fenced (Origin, 2026-11-27, the 116th amended):** *"There are no
+// independent synapses everything is calculated together in the relational
+// field"*. The agreement per distance and coherence by inclusion compute parts
+// apart and compare them; kept as a check, never a reading.
+//
 // Not admitted (named): the comparison of elements at matching points is
 // the 108th's comparison continued past where the arrivals part; no operator
 // forms it; it waits on Origin (`tests/guard/origin_admitted.rs`).
+
+/// The readings of one synapse (a spoke x→y) as the whole field stands at a
+/// registration (the 116th amended: every radial graph calculated together,
+/// one field; the synapse is a view of it, never read apart). Each is the
+/// operators' definition on the complete radial graphs, reduced exactly
+/// (B = A + out(y); Ξ = out(y) + T − in(x) − n·out(x)).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SynapseReading {
+    /// The element the synapse leaves.
+    pub from: usize,
+    /// The element it enters.
+    pub to: usize,
+    /// A: the movement the synapse has carried, as registered.
+    pub a: i64,
+    /// B: the synapse joined to every relation leaving where it enters.
+    pub b: i64,
+    /// Ξ, the passage: what follows the synapse less what precedes it.
+    pub passage: i64,
+    /// The readback's leaving half at `from` (K9): what has left it.
+    pub leaving: i64,
+    /// The readback's entering half at `to` (K9): what has entered it.
+    pub entering: i64,
+}
 
 /// The most distances an activity holds: the agreement is held as one
 /// machine word per degree. A limit of this implementation, not of the
@@ -89,6 +117,8 @@ pub struct Agreement {
     pub beyond: Vec<usize>,
 }
 
+/// **Fenced (the 116th amended):** a check, never a reading.
+///
 /// The activity at a point: every degree of freedom with its agreement, and
 /// the coherent degrees (116th, under trial).
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -196,6 +226,11 @@ impl RadialField {
             let parts = if k == j { None } else { Some((spoke(self.steps[j - 1 - k]), spoke(self.steps[through - 1 - k]))) };
             Degree { point: j, leaving: spoke(self.steps[j]), turn: (j, through), alongside: (j - k, j), parts }
         }).collect()
+    }
+
+    /// The readings of the synapse x→y as the whole field stands now.
+    pub fn synapse(&self, x: usize, y: usize) -> SynapseReading {
+        SynapseReading { from: x, to: y, a: self.a(x, y), b: self.b(x, y), passage: self.xi(x, y), leaving: self.out[x], entering: self.into[y] }
     }
 
     /// The activity at the point after `through` steps, within `reach`
