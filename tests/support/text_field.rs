@@ -75,3 +75,21 @@ pub fn text_field(text: &str) -> TextField {
     let field = RelationalField::from_relations(&rel, series, None).expect("text's field forms");
     TextField { chars, registered, rel, steps, field }
 }
+
+/// The declared relations and the order of steps alone, without forming the
+/// field: for readings of the order (`Order`), which need nothing more.
+pub struct TextOrder { pub chars: Vec<char>, pub registered: Vec<char>, pub rel: DeclaredRelations, pub steps: Vec<usize> }
+
+pub fn text_order(text: &str) -> TextOrder {
+    let registered = project(text);
+    let mut chars: Vec<char> = Vec::new();
+    for &c in &registered { if !chars.contains(&c) { chars.push(c); } }
+    let n = chars.len();
+    let at = |c: char| chars.iter().position(|&x| x == c).unwrap();
+    let edges: Vec<(usize, usize)> = (0..n).flat_map(|s| (0..n).map(move |t| (s, t))).collect();
+    let m = edges.len();
+    let ids = (0..m).map(|e| RelationIdentity { id: format!("spoke-{e}"), basis: "a spoke of a radial graph (109th)".into() }).collect();
+    let rel = DeclaredRelations::from_edges_with_provenance(n, edges, vec![EdgeProvenance::Continuation; m]).with_identity(ids);
+    let steps: Vec<usize> = registered.windows(2).map(|w| at(w[0]) * n + at(w[1])).collect();
+    TextOrder { chars, registered, rel, steps }
+}
