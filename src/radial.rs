@@ -29,7 +29,7 @@
 // freedom's pair levels, connection's grades), which text does not read;
 // they stay in `RelationalField`. Values are integers, exact.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::order::Degree;
 
@@ -81,6 +81,29 @@ pub struct SynapseReading {
     pub leaving: i64,
     /// The readback's entering half at `to` (K9): what has entered it.
     pub entering: i64,
+}
+
+/// Energy in text (Origin, 2026-11-27, 117th: *"energy is maintained as
+/// the subject is continued and lost as the subject departs, although it may
+/// be regained depending upon how that subsequent subject is pursued or
+/// not"*). The field so far is the input and the generated text together,
+/// expanding as it expands (85th).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TextEnergy {
+    /// The movement each step carries on the synapse that fires: +1 where
+    /// the synapse had been stimulated in the field so far (A > 0 as the
+    /// field stood before the step), −1 where not. A sign read at the
+    /// synapse, registered as an input projection (104th); never a magnitude.
+    pub carried: Vec<i64>,
+    /// The energy after each step: the net movement accumulated over the
+    /// successive registrations (W5, 105th), opposite movements cancelling.
+    pub net: Vec<i64>,
+}
+
+/// The net movement accumulated over successive registrations: linear in
+/// the carried movement (reversed, it reverses; summed, it sums).
+pub fn accumulate(carried: &[i64]) -> Vec<i64> {
+    carried.iter().scan(0i64, |s, &c| { *s += c; Some(*s) }).collect()
 }
 
 /// The most distances an activity holds: the agreement is held as one
@@ -226,6 +249,14 @@ impl RadialField {
             let parts = if k == j { None } else { Some((spoke(self.steps[j - 1 - k]), spoke(self.steps[through - 1 - k]))) };
             Degree { point: j, leaving: spoke(self.steps[j]), turn: (j, through), alongside: (j - k, j), parts }
         }).collect()
+    }
+
+    /// Energy in text over every registration of the field so far (117th).
+    pub fn text_energy(&self) -> TextEnergy {
+        let mut stimulated: HashSet<(usize, usize)> = HashSet::new();
+        let carried: Vec<i64> = self.steps.iter().map(|&s| if stimulated.insert(s) { -1 } else { 1 }).collect();
+        let net = accumulate(&carried);
+        TextEnergy { carried, net }
     }
 
     /// The readings of the synapse x→y as the whole field stands now.

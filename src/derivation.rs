@@ -263,6 +263,9 @@ static REGISTER: &[(&str, Derivation)] = &[
     ("SynapseReading.passage", Op { operators: &[A, B, Xi], reads: &[Rel, Con], form: "Ξ[x→y] = Σ_z B[y→z] − Σ_w B[w→x] on the complete radial graphs (= out(y) + T − in(x) − n·out(x))" }),
     ("SynapseReading.leaving", Op { operators: &[A, Readback], reads: &[Rel, Con], form: "Tᵀg[x]: the readback's leaving half at the element the synapse leaves (K9)" }),
     ("SynapseReading.entering", Op { operators: &[A, Readback], reads: &[Rel, Con], form: "Hᵀg[y]: the readback's entering half at the element the synapse enters (K9)" }),
+    // ── Energy in text (117th) ──────────────────────────────────────────
+    ("TextEnergy.carried", Rule { of: &[A], reads: &[En, Con], rule: "the movement each step carries on the synapse that fires: +1 where A on that synapse was positive as the field so far stood before the step (stimulated), −1 where it was zero; a sign read at the synapse, decided exactly, registered as an input projection with its provenance (104th); never a magnitude (103rd)" }),
+    ("TextEnergy.net", Op { operators: &[A], reads: &[En], form: "the energy after each step: Σ of the carried movement over the successive registrations, W5's accumulated energy as the 105th restated it (the net movement, opposite movements cancelling); linear in the carried movement" }),
     // ── The activity at a point, and coherence (116th, Proposed, under trial) ──
     ("Activity.point", Id { what: "the current point of the activity: where step point − 1 entered" }),
     ("Activity.reach", Reg { what: "the declared reach: how many points behind the current point are active; a scope of analysis (85th), never a boundary of the field; under trial (116th), its setting open for Origin" }),

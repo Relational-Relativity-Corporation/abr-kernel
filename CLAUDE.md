@@ -70,6 +70,7 @@ When Origin asks that question, answer it truthfully for the code as it stands, 
 - `tests/guard_operators.rs`: **legacy only by Origin's admission**, as below.
 - *Fenced (the 116th amended: "There are no independent synapses everything is calculated together in the relational field"), a check, never a reading:* the activity and coherence (116th, under trial; `src/radial.rs`, `tests/v10_activity.rs`) are held to every test above: formed as stated (`v10_formation`), continuing by a coherent degree generates only what was observed (`v10_no_drift`), identical agreements stay distinct degrees (`v10_no_repetition`), and the comparison is listed as not admitted, waiting on Origin (`guard_operators`).
 - The subject over one field (the 116th amended; `tests/v10_subject.rs`): the synapse read on the whole field (`RadialField::synapse`, recomputed in `v10_formation`), the whole field changing together at every step, a continuation registered into the same field.
+- Energy in text (117th; `tests/v10_text_energy.rs`): +1 on a synapse the field so far has stimulated, −1 on one it has not, accumulated (`RadialField::text_energy`, recomputed in `v10_formation`); the field so far is the input and the generated text together, expanding as it expands.
 - `tests/v10_derivation.rs`: every reported part has a derivation stating what the 92nd requires.
 - **Not covered (named):** a mapping declared without Origin (Origin's check); a definition wrong the same way in the register and in its recomputation; the applications, which are not run against this suite.
 

@@ -51,7 +51,7 @@ const FORMED: &[&str] = &[
     "RelationalField.relations", "RelationalField.meeting", "Meeting.leaving", "Meeting.entering",
     "RelationalField.ground", "TwoParts.inner_product", "Equal.basis", "Order.edges", "Order.steps", "Degree.leaving",
     "Activity.reach", "Agreement.leaving",
-    "SynapseReading.a", "SynapseReading.b", "SynapseReading.passage", "SynapseReading.leaving", "SynapseReading.entering",
+    "SynapseReading.a", "SynapseReading.b", "SynapseReading.passage", "SynapseReading.leaving", "SynapseReading.entering", "TextEnergy.net",
     // Operator readings.
     "EdgeSeries.a", "EdgeSeries.a_lo", "RelationalField.spatial", "RelationalField.persistence", "Forms.a", "Forms.b",
     "Forms.passage", "Forms.leaving", "Forms.entering", "PersistenceChange.relations", "RelationChange.change",
@@ -63,7 +63,7 @@ const FORMED: &[&str] = &[
     "RelationChange.reading", "SignedExchange.bound", "SignedExchange.side", "Energy.share_resolved",
     "Sustained.held_edges", "Sustained.reorganizing_edges", "Sustained.share_held", "Sustained.share_held_all",
     "Sustained.share_held_boundary", "Connection.evaluated_pairs", "Connection.unresolved_edges",
-    "RelationalField.ways", "Ways.potential", "Ways.balanced", "Activity.coherent",
+    "RelationalField.ways", "Ways.potential", "Ways.balanced", "Activity.coherent", "TextEnergy.carried",
 ];
 
 /// Rules not recomputed here, each with its reason. No operator reading and
@@ -220,6 +220,31 @@ fn the_activity_is_formed_as_stated() {
             let expect: Vec<usize> = (0..sets.len()).filter(|&i| !sets.iter().any(|t| inside(sets[i], t))).collect();
             assert_eq!(a.coherent, expect, "Activity.coherent: by inclusion");
         }
+    });
+}
+
+/// Energy in text (117th): each step's carried movement from A on the
+/// synapse as the field stood before it, and the energy as the running sum,
+/// recomputed from the registered steps.
+#[test]
+fn text_energy_is_formed_as_stated() {
+    for_all("formation: text energy", 0xF0_05, |r| {
+        let n = r.usize(2, 6);
+        let mut f = abr_kernel::radial::RadialField::new(n);
+        let mut am = vec![vec![0i64; n]; n];
+        let (mut carried, mut net, mut e) = (Vec::new(), Vec::new(), 0i64);
+        let mut at = r.usize(0, n - 1);
+        for _ in 0..r.usize(3, 40) {
+            let y = r.usize(0, n - 1);
+            let c = if am[at][y] > 0 { 1 } else { -1 };
+            carried.push(c); e += c; net.push(e);
+            f.push(at, y).unwrap();
+            am[at][y] += 1;
+            at = y;
+        }
+        let t = f.text_energy();
+        assert_eq!(t.carried, carried, "TextEnergy.carried");
+        assert_eq!(t.net, net, "TextEnergy.net");
     });
 }
 
