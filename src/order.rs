@@ -153,3 +153,62 @@ impl Order {
         levels
     }
 }
+
+// ── The field read over all the input in order (Origin, 2026-11-27, 112th) ──
+//
+// *"The only way that this model works at all as if the relational field
+// determined by the 26 radial graphs read over all of the input in order is
+// used to indicate the next character."* The field holds the readback of the
+// input in order: every step's readback (K9) is out of one element and into
+// the next. `indications` reads it at a point of evolution: every earlier
+// point where the field stood at the current element indicates its
+// continuation; how far its arrival runs alongside the current one, and
+// where they part, are read by comparing the two readbacks in order at
+// matching points, two distinct points never identified. Equal exactly to
+// `Order::degrees` (`tests/v10_indications.rs`, 1).
+
+/// Why a field cannot be read in order.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IndicationGap {
+    /// The field's change at this point is not one step of reading: its
+    /// readback is not one element left and one element entered by one
+    /// movement.
+    NotOneStep { point: usize },
+    /// Fewer points than asked for.
+    Through { through: usize, points: usize },
+}
+
+/// The degrees of freedom indicated at a point of evolution, read from the
+/// field's readback in order (112th). `through` is the number of steps read:
+/// the current point is where step `through − 1` entered.
+pub fn indications(field: &crate::relational_field::RelationalField, rel: &DeclaredRelations, through: usize)
+    -> Result<Vec<Degree>, IndicationGap>
+{
+    let points = field.spatial.len();
+    if through == 0 || through > points { return Err(IndicationGap::Through { through, points }); }
+    // One step of reading: one element left and one entered, by one movement.
+    let one = |v: &[f64]| -> Option<usize> {
+        let at: Vec<usize> = (0..v.len()).filter(|&i| v[i] != 0.0).collect();
+        (at.len() == 1 && v[at[0]] == 1.0).then(|| at[0])
+    };
+    // The readback of step p: the first registration is the first step; each
+    // later step is the change between registrations.
+    let step = |p: usize| -> Result<(usize, usize), IndicationGap> {
+        let (l, n) = if p == 0 { (&field.spatial[0].leaving, &field.spatial[0].entering) } else { (&field.persistence[p - 1].leaving, &field.persistence[p - 1].entering) };
+        if l.len() != 1 { return Err(IndicationGap::NotOneStep { point: p }); }
+        match (one(&l[0]), one(&n[0])) { (Some(a), Some(b)) => Ok((a, b)), _ => Err(IndicationGap::NotOneStep { point: p }) }
+    };
+    let read: Vec<(usize, usize)> = (0..through).map(step).collect::<Result<_, _>>()?;
+    for p in 1..through { if read[p].0 != read[p - 1].1 { return Err(IndicationGap::NotOneStep { point: p }); } }
+    let relation = |x: (usize, usize)| rel.edges.iter().position(|&e| e == x).ok_or(IndicationGap::NotOneStep { point: 0 });
+    let locus = |j: usize| if j == 0 { read[0].0 } else { read[j - 1].1 };
+    let here = locus(through);
+    let mut out = Vec::new();
+    for j in (0..through).filter(|&j| locus(j) == here) {
+        let mut k = 0;
+        while k < j && read[j - 1 - k] == read[through - 1 - k] { k += 1; }
+        let parts = if k == j { None } else { Some((relation(read[j - 1 - k])?, relation(read[through - 1 - k])?)) };
+        out.push(Degree { point: j, leaving: relation(read[j])?, turn: (j, through), alongside: (j - k, j), parts });
+    }
+    Ok(out)
+}
