@@ -54,7 +54,7 @@ This governs everything we do. Check every change against it: relation is calcul
 - **Label plainly:** any result not produced by the kernel says so in its first line.
 - **The self-continuing field (85th):** the input is the entire field; output is registered into the same field, with its provenance, never as a weight; one direction, never stopping, nothing cut; the chooser's window is a scope of analysis, never a boundary of the field.
 
-**Start here:** `docs/process/HANDOFF_2026-11-27.md` (§4, the decomposition, first), then Part 9 from the 103rd. *Was:* `docs/process/HANDOFF_2026-11-26.md`, then Part 9 from the 92nd; before that `docs/process/HANDOFF_2026-11-25.md`, then Part 9 from the 72nd (both kept).
+**Start here:** `docs/process/HANDOFF_2026-11-28.md` (§0 and §4: the five points, in Origin's order; #1 waits on Origin's answer), then Part 9 from the 115th. *Was:* `docs/process/HANDOFF_2026-11-27.md` (§4, the decomposition, first), then Part 9 from the 103rd; before that `docs/process/HANDOFF_2026-11-26.md`, then Part 9 from the 92nd; before that `docs/process/HANDOFF_2026-11-25.md`, then Part 9 from the 72nd (both kept).
 
 ## Origin's check (2026-11-26)
 
